@@ -1,0 +1,34 @@
+## Masalah
+
+Ini adalah studi kasus placeholder yang digunakan untuk memvalidasi bahwa template studi kasus dirender dengan benar dari ujung ke ujung. Konten ini menggunakan panjang yang realistis untuk menguji layout, tipografi, dan spasi tanpa merepresentasikan proyek nyata.
+
+Studi kasus nyata akan dibuka dengan masalah spesifik yang dihadapi klien atau produk — konteksnya, siapa yang terdampak, dan mengapa situasi yang ada tidak berjalan. Tujuannya adalah membuat pembaca (biasanya calon klien) memahami taruhan sebelum menjelaskan solusi.
+
+## Pendekatan
+
+Bagian pendekatan teknis mencakup keputusan arsitektur dan alasan di balik pilihan kunci. Mengapa stack ini dibanding alternatif? Apa batasan yang membentuk desain? Kompromi apa yang diterima dan mengapa?
+
+Misalnya: memilih static export daripada deployment server-rendered mengurangi kompleksitas infrastruktur sekaligus memungkinkan halaman yang dimuat cepat melalui CDN. Komprominya adalah fitur yang berat data atau personal membutuhkan fetching sisi klien, yang dapat diterima untuk situs portofolio namun tidak untuk aplikasi transaksional.
+
+### Gambaran arsitektur
+
+Deskripsi singkat komponen utama sistem dan cara mereka terhubung:
+
+- **Frontend**: Next.js App Router dengan static export, di-deploy ke Vercel
+- **Konten**: Model konten MDX berbasis file dengan `gray-matter` untuk parsing frontmatter
+- **i18n**: Pergantian locale berbasis route melalui `next-intl` — setiap route ada di `/en/` dan `/id/`
+- **Styling**: Tailwind CSS v4 dengan design token yang didefinisikan dalam CSS `@theme`
+
+## Visualisasi
+
+Placeholder screenshot atau diagram. Dalam studi kasus nyata, 2–4 screenshot beranotasi akan muncul di sini, bersama diagram arsitektur untuk sistem dengan kompleksitas pipeline yang nyata.
+
+## Hasil
+
+Bagian hasil adalah pendorong konversi — apa yang berubah sebagai hasil dari proyek ini? Metrik konkret adalah yang terbaik ("mengurangi waktu pelaporan manual sekitar 60%"), tetapi hasil terarah valid ketika angka tepat tidak tersedia ("memungkinkan tim untuk ship mingguan alih-alih triwulanan").
+
+Bagian ini tidak boleh dilewati atau dibiarkan kabur. Bahkan jika dokumentasi sumber tidak menyatakan hasil eksplisit, studi kasus harus mensintesis apa yang berubah.
+
+## Tech stack
+
+Baris tag lengkap: Next.js · TypeScript · PostgreSQL · Tailwind CSS · Railway · Docker

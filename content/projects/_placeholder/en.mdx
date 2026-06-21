@@ -1,0 +1,34 @@
+## The problem
+
+This is a placeholder case study used to validate that the case study template renders correctly end-to-end. It uses realistic-length content to test layout, typography, and spacing without representing a real project.
+
+A real case study would open with the specific problem the client or product faced — the context, who it affected, and why the existing situation wasn't working. The goal is to make the reader (typically a prospective client) understand the stakes before explaining the solution.
+
+## The approach
+
+The technical approach section covers architecture decisions and the reasoning behind key choices. Why this stack over alternatives? What constraints shaped the design? What tradeoffs were accepted and why?
+
+For example: choosing a static export over a server-rendered deployment reduces infrastructure complexity while still enabling fast page loads via CDN. The tradeoff is that data-heavy or personalized features require client-side fetching, which is acceptable for a portfolio site but not for a transactional application.
+
+### Architecture overview
+
+A brief description of the system's key components and how they connect:
+
+- **Frontend**: Next.js App Router with static export, deployed to Vercel
+- **Content**: File-based MDX content model with `gray-matter` for frontmatter parsing
+- **i18n**: Route-based locale switching via `next-intl` — every route exists at `/en/` and `/id/`
+- **Styling**: Tailwind CSS v4 with design tokens defined in CSS `@theme`
+
+## Visuals
+
+Screenshot or diagram placeholder. In a real case study, 2–4 annotated screenshots would appear here, along with an architecture diagram for systems with real pipeline complexity.
+
+## Outcome
+
+The outcome section is the conversion driver — what changed as a result of this project? Concrete metrics are best ("reduced manual reporting time by ~60%"), but directional outcomes are valid when precise numbers aren't available ("enabled the team to ship weekly rather than quarterly").
+
+This section must not be skipped or left vague. Even if the source documentation doesn't state explicit outcomes, the case study should synthesize what changed.
+
+## Tech stack
+
+Full tag row: Next.js · TypeScript · PostgreSQL · Tailwind CSS · Railway · Docker

@@ -1,0 +1,15 @@
+{
+  "slug": "_placeholder",
+  "title": "Example Project",
+  "tagline": "A placeholder to validate the case study template renders correctly.",
+  "categoryTags": ["Web App", "Internal Tool"],
+  "techStack": ["Next.js", "TypeScript", "PostgreSQL", "Tailwind CSS", "Railway", "Docker"],
+  "status": "placeholder",
+  "role": "Fullstack Developer",
+  "timeframe": "Jan – Mar 2025",
+  "liveUrl": null,
+  "githubUrl": null,
+  "heroImage": "/images/projects/_placeholder/hero.jpg",
+  "order": 99,
+  "featured": false
+}
