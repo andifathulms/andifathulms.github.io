@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "work": "Proyek",
+    "about": "Tentang",
+    "contact": "Kontak"
+  },
+  "home": {
+    "hero": {
+      "headline": "Sistem fullstack untuk pemerintah, startup, dan semua di antaranya.",
+      "subheadline": "Saya membangun aplikasi web, platform data, dan alat internal berkualitas produksi — dengan dokumentasi yang jelas dan iterasi cepat.",
+      "cta_work": "Lihat proyek saya",
+      "cta_start": "Mulai proyek"
+    },
+    "services": {
+      "title": "Apa yang saya bangun",
+      "subtitle": "Dari konsep hingga produksi — dengan scope yang tepat dan hasil yang tahan lama.",
+      "items": [
+        {
+          "title": "Aplikasi Web",
+          "description": "Aplikasi full-stack untuk pengguna dan beban nyata — Next.js, TypeScript, database modern."
+        },
+        {
+          "title": "Sistem Pemerintah & Enterprise",
+          "description": "Alat internal, platform pelaporan, dan sistem alur kerja untuk klien institusional."
+        },
+        {
+          "title": "Platform Data & Dashboard",
+          "description": "Pipeline ETL, dashboard analitik, dan visualisasi data untuk tim pengambil keputusan."
+        },
+        {
+          "title": "MVP Startup & SaaS",
+          "description": "Pengalaman sebagai co-founder membangun TOGA POS — saya memahami apa yang penting di produk pertama."
+        },
+        {
+          "title": "DevOps & Infrastruktur",
+          "description": "CI/CD, containerisasi, deployment cloud di Vercel, Railway, dan lingkungan VPS."
+        }
+      ]
+    },
+    "featured_work": {
+      "title": "Proyek pilihan",
+      "subtitle": "Infrastruktur pemerintah, startup yang saya co-founding, dan proyek teknis mandiri.",
+      "view_all": "Lihat semua proyek"
+    },
+    "process": {
+      "title": "Cara saya bekerja",
+      "subtitle": "Proses delivery yang terdokumentasi dan dapat direproduksi — bukan sekadar improvisasi.",
+      "steps": [
+        {
+          "label": "01 PRD",
+          "title": "Persyaratan produk, secara tertulis",
+          "description": "Setiap proyek dimulai dengan Product Requirements Document. Bukan file Figma, bukan thread Slack — dokumen terstruktur yang mencakup untuk siapa, apa yang dilakukan, dan seperti apa keberhasilannya."
+        },
+        {
+          "label": "02 CLAUDE.md",
+          "title": "Spesifikasi teknis untuk build",
+          "description": "PRD menjadi spesifikasi teknis: keputusan stack, arsitektur, desain komponen, dan urutan build — ditulis sebelum satu baris kode pun."
+        },
+        {
+          "label": "03 Build",
+          "title": "Cepat, iteratif, terdokumentasi",
+          "description": "Dengan spesifikasi yang jelas di awal, build berjalan cepat. Dokumentasi berfungsi sebagai catatan hidup — setiap keputusan dapat ditelusuri, setiap penyimpangan disengaja."
+        }
+      ],
+      "note": "Situs ini sendiri dibangun dengan cara ini. PRD dan spesifikasi teknis yang menghasilkannya adalah bagian dari repositori."
+    },
+    "about_teaser": {
+      "title": "Tentang Fathul",
+      "body": "Saya Andi Fathul Mukminin — fullstack developer berbasis di Indonesia. Saya telah membangun sistem produksi untuk OIKN (otoritas ibu kota berdaulat Indonesia), co-founding TOGA POS (platform SaaS point-of-sale), dan membuat konten data di TikTok dengan merek InsightfulBytes.",
+      "cta": "Lebih lanjut tentang saya"
+    },
+    "cta": {
+      "title": "Siap membangun sesuatu?",
+      "subtitle": "Baik Anda memiliki spesifikasi yang jelas atau hanya sebuah ide — mari tentukan scope yang tepat bersama.",
+      "button": "Mulai percakapan"
+    }
+  },
+  "work": {
+    "title": "Proyek",
+    "subtitle": "Studi kasus dari proyek pemerintah, startup, dan mandiri.",
+    "private_badge": "Sistem privat / internal"
+  },
+  "case_study": {
+    "role": "Peran",
+    "timeframe": "Periode",
+    "stack": "Stack",
+    "view_live": "Lihat live",
+    "view_github": "Lihat di GitHub",
+    "private_badge": "Sistem privat / internal",
+    "next_project": "Proyek berikutnya",
+    "prev_project": "Proyek sebelumnya"
+  },
+  "about": {
+    "title": "Tentang",
+    "intro": "Fullstack developer. Sistem pemerintah, co-founder startup, kreator data.",
+    "bio_1": "Saya Andi Fathul Mukminin — fullstack developer berbasis di Indonesia dengan rekam jejak di tiga konteks berbeda: sistem produksi untuk klien pemerintah, co-founding startup SaaS, dan proyek teknis mandiri yang didorong oleh rasa ingin tahu.",
+    "bio_2": "Di OIKN (otoritas ibu kota berdaulat Indonesia untuk Nusantara), saya membangun sistem manajemen data internal dan infrastruktur pelaporan yang digunakan tim pemerintah secara nyata. Di TOGA POS, saya co-founding platform point-of-sale untuk UMKM Indonesia dan belajar apa yang dibutuhkan untuk membawa produk ke pengguna nyata dan mempertahankannya.",
+    "bio_3": "Di luar pekerjaan klien, saya membuat konten data di TikTok dengan InsightfulBytes — mengurai statistik BPS dan indikator ekonomi untuk audiens umum. Ini adalah bentuk komunikasi teknis yang berbeda, dan saya menemukan nilainya secara genuien.",
+    "bio_4": "Benang merahnya: saya suka sistem yang bekerja. Scope yang jelas, dokumentasi yang solid, dan kode yang bisa dipahami dan dikembangkan oleh orang lain (atau diri saya di masa depan).",
+    "stack_title": "Tools yang saya gunakan",
+    "cta_title": "Mari bekerja bersama",
+    "cta_body": "Jika Anda memiliki proyek yang membutuhkan pemikiran jernih dan eksekusi solid — saya ingin mendengarnya.",
+    "cta_button": "Hubungi saya"
+  },
+  "contact": {
+    "title": "Kontak",
+    "subtitle": "Mari bicara tentang proyek Anda.",
+    "body": "Cara tercepat untuk mendapat respons adalah melalui email atau WhatsApp. Saya berbasis di Indonesia (WIB/UTC+7) dan biasanya membalas dalam satu hari kerja.",
+    "email_label": "Email",
+    "whatsapp_label": "WhatsApp",
+    "note": "Untuk pertanyaan proyek, beberapa kalimat tentang apa yang Anda bangun dan timeline Anda sudah cukup untuk memulai. Tidak perlu brief formal."
+  },
+  "footer": {
+    "tagline": "Sistem fullstack untuk pemerintah, startup, dan semua di antaranya.",
+    "copyright": "© 2025 AFM Studio",
+    "links_title": "Tautan",
+    "social_title": "Terhubung",
+    "currently_building": "Sedang membangun:"
+  }
+}

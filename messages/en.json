@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "work": "Work",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "home": {
+    "hero": {
+      "headline": "Fullstack systems for governments, startups, and everyone between.",
+      "subheadline": "I build production-grade web applications, data platforms, and internal tools — with clear documentation and fast iteration.",
+      "cta_work": "See my work",
+      "cta_start": "Start a project"
+    },
+    "services": {
+      "title": "What I build",
+      "subtitle": "From concept to production — scoped precisely, built to last.",
+      "items": [
+        {
+          "title": "Web Applications",
+          "description": "Full-stack apps built for real users and real load — Next.js, TypeScript, modern databases."
+        },
+        {
+          "title": "Government & Enterprise Systems",
+          "description": "Internal tools, reporting platforms, and workflow systems for institutional clients."
+        },
+        {
+          "title": "Data Platforms & Dashboards",
+          "description": "ETL pipelines, analytical dashboards, and data visualization for decision-making teams."
+        },
+        {
+          "title": "Startup MVPs & SaaS",
+          "description": "Co-founder experience building TOGA POS — I understand what matters in a first product."
+        },
+        {
+          "title": "DevOps & Infrastructure",
+          "description": "CI/CD, containerization, cloud deployment on Vercel, Railway, and VPS environments."
+        }
+      ]
+    },
+    "featured_work": {
+      "title": "Selected work",
+      "subtitle": "Government infrastructure, a self-founded startup, and independent technical projects.",
+      "view_all": "View all projects"
+    },
+    "process": {
+      "title": "How I work",
+      "subtitle": "A documented, reproducible delivery process — not just vibes.",
+      "steps": [
+        {
+          "label": "01 PRD",
+          "title": "Product requirements, in writing",
+          "description": "Every project starts with a Product Requirements Document. Not a Figma file, not a Slack thread — a structured document covering who this is for, what it does, and what success looks like."
+        },
+        {
+          "label": "02 CLAUDE.md",
+          "title": "Technical spec for the build",
+          "description": "The PRD becomes a technical specification: stack decisions, architecture, component design, and build sequence — written before a single line of code."
+        },
+        {
+          "label": "03 Build",
+          "title": "Fast, iterative, documented",
+          "description": "With clear specs upfront, the build moves quickly. The docs serve as a living record — every decision is traceable, every deviation is intentional."
+        }
+      ],
+      "note": "This site itself was built this way. The PRD and technical spec that produced it are part of the repository."
+    },
+    "about_teaser": {
+      "title": "About Fathul",
+      "body": "I'm Andi Fathul Mukminin — a fullstack developer based in Indonesia. I've built production systems for OIKN (Indonesia's sovereign capital authority), co-founded TOGA POS (a SaaS point-of-sale platform), and create data content on TikTok under the InsightfulBytes brand.",
+      "cta": "More about me"
+    },
+    "cta": {
+      "title": "Ready to build something?",
+      "subtitle": "Whether you have a defined spec or just an idea — let's figure out the right scope together.",
+      "button": "Start a conversation"
+    }
+  },
+  "work": {
+    "title": "Work",
+    "subtitle": "Case studies across government, startup, and independent projects.",
+    "private_badge": "Private / internal system"
+  },
+  "case_study": {
+    "role": "Role",
+    "timeframe": "Timeframe",
+    "stack": "Stack",
+    "view_live": "View live",
+    "view_github": "View on GitHub",
+    "private_badge": "Private / internal system",
+    "next_project": "Next project",
+    "prev_project": "Previous project"
+  },
+  "about": {
+    "title": "About",
+    "intro": "Fullstack developer. Government systems, startup co-founder, data creator.",
+    "bio_1": "I'm Andi Fathul Mukminin — a fullstack developer based in Indonesia with a track record across three distinct contexts: production systems for government clients, co-founding a SaaS startup, and independent technical projects driven by genuine curiosity.",
+    "bio_2": "At OIKN (Indonesia's sovereign capital authority for Nusantara), I built internal data management systems and reporting infrastructure that real government teams depend on. At TOGA POS, I co-founded a point-of-sale platform for Indonesian SMEs and learned what it takes to get a product to real users and keep it running.",
+    "bio_3": "Outside client work, I create data content on TikTok under InsightfulBytes — breaking down BPS statistics and economic indicators for a general audience. It's a different kind of technical communication, and I find it genuinely valuable.",
+    "bio_4": "The throughline: I like systems that work. Clear scope, solid documentation, and code that someone else (or future-me) can understand and extend.",
+    "stack_title": "Tools I reach for",
+    "cta_title": "Let's work together",
+    "cta_body": "If you have a project that needs clear thinking and solid execution — I'd like to hear about it.",
+    "cta_button": "Get in touch"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Let's talk about your project.",
+    "body": "The fastest way to get a response is via email or WhatsApp. I'm based in Indonesia (WIB/UTC+7) and typically reply within one business day.",
+    "email_label": "Email",
+    "whatsapp_label": "WhatsApp",
+    "note": "For project inquiries, a few sentences about what you're building and your timeline is enough to start. No formal brief required."
+  },
+  "footer": {
+    "tagline": "Fullstack systems for governments, startups, and everyone between.",
+    "copyright": "© 2025 AFM Studio",
+    "links_title": "Links",
+    "social_title": "Connect",
+    "currently_building": "Currently building:"
+  }
+}
