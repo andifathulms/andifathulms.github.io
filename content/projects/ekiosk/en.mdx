@@ -1,0 +1,33 @@
+# eKiosk IKN
+
+## The problem
+
+IKN's smart city initiative deploys physical information kiosks in public areas across Nusantara. Each kiosk runs a custom Flutter app that displays government content — maps, announcements, public transport schedules. Without a central management layer, updating what any kiosk shows requires touching each device individually. As the fleet grows, that approach doesn't scale. Operators also had no visibility into whether a kiosk was running, had crashed, or fallen out of sync with the latest content.
+
+Two teams shared the system: non-technical content staff who manage playlists and media, and IT staff who monitor device health and push software updates.
+
+## The approach
+
+### Heartbeat-driven status model
+
+Each physical kiosk pings the server every five minutes with its current state: playlist hash, GPS coordinates, free storage, free memory, app version, and app state. The kiosk's status — OPERATIONAL, STALE, DISCONNECTED, or MAINTENANCE — is computed from that heartbeat on every API read rather than stored as a column. This keeps the data model simple and ensures status is always current. The tradeoff is that you can't `filter(status='disconnected')` in the ORM; the dashboard summary endpoint works around this with in-memory filtering in Python.
+
+### SHA-256 hash-based content sync
+
+Instead of diffing playlist contents on every heartbeat, each playlist computes a deterministic SHA-256 hash of its ordered items on every save. Kiosks report the hash they last synced. The server compares it to the current playlist hash in O(1) to know instantly whether a device is out of sync. No diff logic on either end.
+
+### Playlist builder with drag-and-drop
+
+Operators build content playlists from uploaded media files, reorder items by dragging, and set per-item display durations. The drag-and-drop interface uses `@dnd-kit`. Changes push to devices automatically via the hash comparison on the next heartbeat.
+
+### Real-time GPS fleet tracking
+
+A separate long-running Django management command (`poll_gps_data`) polls a live GPS data source every five seconds, matches vehicle positions to route graphs using Haversine distance and geofence logic, and computes per-stop ETAs. A candidate confirmation system prevents oscillation at shared stops between routes — the bus must either visit a stop unique to the candidate route, or visit ≥80% of that route's named stops before a route switch is committed.
+
+### Dual-path authentication
+
+Dashboard operators log in via IKN's Keycloak OIDC. Flutter kiosks use a separate `AllowAny` registration flow and never interact with the auth layer — a factory-registered kiosk phones home with its UUID without user credentials.
+
+## Outcome
+
+Production system, deployed via Docker Compose with GitHub Actions CI publishing images to GHCR. The platform manages a growing fleet of kiosks across IKN's public areas. Offline alert emails fire automatically when a kiosk goes silent, suppressing repeat alerts until the device recovers. The transport module runs as its own Docker service alongside the main API, tracking the IKN bus fleet in real time on an interactive Leaflet map.

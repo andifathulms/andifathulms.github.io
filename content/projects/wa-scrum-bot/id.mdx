@@ -1,0 +1,29 @@
+# WA Daily Scrum Bot
+
+## Permasalahan
+
+Tim scrum yang menjalankan standup harian via WhatsApp mengandalkan anggota untuk melapor sendiri. Tanpa otomasi, team lead harus mengecek secara manual siapa yang belum posting dan mengingatkan mereka — setiap hari, beberapa kali. Untuk tim 14 orang ini melelahkan dan mudah terlupakan, menyebabkan laporan terlewat atau dikirim terlambat.
+
+Tim OIKN THD membutuhkan sistem otomatis yang memantau group chat, mengirimkan pengingat yang semakin mendesak sepanjang hari, dan mengakhiri setiap hari dengan ringkasan berperingkat — dalam bahasa Indonesia dan Inggris, karena laporan datang dalam kedua bahasa.
+
+## Pendekatan
+
+### Otomasi WhatsApp berbasis Puppeteer
+
+WhatsApp tidak memiliki API bot resmi. Pendekatan standar adalah mengotomasi antarmuka WhatsApp Web browser menggunakan Puppeteer. `whatsapp-web.js` membungkus ini dan menyediakan API event Node.js. Menjalankan browser penuh di dalam container Docker memerlukan instalasi Chromium sistem, melewati unduhan bawaan Puppeteer, dan menghapus file lock `Singleton` yang basi sebelum memulai Node — tanpa ini, exit container yang tidak bersih mencegah startup berikutnya.
+
+### Deteksi pasangan kata kunci (bilingual)
+
+Pesan dihitung sebagai laporan standup jika mengandung pasangan frasa yang diketahui: `yesterday` + `today`, `kemarin` + `hari ini`, dan kombinasi bilingual serupa. Ini membuat deteksi agnostik bahasa dan kuat terhadap format laporan yang berbeda. Pemeriksaan anti-cheat menghapus kata kunci pemicu yang diketahui dan menandai pesan dengan konten tersisa yang terlalu sedikit.
+
+### State flat-file, tanpa database
+
+State laporan persisten ke dua file JSON yang di-mount sebagai Docker volume. Tidak perlu database. Data direset setiap hari; volume bertahan meski container restart. Tujuh cron job berjalan sepanjang hari: kickoff pagi, empat pemeriksaan pengingat yang semakin mendesak (09:00, 10:00, 11:00, 14:00), ringkasan EOD, dan rekap mingguan setiap Jumat.
+
+### Perubahan format ID kontak di tengah proyek
+
+Setelah deployment awal, pencocokan anggota diam-diam rusak. WhatsApp sedang memigrasikan ID kontak internal dari `628xxxxxxx@c.us` ke format `@lid` yang buram. Tiga commit didedikasikan untuk men-debug ini — menangkap ID pengirim nyata dari pesan langsung, menelusuri ketidakcocokan format, dan memperbarui konfigurasi anggota.
+
+## Hasil
+
+Di-deploy ke produksi di VM GCP, berjalan di Docker untuk standup harian Tim OIKN THD (14 anggota). 15 commit dalam enam hari. Komponen dashboard (`ScrumBotDashboard.jsx`) adalah demo React mandiri yang menampilkan kartu statistik, timeline dengan badge "SEKARANG" pada pemeriksaan saat ini, preview ringkasan EOD, dan panel konfigurasi anggota — dibangun sebagai artefak portofolio karena bot langsung tidak memiliki server HTTP.

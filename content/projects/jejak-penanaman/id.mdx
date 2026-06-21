@@ -1,0 +1,33 @@
+# Jejak Penanaman
+
+## Permasalahan
+
+IKN Nusantara mengadakan upacara penanaman pohon berulang yang melibatkan pegawai pemerintah dan masyarakat umum. Sebelum sistem ini, kehadiran dilacak secara manual dengan formulir kertas dan spreadsheet — tidak ada cara untuk memverifikasi bahwa peserta benar-benar berada di lokasi, tidak ada catatan terpusat tentang siapa yang hadir di acara mana, tidak ada dokumentasi spesies yang ditanam, dan tidak ada bukti foto.
+
+## Pendekatan
+
+### Check-in selfie dengan geofence
+
+Pengajuan absensi memerlukan selfie dan koordinat GPS dalam radius yang dapat dikonfigurasi (50–5000m) dari pin acara. Geofence diperiksa dua kali: sisi client dengan perhitungan Haversine untuk umpan balik langsung ("kamu berjarak 340m"), dan sisi server di view pengajuan absensi untuk mencegah pemalsuan level API.
+
+Komponen `CameraCapture` menggunakan API MediaDevices browser, menggambar frame yang ditangkap ke canvas tersembunyi, dan mengompresnya ke maks 1024px / JPEG 0.7 sebelum unggah — menjaga selfie di bawah 1 MB bahkan di kamera ponsel resolusi tinggi. iOS Safari memerlukan `getUserMedia()` dipicu oleh gestur pengguna langsung, sehingga aktivasi kamera terikat ke klik tombol, bukan pemuatan halaman.
+
+### Autentikasi dual: SSO + email
+
+Pegawai IKN autentikasi via Keycloak OIDC. `OIDCAuthenticationBackend` kustom menormalisasi klaim Keycloak yang tidak konsisten — nama datang dalam HURUF BESAR, unit organisasi dipetakan melalui beberapa field klaim yang tidak konsisten. Peserta publik mendaftar dengan email dan menerima kata sandi yang dibuat secara otomatis via SendGrid SMTP.
+
+### Pelacakan spesies tanaman
+
+Setiap catatan absensi dapat dikaitkan dengan beberapa spesies flora yang ditanam, dengan kuantitas per spesies, usia bibit dalam bulan, dan foto tanaman — membuat catatan keanekaragaman hayati per acara untuk rekaman penghijauan IKN.
+
+### Sistem tiket QR dengan manajemen kuota
+
+Acara publik memiliki kuota pendaftaran yang dapat dikonfigurasi. Setiap pendaftaran menghasilkan kode tiket unik `JP-YYMMDD-NNN`. Admin memindai QR code di pintu masuk menggunakan kamera browser via `html5-qrcode`. Overlay selfie twibbon — bingkai bermerek IKN — di-composite sisi client menggunakan canvas dan diunduh sebagai gambar yang dapat dibagikan.
+
+### Konfigurasi OIDC disajikan saat runtime
+
+Build awal membakar URL otoritas Keycloak sebagai argumen build Vite, yang merusak paritas lingkungan antara staging dan produksi. Perbaikannya menyajikan konfigurasi OIDC dari endpoint backend `/api/auth/config/` yang diambil saat boot app, sehingga image Docker yang sama berfungsi di kedua lingkungan tanpa rebuild.
+
+## Hasil
+
+Di-deploy ke produksi di VM dan digunakan dalam acara penanaman pohon IKN nyata sejak pertengahan 2026. 64 commit selama sekitar tiga bulan, mencakup 28 halaman frontend, 34 endpoint API, dan 11 model Django. Sistem menangani acara internal (khusus SSO, tanpa pendaftaran) dan acara publik (pendaftaran terbuka, kuota, tiket QR) melalui satu codebase dengan alur frontend yang bercabang berdasarkan jenis acara.

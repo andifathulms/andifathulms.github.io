@@ -1,0 +1,15 @@
+{
+  "slug": "ekiosk",
+  "title": "eKiosk IKN",
+  "tagline": "Web control room for managing and monitoring public information kiosks across Nusantara",
+  "categoryTags": ["Government", "Smart City", "Web App"],
+  "techStack": ["Django", "React", "PostgreSQL", "MinIO", "Docker", "Keycloak", "TanStack Query"],
+  "status": "private",
+  "role": "Fullstack Developer",
+  "timeframe": "2026",
+  "liveUrl": null,
+  "githubUrl": null,
+  "heroImage": "/images/projects/ekiosk/hero.jpg",
+  "order": 3,
+  "featured": false
+}

@@ -1,0 +1,34 @@
+# Dashboard SAKTI
+
+## The problem
+
+OIKN's six operational budget units (satker) each have expenditure data locked inside Kemenkeu's SAKTI system. Every time the Biro POKS planning team needed figures — for Power BI reports, executive reviews, or quarterly submissions — someone had to manually log into SAKTI, download an Excel file per satker, and stitch the results together. No historical trend, no centralised view, no way to connect the numbers to other tools without manual re-entry.
+
+| Before | After |
+|--------|-------|
+| Manual download every time | Automated daily pipeline at 02:00 WIB |
+| Data scattered in Excel files | Centralised MySQL database with history |
+| No trend visibility | Queryable time-series from first sync |
+| No quick visualisation | React dashboard with budget vs. disbursement charts |
+
+## The approach
+
+### Simulating SAKTI's unusual token mechanism
+
+The real SAKTI API uses a strict single-use Bearer token pattern: every response includes a new token, the previous one becomes immediately invalid, and a separate `resetToken` endpoint bootstraps the first token. Rather than blocking development on real credentials, I built a complete simulation of this in a Django `mock_sakti` app — an in-memory token store with UUID rotation that mirrors SAKTI's actual response structure. Switching to production only requires changing two environment variables.
+
+### Airflow with dynamic task mapping per satker
+
+The `sakti_daily_sync` DAG queries the `Satker` table at runtime and uses Airflow's `.expand()` to spawn parallel fetch tasks for each active satker. Adding or deactivating a satker in the admin panel automatically changes what the pipeline fetches — nothing is hardcoded. Each task run records its status, row count, duration, and any error message in a `SyncLog` table, powering the dashboard's "Last synced" badge.
+
+### DAG calls Django ORM directly
+
+Rather than adding an HTTP layer between Airflow and the database, DAG tasks call Django models directly by mounting the backend source into the Airflow container and setting `DJANGO_SETTINGS_MODULE`. All upsert logic lives in one place and uses Django's `update_or_create` — safe to re-run, no duplicates.
+
+### Known simplification: budget granularity toggle
+
+`Anggaran` (budget) data in SAKTI is per-item without a date column. The granularity toggle on the trend chart approximates a time series by dividing the total budget evenly across periods. This is documented in a code comment and noted as a known simplification — the real fix would require the SAKTI `refSts` history endpoint to provide dated snapshots, which wasn't available during development.
+
+## Outcome
+
+Fully functional end-to-end: Airflow DAG → SAKTI client → MySQL → REST API → React dashboard → Excel export. The complete pipeline runs against the mock server in the dev environment, covering all six SAKTI endpoint types across all active satker. The production Docker stack (`docker-compose.prod.yml`) with multi-stage builds, healthchecks, and `restart: unless-stopped` is verified and ready to deploy once Kemenkeu credential provisioning (IP whitelist + API key) is complete.

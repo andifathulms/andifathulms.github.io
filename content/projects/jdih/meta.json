@@ -1,0 +1,15 @@
+{
+  "slug": "jdih",
+  "title": "JDIH OIKN",
+  "tagline": "Government legal document portal with editorial workflow, tiered access control, and offline AI summaries",
+  "categoryTags": ["Government", "Web App", "Internal Tool"],
+  "techStack": ["Django", "React", "PostgreSQL", "Redis", "Celery", "MinIO", "Docker", "Keycloak"],
+  "status": "private",
+  "role": "Fullstack Developer",
+  "timeframe": "Mar – May 2026",
+  "liveUrl": null,
+  "githubUrl": null,
+  "heroImage": "/images/projects/jdih/hero.jpg",
+  "order": 5,
+  "featured": false
+}

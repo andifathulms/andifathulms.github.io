@@ -1,0 +1,33 @@
+# Cubiq
+
+## Permasalahan
+
+Speedcuber melacak solve mereka di aplikasi seperti csTimer — alat yang berfungsi tetapi tampilannya seperti dirancang pada tahun 2008. Tidak ada alternatif modern yang menggabungkan antarmuka pelatihan premium dengan analitik nyata dan integrasi AI. Cubiq dibangun untuk menggantikan csTimer bagi cuber serius yang menginginkan kedalaman statistik yang sesungguhnya, preview scramble 3D, dan jalur menuju solving berbasis AI.
+
+## Pendekatan
+
+### cubing.js sebagai web component, bukan komponen React
+
+`TwistyPlayer` renderer kubus 3D dari `cubing.js` harus diinstansiasi sebagai elemen DOM. Mengimpornya sebagai komponen React menyebabkan crash server-side rendering karena library mereferensikan `self` (global browser) saat load modul. Solusinya: `dynamic(() => import(...), { ssr: false })` dikombinasikan dengan pola mounting berbasis `useEffect` yang memanggil `document.createElement('twisty-player')` secara langsung.
+
+Turbopack juga harus diganti. `cubing.js` menghasilkan Web Workers menggunakan pola URL relatif yang rusak oleh resolver modul Turbopack. Beralih ke bundler Webpack (`--webpack`) adalah commit yang sebenarnya membuka blokir build.
+
+### Akurasi timer tanpa drift
+
+Timer yang terlihat memanggil `performance.now() - startTime` pada setiap tick render. `setInterval` hanya digunakan untuk memicu re-render, bukan mengukur waktu — sehingga drift tidak terakumulasi bahkan dalam solve yang panjang. Pola hold-to-arm 300ms (spacebar atau sentuhan) cocok dengan perilaku inspeksi WCA.
+
+### Cross solver IDA* dalam TypeScript
+
+Cross solver menemukan urutan terpendek untuk menempatkan semua empat edge cross di wajah yang dipilih, dengan prefix rotasi kubus. Awalnya ditandai dalam PRD sebagai mungkin terlalu kompleks untuk build awal. Diimplementasikan penuh di Phase 3 menggunakan IDA* langsung dalam TypeScript.
+
+### Arsitektur ML: Autodidactic Iteration
+
+Service FastAPI `cubiq-ml` mengimplementasikan Autodidactic Iteration (ADI). Model menghasilkan data pelatihannya sendiri dengan mengacak kubus yang sudah terpecahkan ke kedalaman acak dan belajar memperkirakan jarak langkah kembali ke kondisi terpecahkan. Kegagalan pelatihan yang halus ditemukan dan diperbaiki: jaringan kebijakan runtuh selalu merekomendasikan langkah yang sama karena `argmin` digunakan secara deterministik ketika beberapa aksi memiliki nilai estimasi yang sama di awal pelatihan. Perbaikannya adalah menambahkan noise ke pemilihan aksi selama self-play.
+
+### Dashboard penelitian MDP
+
+Frontend mem-polling `/mdp/status` setiap dua detik selama pelatihan, membuat grafik histori loss dan solve-rate dengan Recharts, dan menampilkan bar probabilitas kebijakan untuk scramble saat ini secara real-time. Pengguna dapat memicu rollout greedy atau MCTS solve dan membandingkan efisiensi langkah langsung dengan solusi optimal Kociemba.
+
+## Hasil
+
+Enam minggu, 12 commit, ~4.900 baris TypeScript dan Python. Empat halaman (Timer, Statistik, Riwayat, Solver), delapan endpoint API ML, statistik ao5/ao12/ao50/ao100 yang sesuai WCA dengan logika trim-best/worst yang benar. Store Zustand persisten ke localStorage dengan `skipHydration` untuk menghindari ketidakcocokan SSR. Semua data solve dapat diekspor sebagai JSON untuk diimpor ke alat lain.

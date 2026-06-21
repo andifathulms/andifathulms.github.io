@@ -1,0 +1,35 @@
+# Lantara v2
+
+## The problem
+
+IKN Nusantara is Indonesia's purpose-built new capital, still under active construction. Its public services authority — Otorita IKN — must issue permits across 31 regulated sectors: social services, health, education, environment, and more. At most government agencies, each permit type has its own hardcoded workflow, form fields, and document requirements baked into the codebase. When a regulation changes — and in a new city, they change constantly — that means a developer, a migration, and a deployment.
+
+The core requirement was different: non-technical administrators need to be able to define permit workflows, form schemas, and document checklists entirely through a UI, with zero developer involvement.
+
+## The approach
+
+### The engine — configuration over code
+
+Instead of a table per permit type, all permit configuration lives in five related models: `Sektor`, `PermitType`, `WorkflowStage`, `FormField`, and `DocumentRequirement`. Adding a new permit type is a data-entry operation. An administrator can configure a six-stage health permit with twelve required documents and a custom form — no migration, no deploy, no pull request.
+
+The form data on each submission is stored as a JSON field, validated at runtime against the live field schema. When an admin modifies a permit's schema, in-flight submissions are protected: at the moment of submission, the current schema version is snapshot-copied onto the submission record. A citizen who already applied never has their form shape change mid-review.
+
+### RBAC without an enum
+
+Staff permissions are generated strings like `verifikasi_teknis:izin_posyandu`, derived from workflow stage keys and permit type keys. There is no `if role == "verifier"` anywhere in the codebase. The DRF permission class checks the submission's current stage against the requesting user's assigned role strings. When a new permit type is added through the UI, the correct role slots are automatically available — no code change required.
+
+### SLA as a first-class concern
+
+Every workflow stage carries an `sla_hours` field; every permit type has an `sla_days` total. A Celery Beat task sweeps submissions periodically, recomputes SLA deadlines using a working-days calendar that accounts for government holidays and weekends, and fires notifications when submissions are at-risk or breached. The verifier queue renders submission cards that visually age from amber to red as deadlines approach. Keyboard shortcuts (`j`/`k` to navigate, `a`/`r`/`d` for approve/revise/reject) let staff process without touching the mouse.
+
+### Two-register design system
+
+Public surfaces — the landing page, permit catalog, and public permit validation page — use an immersive royal-blue palette with animated hero, scroll-reveal sektor cards, and glassmorphism. Authenticated surfaces — the applicant portal, verifier workspace, and admin engine builder — are calm, dense, and information-forward. A verifier processing fifty permits a day needs clarity, not decoration. The design system enforces this split at the token level.
+
+### Dynamic form renderer
+
+A single `<DynamicForm>` React component fetches the permit's `FormField[]` schema from the API and builds a `zod` validation schema at runtime. It handles twelve field types: text, NIK, NPWP, phone, geolocation, file upload, select, and more. Adding a new permit type with any combination of these fields requires zero frontend code.
+
+## Outcome
+
+All four build phases (P0 scaffold through P4 hardening) completed in eight days across 95 commits. The system is demo-able from a fresh `docker compose up` — migrations run, KBLI master data loads, 46 sample permits across three sectors seed, and a superadmin account is created. The public permit validation page lets anyone scan a QR code to confirm an issued permit's authenticity without logging in. RDTR spatial zoning and embedded digital signature (TTE) are fully wired behind feature flags, awaiting external data-sharing partnerships before production activation.

@@ -1,0 +1,31 @@
+# eKiosk IKN
+
+## Permasalahan
+
+Inisiatif kota cerdas IKN menyebarkan kiosk informasi fisik di area publik di seluruh Nusantara. Setiap kiosk menjalankan aplikasi Flutter kustom yang menampilkan konten pemerintahan — peta, pengumuman, jadwal transportasi umum. Tanpa lapisan manajemen terpusat, memperbarui konten di kiosk mana pun memerlukan sentuhan langsung ke setiap perangkat. Seiring armada berkembang, pendekatan itu tidak skalabel. Operator juga tidak memiliki visibilitas apakah sebuah kiosk berjalan, crash, atau tidak sinkron dengan konten terbaru.
+
+## Pendekatan
+
+### Model status berbasis heartbeat
+
+Setiap kiosk fisik mengirim ping ke server setiap lima menit dengan status saat ini: playlist hash, koordinat GPS, penyimpanan bebas, memori bebas, versi app. Status kiosk — OPERATIONAL, STALE, DISCONNECTED, atau MAINTENANCE — dihitung dari heartbeat tersebut pada setiap pembacaan API, bukan disimpan sebagai kolom. Ini menjaga model data tetap sederhana dan memastikan status selalu terkini.
+
+### Sinkronisasi konten berbasis hash SHA-256
+
+Alih-alih membandingkan isi playlist pada setiap heartbeat, setiap playlist menghitung hash SHA-256 deterministik dari item yang diurutkan pada setiap penyimpanan. Kiosk melaporkan hash yang terakhir disinkronkan. Server membandingkannya dengan hash playlist saat ini secara O(1) untuk mengetahui apakah perangkat perlu diperbarui.
+
+### Playlist builder dengan drag-and-drop
+
+Operator membangun playlist konten dari file media yang diunggah, mengurutkan ulang item dengan drag, dan mengatur durasi tampilan per item menggunakan `@dnd-kit`. Perubahan mendorong ke perangkat secara otomatis melalui perbandingan hash pada heartbeat berikutnya.
+
+### Pelacakan armada GPS real-time
+
+Perintah manajemen Django yang berjalan lama (`poll_gps_data`) mem-polling sumber data GPS langsung setiap lima detik, mencocokkan posisi kendaraan ke grafik rute menggunakan jarak Haversine dan logika geofence, serta menghitung ETA per perhentian. Sistem konfirmasi kandidat mencegah osilasi di perhentian bersama antar rute — bus harus mengunjungi perhentian yang unik untuk rute kandidat, atau mengunjungi ≥80% dari perhentian bernama rute tersebut sebelum pergantian rute dikonfirmasi.
+
+### Autentikasi dual-path
+
+Operator dashboard login via Keycloak OIDC IKN. Kiosk Flutter menggunakan alur registrasi `AllowAny` terpisah dan tidak pernah berinteraksi dengan lapisan autentikasi — kiosk yang terdaftar di pabrik mengirimkan heartbeat dengan UUID-nya tanpa kredensial pengguna.
+
+## Hasil
+
+Sistem produksi, di-deploy via Docker Compose dengan GitHub Actions CI yang mempublikasikan image ke GHCR. Email alert offline terkirim otomatis saat kiosk tidak aktif, menekan alert berulang hingga perangkat pulih. Modul transportasi berjalan sebagai layanan Docker tersendiri di samping API utama, melacak armada bus IKN secara real-time di peta Leaflet interaktif.

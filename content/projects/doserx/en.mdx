@@ -1,0 +1,31 @@
+# DoseRx
+
+## The problem
+
+Calculating weight-based medication doses is repetitive, error-prone arithmetic that a doctor redoes for every patient: multiply mg/kg by weight, divide by frequency, convert to mL, check against maximum limits. For pediatric patients, dosing is weight-sensitive and errors are dangerous. The existing tools — institutional paper references, generic phone calculators, spreadsheets — are slow and not built for one-handed mobile use at the bedside.
+
+The primary user is a single doctor working solo on both phone (bedside) and desktop. No multi-user, no auth, no backend required.
+
+## The approach
+
+### Pure calculation engine as the foundation
+
+The central decision was to keep `src/lib/calculate.ts` completely pure — no DOM, no React, no side effects. It takes typed inputs, validates them, applies dose caps, and returns a discriminated union: `CalcResult | CalcError`. UI code is forced to branch on `result.valid` before touching any numeric field, which structurally eliminates the NaN/Infinity display class of bugs. The engine is independently unit-testable and reused across all four calculator tabs without coupling.
+
+### Indonesian clinical context baked in
+
+After calculating a per-dose amount, the app suggests specific tablet fractions or liquid volumes available in Indonesian pharmacies — snapping to practical fractions used in local clinical practice (¼, ½, ¾, 1, 1½, 2). The drug library grew from 8 seed drugs in the original spec to 28 drugs across 12 categories, each with dose range, max caps, stock concentration, and clinical notes.
+
+The Puyer tab — a multi-drug compounded medicine calculator specific to Indonesian practice — batches up to several drugs, calculates each dose individually, and outputs a combined recipe card with tablet-fraction arithmetic that can be printed or copied. Snapping to physically cuttable fractions (¼, ½, ¾ tablet) required a dedicated `suggest.ts` module with a `SOLID_FRACTIONS` array; a naive nearest-integer round would produce unphysical quantities.
+
+### IV infusion as a second pure engine
+
+The IV infusion calculator (`calculateInfusion.ts`) is a separate pure function handling a fundamentally different problem domain: drip rates in mL/hr and drops/min, supporting mcg/kg/min, mcg/kg/hr, mg/kg/hr, and unit/kg/hr dose units. It shares only the input validation pattern with the main engine.
+
+### Offline PWA with persistent history
+
+Deployed as a static site via GitHub Actions → GitHub Pages with PWA support — installable to a phone home screen and fully usable offline once loaded. Calculation history persists across sessions via a `storage.ts` wrapper around `localStorage`, typed to the history-entry schema. The wrapper is the only place in the codebase that reads or writes `localStorage` directly.
+
+## Outcome
+
+Built and deployed in a single day (23 commits, ~11 hours). 28 drugs across 12 categories, five calculator modes (Preset, Custom, Puyer, IV Infusion, History), unit tests covering normal calc, max-daily cap, max-single cap, missing concentration, and invalid inputs. The safety disclaimer required by the original product spec is visible in the app — never buried in a tooltip.

@@ -1,0 +1,31 @@
+# E-Monev IKN
+
+## Permasalahan
+
+Indonesia sedang membangun ibu kota baru dari awal dalam lima tahap pembangunan yang mencakup 2022 hingga 2045. Puluhan unit kerja pemerintah menjalankan kegiatan bersamaan — infrastruktur, tata kelola, lingkungan, program sosial — masing-masing dengan anggaran, target, dan tonggak triwulanannya sendiri. Tanpa sistem terpusat, koordinator tidak memiliki tampilan kemajuan lintas unit, pelaporan triwulanan bersifat manual dan terfragmentasi, kesenjangan anggaran versus realisasi tidak dapat terdeteksi sampai rapat tinjauan sudah terlambat, dan peta jalan 23 tahun (matriks Indikasi Program) tidak memiliki rumah digital.
+
+## Pendekatan
+
+### Model data hierarkis untuk kerangka yang kompleks
+
+Kerangka monitoring IKN memiliki sepuluh lapisan klasifikasi referensi sebelum mencapai data operasional: Tahapan → Prinsip → Aspek → KPI → Indikasi Program → Rencana Operasional → Kegiatan. Setiap kegiatan memiliki pelacakan kemajuan triwulanan (Triwulan), persentase rencana versus realisasi per triwulan, status, kendala, catatan tindak lanjut, komentar reviewer, dan lampiran bukti.
+
+### Alur kerja persetujuan dengan mekanisme sanggahan formal
+
+Rencana operasional melalui pipeline: Usulan → Draft → Review → Final → Disetujui. Mekanisme sanggahan formal memungkinkan reviewer menolak dengan unggahan nota dinas wajib dan alasan tertulis — bukan sekadar klik tombol. Ini mencerminkan proses persetujuan pemerintah yang sebenarnya.
+
+### Decoupling context layer untuk iterasi cepat
+
+React context (`DemoPersistContext`) dibangun dengan antarmuka identik dengan bentuk API yang akan datang, awalnya didukung oleh localStorage untuk prototyping cepat. Ketika backend siap, context di-refaktor untuk memanggil API nyata — antarmuka tetap identik, sehingga tidak satu pun dari 126 file halaman dan komponen perlu diubah.
+
+### SSO dengan resolusi unit organisasi otomatis
+
+Keycloak mengirimkan string jabatan mentah — "DIREKTUR DATA DAN KECERDASAN BUATAN" — yang perlu dipetakan ke catatan unit kerja tertentu. Karena skema Keycloak tidak dapat diubah untuk menyematkan ID, scorer normalisasi dan fuzzy word-overlap berjalan pada setiap login untuk menyelesaikan unit organisasi yang tepat.
+
+### Pelacakan kegiatan geospasial
+
+Kegiatan menyimpan koordinat lat/lng. Dashboard merender peta Leaflet langsung yang menampilkan semua kegiatan yang ter-geocode dengan kode warna berdasarkan status (on-track, terlambat, kritis). Form kegiatan menyertakan pin picker klik-untuk-menempatkan.
+
+## Hasil
+
+Arsitektur kelas produksi yang di-deploy di infrastruktur OIKN: 136 file TypeScript/TSX, 20.600 baris kode frontend, 5 aplikasi Django, 18 model database. CI mempublikasikan image backend ke GHCR pada setiap push ke main. Sistem menangani seluruh cakupan kerangka monitoring IKN — 24 KPI di 5 tahapan selama 23 tahun — dan memberikan setiap role pengguna (Admin, Koordinator, Unit Kerja, Reviewer) tampilan yang sesuai izin dari data yang sama.

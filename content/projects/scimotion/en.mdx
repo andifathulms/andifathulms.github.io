@@ -1,0 +1,31 @@
+# Scimotion
+
+## The problem
+
+Science writing has a gap: equations and diagrams sit flat on the page, but the concepts they represent are dynamic. A reader can memorize the Fourier transform formula without ever grasping why decomposing a signal works. Existing science media either goes too shallow (pop-sci videos) or too deep (academic papers with no visuals). Scimotion targets curious non-specialists — students, self-learners, professionals from adjacent fields — who want real conceptual depth and the ability to manipulate the thing they're trying to understand.
+
+## The approach
+
+### MDX + gray-matter as the content layer
+
+Articles are `.mdx` files with YAML frontmatter. The data layer (`lib/articles.ts`) reads frontmatter at build time using `gray-matter`, enabling fully static article listing with zero database. Article bodies are rendered server-side via `next-mdx-remote` with `remark-math` and `rehype-katex` piped in, so KaTeX equations render without any client-side JavaScript.
+
+### One animation component per article — self-contained
+
+Every interactive widget is a self-contained React client component under `components/animations/`. They share zero global state — each manages its own play/pause/reset lifecycle independently. A shared `useAnimationTrigger` hook based on `IntersectionObserver` fires each animation when the user scrolls 30% into the viewport. Nothing runs off-screen.
+
+### No animation library for science widgets
+
+All animation logic — canvas drawing, SVG path updates, `requestAnimationFrame` loops — is hand-written. Framer Motion is used only for UI chrome: card spring-hover effects and stagger entrance animations on the homepage hero. This was a deliberate constraint to keep bundle size predictable and rendering deterministic. A physics simulation shouldn't depend on how a UI animation library handles its internal scheduler.
+
+### Static-first with selective client components
+
+Pages are server components by default. Only animation blocks, the reading progress bar, the theme toggle, and Framer Motion wrappers are `'use client'`. The initial HTML payload is lean and fully indexable.
+
+### Scope beyond the original spec
+
+The PRD specified one animation per article, five articles total, and no animation library. Shipped: 15 articles across four topic areas (Mathematics, Physics, Computer Science, Medicine), 18 animation components, and Framer Motion added for UI chrome. Several articles warranted a second widget — for example, the Sieve of Eratosthenes article has a prime gap visualization alongside the main sieve animation, because a single long animation left questions a focused secondary widget could answer.
+
+## Outcome
+
+38 commits, four days of active development. 15 MDX articles, 18 hand-coded animation components (canvas-based simulations, SVG step-through visualisers, histogram widgets), a warm dark palette that replaced the original cold navy scheme after seeing the first implementation felt sterile for science content, and a social share system with clipboard copy and toast feedback. Configured for Vercel zero-config deployment.

@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Project source reference docs — not rendered on the public site
+content/projects/*/PRD.md
+content/projects/*/CLAUDE.md
+content/projects/*/PORTFOLIO_CONTEXT.md
+content/projects/*/PRODUCT.md
+content/projects/*/AGENTS.md

@@ -1,0 +1,15 @@
+{
+  "slug": "lantara",
+  "title": "Lantara v2",
+  "tagline": "Dynamic permit engine for IKN Nusantara — add a new permit type as configuration, not code",
+  "categoryTags": ["Government", "Platform", "Web App"],
+  "techStack": ["Django", "React", "TypeScript", "PostgreSQL", "Redis", "Celery", "Django Channels", "WeasyPrint"],
+  "status": "private",
+  "role": "Fullstack Developer",
+  "timeframe": "Jun 2026",
+  "liveUrl": null,
+  "githubUrl": null,
+  "heroImage": "/images/projects/lantara/hero.jpg",
+  "order": 2,
+  "featured": true
+}

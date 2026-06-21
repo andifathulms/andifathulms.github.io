@@ -1,0 +1,33 @@
+# WA Daily Scrum Bot
+
+## The problem
+
+Scrum teams that run daily standups over WhatsApp rely on members self-reporting. Without automation, a team lead has to manually check who hasn't posted and ping them — every day, multiple times. For a 14-person team this is tedious and easy to forget, leading to reports being missed or submitted too late to be useful.
+
+The OIKN THD Team needed an automated system that monitors the group chat, sends escalating reminders through the day, and ends each day with a ranked summary — in both Indonesian and English, since reports arrive in both languages.
+
+## The approach
+
+### Puppeteer-based WhatsApp automation
+
+WhatsApp has no official bot API. The standard approach is to automate the WhatsApp Web browser interface using Puppeteer. `whatsapp-web.js` wraps this and provides a Node.js event API. Running a full browser inside a Docker container required installing system Chromium, skipping Puppeteer's bundled download, and pinning the container hostname to prevent Chromium profile lock conflicts across restarts. An `entrypoint.sh` deletes stale `Singleton` lock files before starting Node — without this, any unclean container exit prevents the next startup.
+
+### Keyword-pair detection (bilingual)
+
+A message counts as a standup report if it contains known phrase pairs: `yesterday` + `today`, `kemarin` + `hari ini`, and similar bilingual combinations. This makes detection language-agnostic and robust to different report formats. An anti-cheat check strips known trigger keywords and flags messages with too little remaining content — catching members who game the bot with bare-keyword submissions and calling them out publicly in the group.
+
+### Flat-file state, no database
+
+Report state persists to two JSON files mounted as a Docker volume: `.bot-state.json` for daily state, `.week-state.json` for weekly. No database needed. The data resets daily; the volume survives container restarts. Seven cron jobs run through the day: morning kickoff, four escalating reminder checks (09:00, 10:00, 11:00, 14:00), EOD summary, and weekly recap on Fridays.
+
+### Holiday and leave awareness
+
+A configurable national holiday list and per-member leave date ranges let the bot skip entirely on holidays and exclude on-leave members from reminder counts and leaderboard rankings. A manual SIGUSR1 trigger (`docker exec <container> kill -USR1 1`) fires an immediate on-demand reminder without restarting the container — useful for testing and manual intervention.
+
+### Mid-project identity format change
+
+After initial deployment, member matching silently broke. WhatsApp was migrating internal contact IDs from `628xxxxxxx@c.us` to an opaque `@lid` format. Three commits were dedicated to debugging this — capturing real sender IDs from live messages, tracing the format mismatch, and updating the member config. The bot's dependency on an unofficial API means changes like this can happen without notice.
+
+## Outcome
+
+Deployed to production on a GCP VM, running in Docker for the OIKN THD Team's daily standups (14 members). 15 commits across six days. The dashboard component (`ScrumBotDashboard.jsx`) is a standalone React demo showing stats cards, a timeline with a "NOW" badge on the current check, EOD summary preview, and member config panel — built as a portfolio artifact since the live bot has no HTTP server.

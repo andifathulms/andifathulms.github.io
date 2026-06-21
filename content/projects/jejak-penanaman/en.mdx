@@ -1,0 +1,35 @@
+# Jejak Penanaman
+
+## The problem
+
+IKN Nusantara hosts recurring tree-planting ceremonies involving both government employees and the general public. Before this system, attendance was tracked manually with paper forms and spreadsheets — no way to verify that participants were actually on-site, no central record of who attended which event, no documentation of species planted, and no photographic evidence.
+
+Two distinct user types needed the same system: IKN government employees who authenticate via Keycloak SSO, and members of the public who register with an email address. Admins needed to manage events, set geofenced locations, track registrations, and export attendance reports.
+
+## The approach
+
+### Geofenced selfie check-in
+
+Attendance submission requires both a selfie and GPS coordinates within a configurable radius (50–5000m) of the event pin. The geofence is checked twice: client-side with a Haversine calculation for immediate feedback ("you are 340m away"), and server-side in the attendance submission view to prevent API-level spoofing. The server check uses the same Haversine formula against the event's stored coordinates.
+
+The `CameraCapture` component uses the browser MediaDevices API, draws the captured frame to a hidden canvas, and compresses it to max 1024px / JPEG 0.7 before upload — keeping selfies under 1 MB even on high-resolution phone cameras. iOS Safari requires `getUserMedia()` to be triggered by a direct user gesture, so the camera activation is wired to a button click, not page load.
+
+### Dual authentication with SSO + email paths
+
+IKN employees authenticate via Keycloak OIDC. A custom `OIDCAuthenticationBackend` normalises Keycloak's inconsistent claims — names arrive in ALL CAPS, organisational units map across multiple inconsistent claim fields, and some NIP values include float formatting. Public participants register with email and receive an auto-generated password via SendGrid SMTP. Admins can enforce SSO-only mode via a CMS toggle.
+
+### Plant species tracking
+
+Each attendance record links to multiple flora species planted, with per-species quantity, sapling age in months, and photos. This was added mid-project to support IKN's reforestation biodiversity records — not in the original PRD, but added without breaking the existing data model.
+
+### QR ticket system with quota management
+
+Public events have configurable registration quotas. Each registration generates a unique `JP-YYMMDD-NNN` ticket code. Admins scan QR codes at the gate using the browser's camera via `html5-qrcode`. Twibbon selfie overlays — branded IKN frames — are composited client-side using canvas and downloaded as shareable images.
+
+### OIDC config served at runtime
+
+Early builds baked the Keycloak authority URL as a Vite build argument, which broke environment parity between staging and production. The fix serves OIDC config from a backend `/api/auth/config/` endpoint fetched at app boot, so the same Docker image works in both environments without a rebuild.
+
+## Outcome
+
+Deployed to production on a VM and used in real IKN tree-planting events as of mid-2026. 64 commits across roughly three months, covering 28 frontend pages, 34 API endpoints, and 11 Django models. The system handles both internal events (SSO-only, no registration) and public events (open registration, quotas, QR tickets) through a single codebase with a forked frontend flow conditioned on the event type.

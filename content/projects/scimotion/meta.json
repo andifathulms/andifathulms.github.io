@@ -1,0 +1,15 @@
+{
+  "slug": "scimotion",
+  "title": "Scimotion",
+  "tagline": "Interactive science blog where every article pairs clear explanation with a live, controllable animation",
+  "categoryTags": ["Personal Project", "Content", "Web App"],
+  "techStack": ["Next.js", "TypeScript", "MDX", "Tailwind CSS", "Framer Motion", "KaTeX"],
+  "status": "active",
+  "role": "Designer & Developer",
+  "timeframe": "Jun 2026",
+  "liveUrl": null,
+  "githubUrl": null,
+  "heroImage": "/images/projects/scimotion/hero.jpg",
+  "order": 10,
+  "featured": true
+}

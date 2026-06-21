@@ -1,0 +1,31 @@
+# Scimotion
+
+## Permasalahan
+
+Penulisan sains memiliki celah: persamaan dan diagram diam di halaman, tetapi konsep yang mereka wakili bersifat dinamis. Pembaca bisa menghafal rumus transformasi Fourier tanpa pernah benar-benar memahami *mengapa* dekomposisi sinyal bekerja. Media sains yang ada terlalu dangkal (video pop-sains) atau terlalu dalam (makalah akademis tanpa visual). Scimotion menargetkan non-spesialis yang ingin kedalaman konseptual nyata dan kemampuan untuk memanipulasi hal yang sedang mereka coba pahami.
+
+## Pendekatan
+
+### MDX + gray-matter sebagai content layer
+
+Artikel adalah file `.mdx` dengan frontmatter YAML. Layer data (`lib/articles.ts`) membaca frontmatter pada build time menggunakan `gray-matter`, memungkinkan daftar artikel yang sepenuhnya statis tanpa database. Body artikel di-render sisi server via `next-mdx-remote` dengan `remark-math` dan `rehype-katex` yang terpasang, sehingga persamaan KaTeX di-render tanpa JavaScript sisi client.
+
+### Satu komponen animasi per artikel — mandiri
+
+Setiap widget interaktif adalah komponen React client yang mandiri di bawah `components/animations/`. Mereka tidak berbagi state global — masing-masing mengelola lifecycle play/pause/reset-nya sendiri. Hook bersama `useAnimationTrigger` berbasis `IntersectionObserver` memicu setiap animasi ketika pengguna menggulir 30% ke dalam viewport. Tidak ada yang berjalan di luar layar.
+
+### Tidak ada library animasi untuk widget sains
+
+Semua logika animasi — menggambar canvas, pembaruan path SVG, loop `requestAnimationFrame` — ditulis tangan. Framer Motion hanya digunakan untuk chrome UI: efek spring-hover kartu dan animasi stagger entrance pada hero homepage. Ini adalah constraint yang disengaja untuk menjaga ukuran bundle dapat diprediksi dan rendering deterministik.
+
+### Cakupan melebihi spesifikasi awal
+
+PRD menyebutkan satu animasi per artikel, lima artikel total. Yang dikirim: 15 artikel di empat area topik (Matematika, Fisika, Ilmu Komputer, Kedokteran), 18 komponen animasi, dan Framer Motion ditambahkan untuk chrome UI. Beberapa artikel memerlukan widget kedua karena satu animasi panjang meninggalkan pertanyaan yang bisa dijawab oleh widget sekunder yang terfokus.
+
+### Static-first dengan komponen client yang selektif
+
+Halaman adalah server component secara default. Hanya blok animasi, bilah kemajuan membaca, toggle tema, dan wrapper Framer Motion yang `'use client'`. Payload HTML awal ringan dan sepenuhnya dapat diindeks.
+
+## Hasil
+
+38 commit, empat hari pengembangan aktif. 15 artikel MDX, 18 komponen animasi yang dikode tangan (simulasi berbasis canvas, visualizer step-through SVG, widget histogram), palet gelap hangat yang menggantikan skema navy dingin awal setelah implementasi pertama terasa steril untuk konten sains, dan sistem berbagi sosial dengan salin clipboard dan umpan balik toast. Dikonfigurasi untuk deployment zero-config di Vercel.

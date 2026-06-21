@@ -1,0 +1,35 @@
+# JDIH OIKN
+
+## Permasalahan
+
+OIKN (Otorita Ibu Kota Nusantara) adalah badan pemerintah baru yang menerbitkan instrumen hukumnya sendiri — peraturan, keputusan, MoU, dan lainnya. Sebelum sistem ini, dokumen hukum tersebar di utas email dan drive lokal, publik tidak memiliki cara untuk menemukan regulasi OIKN resmi, tidak ada proses review yang terkontrol, akses ke dokumen sensitif ditegakkan secara informal tanpa jejak audit, dan pelaporan tahunan yang diwajibkan oleh regulasi harus disusun secara manual.
+
+## Pendekatan
+
+### Kontrol akses tiga tingkat dengan penegakan sisi server
+
+Dokumen diklasifikasikan sebagai terbuka, terbatas, atau tertutup. Dokumen terbatas memerlukan permohonan akses yang harus disetujui oleh pejabat walidata, dengan durasi kedaluwarsa opsional. Penegakan akses terjadi di level endpoint unduhan, bukan hanya di UI — API `/accesses/check/` memungkinkan frontend menampilkan CTA yang tepat (unduh, minta akses, atau prompt login) tanpa membocorkan URL dokumen.
+
+### Alur kerja editorial dengan pemisahan peran
+
+Dokumen melalui status `draft → review → published`. Staf admin mengunggah dan mengajukan; peran walidata terpisah yang menyetujui. Ini memastikan tinjauan empat mata dan mencegah persetujuan mandiri.
+
+### Ringkasan dokumen AI offline
+
+Ketika dokumen disetujui, task Celery secara otomatis mengekstrak teks dari PDF yang diunggah menggunakan `pdfplumber`, menjalankan NLP untuk menghasilkan ringkasan bahasa sederhana menggunakan `sumy` dan `nltk`, dan menyimpan hasilnya. Seluruh pipeline berjalan di server tanpa panggilan API eksternal — tradeoff yang disengaja setelah integrasi Gemini Flash awal dihapus karena mengirimkan dokumen hukum pemerintah ke API cloud pihak ketiga adalah risiko kepatuhan.
+
+### Deteksi hubungan hukum otomatis
+
+Task Celery terpisah memindai judul dokumen yang diterbitkan untuk pola kutipan hukum Indonesia ("mencabut Perka No. 14 Tahun 2022"), mencari dokumen yang direferensikan, dan membuat `RelationCandidate` untuk ditinjau admin. Hubungan yang dikonfirmasi ditampilkan sebagai pohon peraturan yang dapat dinavigasi.
+
+### Statistik pra-agregasi
+
+Dashboard admin tidak pernah menjalankan kueri `COUNT(*)` langsung. Task Celery Beat malam hari (`refresh_statistik_harian`) menghitung ulang semua baris statistik.
+
+### Autentikasi dual
+
+Staf OIKN login via Keycloak SSO (`sso.ikn.go.id`). Backend OIDC memetakan klaim Keycloak ke catatan pengguna JDIH. Pengguna eksternal menggunakan email+password standar dengan JWT. Kedua alur coexist tanpa konflik sesi.
+
+## Hasil
+
+Versi 1.10.0, aktif di produksi. Digunakan oleh Direktorat Hukum OIKN di sebelas rilis yang dilacak (v1.0.0 → v1.10.0) selama sebelas minggu. Sistem mencakup 88 endpoint API, 9 aplikasi Django, 24 model, 76 file source frontend, dan 8 task Celery bernama. Portal publik menyediakan akses dokumen terbuka kepada publik Indonesia; staf internal mengakses alur kerja editorial mereka melalui codebase yang sama.

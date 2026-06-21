@@ -1,0 +1,37 @@
+# JDIH OIKN
+
+## The problem
+
+OIKN (Otorita Ibu Kota Nusantara) is a new government body that issues its own legal instruments — regulations, decrees, MoUs, and more. Before this system, legal documents were scattered across email threads and local drives, the public had no way to find official OIKN regulations, there was no controlled review process, access to sensitive documents was enforced informally with no audit trail, and annual reporting required by regulation had to be assembled manually.
+
+JDIH (Jaringan Dokumentasi dan Informasi Hukum) is a nationally mandated legal information network. OIKN needed a compliant implementation covering both a public-facing portal and an internal editorial workflow.
+
+## The approach
+
+### Three-tier access control with server-side enforcement
+
+Documents are classified as open (terbuka), restricted (terbatas), or closed (tertutup). Restricted documents require an access request that a walidata officer must approve, with an optional expiry duration. Access enforcement happens at the download endpoint level, not just in the UI — a `/accesses/check/` API lets the frontend show the correct call-to-action (download, request access, or login prompt) without leaking the document URL. All downloads are logged in an audit trail.
+
+### Editorial workflow with role separation
+
+Documents move through `draft → review → published` states. Admin staff upload and submit; a separate walidata role approves. This enforces four-eyes review and prevents self-approval. Each state transition fires an activity log entry.
+
+### Offline AI document summaries
+
+When a document is approved, a Celery task automatically extracts text from the uploaded PDF using `pdfplumber`, runs NLP to produce a plain-language summary (tujuan, ruang lingkup, kewajiban sections) using `sumy` and `nltk`, and stores the result for display in the document detail sidebar. The entire pipeline runs on-server with no external API calls — a deliberate tradeoff after the original Gemini Flash integration was removed, because sending government legal documents to a third-party cloud API is a compliance risk.
+
+### Automated legal relationship detection
+
+A separate Celery task scans published document titles for Indonesian legal citation patterns ("mencabut Perka No. 14 Tahun 2022"), looks up the referenced document in the database, and creates a `RelationCandidate` for admin review. Confirmed relationships are displayed as a navigable regulatory tree (`/pohon-peraturan`), showing which documents repeal, amend, or implement each other.
+
+### Pre-aggregated statistics
+
+The admin dashboard never runs live `COUNT(*)` queries against a growing document corpus. A nightly Celery Beat task (`refresh_statistik_harian`) pre-computes all stat rows. A fallback added in v1.10.0 reads directly from `ActivityLog` if the nightly table has no data yet.
+
+### Dual authentication
+
+OIKN staff log in via Keycloak SSO (`sso.ikn.go.id`). The OIDC backend maps Keycloak claims (department, NIP, name) to JDIH user records. External/public users use standard email+password with JWT. Both flows coexist without session conflicts — Keycloak is used purely as an authentication step that mints a JWT for the frontend.
+
+## Outcome
+
+Version 1.10.0, active in production. Used by OIKN's Directorate of Law staff across eleven tracked releases (v1.0.0 → v1.10.0) over eleven weeks. The system covers 88 API endpoints, 9 Django apps, 24 models, 76 frontend source files, and 8 named Celery tasks. The public portal provides open document access to the Indonesian public; internal staff access their editorial workflow through the same codebase.

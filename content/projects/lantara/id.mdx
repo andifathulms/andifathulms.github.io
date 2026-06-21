@@ -1,0 +1,35 @@
+# Lantara v2
+
+## Permasalahan
+
+IKN Nusantara adalah ibu kota baru Indonesia yang dibangun dari awal, masih dalam konstruksi aktif. Otorita IKN harus menerbitkan perizinan di 31 sektor yang diatur: layanan sosial, kesehatan, pendidikan, lingkungan, dan lainnya. Di kebanyakan instansi pemerintah, setiap jenis izin memiliki workflow, form, dan persyaratan dokumen yang dikodekan secara keras di codebase. Ketika regulasi berubah — dan di kota baru, perubahan itu terjadi terus-menerus — itu berarti butuh developer, migrasi database, dan deployment.
+
+Persyaratan utama berbeda: administrator non-teknis harus bisa mendefinisikan workflow perizinan, skema form, dan daftar dokumen sepenuhnya melalui UI, tanpa keterlibatan developer sama sekali.
+
+## Pendekatan
+
+### Engine — konfigurasi, bukan kode
+
+Alih-alih tabel per jenis izin, semua konfigurasi perizinan tersimpan dalam lima model terkait: `Sektor`, `PermitType`, `WorkflowStage`, `FormField`, dan `DocumentRequirement`. Menambahkan jenis izin baru adalah operasi entri data. Administrator dapat mengkonfigurasi izin kesehatan enam tahap dengan dua belas dokumen yang dipersyaratkan dan form kustom — tanpa migrasi, tanpa deployment, tanpa pull request.
+
+Data form pada setiap pengajuan disimpan sebagai JSON field, divalidasi saat runtime terhadap skema field yang aktif. Ketika admin mengubah skema izin, pengajuan yang sedang berjalan terlindungi: pada saat pengajuan, versi skema saat itu disalin secara penuh ke catatan pengajuan.
+
+### RBAC tanpa enum
+
+Permission staff adalah string yang dihasilkan seperti `verifikasi_teknis:izin_posyandu`, berasal dari kunci tahapan workflow dan kunci jenis izin. Tidak ada `if role == "verifier"` di mana pun dalam codebase. Kelas permission DRF memeriksa tahap pengajuan saat ini terhadap string role yang ditetapkan ke pengguna. Ketika jenis izin baru ditambahkan melalui UI, slot role yang tepat otomatis tersedia.
+
+### SLA sebagai concern utama
+
+Setiap tahapan workflow memiliki field `sla_hours`; setiap jenis izin memiliki `sla_days` total. Task Celery Beat menyapu pengajuan secara berkala, menghitung ulang tenggat SLA menggunakan kalender hari kerja yang memperhitungkan hari libur nasional dan akhir pekan, dan mengirimkan notifikasi ketika pengajuan mendekati batas atau sudah melewati batas. Antrian verifikator menampilkan kartu pengajuan yang secara visual menua dari kuning ke merah seiring tenggat mendekati.
+
+### Sistem desain dua register
+
+Permukaan publik menggunakan palet biru royal yang imersif dengan hero animasi dan efek glassmorphism. Permukaan terautentikasi — portal pemohon, workspace verifikator, admin engine builder — tenang, padat, dan berorientasi informasi. Sistem desain menerapkan pemisahan ini di level token.
+
+### Renderer form dinamis
+
+Satu komponen React `<DynamicForm>` mengambil skema `FormField[]` izin dari API dan membangun validasi `zod` saat runtime. Menambahkan jenis izin baru dengan kombinasi field apa pun tidak memerlukan kode frontend sama sekali.
+
+## Hasil
+
+Semua empat fase pembangunan (P0 scaffold hingga P4 hardening) selesai dalam delapan hari dengan 95 commit. Sistem dapat didemonstrasikan dari `docker compose up` yang baru — migrasi berjalan, data master KBLI dimuat, 46 izin sampel di tiga sektor ter-seed, dan akun superadmin dibuat. Halaman validasi izin publik memungkinkan siapa saja memindai QR code untuk mengkonfirmasi keaslian izin yang diterbitkan tanpa perlu login. Zonasi spasial RDTR dan tanda tangan digital tertanam (TTE) sudah terpasang di balik feature flag, menunggu kemitraan berbagi data eksternal sebelum aktivasi produksi.

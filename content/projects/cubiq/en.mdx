@@ -1,0 +1,35 @@
+# Cubiq
+
+## The problem
+
+Speedcubers track solves in apps like csTimer — tools that work but look like they were designed in 2008. There's no modern alternative that combines a premium training interface with real analytics and any kind of AI integration. Cubiq was built to replace csTimer for serious cubers who want genuine stats depth, a 3D scramble preview, and a path toward AI-powered solving.
+
+## The approach
+
+### cubing.js as a web component, not a React component
+
+The `TwistyPlayer` 3D cube renderer from `cubing.js` must be instantiated as a DOM element. Importing it as a React component causes server-side rendering crashes because the library references `self` (a browser global) at module load time. The fix: `dynamic(() => import(...), { ssr: false })` combined with a `useEffect`-based mounting pattern that calls `document.createElement('twisty-player')` directly.
+
+Turbopack also had to go. `cubing.js` spawns Web Workers using a relative URL pattern that Turbopack's module resolver breaks. Switching to the Webpack bundler (`--webpack`) was the actual commit that unblocked the build.
+
+### Timer accuracy without drift
+
+The visible timer calls `performance.now() - startTime` on every render tick. `setInterval` is used only to trigger re-renders, not to measure time — so drift doesn't accumulate even over long solves. A 300ms hold-to-arm pattern (spacebar or touch) matches WCA inspection behaviour.
+
+### IDA* cross solver in TypeScript
+
+The cross solver finds the shortest sequence to place all four cross edges on any chosen face, with a cube rotation prefix (e.g., `z2`) to bring the chosen face down, displayed in csTimer's notation format. It was originally flagged in the PRD as potentially too complex for the initial build. It was fully implemented in Phase 3 using IDA* directly in TypeScript rather than relying on an experimental `cubing.js` search API that wasn't stable enough at the time.
+
+### ML architecture: Autodidactic Iteration
+
+The `cubiq-ml` FastAPI service implements Autodidactic Iteration (ADI), the same family of reinforcement learning used in DeepCubeA. The model generates its own training data by scrambling a solved cube to random depths and learning to estimate the move distance back to solved. The network is a dual-head ResNet: one head regresses a value (estimated moves remaining), one head outputs a policy distribution over 18 moves.
+
+A subtle training failure was caught and fixed: the policy network collapsed to always recommending the same move because `argmin` was used deterministically when multiple actions had equal estimated value at the start of training. The model never explored. The fix was adding noise to action selection during self-play.
+
+### MDP research dashboard
+
+The frontend polls `/mdp/status` every two seconds during training, charts loss and solve-rate history with Recharts, and displays the policy probability bars for the current scramble in real time. Users can trigger a greedy rollout or MCTS solve and compare move efficiency directly against the Kociemba optimal solution.
+
+## Outcome
+
+Six weeks, 12 commits, ~4,900 lines of TypeScript and Python. Four pages (Timer, Stats, History, Solvers), eight ML API endpoints, WCA-compliant ao5/ao12/ao50/ao100 stats with correct trim-best/worst logic. The Zustand store persists to localStorage with `skipHydration` to avoid SSR mismatches. All solve data exports as JSON for import into other tools.

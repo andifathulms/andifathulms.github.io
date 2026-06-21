@@ -1,0 +1,15 @@
+{
+  "slug": "jejak-penanaman",
+  "title": "Jejak Penanaman",
+  "tagline": "Geofenced selfie check-in app for IKN tree-planting events, with plant species tracking and QR ticketing",
+  "categoryTags": ["Government", "Mobile Web", "Internal Tool"],
+  "techStack": ["Django", "React", "PostgreSQL", "Keycloak", "Docker", "Leaflet", "SendGrid"],
+  "status": "private",
+  "role": "Fullstack Developer",
+  "timeframe": "Apr – Jun 2026",
+  "liveUrl": null,
+  "githubUrl": null,
+  "heroImage": "/images/projects/jejak-penanaman/hero.jpg",
+  "order": 6,
+  "featured": false
+}

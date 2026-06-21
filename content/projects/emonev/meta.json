@@ -1,0 +1,15 @@
+{
+  "slug": "emonev",
+  "title": "E-Monev IKN",
+  "tagline": "Government platform monitoring Nusantara's construction progress across a 23-year development roadmap",
+  "categoryTags": ["Government", "Data Platform", "Web App"],
+  "techStack": ["Django", "Next.js", "TypeScript", "PostgreSQL", "Docker", "Keycloak", "Recharts", "Leaflet"],
+  "status": "private",
+  "role": "Fullstack Developer",
+  "timeframe": "2026",
+  "liveUrl": null,
+  "githubUrl": null,
+  "heroImage": "/images/projects/emonev/hero.jpg",
+  "order": 4,
+  "featured": false
+}

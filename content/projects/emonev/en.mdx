@@ -1,0 +1,33 @@
+# E-Monev IKN
+
+## The problem
+
+Indonesia is building an entirely new capital city from scratch across five development stages spanning 2022 to 2045. Dozens of government work units run concurrent activities — infrastructure, governance, environment, social programmes — each with its own budget, targets, and quarterly milestones. Without a centralised system, coordinators had no cross-unit progress view, quarterly reporting was manual and fragmented, budget-versus-realisation gaps couldn't be detected until review meetings were already late, and the 23-year roadmap (the Indikasi Program matrix) had no digital home.
+
+Target users: IKN Authority staff — unit kerja members who report activity progress, coordinators who approve or reject plans, and administrators who manage the master data hierarchy.
+
+## The approach
+
+### Hierarchical data model for a complex framework
+
+The IKN monitoring framework has ten reference classification layers before reaching operational data: Tahapan → Prinsip → Aspek → KPI → Indikasi Program → Rencana Operasional → Kegiatan. Each activity has quarterly progress tracking (Triwulan), per-quarter plan versus realisation percentages, status, issues, follow-up notes, reviewer comments, and file evidence attachments.
+
+### Approval workflow with a formal objection mechanism
+
+Operational plans move through a defined pipeline: Usulan → Draft → Review → Final → Disetujui. A formal objection (Sanggahan) mechanism lets reviewers reject with a mandatory nota dinas document upload and written rationale — not just a button click. This matches the real government approval process rather than simplifying it away.
+
+### Context-layer decoupling for rapid iteration
+
+The React context (`DemoPersistContext`) was built with an interface identical to the future API shape, backed initially by localStorage for rapid prototyping. When the backend was ready, the context was refactored to call the real API — the interface stayed identical, so none of the 126 page and component files needed changes. Component code is completely unaware of whether data comes from the API or local state.
+
+### SSO with automatic org-unit resolution
+
+Keycloak sends raw job-title strings — "DIREKTUR DATA DAN KECERDASAN BUATAN" — that need to map to a specific unit kerja record. Since the Keycloak schema couldn't be changed to embed IDs, a normalisation and fuzzy word-overlap scorer runs on every login to resolve the correct organisational unit, handling edge cases like acronym prefixes and formatting inconsistencies from the HR system.
+
+### Geospatial activity tracking
+
+Activities carry lat/lng coordinates. The dashboard renders a live Leaflet map showing all geolocated activities colour-coded by status (on-track, delayed, critical). Activity forms include a click-to-place pin picker. All Leaflet components are loaded with `next/dynamic` and `{ ssr: false }` — Leaflet requires `window` and can't render server-side.
+
+## Outcome
+
+Production-grade architecture deployed on OIKN's infrastructure: 136 TypeScript/TSX files, 20,600 lines of frontend code, 5 Django apps, 18 database models. CI publishes backend images to GHCR on every push to main. The system handles the full IKN monitoring framework scope — 24 KPIs across 5 tahapan spanning 23 years — and gives each user role (Admin, Koordinator, Unit Kerja, Reviewer) a distinct, permission-appropriate view of the same underlying data.

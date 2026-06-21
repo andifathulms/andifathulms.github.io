@@ -1,0 +1,33 @@
+# Daily Taqwa
+
+## Permasalahan
+
+OIKN (Otorita Ibu Kota Nusantara) membutuhkan cara berbasis bukti untuk mendorong dan memverifikasi kehadiran shalat ~2.000 pegawai di Masjid Negara IKN. Absensi kertas bisa diisi mundur. Check-in digital sederhana bisa dipalsukan dari luar masjid. Pimpinan HR juga membutuhkan visibilitas tren kehadiran lintas direktorat, bukan sekadar daftar kepatuhan per individu.
+
+Taruhannya lebih tinggi dari sistem absensi biasa: waktu shalat singkat, check-in serentak melonjak dalam beberapa menit di sekitar adzan, dan persyaratan lokasi harus benar-benar tahan terhadap pemalsuan.
+
+## Pendekatan
+
+### Server sebagai otoritas waktu dan identitas
+
+Waktu shalat dihitung di sisi server menggunakan library Python `praytimes`, di-cache di Redis, dan divalidasi ulang pada saat setiap permintaan check-in. Client tidak pernah mengirimkan timestamp yang mempengaruhi validasi waktu. Detail penting: IKN beroperasi pada WITA (UTC+8), sehingga check-in Subuh pukul 05:00 WITA menjadi 21:00 UTC di hari kalender sebelumnya — helper `get_wita_date()` diterapkan secara konsisten pada semua constraint database yang menggunakan kunci tanggal.
+
+### Layanan check-in atomik
+
+Seluruh logika check-in berjalan dalam satu blok `@transaction.atomic`: konsumsi nonce, validasi jendela waktu shalat, pemeriksaan geofence GPS (Haversine dengan radius yang dapat dikonfigurasi), pemeriksaan kecepatan antar check-in, validasi liveness wajah, dan pembuatan catatan absensi. Constraint `UNIQUE(user_id, date, prayer)` di level database adalah penjaga keras terhadap race condition. Pembaruan agregat (harian, bulanan, tahunan, dan per-direktorat) terjadi dalam transaksi yang sama.
+
+### Nonce anti-replay
+
+Client memanggil `POST /prayer/nonce` tepat sebelum check-in. Server mengembalikan nonce sekali pakai dengan TTL 2 menit yang disimpan di Redis. Check-in menolak nonce yang hilang, kedaluwarsa, atau sudah dikonsumsi — mencegah replay payload check-in yang valid dari perangkat berbeda atau jendela waktu yang berbeda.
+
+### SSO dual-path via Keycloak
+
+Web menggunakan alur redirect PKCE standar. Mobile menggunakan Direct Access Grant — mengirimkan kredensial ke Keycloak, menerima `id_token`, lalu menukarnya di endpoint backend untuk token SimpleJWT. Satu codebase menangani kedua jenis grant. Klaim Keycloak (NIP, unit_kerja, gender) dipetakan ke model user lokal dengan resolusi eselon fuzzy, termasuk penanganan NIP yang datang dengan format float dari beberapa sistem HR.
+
+### Leaderboard dan riwayat shalat
+
+Fitur gamifikasi mencakup empat varian tab leaderboard: bulanan individual (peringkat terpisah pria/wanita), tahunan, khusus Subuh (shalat yang paling sulit dihadiri), dan agregat per-kedeputian. Grid riwayat shalat bulanan memberi kode warna pada setiap lima slot shalat harian per hari, dengan detail saat diketuk menampilkan foto absensi, timestamp, dan poin.
+
+## Hasil
+
+Phase 1 telah diluncurkan ke produksi di infrastruktur GCP internal OIKN: portal web, backend API, SSO Keycloak, dan pipeline CI/CD berbasis Docker yang mendorong ke GHCR. Sistem menangani lonjakan Dzuhur puncak — hingga 500 check-in serentak dalam 5 menit — tanpa race condition. Perintah manajemen backfill CSV mengimpor catatan absensi kertas sebelum peluncuran. Phase 2 (aplikasi Flutter native, pencocokan wajah penuh, notifikasi web push) sudah dispesifikasikan dan siap dibangun.

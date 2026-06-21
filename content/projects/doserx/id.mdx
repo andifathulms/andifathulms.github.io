@@ -1,0 +1,29 @@
+# DoseRx
+
+## Permasalahan
+
+Menghitung dosis obat berbasis berat adalah aritmetika berulang dan rentan kesalahan yang harus dilakukan dokter untuk setiap pasien: kalikan mg/kg dengan berat, bagi berdasarkan frekuensi, konversi ke mL, periksa terhadap batas maksimum. Untuk pasien pediatri, dosis sensitif terhadap berat dan kesalahan berbahaya. Alat yang ada — referensi kertas institusional, kalkulator ponsel biasa, spreadsheet — lambat dan tidak dirancang untuk penggunaan satu tangan di sisi tempat tidur.
+
+## Pendekatan
+
+### Engine kalkulasi murni sebagai fondasi
+
+Keputusan utama adalah menjaga `src/lib/calculate.ts` sepenuhnya murni — tanpa DOM, tanpa React, tanpa efek samping. Ia menerima input yang diketik, memvalidasinya, menerapkan batas dosis, dan mengembalikan union diskriminan: `CalcResult | CalcError`. Kode UI dipaksa untuk bercabang pada `result.valid` sebelum menyentuh field numerik apa pun, yang secara struktural menghilangkan kelas bug tampilan NaN/Infinity.
+
+### Konteks klinis Indonesia tertanam
+
+Setelah menghitung jumlah per dosis, app menyarankan pecahan tablet atau volume cairan spesifik yang tersedia di apotek Indonesia — menjepret ke pecahan praktis yang digunakan dalam praktik klinis lokal (¼, ½, ¾, 1, 1½, 2). Library obat berkembang dari 8 obat awal dalam spesifikasi menjadi 28 obat di 12 kategori.
+
+Tab Puyer — kalkulator obat racikan multi-obat yang spesifik untuk praktik Indonesia — memproses beberapa obat sekaligus, menghitung setiap dosis secara individual, dan menghasilkan kartu resep dengan aritmetika pecahan tablet yang dapat dicetak atau disalin. Menjepret ke pecahan yang dapat dipotong secara fisik (¼, ½, ¾ tablet) memerlukan modul `suggest.ts` khusus; pembulatan ke integer terdekat biasa akan menghasilkan kuantitas yang tidak fisik.
+
+### Kalkulator infus IV sebagai engine murni kedua
+
+Kalkulator infus IV (`calculateInfusion.ts`) adalah fungsi murni terpisah yang menangani domain masalah yang berbeda: laju tetes dalam mL/jam dan tetes/menit, mendukung unit dosis mcg/kg/menit, mcg/kg/jam, mg/kg/jam, dan unit/kg/jam.
+
+### PWA offline dengan riwayat persisten
+
+Di-deploy sebagai situs statis via GitHub Actions → GitHub Pages dengan dukungan PWA — dapat dipasang ke layar beranda ponsel dan digunakan sepenuhnya offline setelah dimuat. Riwayat kalkulasi persisten antar sesi via wrapper `storage.ts` di sekitar `localStorage`.
+
+## Hasil
+
+Dibangun dan di-deploy dalam satu hari (23 commit, ~11 jam). 28 obat di 12 kategori, lima mode kalkulator (Preset, Kustom, Puyer, Infus IV, Riwayat), unit test yang mencakup kalkulasi normal, batas dosis harian maksimum, batas dosis tunggal maksimum, konsentrasi yang hilang, dan input tidak valid. Disclaimer keselamatan yang dipersyaratkan oleh spesifikasi produk terlihat di app — tidak pernah tersembunyi di tooltip.

@@ -1,0 +1,27 @@
+# Dashboard SAKTI
+
+## Permasalahan
+
+Enam satuan kerja (satker) anggaran operasional OIKN masing-masing memiliki data pengeluaran yang terkunci di sistem SAKTI Kemenkeu. Setiap kali tim Biro POKS membutuhkan angka — untuk laporan Power BI, tinjauan eksekutif, atau submission triwulanan — seseorang harus login manual ke SAKTI, mengunduh satu file Excel per satker, dan menyatukan hasilnya. Tidak ada tren historis, tidak ada tampilan terpusat, tidak ada cara menghubungkan angka ke alat lain tanpa entri ulang manual.
+
+## Pendekatan
+
+### Simulasi mekanisme token SAKTI yang tidak biasa
+
+API SAKTI nyata menggunakan pola token Bearer sekali pakai yang ketat: setiap respons menyertakan token baru, token sebelumnya langsung tidak valid, dan endpoint `resetToken` terpisah mem-bootstrap token pertama. Alih-alih memblokir pengembangan pada kredensial nyata, saya membangun simulasi lengkap ini di aplikasi Django `mock_sakti` — penyimpan token dalam memori dengan rotasi UUID yang mencerminkan struktur respons SAKTI yang sebenarnya. Beralih ke produksi hanya memerlukan perubahan dua variabel lingkungan.
+
+### Airflow dengan dynamic task mapping per satker
+
+DAG `sakti_daily_sync` mengkueri tabel `Satker` saat runtime dan menggunakan `.expand()` Airflow untuk menghasilkan task fetch paralel untuk setiap satker aktif. Menambah atau menonaktifkan satker di panel admin secara otomatis mengubah apa yang diambil pipeline — tidak ada yang dikodekan keras.
+
+### DAG memanggil Django ORM langsung
+
+Alih-alih menambahkan lapisan HTTP antara Airflow dan database, task DAG memanggil model Django langsung dengan memasang source backend ke container Airflow dan mengatur `DJANGO_SETTINGS_MODULE`. Semua logika upsert berada di satu tempat dan menggunakan `update_or_create` Django — aman untuk dijalankan ulang, tidak ada duplikat.
+
+### Simplifikasi yang diketahui: toggle granularitas anggaran
+
+Data `Anggaran` di SAKTI bersifat per-item tanpa kolom tanggal. Toggle granularitas pada grafik tren memperkirakan deret waktu dengan membagi total anggaran secara merata ke seluruh periode. Ini didokumentasikan dalam komentar kode sebagai simplifikasi yang diketahui.
+
+## Hasil
+
+Fungsional end-to-end: DAG Airflow → SAKTI client → MySQL → REST API → dashboard React → ekspor Excel. Pipeline lengkap berjalan terhadap mock server di lingkungan dev, mencakup semua enam jenis endpoint SAKTI di seluruh satker aktif. Stack Docker produksi (`docker-compose.prod.yml`) dengan multi-stage builds, healthchecks, dan `restart: unless-stopped` sudah diverifikasi dan siap di-deploy begitu provisi kredensial Kemenkeu (whitelist IP + API key) selesai.
