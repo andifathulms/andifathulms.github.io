@@ -29,7 +29,7 @@
         },
         {
           "title": "Startup MVPs & SaaS",
-          "description": "Co-founder experience building TOGA POS — I understand what matters in a first product."
+          "description": "Independent product experience — I've shipped tools from scratch and understand what a first version needs to do."
         },
         {
           "title": "DevOps & Infrastructure",
@@ -66,7 +66,7 @@
     },
     "about_teaser": {
       "title": "About Fathul",
-      "body": "I'm Andi Fathul Mukminin — a fullstack developer based in Indonesia. I've built production systems for OIKN (Indonesia's sovereign capital authority), co-founded TOGA POS (a SaaS point-of-sale platform), and create data content on TikTok under the InsightfulBytes brand.",
+      "body": "I'm Andi Fathul Mukminin — a fullstack developer based in Indonesia. I've built production systems for OIKN (Indonesia's sovereign capital authority), shipped independent technical projects, and create data content on TikTok under @nusantaramapper.",
       "cta": "More about me"
     },
     "cta": {
@@ -87,15 +87,16 @@
     "view_live": "View live",
     "view_github": "View on GitHub",
     "private_badge": "Private / internal system",
+    "screenshots": "Screenshots",
     "next_project": "Next project",
     "prev_project": "Previous project"
   },
   "about": {
     "title": "About",
-    "intro": "Fullstack developer. Government systems, startup co-founder, data creator.",
-    "bio_1": "I'm Andi Fathul Mukminin — a fullstack developer based in Indonesia with a track record across three distinct contexts: production systems for government clients, co-founding a SaaS startup, and independent technical projects driven by genuine curiosity.",
-    "bio_2": "At OIKN (Indonesia's sovereign capital authority for Nusantara), I built internal data management systems and reporting infrastructure that real government teams depend on. At TOGA POS, I co-founded a point-of-sale platform for Indonesian SMEs and learned what it takes to get a product to real users and keep it running.",
-    "bio_3": "Outside client work, I create data content on TikTok under InsightfulBytes — breaking down BPS statistics and economic indicators for a general audience. It's a different kind of technical communication, and I find it genuinely valuable.",
+    "intro": "Fullstack developer. Government systems, independent builder, data creator.",
+    "bio_1": "I'm Andi Fathul Mukminin — a fullstack developer based in Indonesia with a track record across three contexts: production systems for government clients, independent technical projects driven by genuine curiosity, and data communication for a general audience.",
+    "bio_2": "At OIKN (Indonesia's sovereign capital authority for Nusantara), I built internal data management systems and reporting infrastructure that real government teams depend on.",
+    "bio_3": "Outside client work, I create data content on TikTok under @nusantaramapper — breaking down BPS statistics and economic indicators for a general audience. It's a different kind of technical communication, and I find it genuinely valuable.",
     "bio_4": "The throughline: I like systems that work. Clear scope, solid documentation, and code that someone else (or future-me) can understand and extend.",
     "stack_title": "Tools I reach for",
     "cta_title": "Let's work together",

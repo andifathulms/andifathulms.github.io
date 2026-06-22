@@ -29,7 +29,7 @@
         },
         {
           "title": "MVP Startup & SaaS",
-          "description": "Pengalaman sebagai co-founder membangun TOGA POS — saya memahami apa yang penting di produk pertama."
+          "description": "Pengalaman produk mandiri — saya pernah membangun tools dari nol dan memahami apa yang dibutuhkan sebuah versi pertama."
         },
         {
           "title": "DevOps & Infrastruktur",
@@ -66,7 +66,7 @@
     },
     "about_teaser": {
       "title": "Tentang Fathul",
-      "body": "Saya Andi Fathul Mukminin — fullstack developer berbasis di Indonesia. Saya telah membangun sistem produksi untuk OIKN (otoritas ibu kota berdaulat Indonesia), co-founding TOGA POS (platform SaaS point-of-sale), dan membuat konten data di TikTok dengan merek InsightfulBytes.",
+      "body": "Saya Andi Fathul Mukminin — fullstack developer berbasis di Indonesia. Saya telah membangun sistem produksi untuk OIKN (otoritas ibu kota berdaulat Indonesia), mengerjakan proyek teknis mandiri, dan membuat konten data di TikTok dengan akun @nusantaramapper.",
       "cta": "Lebih lanjut tentang saya"
     },
     "cta": {
@@ -87,15 +87,16 @@
     "view_live": "Lihat live",
     "view_github": "Lihat di GitHub",
     "private_badge": "Sistem privat / internal",
+    "screenshots": "Tangkapan Layar",
     "next_project": "Proyek berikutnya",
     "prev_project": "Proyek sebelumnya"
   },
   "about": {
     "title": "Tentang",
-    "intro": "Fullstack developer. Sistem pemerintah, co-founder startup, kreator data.",
-    "bio_1": "Saya Andi Fathul Mukminin — fullstack developer berbasis di Indonesia dengan rekam jejak di tiga konteks berbeda: sistem produksi untuk klien pemerintah, co-founding startup SaaS, dan proyek teknis mandiri yang didorong oleh rasa ingin tahu.",
-    "bio_2": "Di OIKN (otoritas ibu kota berdaulat Indonesia untuk Nusantara), saya membangun sistem manajemen data internal dan infrastruktur pelaporan yang digunakan tim pemerintah secara nyata. Di TOGA POS, saya co-founding platform point-of-sale untuk UMKM Indonesia dan belajar apa yang dibutuhkan untuk membawa produk ke pengguna nyata dan mempertahankannya.",
-    "bio_3": "Di luar pekerjaan klien, saya membuat konten data di TikTok dengan InsightfulBytes — mengurai statistik BPS dan indikator ekonomi untuk audiens umum. Ini adalah bentuk komunikasi teknis yang berbeda, dan saya menemukan nilainya secara genuien.",
+    "intro": "Fullstack developer. Sistem pemerintah, builder mandiri, kreator data.",
+    "bio_1": "Saya Andi Fathul Mukminin — fullstack developer berbasis di Indonesia dengan rekam jejak di tiga konteks: sistem produksi untuk klien pemerintah, proyek teknis mandiri yang didorong rasa ingin tahu, dan komunikasi data untuk audiens umum.",
+    "bio_2": "Di OIKN (otoritas ibu kota berdaulat Indonesia untuk Nusantara), saya membangun sistem manajemen data internal dan infrastruktur pelaporan yang digunakan tim pemerintah secara nyata.",
+    "bio_3": "Di luar pekerjaan klien, saya membuat konten data di TikTok dengan akun @nusantaramapper — mengurai statistik BPS dan indikator ekonomi untuk audiens umum. Ini adalah bentuk komunikasi teknis yang berbeda, dan saya menemukan nilainya.",
     "bio_4": "Benang merahnya: saya suka sistem yang bekerja. Scope yang jelas, dokumentasi yang solid, dan kode yang bisa dipahami dan dikembangkan oleh orang lain (atau diri saya di masa depan).",
     "stack_title": "Tools yang saya gunakan",
     "cta_title": "Mari bekerja bersama",

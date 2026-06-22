@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
+import StackIcon from '@/components/StackIcon';
 
 export async function generateMetadata({
   params,
@@ -49,14 +50,14 @@ export default async function AboutPage({
             <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-5">
               {t('stack_title')}
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-4 gap-y-6">
               {stack.map((tech) => (
-                <span
-                  key={tech}
-                  className="font-mono text-sm px-3 py-1 border border-gold/20 text-gold/70 rounded"
-                >
-                  {tech}
-                </span>
+                <div key={tech} className="flex flex-col items-center gap-2">
+                  <StackIcon name={tech} className="w-6 h-6 text-cream/50" />
+                  <span className="font-mono text-xs text-cream/40 text-center leading-tight">
+                    {tech}
+                  </span>
+                </div>
               ))}
             </div>
           </div>

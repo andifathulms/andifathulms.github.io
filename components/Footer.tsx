@@ -47,7 +47,7 @@ export default function Footer() {
               {[
                 { href: 'https://github.com/andifathulmukminin', label: 'GitHub' },
                 { href: 'https://linkedin.com/in/andifathulmukminin', label: 'LinkedIn' },
-                { href: 'https://tiktok.com/@insightfulbytes', label: 'TikTok' },
+                { href: 'https://tiktok.com/@nusantaramapper', label: 'TikTok' },
                 { href: 'mailto:officialandifathul@gmail.com', label: 'Email' },
               ].map(({ href, label }) => (
                 <a

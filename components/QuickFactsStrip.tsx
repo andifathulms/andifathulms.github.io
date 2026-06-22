@@ -60,16 +60,28 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
                 {t('view_live')} ↗
               </a>
             )}
-            {project.githubUrl && (
-              <a
-                href={project.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-xs text-cream/60 border border-cream/20 px-3 py-1.5 rounded hover:border-cream/40 transition-colors"
-              >
-                {t('view_github')} ↗
-              </a>
-            )}
+            {Array.isArray(project.githubUrl)
+              ? project.githubUrl.map((url, i) => (
+                  <a
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-xs text-cream/60 border border-cream/20 px-3 py-1.5 rounded hover:border-cream/40 transition-colors"
+                  >
+                    {t('view_github')} {project.githubUrl!.length > 1 ? `(${i + 1})` : ''} ↗
+                  </a>
+                ))
+              : project.githubUrl && (
+                  <a
+                    href={project.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-xs text-cream/60 border border-cream/20 px-3 py-1.5 rounded hover:border-cream/40 transition-colors"
+                  >
+                    {t('view_github')} ↗
+                  </a>
+                )}
           </>
         )}
       </div>

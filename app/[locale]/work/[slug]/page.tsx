@@ -9,10 +9,12 @@ import {
   getProjectMeta,
   getProjectContent,
   getAdjacentProjects,
+  getProjectScreenshots,
 } from '@/lib/content';
 import { routing } from '@/i18n/routing';
 import QuickFactsStrip from '@/components/QuickFactsStrip';
 import TechStackChips from '@/components/TechStackChips';
+import ScreenshotGallery from '@/components/ScreenshotGallery';
 
 export function generateStaticParams() {
   const slugs = getAllProjectSlugs();
@@ -53,6 +55,7 @@ export default async function CaseStudyPage({
 
   const t = await getTranslations({ locale, namespace: 'case_study' });
   const { prev, next } = getAdjacentProjects(slug);
+  const screenshots = getProjectScreenshots(slug);
 
   return (
     <article className="pt-28 pb-24">
@@ -63,10 +66,12 @@ export default async function CaseStudyPage({
             src={project.heroImage}
             alt={project.title}
             fill
-            className="object-cover opacity-40"
+            className="object-cover opacity-60"
             priority
           />
         )}
+        {/* gradient scrim so text is always legible regardless of image brightness */}
+        <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/20" />
         <div className="absolute inset-0 flex flex-col justify-end px-6 pb-10">
           <div className="max-w-5xl mx-auto w-full">
             {/* Category tags */}
@@ -96,6 +101,11 @@ export default async function CaseStudyPage({
         <div className="prose-case-study max-w-2xl">
           <MDXRemote source={content} />
         </div>
+
+        {/* Screenshots gallery */}
+        {screenshots.length > 0 && (
+          <ScreenshotGallery screenshots={screenshots} label={t('screenshots')} />
+        )}
 
         {/* Full tech stack */}
         <div className="border-t border-gold/20 mt-16 pt-8">

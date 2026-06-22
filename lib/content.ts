@@ -11,7 +11,7 @@ export interface ProjectMeta {
   role?: string;
   timeframe?: string;
   liveUrl: string | null;
-  githubUrl: string | null;
+  githubUrl: string | string[] | null;
   heroImage: string;
   order?: number;
   featured?: boolean;
@@ -38,8 +38,10 @@ export function getAllProjects(): ProjectMeta[] {
   return projects.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 }
 
-export function getFeaturedProjects(): ProjectMeta[] {
-  return getAllProjects().filter((p) => p.featured && p.status !== 'placeholder');
+export function getFeaturedProjects(limit = 3): ProjectMeta[] {
+  return getAllProjects()
+    .filter((p) => p.featured && p.status !== 'placeholder')
+    .slice(0, limit);
 }
 
 export function getProjectMeta(slug: string): ProjectMeta | null {
@@ -60,6 +62,35 @@ export function getAllProjectSlugs(): string[] {
   return fs
     .readdirSync(PROJECTS_DIR)
     .filter((f) => fs.statSync(path.join(PROJECTS_DIR, f)).isDirectory());
+}
+
+export interface ProjectScreenshot {
+  src: string;
+  caption: string;
+}
+
+export function getProjectScreenshots(slug: string): ProjectScreenshot[] {
+  const screenshotsDir = path.join(process.cwd(), 'public', 'images', 'projects', slug, 'screenshots');
+  if (!fs.existsSync(screenshotsDir)) return [];
+
+  const exts = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+  return fs
+    .readdirSync(screenshotsDir)
+    .filter((f) => exts.has(path.extname(f).toLowerCase()) && !f.startsWith('.'))
+    .sort((a, b) => {
+      const numA = parseInt(a) || 0;
+      const numB = parseInt(b) || 0;
+      return numA - numB;
+    })
+    .map((filename) => {
+      const nameWithoutExt = path.basename(filename, path.extname(filename));
+      // "1_Beranda" → "Beranda", "Dashboard Admin" stays as-is
+      const caption = nameWithoutExt.replace(/^\d+[_\s-]+/, '');
+      return {
+        src: `/images/projects/${slug}/screenshots/${filename}`,
+        caption,
+      };
+    });
 }
 
 export function getAdjacentProjects(
