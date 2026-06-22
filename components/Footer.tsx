@@ -45,7 +45,7 @@ export default function Footer() {
             </p>
             <div className="flex flex-col gap-2 mb-6">
               {[
-                { href: 'https://github.com/andifathulmukminin', label: 'GitHub' },
+                { href: 'https://github.com/andifathulms', label: 'GitHub' },
                 { href: 'https://linkedin.com/in/andifathulmukminin', label: 'LinkedIn' },
                 { href: 'https://tiktok.com/@nusantaramapper', label: 'TikTok' },
                 { href: 'mailto:officialandifathul@gmail.com', label: 'Email' },
