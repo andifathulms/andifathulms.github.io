@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import Hero from '@/components/Hero';
+import IdentityAnchor from '@/components/IdentityAnchor';
 import ServiceCard from '@/components/ServiceCard';
 import ProjectCard from '@/components/ProjectCard';
 import ProcessSection from '@/components/ProcessSection';
@@ -92,26 +93,6 @@ function FeaturedWorkSection({ projects }: { projects: ReturnType<typeof getFeat
   );
 }
 
-function AboutTeaser() {
-  const t = useTranslations('home.about_teaser');
-
-  return (
-    <section className="border-t border-gold/20 py-24 px-6">
-      <div className="max-w-5xl mx-auto max-w-2xl">
-        <h2 className="font-heading text-3xl md:text-4xl font-medium text-cream mb-6">
-          {t('title')}
-        </h2>
-        <p className="text-cream/70 leading-relaxed mb-8 text-lg">{t('body')}</p>
-        <Link
-          href="/about"
-          className="text-sm text-gold hover:text-gold/80 transition-colors"
-        >
-          {t('cta')} →
-        </Link>
-      </div>
-    </section>
-  );
-}
 
 function CtaSection() {
   const t = useTranslations('home.cta');
@@ -146,10 +127,10 @@ export default async function HomePage({
   return (
     <>
       <Hero />
+      <IdentityAnchor />
       <ServicesSection />
       <FeaturedWorkSection projects={featuredProjects} />
       <ProcessSection />
-      <AboutTeaser />
       <CtaSection />
     </>
   );

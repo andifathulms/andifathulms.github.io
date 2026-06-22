@@ -6,8 +6,8 @@
   },
   "home": {
     "hero": {
-      "headline": "Fullstack systems for governments, startups, and everyone between.",
-      "subheadline": "I build production-grade web applications, data platforms, and internal tools — with clear documentation and fast iteration.",
+      "headline": "Building software at Indonesia's new capital.",
+      "subheadline": "Fullstack developer at Otorita IKN — shipping production systems for Nusantara, and web applications as independent projects on the side.",
       "cta_work": "See my work",
       "cta_start": "Start a project"
     },
@@ -64,10 +64,12 @@
       ],
       "note": "This site itself was built this way. The PRD and technical spec that produced it are part of the repository."
     },
-    "about_teaser": {
-      "title": "About Fathul",
-      "body": "I'm Andi Fathul Mukminin — a fullstack developer based in Indonesia. I've built production systems for OIKN (Indonesia's sovereign capital authority), shipped independent technical projects, and create data content on TikTok under @nusantaramapper.",
-      "cta": "More about me"
+    "identity_anchor": {
+      "label": "About me",
+      "name": "Andi Fathul Mukminin",
+      "bio": "I'm a civil servant (ASN) at Otorita IKN, working in the Directorate of Data and Artificial Intelligence — building production systems for Indonesia's new capital, Nusantara. Outside work, I build web applications and tools as independent projects.",
+      "chips": ["ASN · Otorita IKN", "Nusantara, Indonesia"],
+      "read_more": "Read full story"
     },
     "cta": {
       "title": "Ready to build something?",
@@ -93,11 +95,19 @@
   },
   "about": {
     "title": "About",
-    "intro": "Fullstack developer. Government systems, independent builder, data creator.",
-    "bio_1": "I'm Andi Fathul Mukminin — a fullstack developer based in Indonesia with a track record across three contexts: production systems for government clients, independent technical projects driven by genuine curiosity, and data communication for a general audience.",
-    "bio_2": "At OIKN (Indonesia's sovereign capital authority for Nusantara), I built internal data management systems and reporting infrastructure that real government teams depend on.",
-    "bio_3": "Outside client work, I create data content on TikTok under @nusantaramapper — breaking down BPS statistics and economic indicators for a general audience. It's a different kind of technical communication, and I find it genuinely valuable.",
+    "intro": "Fullstack developer. Government systems, independent builder.",
+    "bio_1": "I'm Andi Fathul Mukminin — a fullstack developer and civil servant (ASN) at Otorita IKN, Indonesia's authority for Nusantara, the new capital. I work in the Directorate of Data and Artificial Intelligence, building production systems that real government teams depend on.",
+    "bio_2": "My day-to-day is building internal tools, data platforms, and reporting infrastructure for one of the most ambitious public projects in Indonesia — a city being built from scratch. The work demands clear scope, solid architecture, and code that survives beyond the sprint.",
+    "bio_3": "Outside work, I build web applications and tools as independent projects — driven by curiosity and the desire to ship things end-to-end. These projects let me explore different problem spaces and keep my skills sharp across the full stack.",
     "bio_4": "The throughline: I like systems that work. Clear scope, solid documentation, and code that someone else (or future-me) can understand and extend.",
+    "role_label": "Role",
+    "role_value": "ASN — Otorita IKN",
+    "directorate_label": "Directorate",
+    "directorate_value": "Data and Artificial Intelligence",
+    "location_label": "Location",
+    "location_value": "Nusantara, Indonesia",
+    "availability_label": "Availability",
+    "availability": "Outside my government work, I occasionally take on freelance projects — web applications and internal tools for teams that need clear thinking and solid execution.",
     "stack_title": "Tools I reach for",
     "cta_title": "Let's work together",
     "cta_body": "If you have a project that needs clear thinking and solid execution — I'd like to hear about it.",
@@ -112,7 +122,7 @@
     "note": "For project inquiries, a few sentences about what you're building and your timeline is enough to start. No formal brief required."
   },
   "footer": {
-    "tagline": "Fullstack systems for governments, startups, and everyone between.",
+    "tagline": "Building software at Indonesia's new capital.",
     "copyright": "© 2025 AFM Studio",
     "links_title": "Links",
     "social_title": "Connect",

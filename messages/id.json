@@ -6,8 +6,8 @@
   },
   "home": {
     "hero": {
-      "headline": "Sistem fullstack untuk pemerintah, startup, dan semua di antaranya.",
-      "subheadline": "Saya membangun aplikasi web, platform data, dan alat internal berkualitas produksi — dengan dokumentasi yang jelas dan iterasi cepat.",
+      "headline": "Membangun software di ibu kota baru Indonesia.",
+      "subheadline": "Fullstack developer di Otorita IKN — membangun sistem produksi untuk Nusantara, dan aplikasi web sebagai proyek mandiri.",
       "cta_work": "Lihat proyek saya",
       "cta_start": "Mulai proyek"
     },
@@ -64,10 +64,12 @@
       ],
       "note": "Situs ini sendiri dibangun dengan cara ini. PRD dan spesifikasi teknis yang menghasilkannya adalah bagian dari repositori."
     },
-    "about_teaser": {
-      "title": "Tentang Fathul",
-      "body": "Saya Andi Fathul Mukminin — fullstack developer berbasis di Indonesia. Saya telah membangun sistem produksi untuk OIKN (otoritas ibu kota berdaulat Indonesia), mengerjakan proyek teknis mandiri, dan membuat konten data di TikTok dengan akun @nusantaramapper.",
-      "cta": "Lebih lanjut tentang saya"
+    "identity_anchor": {
+      "label": "Tentang saya",
+      "name": "Andi Fathul Mukminin",
+      "bio": "Saya seorang ASN di Otorita IKN, bekerja di Direktorat Data dan Kecerdasan Buatan — membangun sistem produksi untuk ibu kota baru Indonesia, Nusantara. Di luar pekerjaan, saya membangun aplikasi web dan tools sebagai proyek mandiri.",
+      "chips": ["ASN · Otorita IKN", "Nusantara, Indonesia"],
+      "read_more": "Baca selengkapnya"
     },
     "cta": {
       "title": "Siap membangun sesuatu?",
@@ -93,11 +95,19 @@
   },
   "about": {
     "title": "Tentang",
-    "intro": "Fullstack developer. Sistem pemerintah, builder mandiri, kreator data.",
-    "bio_1": "Saya Andi Fathul Mukminin — fullstack developer berbasis di Indonesia dengan rekam jejak di tiga konteks: sistem produksi untuk klien pemerintah, proyek teknis mandiri yang didorong rasa ingin tahu, dan komunikasi data untuk audiens umum.",
-    "bio_2": "Di OIKN (otoritas ibu kota berdaulat Indonesia untuk Nusantara), saya membangun sistem manajemen data internal dan infrastruktur pelaporan yang digunakan tim pemerintah secara nyata.",
-    "bio_3": "Di luar pekerjaan klien, saya membuat konten data di TikTok dengan akun @nusantaramapper — mengurai statistik BPS dan indikator ekonomi untuk audiens umum. Ini adalah bentuk komunikasi teknis yang berbeda, dan saya menemukan nilainya.",
+    "intro": "Fullstack developer. Sistem pemerintah, builder mandiri.",
+    "bio_1": "Saya Andi Fathul Mukminin — fullstack developer sekaligus ASN di Otorita IKN, otoritas Indonesia untuk Nusantara, ibu kota baru. Saya bekerja di Direktorat Data dan Kecerdasan Buatan, membangun sistem produksi yang digunakan nyata oleh tim pemerintah.",
+    "bio_2": "Keseharian saya adalah membangun tools internal, platform data, dan infrastruktur pelaporan untuk salah satu proyek publik paling ambisius di Indonesia — sebuah kota yang dibangun dari nol. Pekerjaan ini menuntut scope yang jelas, arsitektur yang solid, dan kode yang bertahan melewati satu sprint.",
+    "bio_3": "Di luar pekerjaan, saya membangun aplikasi web dan tools sebagai proyek mandiri — didorong rasa ingin tahu dan keinginan untuk menyelesaikan sesuatu dari awal hingga akhir. Proyek-proyek ini memberi saya ruang untuk mengeksplorasi berbagai problem dan menjaga kemampuan di seluruh stack.",
     "bio_4": "Benang merahnya: saya suka sistem yang bekerja. Scope yang jelas, dokumentasi yang solid, dan kode yang bisa dipahami dan dikembangkan oleh orang lain (atau diri saya di masa depan).",
+    "role_label": "Jabatan",
+    "role_value": "ASN — Otorita IKN",
+    "directorate_label": "Direktorat",
+    "directorate_value": "Data dan Kecerdasan Buatan",
+    "location_label": "Lokasi",
+    "location_value": "Nusantara, Indonesia",
+    "availability_label": "Ketersediaan",
+    "availability": "Di luar pekerjaan pemerintahan, sesekali saya mengerjakan proyek freelance — aplikasi web dan tools internal untuk tim yang membutuhkan pemikiran jernih dan eksekusi solid.",
     "stack_title": "Tools yang saya gunakan",
     "cta_title": "Mari bekerja bersama",
     "cta_body": "Jika Anda memiliki proyek yang membutuhkan pemikiran jernih dan eksekusi solid — saya ingin mendengarnya.",
@@ -112,7 +122,7 @@
     "note": "Untuk pertanyaan proyek, beberapa kalimat tentang apa yang Anda bangun dan timeline Anda sudah cukup untuk memulai. Tidak perlu brief formal."
   },
   "footer": {
-    "tagline": "Sistem fullstack untuk pemerintah, startup, dan semua di antaranya.",
+    "tagline": "Membangun software di ibu kota baru Indonesia.",
     "copyright": "© 2025 AFM Studio",
     "links_title": "Tautan",
     "social_title": "Terhubung",
