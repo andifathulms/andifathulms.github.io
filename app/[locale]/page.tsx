@@ -31,7 +31,7 @@ function ServicesSection() {
   }));
 
   return (
-    <section className="border-t border-gold/20 py-24 px-6">
+    <section className="reveal border-t border-gold/20 py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="mb-12">
           <h2 className="font-heading text-3xl md:text-4xl font-medium text-cream mb-3">
@@ -56,7 +56,7 @@ function FeaturedWorkSection({ projects }: { projects: ReturnType<typeof getFeat
   if (projects.length === 0) return null;
 
   return (
-    <section className="border-t border-gold/20 py-24 px-6">
+    <section className="reveal border-t border-gold/20 py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-end justify-between mb-12">
           <div>
@@ -98,7 +98,7 @@ function CtaSection() {
   const t = useTranslations('home.cta');
 
   return (
-    <section className="border-t border-gold/20 py-24 px-6">
+    <section className="reveal border-t border-gold/20 py-24 px-6">
       <div className="max-w-5xl mx-auto text-center">
         <h2 className="font-heading text-3xl md:text-4xl font-medium text-cream mb-4">
           {t('title')}

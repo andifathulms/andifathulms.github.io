@@ -14,7 +14,7 @@ export default function ProjectCard({ project, privateBadgeLabel }: ProjectCardP
   return (
     <Link
       href={`/work/${project.slug}`}
-      className="group block border-t border-gold/20 pt-6 pb-6 hover:border-gold/40 transition-colors"
+      className="group block border-t border-gold/20 pt-6 pb-6 hover:border-gold/40 transition-all duration-300 hover:-translate-y-1"
     >
       {/* Hero image */}
       <div className="aspect-video bg-navy/50 border border-cream/5 rounded overflow-hidden mb-5 relative">
@@ -23,7 +23,8 @@ export default function ProjectCard({ project, privateBadgeLabel }: ProjectCardP
             src={project.heroImage}
             alt={project.title}
             fill
-            className="object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover opacity-70 transition-transform duration-500 group-hover:scale-[1.04] group-hover:opacity-90"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">

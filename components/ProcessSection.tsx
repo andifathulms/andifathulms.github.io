@@ -22,7 +22,7 @@ export default function ProcessSection() {
   ];
 
   return (
-    <section className="border-t border-gold/20 py-24 px-6">
+    <section className="reveal border-t border-gold/20 py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="mb-14">
           <h2 className="font-heading text-3xl md:text-4xl font-medium text-cream mb-3">
