@@ -68,7 +68,10 @@
       "label": "About me",
       "name": "Andi Fathul Mukminin",
       "bio": "I'm a civil servant (ASN) at Otorita IKN, working in the Directorate of Data and Artificial Intelligence — building production systems for Indonesia's new capital, Nusantara. Outside work, I build web applications and tools as independent projects.",
-      "chips": ["ASN · Otorita IKN", "Nusantara, Indonesia"],
+      "chips": [
+        "ASN · Otorita IKN",
+        "Nusantara, Indonesia"
+      ],
       "read_more": "Read full story"
     },
     "cta": {
@@ -127,5 +130,11 @@
     "links_title": "Links",
     "social_title": "Connect",
     "currently_building": "Currently building:"
+  },
+  "a11y": {
+    "skip_to_content": "Skip to content",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "main_nav": "Main navigation"
   }
 }
