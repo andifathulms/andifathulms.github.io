@@ -2,14 +2,24 @@
   "slug": "wa-scrum-bot",
   "title": "WA Daily Scrum Bot",
   "tagline": "WhatsApp bot that monitors a team group chat and sends escalating standup reminders with a weekly leaderboard",
-  "categoryTags": ["Internal Tool", "Automation", "Bot"],
-  "techStack": ["Node.js", "whatsapp-web.js", "Docker", "GitHub Actions", "React"],
+  "categoryTags": [
+    "Internal Tool",
+    "Automation",
+    "Bot"
+  ],
+  "techStack": [
+    "Node.js",
+    "whatsapp-web.js",
+    "Docker",
+    "GitHub Actions",
+    "React"
+  ],
   "status": "private",
   "role": "Developer",
   "timeframe": "Jun 2026",
   "liveUrl": null,
   "githubUrl": null,
-  "heroImage": "/images/projects/wa-scrum-bot/hero.jpg",
+  "heroImage": "/images/projects/wa-scrum-bot/cover.svg",
   "order": 11,
   "featured": false
 }

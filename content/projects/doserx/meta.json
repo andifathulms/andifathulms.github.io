@@ -2,14 +2,24 @@
   "slug": "doserx",
   "title": "DoseRx",
   "tagline": "Weight-based medication dose calculator built for bedside clinical use, with offline PWA support",
-  "categoryTags": ["Personal Project", "Healthcare", "Web App"],
-  "techStack": ["React", "TypeScript", "Vite", "PWA", "GitHub Actions"],
+  "categoryTags": [
+    "Personal Project",
+    "Healthcare",
+    "Web App"
+  ],
+  "techStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "PWA",
+    "GitHub Actions"
+  ],
   "status": "active",
   "role": "Developer",
   "timeframe": "Jun 2026",
   "liveUrl": null,
   "githubUrl": null,
-  "heroImage": "/images/projects/doserx/hero.jpg",
+  "heroImage": "/images/projects/doserx/cover.svg",
   "order": 8,
   "featured": false
 }

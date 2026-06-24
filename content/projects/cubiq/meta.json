@@ -2,14 +2,26 @@
   "slug": "cubiq",
   "title": "Cubiq",
   "tagline": "Dark-themed Rubik's Cube training app with a precision timer, analytics, and a live RL-trained AI solver",
-  "categoryTags": ["Personal Project", "ML / AI", "Web App"],
-  "techStack": ["Next.js", "TypeScript", "React", "Tailwind CSS", "FastAPI", "PyTorch", "Zustand"],
+  "categoryTags": [
+    "Personal Project",
+    "ML / AI",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "TypeScript",
+    "React",
+    "Tailwind CSS",
+    "FastAPI",
+    "PyTorch",
+    "Zustand"
+  ],
   "status": "active",
   "role": "Fullstack Developer",
   "timeframe": "May – Jun 2026",
   "liveUrl": null,
   "githubUrl": null,
-  "heroImage": "/images/projects/cubiq/hero.jpg",
+  "heroImage": "/images/projects/cubiq/cover.svg",
   "order": 9,
   "featured": true
 }

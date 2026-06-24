@@ -2,14 +2,25 @@
   "slug": "dashboard-sakti",
   "title": "Dashboard SAKTI",
   "tagline": "Automated budget monitoring platform pulling Kemenkeu expenditure data into a centralised OIKN dashboard",
-  "categoryTags": ["Government", "Data Platform", "Internal Tool"],
-  "techStack": ["Django", "React", "Apache Airflow", "MySQL", "Docker", "Recharts"],
+  "categoryTags": [
+    "Government",
+    "Data Platform",
+    "Internal Tool"
+  ],
+  "techStack": [
+    "Django",
+    "React",
+    "Apache Airflow",
+    "MySQL",
+    "Docker",
+    "Recharts"
+  ],
   "status": "private",
   "role": "Fullstack Developer",
   "timeframe": "Jun 2026",
   "liveUrl": null,
   "githubUrl": null,
-  "heroImage": "/images/projects/dashboard-sakti/hero.jpg",
+  "heroImage": "/images/projects/dashboard-sakti/cover.svg",
   "order": 7,
   "featured": false
 }
