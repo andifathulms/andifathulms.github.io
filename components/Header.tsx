@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { Link, usePathname } from '@/i18n/navigation';
 import LocaleSwitcher from './LocaleSwitcher';
 import { useEffect, useState } from 'react';
@@ -30,7 +31,19 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-gold/10 bg-navy/95 backdrop-blur-sm">
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="font-heading text-lg font-medium text-cream hover:text-gold transition-colors">
+        <Link
+          href="/"
+          className="group flex items-center gap-2.5 font-heading text-lg font-medium text-cream transition-colors hover:text-gold"
+        >
+          <Image
+            src="/images/brand/logo-mark.svg"
+            alt=""
+            aria-hidden="true"
+            width={32}
+            height={32}
+            priority
+            className="h-8 w-8 rounded-[7px] transition-transform group-hover:scale-105"
+          />
           AFM Studio
         </Link>
 

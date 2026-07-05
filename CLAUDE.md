@@ -117,7 +117,7 @@ content/
 
 ## Components to build
 
-- `Header` — wordmark, nav links, locale switcher.
+- `Header` — logo mark + wordmark, nav links, locale switcher.
 - `Footer` — three-column layout.
 - `Hero` — home page hero with positioning statement + two CTAs.
 - `ServiceCard` — small card for the services grid.
@@ -135,4 +135,8 @@ content/
 - No CMS or admin UI.
 - No guestbook or comments.
 - No live third-party API integrations.
-- No logo icon/mark — styled wordmark text only.
+- Header wordmark pairs the brand mark (`public/images/brand/logo-mark.svg` — navy square,
+  gold corner brackets, serif "A") with the "AFM Studio" text, per the exported
+  `exports/afmstudio/` lockup set. Favicon/apple-icon use the same mark
+  (`app/icon.png`, `app/apple-icon.png`). Don't introduce a second, different
+  mark elsewhere — this is the one logo for the site.

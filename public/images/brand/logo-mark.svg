@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect x="0" y="0" width="512" height="512" rx="26" fill="#0d1b2e" stroke="#1c2c42" stroke-width="1"></rect>
+  
+  <g stroke="#cda757" stroke-width="6" fill="none" opacity="1">
+    <path d="M 56 128 L 56 56 L 128 56"></path>
+    <path d="M 384 56 L 456 56 L 456 128"></path>
+    <path d="M 56 384 L 56 456 L 128 456"></path>
+    <path d="M 384 456 L 456 456 L 456 384"></path>
+  </g>
+  <text x="256" y="268.05" text-anchor="middle" dominant-baseline="central" font-family="&#39;Playfair Display&#39;, Georgia, serif" font-weight="800" font-size="241" fill="#f2ede2">A</text>
+</svg>
