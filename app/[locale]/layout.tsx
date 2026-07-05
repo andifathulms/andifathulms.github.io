@@ -111,6 +111,7 @@ export default async function LocaleLayout({
     jobTitle: PERSON.jobTitle,
     email: `mailto:${PERSON.email}`,
     url: SITE_URL,
+    image: `${SITE_URL}/icon.png`,
     worksFor: { '@type': 'Organization', name: PERSON.worksFor },
     sameAs: PERSON.sameAs,
   };
