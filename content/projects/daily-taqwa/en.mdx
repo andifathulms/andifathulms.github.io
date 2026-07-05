@@ -4,32 +4,30 @@
 
 OIKN (Otorita Ibu Kota Nusantara) wanted an evidence-based way to encourage and verify prayer attendance at Masjid Negara IKN among its ~2,000 civil servants. Paper sign-in sheets could be filled in retroactively. A simple digital check-in could be spoofed from outside the mosque. HR leadership also needed attendance trend visibility across directorates, not just a per-person compliance list.
 
-The stakes were higher than a typical attendance system: prayer windows are short, concurrent check-ins spike in the few minutes around each adzan, and the location requirement needed to be genuinely tamper-resistant.
+The stakes were higher than a typical attendance system: prayer windows are short, concurrent check-ins spike in the few minutes around each adzan, and the location requirement needed to be genuinely tamper-resistant — not just "hard to fake," but hard to fake on purpose by someone motivated to.
 
 ## The approach
 
+### One backend, two clients — and only one may check in
+
+Browser GPS cannot be trusted. A `navigator.geolocation` reading gives no way to attest it came from real hardware, and free "fake GPS" apps or a devtools override defeat a web-only geofence no matter how good the server-side validation is. So the production architecture is deliberately split. The **native mobile app is the only client authorized to submit a check-in** — it performs liveness capture and a GPS read with OS-level mock-location detection, something a website fundamentally cannot do. The **Next.js web portal** never exposes a live check-in to end users; it serves prayer schedules, the gamified leaderboard, profiles, release notes, and the full admin panel. Both talk to the same Django REST API, which is the single source of truth for every rule.
+
 ### Server as the authority for time and identity
 
-Prayer windows are computed server-side using the Python `praytimes` library, cached in Redis, and re-validated at the exact moment of each check-in request. The client never sends a timestamp that affects window validation. A subtle but critical detail: IKN operates on WITA (UTC+8), so a Subuh check-in at 05:00 WITA becomes 21:00 UTC the previous calendar day — a `get_wita_date()` helper is applied consistently across all date-keyed database constraints to prevent silent collision bugs.
+Prayer windows are computed server-side using the Python `praytimes` library, cached in Redis, and re-validated at the exact moment of each check-in request. The client never sends a timestamp that affects validation. A subtle but critical detail: IKN operates on WITA (UTC+8), so a Subuh check-in at 05:00 WITA becomes 21:00 UTC the previous calendar day — a `get_wita_date()` helper is applied consistently across all date-keyed database constraints to prevent silent collision bugs.
 
 ### Atomic check-in service
 
-All check-in logic runs inside a single `@transaction.atomic` block: nonce consumption, prayer window validation, GPS geofence check (Haversine with configurable radius), velocity sanity check between sequential check-ins, face liveness validation, and attendance record creation. A `UNIQUE(user_id, date, prayer)` constraint at the database level is the hard guard against race conditions — the service catches `IntegrityError` and returns a clean "already checked in" response. Aggregate updates (daily, monthly, yearly, and per-directorate) happen in the same transaction, so they never drift from the attendance records.
+All check-in logic runs inside a single `@transaction.atomic` block: nonce consumption, prayer window validation, GPS geofence check (Haversine with configurable radius), velocity sanity check between sequential check-ins, face liveness validation, and attendance record creation. A `UNIQUE(user_id, date, prayer)` constraint at the database level is the hard guard against race conditions — the service catches `IntegrityError` and returns a clean "already checked in" response. Aggregate updates (daily, monthly, yearly, and per-directorate) happen in the same transaction, so they never drift from the attendance records. Single-use nonces with a 2-minute TTL, issued right before check-in, block replay of a valid payload from another device or a later window.
 
-### Anti-replay nonces
+### Dual-path SSO through one Keycloak
 
-The client calls `POST /prayer/nonce` immediately before check-in. The server returns a single-use nonce with a 2-minute TTL stored in Redis. Check-in rejects any nonce that is missing, expired, or already consumed. This prevents replaying a valid check-in payload from a different device or a later time window.
+Both clients authenticate through OIKN's Keycloak instance, but with two different grant types from a single codebase. The web portal uses a standard PKCE redirect via `mozilla-django-oidc`. Mobile uses Direct Access Grant — it POSTs credentials to Keycloak, receives an `id_token`, then exchanges it at a backend endpoint for SimpleJWT tokens. Keycloak claims (NIP, unit_kerja, gender) are mapped to the local user model with fuzzy eselon resolution, including coercing NIPs that arrive with float formatting from some HR systems and accepting non-standard PPPK/military numbers.
 
-### Dual-path SSO
+### Leaderboard, history, and HR reality
 
-Both web and mobile authenticate through OIKN's Keycloak instance. The web portal uses a standard PKCE redirect flow via `mozilla-django-oidc`. Mobile uses Direct Access Grant — it POSTs credentials to Keycloak, receives an `id_token`, then exchanges it at a backend endpoint for SimpleJWT tokens. A single codebase handles both grant types. Keycloak claims (NIP, unit_kerja, gender) are mapped to the local user model with fuzzy eselon resolution, including handling NIPs that arrive with float formatting from some HR systems.
-
-### Leaderboard and prayer history
-
-The gamification layer includes four leaderboard tab variants: monthly individual (separate male/female rankings), yearly, Subuh-specific (the hardest prayer to attend), and per-directorate aggregate. A monthly prayer history grid color-codes each of the five daily prayer slots per day, with tap-to-detail showing the attendance photo, timestamp, and points. The top three on each leaderboard get a podium treatment; the current user's rank is always pinned at the bottom if they fall outside the top ten.
+The gamification layer has four leaderboard variants: monthly individual (separate male/female), yearly, Subuh-specific (the hardest prayer to attend), and per-directorate aggregate — top three get a podium, and the current user's rank is pinned at the bottom if they fall outside the top ten. A monthly history grid color-codes all five prayer slots per day, tap-to-detail showing photo, timestamp, and points. Around this core, launch surfaced needs the original spec didn't cover: because Keycloak supplies no gender claim, users can self-correct gender and directorate from their profile — and the OIDC sync learned to stop clobbering those manual fixes on the next login. A CSV backfill command that imports the prior paper records was wrapped in an admin web upload page so HR never needs shell access to the VM, and web/mobile login timestamps are tracked separately so admins can watch mobile-app adoption climb.
 
 ## Outcome
 
-Phase 1 shipped to production on OIKN's internal GCP infrastructure: web portal, backend API, Keycloak SSO, and Docker-based CI/CD pipeline pushing to GHCR. The system handles the peak Dzuhur window — up to 500 concurrent check-ins within a 5-minute burst — without race conditions, thanks to the row-level locking and database-level unique constraint design.
-
-A CSV backfill management command imported pre-launch paper attendance records, handling non-standard NIPs (PPPK, military) and merging SSO accounts by NIP. Phase 2 (native Flutter app, full face matching, web push notifications) is specced and ready to build.
+Daily Taqwa is deployed to production on OIKN's internal GCP infrastructure, with CI pushing Docker images to GHCR on every merge to `main`. The native mobile app is live and is the sole channel for actual presensi; the web portal at its internal domain runs the admin and ranking surfaces against the same API. The system holds up under the peak Dzuhur window — up to 500 concurrent check-ins in a five-minute burst — without race conditions, thanks to row-level locking and the database-level unique constraint. Backend scope grew well beyond the original PRD along the way: Keycloak SSO replaced local-only auth, face matching was deliberately descoped to liveness-only for Phase 1 to avoid a heavy dlib build, and a layer of HR tooling — web backfill upload, profile self-service, platform-split login activity, an in-app release-notes page — was added in response to real launch needs. Full server-side face matching remains the headline Phase 2 item. The repository is private, under the OIKN organization.
