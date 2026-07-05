@@ -17,11 +17,12 @@
     "Django Channels",
     "WeasyPrint"
   ],
-  "status": "private",
+  "status": "active",
   "role": "Fullstack Developer",
   "timeframe": "Jun 2026",
-  "liveUrl": null,
-  "githubUrl": null,
+  "liveUrl": "https://lantara.kotacerdas.id",
+  "liveIsStaging": true,
+  "githubUrl": "https://github.com/thdoikn/lantara-v2",
   "heroImage": "/images/projects/lantara/hero.jpeg",
   "order": 2,
   "featured": true

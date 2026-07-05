@@ -11,6 +11,7 @@ export interface ProjectMeta {
   role?: string;
   timeframe?: string;
   liveUrl: string | null;
+  liveIsStaging?: boolean;
   githubUrl: string | string[] | null;
   heroImage: string;
   order?: number;

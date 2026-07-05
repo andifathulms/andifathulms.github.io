@@ -50,16 +50,30 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
           </span>
         ) : (
           <>
-            {project.liveUrl && (
-              <a
-                href={project.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-xs text-gold border border-gold/30 px-3 py-1.5 rounded hover:border-gold/60 transition-colors"
-              >
-                {t('view_live')} ↗
-              </a>
-            )}
+            {project.liveUrl &&
+              (project.liveIsStaging ? (
+                <a
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Staging environment — not the production URL"
+                  className="font-mono text-xs text-clay border border-clay/40 px-3 py-1.5 rounded hover:border-clay/70 transition-colors inline-flex items-center gap-1.5"
+                >
+                  {t('view_staging')} ↗
+                  <span className="text-[0.65rem] uppercase tracking-wider text-clay/70 border-l border-clay/30 pl-1.5">
+                    Staging
+                  </span>
+                </a>
+              ) : (
+                <a
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-xs text-gold border border-gold/30 px-3 py-1.5 rounded hover:border-gold/60 transition-colors"
+                >
+                  {t('view_live')} ↗
+                </a>
+              ))}
             {Array.isArray(project.githubUrl)
               ? project.githubUrl.map((url, i) => (
                   <a
