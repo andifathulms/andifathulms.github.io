@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 
 export default function Footer() {
@@ -11,7 +12,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
           {/* Left: tagline + copyright */}
           <div>
-            <p className="font-heading text-lg font-medium text-cream mb-3">AFM Studio</p>
+            <div className="flex items-center gap-2.5 mb-3">
+              <Image
+                src="/images/brand/logo-mark.svg"
+                alt=""
+                aria-hidden="true"
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-[7px]"
+              />
+              <p className="font-heading text-lg font-medium text-cream">AFM Studio</p>
+            </div>
             <p className="text-sm text-cream/60 leading-relaxed mb-4">{t('tagline')}</p>
             <p className="font-mono text-xs text-cream/30">{t('copyright')}</p>
           </div>
