@@ -20,8 +20,8 @@ export async function generateMetadata({
 }
 
 const stack = [
-  'Next.js', 'TypeScript', 'React', 'PostgreSQL', 'Tailwind CSS',
-  'Node.js', 'Python', 'Docker', 'Railway', 'Vercel',
+  'Next.js', 'Django', 'TypeScript', 'React', 'PostgreSQL',
+  'Redis', 'Celery', 'Tailwind CSS', 'Node.js', 'Python', 'Docker',
 ];
 
 export default async function AboutPage({
