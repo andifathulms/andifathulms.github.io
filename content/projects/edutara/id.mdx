@@ -1,0 +1,33 @@
+# Edutara
+
+## Permasalahan
+
+Otorita IKN sudah menjalankan platform pelatihan langsung untuk pegawainya dan institusi mitra — Universitas Monash, UGM, Learning Center Kementerian Keuangan, dan beberapa lainnya — dengan 266+ pengguna terdaftar. Dibangun di atas Laravel, template Blade, dan jQuery, tanpa pengujian otomatis, konvensi yang tidak konsisten, dan lisensi aset UI yang tidak terdokumentasi — risiko hukum nyata untuk platform pemerintah. Setiap perubahan membawa risiko sungguhan bagi produk langsung yang digunakan pegawai untuk pelatihan wajib, dan sistemnya memiliki bus factor tinggi: sulit distaf, sulit diubah dengan aman.
+
+Permintaannya adalah re-platform penuh dengan paritas fitur 100% — tetapi di atas stack modern, teruji, dan dapat diobservasi — untuk audiens yang benar-benar beragam: pegawai negeri, staf swasta, dan mahasiswa dengan tingkat literasi teknologi yang sangat berbeda, ditambah admin institusi yang menjalankan program pelatihan mereka sendiri dan pimpinan pemerintah yang membutuhkan pelaporan kepatuhan untuk badan kepegawaian negara.
+
+## Pendekatan
+
+### API-first, sehingga tidak ada yang perlu dibangun dua kali
+
+Backend Django REST Framework dan frontend Next.js berkomunikasi sepenuhnya melalui klien API bertipe — tidak ada logika bisnis yang diduplikasi di React. Keputusan itu berarti API yang sama dapat melayani aplikasi mobile atau integrasi mitra di masa depan tanpa menyentuh sistem inti, dan menegakkan setiap pemeriksaan permission di satu lapisan yang tidak bisa dilewati frontend yang dimanipulasi: setiap endpoint memiliki pemeriksaan sisi server sendiri, bukan tombol yang disembunyikan di UI.
+
+### UUID di mana-mana, multi-tenancy per baris, bukan per database
+
+Setiap model mengekspos UUID publik untuk URL dan respons API — primary key integer internal tidak pernah bocor, menutup seluruh kelas bug "tebak ID berurutan berikutnya" secara gratis. Multi-tenancy berjalan pada foreign key `institution_id` ditambah middleware yang membatasi query ke institusi mana pun yang sedang diperankan pengguna, alih-alih database per institusi — lebih murah dijalankan dan lebih sederhana dinalar, sembari tetap menjaga data setiap institusi terisolasi.
+
+### Engine kuis yang dibangun sebagai state machine eksplisit
+
+Bank soal dan segmen terpisah dari percobaan tertentu mana pun. Begitu peserta memulai kuis, soal-soal di-snapshot ke percobaan tersebut — mengubah bank soal setelahnya tidak akan pernah diam-diam merusak percobaan yang sudah dinilai. Penilaian berjalan per segmen dengan ambang kelulusan independennya sendiri, sehingga peserta harus lulus setiap segmen, bukan sekadar rata-rata di antaranya.
+
+### Tugas yang tidak terblokir oleh penilaian
+
+Tugas yang disubmit langsung ditandai selesai untuk keperluan progres; penilaian sesungguhnya — terima, tolak, nilai — terjadi secara asinkron dan tidak pernah menahan penyelesaian kelas peserta, sesuai dengan cara alur persetujuan klien sendiri sudah bekerja. Sertifikat dan laporan mengikuti filosofi asinkron yang sama: pembuatan PDF berjalan sebagai job latar belakang sehingga render yang lambat tidak pernah memblokir permintaan, dan setiap sertifikat yang diterbitkan membawa kode QR yang tertaut ke halaman validasi publik tanpa login.
+
+### Membangun skema pelaporan mendahului kebutuhan
+
+Laporan kepatuhan klien — jam pelatihan per pegawai, dapat difilter berdasarkan hierarki institusi — hari ini hanya memiliki satu sumber data nyata: Edutara sendiri. Ia tetap dibangun di atas skema ternormalisasi dan bertanda sumber sejak hari pertama, karena OIKN berencana suatu saat menarik catatan pelatihan dari platform mitra. Itu adalah over-build yang disengaja, dibuat secara eksplisit alih-alih ditemukan sebagai scope creep yang menyakitkan nanti.
+
+## Hasil
+
+Edutara dirilis sebagai sistem teruji dan digerbangi CI, bukan prototipe: suite unit pytest dan Vitest/RTL, suite end-to-end Playwright penuh yang menjalankan seluruh stack Docker dengan data seed, dan gerbang cakupan yang ditegakkan di CI. Model peran itu sendiri dirancang ulang di tengah pembangunan begitu penggunaan nyata memperjelas di mana batas spesifikasi awal tidak berlaku — peran Teacher menggantikan pemisahan Manajer/Staf, tingkat operator-platform baru diperkenalkan di bawah Superadmin, dan akses institusi berpindah dari hanya-undangan menjadi undangan-atau-permintaan-dengan-persetujuan. Dua fitur — testimoni yang disubmit peserta dan permintaan bergabung institusi mandiri — dirilis tanpa persyaratan yang sesuai di spesifikasi awal, ditambahkan karena masuk akal begitu platform inti sudah berjalan. Dari 124 commit, sebagian besar pembangunan — 109 commit — mendarat hanya dalam dua hari, dengan pass pengerasan deployment terakhir beberapa hari kemudian: 12 aplikasi Django, 43 model, dan platform multi-peran penuh (peserta, institusi, superadmin) dengan engine kuis dari nol, bukan demo CRUD.

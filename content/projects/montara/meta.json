@@ -1,0 +1,28 @@
+{
+  "slug": "montara",
+  "title": "Montara",
+  "tagline": "Construction monitoring platform tracking every IKN infrastructure project through a five-role approval workflow",
+  "categoryTags": [
+    "Government",
+    "Platform",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "Django",
+    "TypeScript",
+    "PostgreSQL",
+    "Celery",
+    "Redis",
+    "Leaflet",
+    "Recharts"
+  ],
+  "status": "private",
+  "role": "Fullstack Developer",
+  "timeframe": "May – Jul 2026",
+  "liveUrl": null,
+  "githubUrl": null,
+  "heroImage": "/images/projects/montara/cover.svg",
+  "order": 12,
+  "featured": false
+}

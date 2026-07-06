@@ -1,0 +1,31 @@
+# Montara
+
+## Permasalahan
+
+Program konstruksi IKN Nusantara mencakup puluhan kontraktor yang membangun infrastruktur secara bersamaan, dan pihak yang melacaknya terbagi ke dalam kelompok dengan kebutuhan dan tingkat kepercayaan yang benar-benar berbeda. Kontraktor perlu melaporkan progres fisik dan finansial pada proyek yang mereka tangani. PPK (pejabat pembuat komitmen pemerintah) perlu menyetujui atau menolak apa yang diajukan kontraktor — tetapi hanya untuk proyek dalam lingkupnya, dengan jejak audit, karena ini adalah komitmen pemerintah. Staf kepatuhan dan eksekutif membutuhkan dashboard agregat yang dapat dipercaya tanpa harus menelusuri data proyek mentah. Belum ada sistem yang menegakkan *siapa* yang bisa mengubah *apa*, dengan alur persetujuan sungguhan dan log audit — yang justru menjadi seluruh perbedaan antara platform monitoring dan spreadsheet bersama.
+
+## Pendekatan
+
+### Frontend sebagai sumber kebenaran, backend sebagai terjemahan
+
+Alih-alih merancang skema database dari spesifikasi dan membangun kedua sisi secara paralel, frontend dibangun lebih dulu — prototipe Next.js yang berfungsi penuh, berjalan sepenuhnya terhadap `localStorage`, dengan setiap peran, aturan permission, dan state machine workflow benar-benar diimplementasikan dan diuji, bukan sekadar mock. Ia melewati audit level senior formal dengan item remediasi yang dilacak sebelum backend apa pun ada. Baru setelah itu backend Django dibangun, sebagai implementasi ulang sisi server yang setia terhadap model data dan aturan bisnis yang sudah divalidasi frontend. Ketika spesifikasi awal dan frontend yang berfungsi tidak sepakat, frontend yang menang — kebijakan yang sengaja dan didokumentasikan, bukan kebetulan urutan kerja. Itu juga sebabnya pembangunan backend cepat: 20 commit dalam satu hari, karena masalah domainnya sudah terpecahkan dan terbukti, bukan dirancang di bawah tekanan waktu.
+
+### Permintaan persetujuan, bukan field status
+
+Alih-alih satu status `draft → diajukan → disetujui` yang melekat langsung pada proyek, setiap mutasi — buat, ubah, submit progres, hapus — dimodelkan sebagai entitas `ApprovalRequest` tersendiri, dengan status proyek diturunkan dari permintaan terakhir. Pemisahan itu memungkinkan jejak audit lengkap tentang siapa mengusulkan apa dan siapa memutuskan, independen dari entitas yang diubah, dan memungkinkan PPK atau super-admin melewati antrean sepenuhnya untuk perubahan langsung mereka sendiri — jalan pintas yang disengaja, dicatat secara terpisah alih-alih disembunyikan.
+
+### Konkurensi tanpa table lock
+
+Setiap proyek membawa penghitung revisi yang diambil saat permintaan persetujuan diajukan dan divalidasi ulang pada saat persetujuan. Persetujuan yang usang — di mana proyek berubah setelah permintaan diajukan — ditolak di sisi server alih-alih diam-diam menimpa data yang lebih baru. Tidak perlu penguncian tabel secara menyeluruh.
+
+### Pengarsipan yang menghormati tata kelola arsip pemerintah
+
+Menghapus proyek tidak sekadar membalik sebuah flag. Ia berdampak berantai menutup semua isu terbuka, mencatat status sebelumnya sehingga pemulihan bisa membatalkannya, dan penghapusan permanen menampilkan pratinjau dampak penuh — jumlah per jenis entitas — sebelum apa pun benar-benar dihancurkan, mengingat betapa konsekuensialnya tindakan itu untuk catatan pemerintah.
+
+### Notifikasi real-time dan BIM viewer sungguhan
+
+Prototipe frontend awalnya menghitung ulang notifikasi dari nol pada setiap render. Backend dengan sengaja meningkatkannya menjadi tabel notifikasi persisten yang diisi secara transaksional pada peristiwa pemicu, dengan Celery dan Redis menangani sapuan deteksi keterlambatan dan agregasi terjadwal. Di sisi BIM, spesifikasi awal meninggalkan viewer 3D sebagai pertanyaan terbuka yang belum diputuskan — backend menyelesaikannya dengan mengimplementasikan pertukaran token Autodesk Platform Services sungguhan alih-alih hanya mengirimkan viewer simulasi frontend sebagai final.
+
+## Hasil
+
+Sistem ini berada di titik setelah milestone integrasi, sebelum peluncuran produksi: delapan dashboard yang dibatasi peran (ringkasan, peta, anggaran, progres, risiko, kepatuhan, portofolio, kinerja kontraktor) dengan ekspor CSV/PDF, lima peran yang ditegakkan baik di sisi klien maupun server, alur kerja permintaan-persetujuan penuh dengan pelacakan pengajuan ulang, dan siklus arsip-pulihkan-hapus-permanen yang dimodelkan berdasarkan kepentingan retensi arsip yang sesungguhnya. Frontend membawa 111+ pengujian dalam suite Vitest-nya sendiri, termasuk pengujian isolasi lintas-peran dan integrasi pipeline pengajuan-ulang. Di kedua repositori: 53 commit frontend selama enam minggu membangun dan memperkuat prototipe, lalu 20 commit backend dalam satu hari yang terkonsentrasi menerjemahkan desain yang sudah tervalidasi itu ke Django — 37 model, 11 aplikasi domain, dan permukaan API bertipe yang terhubung di balik feature flag sehingga sistem masih bisa kembali ke mode prototipe aslinya selama masa transisi.

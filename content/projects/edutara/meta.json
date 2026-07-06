@@ -1,0 +1,28 @@
+{
+  "slug": "edutara",
+  "title": "Edutara",
+  "tagline": "Government-grade learning platform re-built from scratch — courses, quizzes, graded assignments, and verifiable certificates",
+  "categoryTags": [
+    "Government",
+    "Education",
+    "Web App"
+  ],
+  "techStack": [
+    "Django",
+    "Next.js",
+    "TypeScript",
+    "PostgreSQL",
+    "Celery",
+    "Redis",
+    "Keycloak",
+    "MinIO"
+  ],
+  "status": "private",
+  "role": "Fullstack Developer",
+  "timeframe": "Jun – Jul 2026",
+  "liveUrl": null,
+  "githubUrl": null,
+  "heroImage": "/images/projects/edutara/cover.svg",
+  "order": 13,
+  "featured": false
+}

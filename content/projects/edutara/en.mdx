@@ -1,0 +1,33 @@
+# Edutara
+
+## The problem
+
+Otorita IKN already ran a live training platform for its employees and partner institutions — Monash University, UGM, Kementerian Keuangan's Learning Center, and several others — with 266+ registered users. It was built on Laravel, Blade templates, and jQuery, with no automated tests, inconsistent conventions, and undocumented UI asset licensing, a real legal exposure for a government platform. Every change carried real risk to a live product real employees depended on for mandatory training, and the system had a high bus factor: hard to staff, hard to change safely.
+
+The ask was a full re-platform with 100% feature parity — but on a modern, tested, observable stack — for a genuinely mixed audience: civil servants, private-sector staff, and university students with very different levels of tech literacy, plus institution admins running their own training programs and government leadership who need compliance reporting for the civil service agency.
+
+## The approach
+
+### API-first, so nothing has to be rebuilt twice
+
+A Django REST Framework backend and a Next.js frontend talk entirely over a typed API client — no business logic duplicated in React. That decision means the same API can serve a future mobile app or partner integration without touching the core system, and it enforces every permission check at the one layer a tampered frontend can't bypass: every endpoint has its own server-side check, not a UI-hidden button.
+
+### UUIDs everywhere, multi-tenancy by row, not by database
+
+Every model exposes a public UUID for URLs and API responses — internal integer primary keys never leak, closing off a whole class of "guess the next sequential ID" bugs for free. Multi-tenancy runs on an `institution_id` foreign key plus middleware that scopes queries to whichever institution a user is currently acting as, rather than a database per institution — cheaper to run and simpler to reason about, while still keeping each institution's data isolated.
+
+### A quiz engine built as an explicit state machine
+
+Question banks and segments are separate from any specific attempt. The moment a learner starts a quiz, the questions are snapshotted onto that attempt — editing a question bank afterward can never silently corrupt an already-graded attempt. Scoring runs per segment with its own independent pass threshold, so a learner has to clear every segment, not just average across them.
+
+### Assignments that don't block on grading
+
+A submitted assignment is immediately marked done for progress purposes; the actual grading — accept, reject, score — happens asynchronously and never holds up a learner's course completion, matching how the client's own approval workflows already worked. Certificates and reports follow the same async philosophy: PDF generation runs as a background job so a slow render never blocks a request, and every issued certificate carries a QR code linking to a no-login public validation page.
+
+### Building the reporting schema ahead of need
+
+The client's compliance report — training hours per employee, filterable by institutional hierarchy — only has one real data source today: Edutara itself. It was still built on a normalized, source-tagged schema from day one, because OIKN plans to eventually pull training records from partner platforms. That's a deliberate over-build, made explicitly rather than discovered as painful scope creep later.
+
+## Outcome
+
+Edutara shipped as a tested, CI-gated system, not a prototype: pytest and Vitest/RTL unit suites, a full Playwright end-to-end suite that spins up the whole Docker stack with seed data, and a coverage gate enforced in CI. The role model itself was redesigned mid-build once real usage clarified where the original spec's boundaries didn't hold — a Teacher role replaced a Manager/Staff split, a new platform-operator tier was introduced beneath Superadmin, and institution access moved from invite-only to invite-or-request-with-approval. Two features — learner-submitted testimonials and self-service institution join requests — shipped with no corresponding requirement in the original spec, added because they made sense once the core platform was working. Across 124 commits, the bulk of the build — 109 commits — landed in just two days, with a final deployment-hardening pass a few days later: 12 Django apps, 43 models, and a full multi-role platform (learner, institution, superadmin) with a from-scratch quiz engine, not a CRUD demo.
