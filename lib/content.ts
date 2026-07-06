@@ -55,7 +55,10 @@ export function getProjectMeta(slug: string): ProjectMeta | null {
 export function getProjectContent(slug: string, locale: string): string | null {
   const filePath = path.join(PROJECTS_DIR, slug, `${locale}.mdx`);
   if (!fs.existsSync(filePath)) return null;
-  return fs.readFileSync(filePath, 'utf-8');
+  const raw = fs.readFileSync(filePath, 'utf-8');
+  // Case study MDX conventionally opens with "# Title", but the hero banner
+  // above already renders the title — strip it here so it isn't duplicated.
+  return raw.replace(/^#\s+.+\n+/, '');
 }
 
 export function getAllProjectSlugs(): string[] {
