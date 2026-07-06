@@ -17,11 +17,14 @@
     "TanStack Query",
     "Recharts"
   ],
-  "status": "private",
+  "status": "active",
   "role": "Fullstack Developer",
   "timeframe": "Mar – Jul 2026",
-  "liveUrl": null,
-  "githubUrl": null,
+  "liveUrl": "https://ekiosk.kotacerdas.id",
+  "githubUrl": [
+    "https://github.com/thdoikn/ekiosk-cms",
+    "https://github.com/thdoikn/ekiosk-frontend-cms"
+  ],
   "heroImage": "/images/projects/ekiosk/hero.jpeg",
   "order": 3,
   "featured": false
