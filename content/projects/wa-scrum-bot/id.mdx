@@ -1,5 +1,3 @@
-# WA Daily Scrum Bot
-
 ## Permasalahan
 
 Tim scrum yang menjalankan standup harian via WhatsApp mengandalkan anggota untuk melapor sendiri. Tanpa otomasi, team lead harus mengecek secara manual siapa yang belum posting dan mengingatkan mereka — setiap hari, beberapa kali. Untuk tim 14 orang ini melelahkan dan mudah terlupakan, menyebabkan laporan terlewat atau dikirim terlambat.
@@ -10,20 +8,28 @@ Tim OIKN THD membutuhkan sistem otomatis yang memantau group chat, mengirimkan p
 
 ### Otomasi WhatsApp berbasis Puppeteer
 
-WhatsApp tidak memiliki API bot resmi. Pendekatan standar adalah mengotomasi antarmuka WhatsApp Web browser menggunakan Puppeteer. `whatsapp-web.js` membungkus ini dan menyediakan API event Node.js. Menjalankan browser penuh di dalam container Docker memerlukan instalasi Chromium sistem, melewati unduhan bawaan Puppeteer, dan menghapus file lock `Singleton` yang basi sebelum memulai Node — tanpa ini, exit container yang tidak bersih mencegah startup berikutnya.
+WhatsApp tidak memiliki API bot resmi. Pendekatan standar adalah mengotomasi antarmuka WhatsApp Web browser menggunakan Puppeteer — `whatsapp-web.js` membungkus ini dan menyediakan API event Node.js. Menjalankan browser penuh di dalam container Docker memerlukan instalasi Chromium sistem, melewati unduhan bawaan Puppeteer, dan menetapkan hostname container untuk mencegah konflik lock profil Chromium antar restart. `entrypoint.sh` menghapus file lock `Singleton` yang basi sebelum memulai Node — tanpa ini, exit container yang tidak bersih memblokir startup berikutnya.
 
-### Deteksi pasangan kata kunci (bilingual)
+### Deteksi pasangan kata kunci bilingual, dengan pass anti-cheat
 
-Pesan dihitung sebagai laporan standup jika mengandung pasangan frasa yang diketahui: `yesterday` + `today`, `kemarin` + `hari ini`, dan kombinasi bilingual serupa. Ini membuat deteksi agnostik bahasa dan kuat terhadap format laporan yang berbeda. Pemeriksaan anti-cheat menghapus kata kunci pemicu yang diketahui dan menandai pesan dengan konten tersisa yang terlalu sedikit.
+Pesan dihitung sebagai laporan standup jika mengandung pasangan frasa yang diketahui — `yesterday` + `today`, `kemarin` + `hari ini`, dan kombinasi bilingual serupa — membuat deteksi agnostik bahasa dan kuat terhadap format laporan yang berbeda. Pass kedua menghapus kata kunci pemicu tersebut dan menandai pesan dengan konten tersisa yang terlalu sedikit, menangkap anggota yang mengakali bot dengan submission kata-kunci telanjang dan memanggil mereka secara publik di grup.
 
-### State flat-file, tanpa database
+### Melacak bukan hanya *apakah* seseorang melapor, tapi apakah pekerjaannya benar-benar bergerak
 
-State laporan persisten ke dua file JSON yang di-mount sebagai Docker volume. Tidak perlu database. Data direset setiap hari; volume bertahan meski container restart. Tujuh cron job berjalan sepanjang hari: kickoff pagi, empat pemeriksaan pengingat yang semakin mendesak (09:00, 10:00, 11:00, 14:00), ringkasan EOD, dan rekap mingguan setiap Jumat.
+Di luar deteksi laporan, bot melacak item bullet individual lintas hari. `detectSection()` mengklasifikasikan setiap baris sebagai Yesterday/Today/Impediment, dan pemeriksaan `taskSimilarity()` berbasis Jaccard-similarity (ambang 0.7) mengenali bahwa "fix login bug" dan "fixing the login bug issue" adalah tugas yang sama yang muncul kembali di bawah "Today" tanpa pernah naik menjadi "selesai" — ditandai setelah bertahan tiga hari atau lebih. Whitelist mengecualikan kata tugas rutin (`piket`, `cuti`, `standby`) agar tidak pernah ditandai, dan konfigurasi `staleHelp` per anggota dapat membingkai ulang tugas macet untuk QA lead yang kelebihan beban sebagai tawaran dukungan helper bernama, bukan panggilan telanjang.
 
-### Perubahan format ID kontak di tengah proyek
+### Menutup celah akal-akalan dalam state carry
 
-Setelah deployment awal, pencocokan anggota diam-diam rusak. WhatsApp sedang memigrasikan ID kontak internal dari `628xxxxxxx@c.us` ke format `@lid` yang buram. Tiga commit didedikasikan untuk men-debug ini — menangkap ID pengirim nyata dari pesan langsung, menelusuri ketidakcocokan format, dan memperbarui konfigurasi anggota.
+Hitungan hari tugas macet awalnya reset setiap Senin, yang berarti anggota bisa menghindari flag hanya dengan menghilangkan tugas macet dari daftar satu hari — mereset streak secara gratis. Perbaikannya berpindah dari bucket per-minggu ke struktur `carry` lintas-minggu yang persisten, di mana counter hanya bersih ketika tugas yang *sama* kemudian dilaporkan selesai lewat pencocokan similarity, bukan karena dihilangkan. Membuat ini aman memerlukan jaminan idempotensi yang sepadan: pada setiap restart, bot mengambil ulang 500 pesan grup terakhir dan memutarnya secara kronologis untuk membangun ulang state `carry`, `ledger`, dan `history`-nya, sehingga redeploy tidak pernah diam-diam kehilangan pelacakan yang sedang berjalan.
+
+### Menggerbang fitur berisiko sebelum dipercaya untuk broadcast
+
+Rekap mingguan Jumat mengagregasi beberapa kalkulasi yang masing-masing berpotensi salah — completion rate, streak konsistensi tepat waktu, digest kesehatan tim, carry tugas macet — yang mana pun bisa menghasilkan angka yang salah atau memalukan di depan seluruh tim. Fitur ini dirilis di balik flag konfigurasi `weeklyRecapAutoSend` ditambah pengiriman manual yang dipicu `SIGHUP`, sehingga output agregat bisa diperiksa kewarasannya terhadap data nyata selama satu siklus penuh sebelum otomasi dipercaya berjalan tanpa pengawasan.
+
+### Swalayan, sesuai permintaan
+
+`!mystats` memungkinkan anggota mana pun menanyakan persentase tepat waktu, streak saat ini, dan completion rate mingguan mereka sendiri tanpa menunggu hari Jumat; `!rank` memposting leaderboard konsistensi yang sama sesuai permintaan; `!help` mengiklankan keduanya dari pesan kickoff pagi.
 
 ## Hasil
 
-Di-deploy ke produksi di VM GCP, berjalan di Docker untuk standup harian Tim OIKN THD (14 anggota). 15 commit dalam enam hari. Komponen dashboard (`ScrumBotDashboard.jsx`) adalah demo React mandiri yang menampilkan kartu statistik, timeline dengan badge "SEKARANG" pada pemeriksaan saat ini, preview ringkasan EOD, dan panel konfigurasi anggota — dibangun sebagai artefak portofolio karena bot langsung tidak memiliki server HTTP.
+Di-deploy dan berjalan di produksi di VM GCP untuk standup harian Tim OIKN THD. Yang dimulai sebagai deteksi laporan dan pengingat eskalasi berkembang jauh melampaui cakupan itu — 25 commit selama 18 hari, lebih dari sepuluh di antaranya mendarat dalam satu rentang tiga hari begitu lapisan pelacakan tugas dan analitik terbentuk. Rekap Jumat kini adalah komposit dari beberapa subsistem yang dibangun secara independen (completion rate, streak konsistensi, digest kesehatan tim, carry tugas macet) alih-alih satu peringkat tunggal, semuanya disajikan dari file state JSON datar tanpa database, di-mount sebagai volume Docker sehingga restart tidak pernah kehilangan progres satu hari.

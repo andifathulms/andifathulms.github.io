@@ -1,5 +1,3 @@
-# WA Daily Scrum Bot
-
 ## The problem
 
 Scrum teams that run daily standups over WhatsApp rely on members self-reporting. Without automation, a team lead has to manually check who hasn't posted and ping them — every day, multiple times. For a 14-person team this is tedious and easy to forget, leading to reports being missed or submitted too late to be useful.
@@ -10,24 +8,28 @@ The OIKN THD Team needed an automated system that monitors the group chat, sends
 
 ### Puppeteer-based WhatsApp automation
 
-WhatsApp has no official bot API. The standard approach is to automate the WhatsApp Web browser interface using Puppeteer. `whatsapp-web.js` wraps this and provides a Node.js event API. Running a full browser inside a Docker container required installing system Chromium, skipping Puppeteer's bundled download, and pinning the container hostname to prevent Chromium profile lock conflicts across restarts. An `entrypoint.sh` deletes stale `Singleton` lock files before starting Node — without this, any unclean container exit prevents the next startup.
+WhatsApp has no official bot API. The standard approach is to automate the WhatsApp Web browser interface using Puppeteer — `whatsapp-web.js` wraps this and provides a Node.js event API. Running a full browser inside a Docker container required installing system Chromium, skipping Puppeteer's bundled download, and pinning the container hostname to prevent Chromium profile lock conflicts across restarts. An `entrypoint.sh` deletes stale `Singleton` lock files before starting Node — without it, any unclean container exit blocks the next startup.
 
-### Keyword-pair detection (bilingual)
+### Bilingual keyword-pair detection, with an anti-cheat pass
 
-A message counts as a standup report if it contains known phrase pairs: `yesterday` + `today`, `kemarin` + `hari ini`, and similar bilingual combinations. This makes detection language-agnostic and robust to different report formats. An anti-cheat check strips known trigger keywords and flags messages with too little remaining content — catching members who game the bot with bare-keyword submissions and calling them out publicly in the group.
+A message counts as a standup report if it contains known phrase pairs — `yesterday` + `today`, `kemarin` + `hari ini`, and similar bilingual combinations — making detection language-agnostic and robust to different report formats. A second pass strips those trigger keywords and flags messages with too little content remaining, catching members who game the bot with bare-keyword submissions and calling them out publicly in the group.
 
-### Flat-file state, no database
+### Tracking not just *whether* someone reported, but whether their work is actually moving
 
-Report state persists to two JSON files mounted as a Docker volume: `.bot-state.json` for daily state, `.week-state.json` for weekly. No database needed. The data resets daily; the volume survives container restarts. Seven cron jobs run through the day: morning kickoff, four escalating reminder checks (09:00, 10:00, 11:00, 14:00), EOD summary, and weekly recap on Fridays.
+Beyond report detection, the bot tracks individual bullet items across days. `detectSection()` classifies each line as Yesterday/Today/Impediment, and a Jaccard-similarity `taskSimilarity()` check (0.7 threshold) recognises that "fix login bug" and "fixing the login bug issue" are the same task reappearing under "Today" without ever graduating to "done" — flagged once it's carried three or more days. A whitelist excludes recurring duty words (`piket`, `cuti`, `standby`) from ever being flagged, and a per-member `staleHelp` config can reframe a stuck task for an overloaded QA lead as an offer of named-helper support instead of a bare callout.
 
-### Holiday and leave awareness
+### Closing the gaming loophole in the carry state
 
-A configurable national holiday list and per-member leave date ranges let the bot skip entirely on holidays and exclude on-leave members from reminder counts and leaderboard rankings. A manual SIGUSR1 trigger (`docker exec <container> kill -USR1 1`) fires an immediate on-demand reminder without restarting the container — useful for testing and manual intervention.
+The stale-task day-count originally reset every Monday, which meant a member could dodge the flag simply by leaving a stuck task off one day's list — resetting the streak for free. The fix moved from a per-week bucket to a persistent cross-week `carry` structure where the counter only clears when the *same* task is later reported done via similarity match, not by omission. Making that safe required a matching idempotency guarantee: on every restart, the bot re-fetches the last 500 group messages and chronologically replays them to rebuild its `carry`, `ledger`, and `history` state, so a redeploy never silently loses in-progress tracking.
 
-### Mid-project identity format change
+### Gating risky features before trusting them to broadcast
 
-After initial deployment, member matching silently broke. WhatsApp was migrating internal contact IDs from `628xxxxxxx@c.us` to an opaque `@lid` format. Three commits were dedicated to debugging this — capturing real sender IDs from live messages, tracing the format mismatch, and updating the member config. The bot's dependency on an unofficial API means changes like this can happen without notice.
+The Friday weekly recap aggregates several independently fallible calculations — completion rate, an on-time consistency streak, a team-health digest, stale-task carry — any one of which could produce a wrong or embarrassing number in front of the whole team. It shipped behind a `weeklyRecapAutoSend` config flag plus a manual `SIGHUP`-triggered send, so the aggregated output could be sanity-checked against real data for a full cycle before automation was trusted to run unattended.
+
+### Self-service, on demand
+
+`!mystats` lets any member query their own on-time percentage, current streak, and weekly completion rate without waiting for Friday; `!rank` posts the same consistency leaderboard on demand; `!help` advertises both from the morning kickoff message.
 
 ## Outcome
 
-Deployed to production on a GCP VM, running in Docker for the OIKN THD Team's daily standups (14 members). 15 commits across six days. The dashboard component (`ScrumBotDashboard.jsx`) is a standalone React demo showing stats cards, a timeline with a "NOW" badge on the current check, EOD summary preview, and member config panel — built as a portfolio artifact since the live bot has no HTTP server.
+Deployed and running in production on a GCP VM for the OIKN THD Team's daily standups. What began as report-detection and escalating reminders grew well past that scope — 25 commits over 18 days, more than ten of them landing in a single three-day stretch once the task-tracking and analytics layer took shape. The Friday recap is now a composite of several independently built subsystems (completion rate, consistency streaks, team-health digest, stale-task carry) rather than a single ranking, all served from flat JSON state files with no database, mounted as a Docker volume so restarts never lose a day's progress.

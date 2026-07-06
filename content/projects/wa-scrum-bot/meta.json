@@ -14,12 +14,12 @@
     "GitHub Actions",
     "React"
   ],
-  "status": "private",
+  "status": "active",
   "role": "Developer",
   "timeframe": "Jun 2026",
   "liveUrl": null,
-  "githubUrl": null,
-  "heroImage": "/images/projects/wa-scrum-bot/cover.svg",
+  "githubUrl": "https://github.com/thdoikn/wa-scrum-bot",
+  "heroImage": "/images/projects/wa-scrum-bot/hero.jpeg",
   "order": 11,
   "featured": false
 }
