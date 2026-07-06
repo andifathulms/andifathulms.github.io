@@ -17,11 +17,14 @@
     "Recharts",
     "Leaflet"
   ],
-  "status": "private",
+  "status": "active",
   "role": "Fullstack Developer",
   "timeframe": "May – Jul 2026",
-  "liveUrl": null,
-  "githubUrl": null,
+  "liveUrl": "https://emonev.kotacerdas.id",
+  "githubUrl": [
+    "https://github.com/thdoikn/emonevp2e-backend",
+    "https://github.com/thdoikn/emonevp2e-frontend"
+  ],
   "heroImage": "/images/projects/emonev/hero.jpeg",
   "order": 4,
   "featured": false
