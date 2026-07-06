@@ -1,33 +1,37 @@
-# Jejak Penanaman
-
 ## Permasalahan
 
 IKN Nusantara mengadakan upacara penanaman pohon berulang yang melibatkan pegawai pemerintah dan masyarakat umum. Sebelum sistem ini, kehadiran dilacak secara manual dengan formulir kertas dan spreadsheet — tidak ada cara untuk memverifikasi bahwa peserta benar-benar berada di lokasi, tidak ada catatan terpusat tentang siapa yang hadir di acara mana, tidak ada dokumentasi spesies yang ditanam, dan tidak ada bukti foto.
+
+Dua jenis pengguna berbeda membutuhkan sistem yang sama: pegawai pemerintah IKN yang autentikasi via Keycloak SSO, dan masyarakat umum yang mendaftar dengan email — ditambah peserta walk-up di acara terbuka yang sama sekali tidak punya akun. Admin perlu mengelola acara, menetapkan lokasi geofence, melacak pendaftaran, dan mengekspor laporan kehadiran.
 
 ## Pendekatan
 
 ### Check-in selfie dengan geofence
 
-Pengajuan absensi memerlukan selfie dan koordinat GPS dalam radius yang dapat dikonfigurasi (50–5000m) dari pin acara. Geofence diperiksa dua kali: sisi client dengan perhitungan Haversine untuk umpan balik langsung ("kamu berjarak 340m"), dan sisi server di view pengajuan absensi untuk mencegah pemalsuan level API.
+Pengajuan absensi memerlukan selfie dan koordinat GPS dalam radius yang dapat dikonfigurasi (50–5000m) dari pin acara. Geofence diperiksa dua kali: sisi client dengan perhitungan Haversine untuk umpan balik langsung ("kamu berjarak 340m"), dan sisi server di view pengajuan absensi untuk mencegah pemalsuan level API, menggunakan rumus yang sama terhadap koordinat acara yang tersimpan.
 
 Komponen `CameraCapture` menggunakan API MediaDevices browser, menggambar frame yang ditangkap ke canvas tersembunyi, dan mengompresnya ke maks 1024px / JPEG 0.7 sebelum unggah — menjaga selfie di bawah 1 MB bahkan di kamera ponsel resolusi tinggi. iOS Safari memerlukan `getUserMedia()` dipicu oleh gestur pengguna langsung, sehingga aktivasi kamera terikat ke klik tombol, bukan pemuatan halaman.
 
-### Autentikasi dual: SSO + email
+### Setiap foto membawa buktinya sendiri
 
-Pegawai IKN autentikasi via Keycloak OIDC. `OIDCAuthenticationBackend` kustom menormalisasi klaim Keycloak yang tidak konsisten — nama datang dalam HURUF BESAR, unit organisasi dipetakan melalui beberapa field klaim yang tidak konsisten. Peserta publik mendaftar dengan email dan menerima kata sandi yang dibuat secara otomatis via SendGrid SMTP.
+Selfie dan foto tanaman mendapat overlay timestamp-dan-GPS yang dibakar langsung ke canvas sebelum unggah — tanggal dan waktu dalam WITA, koordinat hingga 7 desimal — dan data GPS yang sama disematkan ke metadata EXIF JPEG di sisi client via `piexifjs`. Tidak ada pemrosesan gambar di sisi server; buktinya melekat pada file itu sendiri.
+
+### Tiga jalan masuk, satu model kehadiran
+
+Pegawai IKN autentikasi via Keycloak OIDC, yang klaimnya datang benar-benar berantakan — nama dalam HURUF BESAR, unit organisasi terpecah tidak konsisten di beberapa field klaim — dinormalisasi oleh `OIDCAuthenticationBackend` kustom. Peserta publik mendaftar dengan email dan menerima kata sandi yang dibuat otomatis via SendGrid. Untuk acara publik terbuka, jalur ketiga melewati akun sepenuhnya: endpoint registrasi anonim membuat pengguna tamu ringan secara on-the-fly sehingga peserta walk-up tidak terhalang alur autentikasi, tanpa melemahkan model permission bagi siapa pun.
 
 ### Pelacakan spesies tanaman
 
-Setiap catatan absensi dapat dikaitkan dengan beberapa spesies flora yang ditanam, dengan kuantitas per spesies, usia bibit dalam bulan, dan foto tanaman — membuat catatan keanekaragaman hayati per acara untuk rekaman penghijauan IKN.
+Setiap catatan absensi dapat dikaitkan dengan beberapa spesies flora yang ditanam, dengan kuantitas per spesies, usia bibit dalam bulan, dan foto — ditambahkan di tengah proyek, di luar PRD awal, untuk mendukung catatan keanekaragaman hayati penghijauan IKN tanpa merusak model data yang ada. Tampilan "Jejak Hijau" pribadi memungkinkan peserta melihat semua yang telah mereka tanam di seluruh acara yang pernah dihadiri, dengan lightbox foto.
 
-### Sistem tiket QR dengan manajemen kuota
+### Tiket QR yang berskala ke kuota per instansi
 
-Acara publik memiliki kuota pendaftaran yang dapat dikonfigurasi. Setiap pendaftaran menghasilkan kode tiket unik `JP-YYMMDD-NNN`. Admin memindai QR code di pintu masuk menggunakan kamera browser via `html5-qrcode`. Overlay selfie twibbon — bingkai bermerek IKN — di-composite sisi client menggunakan canvas dan diunduh sebagai gambar yang dapat dibagikan.
+Acara publik menghasilkan kode tiket unik `JP-YYMMDD-NNN` per pendaftaran, ditetapkan secara atomik untuk menghindari tabrakan, dan admin memindainya di pintu masuk dengan kamera browser via `html5-qrcode`, dengan umpan balik audio per hasil scan. Yang dimulai sebagai satu kuota datar per acara berkembang menjadi segmentasi opt-in: sebuah acara dapat membagi kuotanya per instansi pemerintah, masing-masing dengan batas nullable sendiri (null = tanpa batas) dan daftar ukuran kaos yang tersedia sendiri — validasi pendaftaran menyelesaikan instansi peserta dan menegakkan aturan khusus instansi tersebut, sementara acara yang lebih sederhana tetap berfungsi seperti sebelumnya. Overlay selfie twibbon — bingkai bermerek IKN — di-composite di sisi client di atas foto yang diambil dan diunduh sebagai gambar yang dapat dibagikan.
 
-### Konfigurasi OIDC disajikan saat runtime
+### Kehadiran yang fleksibel untuk konektivitas dunia nyata, tanpa jadi longgar
 
-Build awal membakar URL otoritas Keycloak sebagai argumen build Vite, yang merusak paritas lingkungan antara staging dan produksi. Perbaikannya menyajikan konfigurasi OIDC dari endpoint backend `/api/auth/config/` yang diambil saat boot app, sehingga image Docker yang sama berfungsi di kedua lingkungan tanpa rebuild.
+Absensi tidak sepenuhnya tidak dapat diubah. Admin dapat membuat catatan secara paksa atas nama peserta — termasuk menimpa timestamp via pemilih waktu — untuk kegagalan konektivitas di lokasi yang pasti terjadi di acara luar ruangan, dan dapat menambahkan foto tanaman ke catatan yang ada setelahnya. Di atas pemisahan admin/peserta ada peran superadmin yang mengelola admin lain, mempromosikan pengguna publik menjadi status pegawai (mengunci field organisasi mereka sehingga login SSO di masa depan tidak dapat diam-diam menimpa koreksi manual), serta mencari, memfilter, dan menghapus di seluruh basis pengguna.
 
 ## Hasil
 
-Di-deploy ke produksi di VM dan digunakan dalam acara penanaman pohon IKN nyata sejak pertengahan 2026. 64 commit selama sekitar tiga bulan, mencakup 28 halaman frontend, 34 endpoint API, dan 11 model Django. Sistem menangani acara internal (khusus SSO, tanpa pendaftaran) dan acara publik (pendaftaran terbuka, kuota, tiket QR) melalui satu codebase dengan alur frontend yang bercabang berdasarkan jenis acara.
+Di-deploy ke produksi dan digunakan dalam acara penanaman pohon IKN nyata sejak pertengahan 2026. 78 commit selama sekitar tiga bulan, mencakup 5 aplikasi Django, 13 model, ~90 endpoint API, dan 28 halaman frontend. Sistem menangani acara internal (khusus SSO, tanpa pendaftaran) dan acara publik (pendaftaran terbuka, kuota per instansi, tiket QR, walk-in tamu) melalui satu codebase, dengan dashboard admin yang memecah kehadiran berdasarkan direktorat dan kedeputian untuk pelaporan internal.

@@ -16,12 +16,12 @@
     "Leaflet",
     "SendGrid"
   ],
-  "status": "private",
+  "status": "active",
   "role": "Fullstack Developer",
-  "timeframe": "Apr – Jun 2026",
-  "liveUrl": null,
-  "githubUrl": null,
-  "heroImage": "/images/projects/jejak-penanaman/cover.svg",
+  "timeframe": "Apr – Jul 2026",
+  "liveUrl": "https://jejakpenanaman.kotacerdas.id",
+  "githubUrl": "https://github.com/thdoikn/jejak-penanaman",
+  "heroImage": "/images/projects/jejak-penanaman/hero.jpeg",
   "order": 6,
   "featured": false
 }
