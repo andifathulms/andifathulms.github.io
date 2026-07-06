@@ -1,7 +1,7 @@
 {
   "slug": "ekiosk",
   "title": "eKiosk IKN",
-  "tagline": "Web control room for managing and monitoring public information kiosks across Nusantara",
+  "tagline": "Two web control rooms for Nusantara: digital kiosk content management and real-time BRT fleet tracking with predictive ETAs",
   "categoryTags": [
     "Government",
     "Smart City",
@@ -11,17 +11,18 @@
     "Django",
     "React",
     "PostgreSQL",
-    "MinIO",
-    "Docker",
+    "Leaflet",
     "Keycloak",
-    "TanStack Query"
+    "MinIO",
+    "TanStack Query",
+    "Recharts"
   ],
   "status": "private",
   "role": "Fullstack Developer",
-  "timeframe": "2026",
+  "timeframe": "Mar – Jul 2026",
   "liveUrl": null,
   "githubUrl": null,
-  "heroImage": "/images/projects/ekiosk/cover.svg",
+  "heroImage": "/images/projects/ekiosk/hero.jpeg",
   "order": 3,
   "featured": false
 }

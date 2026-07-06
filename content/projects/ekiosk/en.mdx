@@ -2,32 +2,40 @@
 
 ## The problem
 
-IKN's smart city initiative deploys physical information kiosks in public areas across Nusantara. Each kiosk runs a custom Flutter app that displays government content — maps, announcements, public transport schedules. Without a central management layer, updating what any kiosk shows requires touching each device individually. As the fleet grows, that approach doesn't scale. Operators also had no visibility into whether a kiosk was running, had crashed, or fallen out of sync with the latest content.
+IKN's smart city initiative deploys physical information kiosks in public areas across Nusantara, each running a custom Flutter app that displays government content — maps, announcements, transport schedules. Without a central management layer, updating what any kiosk shows requires touching each device individually, which doesn't scale as the fleet grows. Operators also had no visibility into whether a kiosk was running, had crashed, or had fallen out of sync.
 
-Two teams shared the system: non-technical content staff who manage playlists and media, and IT staff who monitor device health and push software updates.
+Separately, IKN operates a BRT (bus rapid transit) fleet. A prior in-house Go service tracked bus GPS positions in memory, with no persistence, no historical analytics, and a race-condition-prone shared state — and no way to tell riders or operators when a bus would actually arrive.
+
+Two operator groups depend on this system: non-technical content staff managing kiosk playlists and media, and transport/IT staff monitoring fleet health, GPS tracking, and ETA accuracy.
 
 ## The approach
 
-### Heartbeat-driven status model
+### Heartbeat-driven kiosk status
 
-Each physical kiosk pings the server every five minutes with its current state: playlist hash, GPS coordinates, free storage, free memory, app version, and app state. The kiosk's status — OPERATIONAL, STALE, DISCONNECTED, or MAINTENANCE — is computed from that heartbeat on every API read rather than stored as a column. This keeps the data model simple and ensures status is always current. The tradeoff is that you can't `filter(status='disconnected')` in the ORM; the dashboard summary endpoint works around this with in-memory filtering in Python.
+Each physical kiosk pings the server every five minutes with its current state — playlist hash, GPS coordinates, free storage, free memory, app version. Status (OPERATIONAL / STALE / DISCONNECTED / MAINTENANCE) is computed live from that heartbeat on every API read rather than stored as a column, keeping the data model simple and always current. Content sync avoids diffing entirely: each playlist computes a deterministic SHA-256 hash of its ordered items on every save, and kiosks report the hash they last synced, so the server can tell instantly — in O(1) — whether a device is stale.
 
-### SHA-256 hash-based content sync
+### From one dashboard to two products
 
-Instead of diffing playlist contents on every heartbeat, each playlist computes a deterministic SHA-256 hash of its ordered items on every save. Kiosks report the hash they last synced. The server compares it to the current playlist hash in O(1) to know instantly whether a device is out of sync. No diff logic on either end.
+What began as a single dashboard with a "Fleet" tab has since split into two standalone single-page apps — **eKiosk CMS** and **Fleet Management** — each with its own layout and sidebar, reachable through a shared app launcher and a cross-app switcher embedded in both topbars. Fleet Management is additionally gated behind a staff role. All of it runs on a hand-rolled design system (a token file plus inline CSS objects, no component library) rather than Tailwind, kept deliberately consistent across both apps.
 
-### Playlist builder with drag-and-drop
+### Real-time GPS tracking and a statistical ETA engine
 
-Operators build content playlists from uploaded media files, reorder items by dragging, and set per-item display durations. The drag-and-drop interface uses `@dnd-kit`. Changes push to devices automatically via the hash comparison on the next heartbeat.
+A long-running poller (`poll_gps_data`) hits a live GPS vendor API every ~5 seconds per vehicle, matches each position to a route graph, and buffers movement into a track-history table — its own Docker service alongside the main API. The route graph itself is a small hand-rolled directed graph, built deliberately without networkx or any data-science library, to keep the image slim.
 
-### Real-time GPS fleet tracking
+ETA isn't a fixed-speed guess: it projects the vehicle's live GPS fix onto the polyline segment it's currently traveling, then walks forward through the route's stops using **learned historical travel times** — median seconds per (route, from-stop, to-stop, hour-of-day, weekday/weekend) bucket, computed nightly from trip-split GPS history with outlier trimming. Where there isn't enough learned data yet, the estimate falls back through scheduled-timetable deltas, then haversine distance over an assumed speed, then a stop-count heuristic — so it degrades gracefully instead of failing.
 
-A separate long-running Django management command (`poll_gps_data`) polls a live GPS data source every five seconds, matches vehicle positions to route graphs using Haversine distance and geofence logic, and computes per-stop ETAs. A candidate confirmation system prevents oscillation at shared stops between routes — the bus must either visit a stop unique to the candidate route, or visit ≥80% of that route's named stops before a route switch is committed.
+### Measuring the ETA engine against itself
 
-### Dual-path authentication
+The system doesn't just predict — it grades its own predictions. The poller periodically samples its ETA output into a log, then closes each prediction out the instant the bus actually crosses the target stop's geofence, recording the signed error. That feeds a dedicated accuracy report: mean absolute error, percentage within 1/2/3 minutes, broken down by hour and by stop — so it's possible to see exactly where the model is weakest, not just that it exists.
 
-Dashboard operators log in via IKN's Keycloak OIDC. Flutter kiosks use a separate `AllowAny` registration flow and never interact with the auth layer — a factory-registered kiosk phones home with its UUID without user credentials.
+### Self-correcting route detection, without oscillation
+
+Buses sometimes get manually reassigned or drift from their scheduled route. A separate service continuously scores each vehicle's recent GPS trail against every route's polyline and proposes a correction when the best match is both close enough and clearly better than the runner-up. An early version — "N consecutive ticks near route X" — caused oscillation at stops shared between overlapping routes. The fix adds a spatial confirmation gate on top of the scoring: a correction only commits once the bus visits a stop unique to the new route, or at least 80% of its named stops. Every correction is journaled for audit.
+
+### Auth split by audience
+
+Dashboard operators authenticate through IKN's Keycloak SSO, which issues a JWT the frontend stores in Zustand; user fields (NIP, jabatan, direktorat) sync from Keycloak claims on every login. Flutter kiosks never touch that layer at all — they use a separate `AllowAny` registration flow, since a kiosk phoning home from a factory-assigned UUID has no user to authenticate as.
 
 ## Outcome
 
-Production system, deployed via Docker Compose with GitHub Actions CI publishing images to GHCR. The platform manages a growing fleet of kiosks across IKN's public areas. Offline alert emails fire automatically when a kiosk goes silent, suppressing repeat alerts until the device recovers. The transport module runs as its own Docker service alongside the main API, tracking the IKN bus fleet in real time on an interactive Leaflet map.
+Both apps run in production, containerized via Docker Compose with GitHub Actions publishing images to GHCR. The backend has grown to 113 commits, 66 of them in the transport module alone — the busiest and most recent stretch of work covered the ETA-accuracy feedback loop, point-of-interest journey planning, and rewriting the daily fleet-analytics query from a Python loop into a single PostgreSQL query with window functions, after the original implementation started timing out gunicorn workers under load. The whole ETA and analytics layer — geometry, statistics, graph structure — runs on the Python standard library and raw SQL, with zero new heavyweight dependencies (no pandas, numpy, geopy, shapely, networkx, Celery, or Redis) added to support it.
