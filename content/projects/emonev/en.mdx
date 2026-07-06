@@ -2,32 +2,40 @@
 
 ## The problem
 
-Indonesia is building an entirely new capital city from scratch across five development stages spanning 2022 to 2045. Dozens of government work units run concurrent activities — infrastructure, governance, environment, social programmes — each with its own budget, targets, and quarterly milestones. Without a centralised system, coordinators had no cross-unit progress view, quarterly reporting was manual and fragmented, budget-versus-realisation gaps couldn't be detected until review meetings were already late, and the 23-year roadmap (the Indikasi Program matrix) had no digital home.
+Indonesia is building an entirely new capital city from scratch across five development stages spanning 2022 to 2045. Dozens of government work units run concurrent activities — infrastructure, governance, environment, social programmes — each with its own budget, targets, and quarterly milestones. Without a centralised system, coordinators had no cross-unit progress view, quarterly reporting was manual and fragmented, budget-versus-realisation gaps couldn't be detected until reviews were already late, the 23-year roadmap (the Indikasi Program matrix) had no digital home, and there was no formal trail of who approved or rejected a report and why. Reporting deadlines weren't enforced either — units could submit or edit data outside the official reporting window.
 
-Target users: IKN Authority staff — unit kerja members who report activity progress, coordinators who approve or reject plans, and administrators who manage the master data hierarchy.
+Target users span a six-level role hierarchy: unit kerja members who report activity progress, reviewers and approvers at admin and deputi level, and administrators who manage master data and system-wide scheduling.
 
 ## The approach
 
-### Hierarchical data model for a complex framework
+### An ordered role hierarchy, not a bitmask
 
-The IKN monitoring framework has ten reference classification layers before reaching operational data: Tahapan → Prinsip → Aspek → KPI → Indikasi Program → Rencana Operasional → Kegiatan. Each activity has quarterly progress tracking (Triwulan), per-quarter plan versus realisation percentages, status, issues, follow-up notes, reviewer comments, and file evidence attachments.
+Six roles — `super_admin, admin, deputi_pp, eselon_1, eselon_2, guest` — sit in an explicit `ROLE_HIERARCHY` list, and every permission check reduces to `user.has_min_role(min_role)`, a single list-position comparison. Permission classes like `IsSuperAdmin` or `CanApproveRO` are thin wrappers around that one comparison, so adding a new gated action anywhere in the system is a one-line permission class, not a fresh ad-hoc check.
 
-### Approval workflow with a formal objection mechanism
+### Review status as a state machine, not a status flag
 
-Operational plans move through a defined pipeline: Usulan → Draft → Review → Final → Disetujui. A formal objection (Sanggahan) mechanism lets reviewers reject with a mandatory nota dinas document upload and written rationale — not just a button click. This matches the real government approval process rather than simplifying it away.
+Quarterly progress (`TriwulanProgress`) carries a `ReviewStatus` — Draft, Submitted, Need Revision, Approved — governed by a `VALID_TRANSITIONS` map and a `transition_to()` method that validates the move and writes a `ReviewHistory` row (from-status, to-status, actor, note) on every change. Whether an entry is still editable is derived directly from its status, which is what drives the frontend's edit-lock UI. The result is a fully queryable audit trail of every submit, approve, reject, and reopen — not something reconstructed after the fact from application logs. (An earlier separate approval pipeline for Operational Plans was later removed deliberately, once it became clear the real approval gate belongs at the Triwulan level — one workflow, not two competing ones.)
 
-### Context-layer decoupling for rapid iteration
+### Deadlines enforced where they can't be bypassed
 
-The React context (`DemoPersistContext`) was built with an interface identical to the future API shape, backed initially by localStorage for rapid prototyping. When the backend was ready, the context was refactored to call the real API — the interface stayed identical, so none of the 126 page and component files needed changes. Component code is completely unaware of whether data comes from the API or local state.
+`ReportingWindow`, `PerencanaanWindow`, and `RencanaOperasionalWindow` models let admins define open/close schedules, including per-unit deadline extensions. The validation lives in `reporting_window/services.py` and is called from the serializers and views themselves — a write outside the active window raises a `ValidationError` server-side regardless of what the frontend shows, so the dashboard banners are UX sugar on top of a rule that can't be routed around by calling the API directly.
 
 ### SSO with automatic org-unit resolution
 
-Keycloak sends raw job-title strings — "DIREKTUR DATA DAN KECERDASAN BUATAN" — that need to map to a specific unit kerja record. Since the Keycloak schema couldn't be changed to embed IDs, a normalisation and fuzzy word-overlap scorer runs on every login to resolve the correct organisational unit, handling edge cases like acronym prefixes and formatting inconsistencies from the HR system.
+Keycloak sends raw job-title strings — "DIREKTUR DATA DAN KECERDASAN BUATAN" — that need to resolve to a specific unit kerja record, and the Keycloak schema itself couldn't be changed to embed IDs. A normalisation and fuzzy word-overlap scorer runs on every login: it strips diacritics, maps title prefixes to org-unit prefixes, and scores word overlap to find the right match, without any manual user-to-org assignment step.
 
-### Geospatial activity tracking
+### Migrating live data to UUID primary keys
 
-Activities carry lat/lng coordinates. The dashboard renders a live Leaflet map showing all geolocated activities colour-coded by status (on-track, delayed, critical). Activity forms include a click-to-place pin picker. All Leaflet components are loaded with `next/dynamic` and `{ ssr: false }` — Leaflet requires `window` and can't render server-side.
+All master-data models originally used auto-increment bigint keys. Moving them to UUIDs — to remove implicit ordering and make cross-environment data merges safe — meant writing a real forward-migration path for databases that were already deployed and populated, not just a fresh-install migration, along with cleanup for the migration-history inconsistencies that surfaced on already-provisioned databases along the way.
+
+### Structured problems instead of a text field, validated imports instead of blind ones
+
+Early activity tracking had no real place to record recurring problems beyond a single free-text field. `Isu` (issue) and `TindakLanjut` (follow-up) are now their own models — one activity can carry many issues, each with its own status, assisting units, and follow-up trail. Master-data bulk import got the same rigor: a two-step `bulk_validate` / `bulk_commit` flow lets an admin dry-run an Excel or CSV upload, resolve foreign keys, and review every error before anything actually writes to the database.
+
+### From localStorage, to an API, to a lazy API — without touching components twice
+
+The frontend's data context started out backed by `localStorage` to unblock UI work while the backend was still being built, deliberately designed with the same interface the real API would eventually expose. When the backend was ready, only the context implementation changed — not the ~200+ components consuming it. As the number of master-data categories grew, eagerly fetching all of them on every page load became wasteful, so the context was refactored a second time into a lazy, per-category model (`useMasterCategories()`), reusing the same "keep the interface identical" discipline from the first migration.
 
 ## Outcome
 
-Production-grade architecture deployed on OIKN's infrastructure: 136 TypeScript/TSX files, 20,600 lines of frontend code, 5 Django apps, 18 database models. CI publishes backend images to GHCR on every push to main. The system handles the full IKN monitoring framework scope — 24 KPIs across 5 tahapan spanning 23 years — and gives each user role (Admin, Koordinator, Unit Kerja, Reviewer) a distinct, permission-appropriate view of the same underlying data.
+Production-grade architecture, with the backend deployed and its Docker image published to GHCR on every push to main behind a pip-audit dependency-vulnerability gate. The system has grown well past its original scope — 82 backend commits and 145 frontend commits across roughly seven weeks, spanning 9 Django apps, ~29 database models, and 225 frontend source files (~29,300 lines) covering the full IKN monitoring framework: 24 KPIs across 5 tahapan, 8 prinsip, and 6 aspek, spanning the 23-year roadmap. The reporting module generates monthly, quarterly, semester, annual, and end-of-stage reports as PDF, DOCX, or Excel on demand, and a live Control Tower dashboard — executive summary, monthly/aspek analytics, KPI relations graph, and a geolocated Leaflet map — gives every role a permission-appropriate view of the same underlying data.

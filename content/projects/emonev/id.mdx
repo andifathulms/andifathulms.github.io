@@ -2,30 +2,40 @@
 
 ## Permasalahan
 
-Indonesia sedang membangun ibu kota baru dari awal dalam lima tahap pembangunan yang mencakup 2022 hingga 2045. Puluhan unit kerja pemerintah menjalankan kegiatan bersamaan — infrastruktur, tata kelola, lingkungan, program sosial — masing-masing dengan anggaran, target, dan tonggak triwulanannya sendiri. Tanpa sistem terpusat, koordinator tidak memiliki tampilan kemajuan lintas unit, pelaporan triwulanan bersifat manual dan terfragmentasi, kesenjangan anggaran versus realisasi tidak dapat terdeteksi sampai rapat tinjauan sudah terlambat, dan peta jalan 23 tahun (matriks Indikasi Program) tidak memiliki rumah digital.
+Indonesia sedang membangun ibu kota baru dari awal dalam lima tahap pembangunan yang mencakup 2022 hingga 2045. Puluhan unit kerja pemerintah menjalankan kegiatan bersamaan — infrastruktur, tata kelola, lingkungan, program sosial — masing-masing dengan anggaran, target, dan tonggak triwulanannya sendiri. Tanpa sistem terpusat, koordinator tidak memiliki tampilan kemajuan lintas unit, pelaporan triwulanan bersifat manual dan terfragmentasi, kesenjangan anggaran versus realisasi tidak dapat terdeteksi sampai review sudah terlambat, peta jalan 23 tahun (matriks Indikasi Program) tidak memiliki rumah digital, dan tidak ada jejak formal siapa menyetujui atau menolak laporan dan alasannya. Tenggat pelaporan juga tidak ditegakkan — unit bisa mengirim atau mengubah data di luar jendela pelaporan resmi.
+
+Target pengguna mencakup hierarki enam peran: anggota unit kerja yang melaporkan kemajuan kegiatan, reviewer dan approver di level admin dan deputi, serta administrator yang mengelola master data dan penjadwalan seluruh sistem.
 
 ## Pendekatan
 
-### Model data hierarkis untuk kerangka yang kompleks
+### Hierarki peran berurutan, bukan bitmask
 
-Kerangka monitoring IKN memiliki sepuluh lapisan klasifikasi referensi sebelum mencapai data operasional: Tahapan → Prinsip → Aspek → KPI → Indikasi Program → Rencana Operasional → Kegiatan. Setiap kegiatan memiliki pelacakan kemajuan triwulanan (Triwulan), persentase rencana versus realisasi per triwulan, status, kendala, catatan tindak lanjut, komentar reviewer, dan lampiran bukti.
+Enam peran — `super_admin, admin, deputi_pp, eselon_1, eselon_2, guest` — berada dalam daftar `ROLE_HIERARCHY` eksplisit, dan setiap pemeriksaan permission direduksi menjadi `user.has_min_role(min_role)`, satu perbandingan posisi daftar. Kelas permission seperti `IsSuperAdmin` atau `CanApproveRO` adalah pembungkus tipis di atas satu perbandingan itu, sehingga menambahkan aksi baru yang dibatasi di mana pun dalam sistem cukup satu baris kelas permission, bukan pemeriksaan ad-hoc baru.
 
-### Alur kerja persetujuan dengan mekanisme sanggahan formal
+### Status review sebagai state machine, bukan flag status
 
-Rencana operasional melalui pipeline: Usulan → Draft → Review → Final → Disetujui. Mekanisme sanggahan formal memungkinkan reviewer menolak dengan unggahan nota dinas wajib dan alasan tertulis — bukan sekadar klik tombol. Ini mencerminkan proses persetujuan pemerintah yang sebenarnya.
+Kemajuan triwulanan (`TriwulanProgress`) membawa `ReviewStatus` — Draft, Submitted, Need Revision, Approved — yang diatur oleh peta `VALID_TRANSITIONS` dan metode `transition_to()` yang memvalidasi perpindahan dan menulis baris `ReviewHistory` (status-dari, status-ke, aktor, catatan) pada setiap perubahan. Apakah sebuah entri masih bisa diedit diturunkan langsung dari statusnya, yang menjadi penggerak UI edit-lock di frontend. Hasilnya adalah jejak audit yang sepenuhnya dapat dikueri untuk setiap submit, approve, reject, dan reopen — bukan sesuatu yang direkonstruksi setelahnya dari log aplikasi. (Pipeline persetujuan terpisah untuk Rencana Operasional yang ada sebelumnya kemudian sengaja dihapus, setelah menjadi jelas bahwa gerbang persetujuan yang sesungguhnya berada di level Triwulan — satu alur kerja, bukan dua yang saling bersaing.)
 
-### Decoupling context layer untuk iterasi cepat
+### Tenggat yang ditegakkan di tempat yang tidak bisa dilewati
 
-React context (`DemoPersistContext`) dibangun dengan antarmuka identik dengan bentuk API yang akan datang, awalnya didukung oleh localStorage untuk prototyping cepat. Ketika backend siap, context di-refaktor untuk memanggil API nyata — antarmuka tetap identik, sehingga tidak satu pun dari 126 file halaman dan komponen perlu diubah.
+Model `ReportingWindow`, `PerencanaanWindow`, dan `RencanaOperasionalWindow` memungkinkan admin mendefinisikan jadwal buka/tutup, termasuk perpanjangan tenggat per unit. Validasinya berada di `reporting_window/services.py` dan dipanggil dari serializer dan view itu sendiri — penulisan di luar jendela aktif memunculkan `ValidationError` di sisi server terlepas dari apa yang ditampilkan frontend, sehingga banner di dashboard hanyalah gula UX di atas aturan yang tidak bisa dilewati dengan memanggil API secara langsung.
 
 ### SSO dengan resolusi unit organisasi otomatis
 
-Keycloak mengirimkan string jabatan mentah — "DIREKTUR DATA DAN KECERDASAN BUATAN" — yang perlu dipetakan ke catatan unit kerja tertentu. Karena skema Keycloak tidak dapat diubah untuk menyematkan ID, scorer normalisasi dan fuzzy word-overlap berjalan pada setiap login untuk menyelesaikan unit organisasi yang tepat.
+Keycloak mengirimkan string jabatan mentah — "DIREKTUR DATA DAN KECERDASAN BUATAN" — yang perlu diselesaikan ke catatan unit kerja tertentu, dan skema Keycloak sendiri tidak dapat diubah untuk menyematkan ID. Scorer normalisasi dan fuzzy word-overlap berjalan pada setiap login: menghapus diakritik, memetakan prefiks jabatan ke prefiks unit organisasi, dan menilai overlap kata untuk menemukan kecocokan yang tepat, tanpa langkah penugasan pengguna-ke-organisasi secara manual.
 
-### Pelacakan kegiatan geospasial
+### Memigrasikan data langsung ke primary key UUID
 
-Kegiatan menyimpan koordinat lat/lng. Dashboard merender peta Leaflet langsung yang menampilkan semua kegiatan yang ter-geocode dengan kode warna berdasarkan status (on-track, terlambat, kritis). Form kegiatan menyertakan pin picker klik-untuk-menempatkan.
+Semua model master data awalnya menggunakan kunci bigint auto-increment. Memindahkannya ke UUID — untuk menghilangkan urutan implisit dan membuat penggabungan data lintas-lingkungan aman — berarti menulis jalur migrasi maju yang sesungguhnya untuk database yang sudah di-deploy dan terisi data, bukan sekadar migrasi instalasi baru, ditambah pembersihan inkonsistensi riwayat migrasi yang muncul pada database yang sudah tersedia di sepanjang proses.
+
+### Masalah terstruktur alih-alih field teks, impor tervalidasi alih-alih impor buta
+
+Pelacakan kegiatan awal tidak memiliki tempat nyata untuk mencatat masalah berulang selain satu field teks bebas. `Isu` dan `TindakLanjut` kini menjadi model tersendiri — satu kegiatan bisa membawa banyak isu, masing-masing dengan status, unit pembantu, dan jejak tindak lanjutnya sendiri. Impor massal master data mendapat kekakuan yang sama: alur `bulk_validate` / `bulk_commit` dua langkah memungkinkan admin melakukan dry-run unggahan Excel atau CSV, menyelesaikan foreign key, dan meninjau setiap error sebelum apa pun benar-benar ditulis ke database.
+
+### Dari localStorage, ke API, ke API lambat — tanpa menyentuh komponen dua kali
+
+Context data frontend awalnya didukung `localStorage` untuk membuka blokir kerja UI selagi backend masih dibangun, sengaja dirancang dengan antarmuka yang sama seperti yang akan diekspos API nyata nantinya. Ketika backend siap, hanya implementasi context yang berubah — bukan 200+ komponen yang mengonsumsinya. Seiring jumlah kategori master data bertambah, mengambil semuanya secara eager pada setiap pemuatan halaman menjadi boros, sehingga context di-refaktor kedua kalinya menjadi model lambat per-kategori (`useMasterCategories()`), menggunakan kembali disiplin "jaga antarmuka tetap identik" dari migrasi pertama.
 
 ## Hasil
 
-Arsitektur kelas produksi yang di-deploy di infrastruktur OIKN: 136 file TypeScript/TSX, 20.600 baris kode frontend, 5 aplikasi Django, 18 model database. CI mempublikasikan image backend ke GHCR pada setiap push ke main. Sistem menangani seluruh cakupan kerangka monitoring IKN — 24 KPI di 5 tahapan selama 23 tahun — dan memberikan setiap role pengguna (Admin, Koordinator, Unit Kerja, Reviewer) tampilan yang sesuai izin dari data yang sama.
+Arsitektur kelas produksi, dengan backend di-deploy dan image Docker-nya dipublikasikan ke GHCR pada setiap push ke main di balik gerbang kerentanan dependensi pip-audit. Sistem telah tumbuh jauh melampaui cakupan awalnya — 82 commit backend dan 145 commit frontend dalam kurang lebih tujuh minggu, mencakup 9 aplikasi Django, ~29 model database, dan 225 file sumber frontend (~29.300 baris) mencakup seluruh kerangka monitoring IKN: 24 KPI di 5 tahapan, 8 prinsip, dan 6 aspek, sepanjang peta jalan 23 tahun. Modul pelaporan menghasilkan laporan bulanan, triwulanan, semester, tahunan, dan akhir-tahapan sebagai PDF, DOCX, atau Excel sesuai permintaan, dan dashboard Control Tower langsung — ringkasan eksekutif, analitik bulanan/aspek, graf relasi KPI, dan peta Leaflet ter-geocode — memberikan setiap peran tampilan yang sesuai izin dari data yang sama.
