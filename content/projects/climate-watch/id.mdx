@@ -1,0 +1,33 @@
+## Permasalahan
+
+Perubahan iklim terus-menerus dibicarakan secara abstrak, tetapi hampir tidak ada orang di Indonesia yang bisa menunjukkan angka aktual kotanya sendiri. Data cuaca historis ada melalui dataset reanalysis global, tetapi mentah, tidak terkelompok, dan tidak dapat diakses pembaca non-teknis. Tugas Iklim adalah mengambil puluhan tahun catatan suhu dan curah hujan harian dan mengubahnya menjadi grafik yang bisa dibaca dalam hitungan detik oleh orang yang penasaran, pelajar, jurnalis, atau petani — bukan spreadsheet yang harus mereka tafsirkan sendiri.
+
+## Pendekatan
+
+### Data reanalysis, bukan stasiun darat yang jarang
+
+Cakupan stasiun cuaca darat Indonesia jarang, sehingga Iklim menggunakan ERA5 — dataset reanalysis historis berbasis satelit dan model yang disajikan melalui Open-Meteo — yang memberikan data harian tanpa celah kembali ke 1950 untuk lintang dan bujur mana pun, stasiun atau bukan.
+
+### Pra-hitung, tidak pernah agregasi saat permintaan
+
+Baris harian mentah, berpotensi jutaan per kota, digulung ke tabel ringkasan bulanan dan tahunan lebih dulu oleh job Celery terjadwal, sehingga setiap pemuatan halaman adalah pembacaan cepat terhadap tabel kecil pra-hitung alih-alih agregasi langsung atas puluhan tahun baris. Data harian sendiri hidup di hypertable TimescaleDB — ekstensi Postgres yang dibuat khusus untuk time-series skala besar — dipartisi berdasarkan tanggal dengan indeks komposit `(region, date)` yang sesuai pola kueri utama. Hypertable TimescaleDB menolak primary key surrogate sama sekali, karena indeks unik apa pun harus menyertakan kolom partisi; skema dibangun sejak awal di sekitar constraint keunikan komposit `(region, date)`, bukan diakali belakangan.
+
+### Data yang hilang adalah data
+
+Nilai null dari API sumber disimpan sebagai NULL, tidak pernah dipaksa menjadi nol — 0mm hujan dan "kami tidak tahu" diperlakukan sebagai hal yang berbeda secara material, yang penting dalam domain di mana "tidak ada pengukuran" sungguh umum di periode reanalysis yang lebih tua.
+
+### Ketahanan terhadap API gratis tanpa autentikasi
+
+Open-Meteo tidak memiliki kunci dan tidak memiliki batas laju keras, tetapi tetap dibatasi lajunya dalam praktik. Fetch 75 tahun sekali tembak per region tidak reliabel, sehingga ingestion membagi riwayat setiap kota menjadi jendela 25 tahun, mundur pada respons 429 dengan atau tanpa header `Retry-After`, dan dapat melanjutkan bootstrap yang belum selesai tanpa mengambil ulang kota yang sudah berhasil — perlu untuk proses ingestion berjam-jam di 75 kota yang harus bertahan jika terinterupsi di tengah jalan. Perintah `seed_demo` yang menghasilkan data sintetis berlabel jelas menjaga aplikasi tetap sepenuhnya bisa didemokan bahkan tanpa akses ke API langsung.
+
+### D3 disediakan hanya untuk satu komponen yang membutuhkannya
+
+Setiap grafik lain menggunakan Recharts; hanya heatmap kalender andalan "Climate Fingerprint" — masalah interaksi dan rendering yang khusus — menggunakan D3 buatan tangan. Ada bug persepsi nyata yang tertangkap setelah rilis awal: pada kanvas gelap, interpolator terang-ke-gelap membuat hujan nol menjadi sel paling *terang* di grid. Setiap variabel kini menggunakan ramp satu-hue berlabuh gelap-ke-vivid, diverifikasi monoton baik dalam kecerahan maupun saturasi, sehingga nilai magnitudo tertinggi terbaca sebagai visual "paling intens" alih-alih memudar ke warna pucat di puncak.
+
+### Sistem desain yang bertahan dari inversi di tengah proyek
+
+Iklim pertama kali dirilis dengan palet terang hangat "Musim" milik PRD, lalu berpindah dua minggu kemudian ke redesain gelap penuh "Musim Nokturnal" — mempertahankan identitas earth-tone yang sama pada kanvas volcanic-ink hangat alih-alih dark mode biru-slate generik. Setiap warna pengkode-data divalidasi terhadap permukaan nyata untuk kontras WCAG dan intensitas perseptual monoton, dengan warna selalu mengikuti entitas (kota A selalu warna seri yang sama di setiap grafik) bukan metrik.
+
+## Hasil
+
+38 commit selama kurang lebih dua minggu pembangunan aktif (dengan jeda di antara dua dorongan fitur), mencakup 5 model inti, 11 endpoint API, dan 6 rute frontend — sekitar 1.980 baris Python backend dan 3.525 baris TypeScript frontend. Cakupan tumbuh melampaui rencana awal: 75 kota ter-seed dengan data harian lengkap 1950-hingga-sekarang, versus target 84 kota awal PRD pada orde besaran yang serupa. Di luar fingerprint inti, pelacakan cuaca ekstrem, dan deteksi pergeseran musim hujan, pembangunan menambahkan peringkat lintas-kota dan analisis dampak ENSO yang tidak ada dalam cakupan awal, plus peta cakupan beranda yang dibangun dari data topojson garis pantai Indonesia nyata alih-alih placeholder bounding-box. Berjalan sebagai build lokal yang berfungsi dengan repositori publik; proyeksi CMIP6 2050 dan cakupan penuh 514 kabupaten tetap secara eksplisit di luar cakupan versi ini.

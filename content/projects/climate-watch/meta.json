@@ -1,0 +1,28 @@
+{
+  "slug": "climate-watch",
+  "title": "Iklim",
+  "tagline": "75 years of Indonesian climate history turned into plain visual answers for 75 cities — free, no login",
+  "categoryTags": [
+    "Personal Project",
+    "Data Platform",
+    "Web App"
+  ],
+  "techStack": [
+    "Django",
+    "Next.js",
+    "TypeScript",
+    "PostgreSQL",
+    "D3.js",
+    "Recharts",
+    "Celery",
+    "Docker"
+  ],
+  "status": "active",
+  "role": "Fullstack Developer",
+  "timeframe": "Jul 2026",
+  "liveUrl": null,
+  "githubUrl": "https://github.com/andifathulms/climatewatch",
+  "heroImage": "/images/projects/climate-watch/hero.jpeg",
+  "order": 14,
+  "featured": false
+}
