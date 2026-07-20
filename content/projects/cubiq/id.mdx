@@ -1,33 +1,35 @@
-# Cubiq
-
 ## Permasalahan
 
-Speedcuber melacak solve mereka di aplikasi seperti csTimer — alat yang berfungsi tetapi tampilannya seperti dirancang pada tahun 2008. Tidak ada alternatif modern yang menggabungkan antarmuka pelatihan premium dengan analitik nyata dan integrasi AI. Cubiq dibangun untuk menggantikan csTimer bagi cuber serius yang menginginkan kedalaman statistik yang sesungguhnya, preview scramble 3D, dan jalur menuju solving berbasis AI.
+Speedcuber melacak solve mereka di aplikasi seperti csTimer — alat yang berfungsi tetapi tampilannya seperti dirancang pada tahun 2008. Tidak ada alternatif modern yang bagus yang menggabungkan antarmuka pelatihan yang indah dengan analitik nyata, solver per-puzzle, dan integrasi AI apa pun. Cubiq dibangun untuk menggantikan csTimer bagi cuber serius yang menginginkan kesan premium, statistik kaya, dan alat solving yang jauh melampaui cross.
 
 ## Pendekatan
 
 ### cubing.js sebagai web component, bukan komponen React
 
-`TwistyPlayer` renderer kubus 3D dari `cubing.js` harus diinstansiasi sebagai elemen DOM. Mengimpornya sebagai komponen React menyebabkan crash server-side rendering karena library mereferensikan `self` (global browser) saat load modul. Solusinya: `dynamic(() => import(...), { ssr: false })` dikombinasikan dengan pola mounting berbasis `useEffect` yang memanggil `document.createElement('twisty-player')` secara langsung.
+Renderer kubus 3D `TwistyPlayer` dari `cubing.js` harus diinstansiasi sebagai elemen DOM. Mengimpornya sebagai komponen React membuat server-side rendering crash karena library mereferensikan `self` (global browser) saat load modul. Solusinya: `dynamic(() => import(...), { ssr: false })` dikombinasikan dengan pola mounting berbasis `useEffect` yang memanggil `document.createElement('twisty-player')` secara langsung. Turbopack juga harus diganti — `cubing.js` menghasilkan Web Workers menggunakan pola URL relatif yang rusak oleh resolver modulnya, sehingga beralih ke bundler Webpack adalah commit yang sebenarnya membuka blokir build, kendala nyata bukan sekadar teoretis.
 
-Turbopack juga harus diganti. `cubing.js` menghasilkan Web Workers menggunakan pola URL relatif yang rusak oleh resolver modul Turbopack. Beralih ke bundler Webpack (`--webpack`) adalah commit yang sebenarnya membuka blokir build.
+### Delapan keluarga puzzle, delapan strategi solving
+
+Alih-alih satu solver generik, setiap puzzle mendapat representasi kubus dan generator move-table sendiri dari nol, dengan strategi yang dipilih sesuai ukuran ruang keadaan puzzle tersebut:
+
+- **2x2, Pyraminx, Skewb** — cukup kecil (hingga ~3,1 juta posisi) untuk pra-menghitung penuh tabel jarak God's-algorithm; API tinggal mencari jumlah langkah optimal dan jalurnya, terbukti ≤ 11 langkah.
+- **3x3** — CFOP bertahap: solving cross/x-cross/double-x-cross IDA* yang eksak, pencarian pasangan F2L, dan database pengenalan+algoritma OLL/PLL penuh, dengan pembatalan langkah lintas batas tahap sehingga solusi yang digabung tidak dipadatkan dengan putaran redundan.
+- **4x4, 5x5** — tabel gerak yang dihasilkan geometri memberi makan pipeline reduksi (center → pairing edge/wing → penanganan parity → penyelesaian CFOP 3x3), metode standar big-cube, dengan logika reduksi dan perbaikan parity diimplementasikan tangan, bukan dipinjam.
+- **Megaminx** — penempatan layer-by-layer greedy dengan library commutator kurasi untuk last layer.
+- **Square-1** — kasus rekayasa tersulit: solver dua fase (BFS bentuk untuk mengembalikan siluet kubus/persegi, lalu piece descent eksak) dipasangkan dengan tampilan 3D animasi kustom yang merender puzzle sebagai shell dua sisi nyata dan menganimasikan flip ekuator 180° sebagai geometri kaku, bukan pertukaran sprite.
 
 ### Akurasi timer tanpa drift
 
-Timer yang terlihat memanggil `performance.now() - startTime` pada setiap tick render. `setInterval` hanya digunakan untuk memicu re-render, bukan mengukur waktu — sehingga drift tidak terakumulasi bahkan dalam solve yang panjang. Pola hold-to-arm 300ms (spacebar atau sentuhan) cocok dengan perilaku inspeksi WCA.
+Timer yang terlihat memanggil `performance.now() - startTime` pada setiap tick render. `setInterval` hanya memicu re-render, tidak pernah mengukur waktu, sehingga drift tidak terakumulasi bahkan dalam solve panjang. Pola hold-to-arm 300ms cocok dengan perilaku inspeksi WCA.
 
-### Cross solver IDA* dalam TypeScript
+### AI yang belajar menyelesaikan dirinya sendiri
 
-Cross solver menemukan urutan terpendek untuk menempatkan semua empat edge cross di wajah yang dipilih, dengan prefix rotasi kubus. Awalnya ditandai dalam PRD sebagai mungkin terlalu kompleks untuk build awal. Diimplementasikan penuh di Phase 3 menggunakan IDA* langsung dalam TypeScript.
+Service FastAPI `cubiq-ml` mengimplementasikan Autodidactic Iteration, keluarga reinforcement learning yang sama di balik DeepCubeA: model menghasilkan data pelatihannya sendiri dengan mengacak kubus yang sudah terpecahkan ke kedalaman acak dan belajar memperkirakan jarak langkah kembali ke kondisi terpecahkan. ResNet dual-head meregresi nilai (langkah tersisa) dari satu head dan distribusi kebijakan atas 18 langkah dari head lainnya. Dashboard penelitian MDP langsung mem-polling status pelatihan setiap dua detik, membuat grafik histori loss dan solve-rate, dan menampilkan bar probabilitas kebijakan untuk scramble saat ini — pengguna dapat memicu rollout greedy atau MCTS dan membandingkan efisiensi langkah langsung dengan solusi optimal Kociemba, yang hanya digunakan sebagai benchmark ground-truth, tidak pernah menjadi bagian dari jalur solving itu sendiri.
 
-### Arsitektur ML: Autodidactic Iteration
+### Satu workspace, dapat di-deep-link
 
-Service FastAPI `cubiq-ml` mengimplementasikan Autodidactic Iteration (ADI). Model menghasilkan data pelatihannya sendiri dengan mengacak kubus yang sudah terpecahkan ke kedalaman acak dan belajar memperkirakan jarak langkah kembali ke kondisi terpecahkan. Kegagalan pelatihan yang halus ditemukan dan diperbaiki: jaringan kebijakan runtuh selalu merekomendasikan langkah yang sama karena `argmin` digunakan secara deterministik ketika beberapa aksi memiliki nilai estimasi yang sama di awal pelatihan. Perbaikannya adalah menambahkan noise ke pemilihan aksi selama self-play.
-
-### Dashboard penelitian MDP
-
-Frontend mem-polling `/mdp/status` setiap dua detik selama pelatihan, membuat grafik histori loss dan solve-rate dengan Recharts, dan menampilkan bar probabilitas kebijakan untuk scramble saat ini secara real-time. Pengguna dapat memicu rollout greedy atau MCTS solve dan membandingkan efisiensi langkah langsung dengan solusi optimal Kociemba.
+`/solvers` adalah satu workspace scramble-sticky — satu tab per puzzle plus tab Research untuk dashboard MDP — masing-masing didukung slot scramble sendiri dan panel preview 3D bersama, sehingga berpindah puzzle tidak pernah kehilangan posisi. Tombol "Solve this" pada solve timer yang selesai deep-link langsung ke tab solver puzzle yang sesuai via `/solvers?puzzle=<id>&scramble=<alg>`, dengan scramble sudah terisi.
 
 ## Hasil
 
-Enam minggu, 12 commit, ~4.900 baris TypeScript dan Python. Empat halaman (Timer, Statistik, Riwayat, Solver), delapan endpoint API ML, statistik ao5/ao12/ao50/ao100 yang sesuai WCA dengan logika trim-best/worst yang benar. Store Zustand persisten ke localStorage dengan `skipHydration` untuk menghindari ketidakcocokan SSR. Semua data solve dapat diekspor sebagai JSON untuk diimpor ke alat lain.
+Enam bulan kerja berkelanjutan, ~70 commit, ~13.700 baris terbagi kurang lebih merata antara TypeScript dan Python. Yang dimulai sebagai cross solver yang ditandai dalam PRD sebagai mungkin terlalu kompleks untuk fase awal dirilis penuh di Phase 3 — dan setiap solver setelahnya melangkah jauh lebih dari yang ditentukan rencana awal, tumbuh menjadi engine dari nol untuk seluruh 8 puzzle twisty utama plus model RL yang melatih dirinya sendiri, tidak ada yang dipinjam dari library cube-solving yang ada di luar `cubing.js` untuk rendering dan `kociemba` sebagai benchmark. Berjalan sebagai prototipe lokal — belum ada deployment publik — dengan statistik ao5/ao12/ao50/ao100 yang sesuai WCA, store Zustand yang persisten ke localStorage dengan `skipHydration` untuk menghindari ketidakcocokan SSR, dan ekspor/impor JSON penuh untuk setiap solve.

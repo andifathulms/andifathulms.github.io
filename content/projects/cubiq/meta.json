@@ -1,7 +1,7 @@
 {
   "slug": "cubiq",
   "title": "Cubiq",
-  "tagline": "Dark-themed Rubik's Cube training app with a precision timer, analytics, and a live RL-trained AI solver",
+  "tagline": "Dark-themed speedcubing trainer with a precision timer, WCA-standard analytics, and from-scratch solvers for all 8 major twisty puzzles",
   "categoryTags": [
     "Personal Project",
     "ML / AI",
@@ -18,10 +18,10 @@
   ],
   "status": "active",
   "role": "Fullstack Developer",
-  "timeframe": "May – Jun 2026",
+  "timeframe": "May – Jul 2026",
   "liveUrl": null,
   "githubUrl": null,
-  "heroImage": "/images/projects/cubiq/cover.svg",
+  "heroImage": "/images/projects/cubiq/hero.jpeg",
   "order": 9,
   "featured": true
 }

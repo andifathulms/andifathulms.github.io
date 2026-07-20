@@ -1,35 +1,35 @@
-# Cubiq
-
 ## The problem
 
-Speedcubers track solves in apps like csTimer — tools that work but look like they were designed in 2008. There's no modern alternative that combines a premium training interface with real analytics and any kind of AI integration. Cubiq was built to replace csTimer for serious cubers who want genuine stats depth, a 3D scramble preview, and a path toward AI-powered solving.
+Speedcubers track their solves in apps like csTimer — a tool that works but looks like it was designed in 2008. There's no good modern alternative that combines a beautiful training interface with real analytics, per-puzzle solvers, and any kind of AI integration. Cubiq was built to replace csTimer for serious cubers who want a premium feel, rich stats, and solving tools that go well past the cross.
 
 ## The approach
 
 ### cubing.js as a web component, not a React component
 
-The `TwistyPlayer` 3D cube renderer from `cubing.js` must be instantiated as a DOM element. Importing it as a React component causes server-side rendering crashes because the library references `self` (a browser global) at module load time. The fix: `dynamic(() => import(...), { ssr: false })` combined with a `useEffect`-based mounting pattern that calls `document.createElement('twisty-player')` directly.
+The `TwistyPlayer` 3D cube renderer from `cubing.js` must be instantiated as a DOM element. Importing it as a React component crashes server-side rendering because the library references `self` (a browser global) at module load time. The fix: `dynamic(() => import(...), { ssr: false })` combined with a `useEffect`-based mounting pattern that calls `document.createElement('twisty-player')` directly. Turbopack also had to go — `cubing.js` spawns Web Workers using a relative URL pattern its module resolver breaks, so switching to the Webpack bundler was the actual commit that unblocked the build, a real constraint rather than a theoretical one.
 
-Turbopack also had to go. `cubing.js` spawns Web Workers using a relative URL pattern that Turbopack's module resolver breaks. Switching to the Webpack bundler (`--webpack`) was the actual commit that unblocked the build.
+### Eight puzzle families, eight solving strategies
+
+Rather than one generic solver, each puzzle got its own from-scratch cube representation and move-table generator, with a strategy chosen to fit that puzzle's state-space size:
+
+- **2x2, Pyraminx, Skewb** — small enough (up to ~3.1M positions) to fully precompute a God's-algorithm distance table; the API just looks up the optimal move count and path, provably ≤ 11 moves.
+- **3x3** — staged CFOP: exact IDA* cross/x-cross/double-x-cross solving, F2L pair search, and a full OLL/PLL recognition and algorithm database, with move cancellation across stage boundaries so the stitched solution isn't padded with redundant turns.
+- **4x4, 5x5** — geometry-generated move tables feeding a reduction pipeline (centers → edge/wing pairing → parity handling → 3x3 CFOP finish), the standard big-cube method, with the reduction and parity-fix logic hand-implemented rather than borrowed.
+- **Megaminx** — layer-by-layer greedy placement with a curated commutator library for the last layer.
+- **Square-1** — the hardest engineering case: a two-phase solver (shape BFS to restore the cube/square silhouette, then exact piece descent) paired with a custom animated 3D view that renders the puzzle as a real double-sided shell and animates 180° equator flips as rigid geometry rather than a sprite swap.
 
 ### Timer accuracy without drift
 
-The visible timer calls `performance.now() - startTime` on every render tick. `setInterval` is used only to trigger re-renders, not to measure time — so drift doesn't accumulate even over long solves. A 300ms hold-to-arm pattern (spacebar or touch) matches WCA inspection behaviour.
+The visible timer calls `performance.now() - startTime` on every render tick. `setInterval` only triggers re-renders, never measures time, so drift doesn't accumulate even over long solves. A 300ms hold-to-arm pattern matches WCA inspection behaviour.
 
-### IDA* cross solver in TypeScript
+### An AI that learns to solve itself
 
-The cross solver finds the shortest sequence to place all four cross edges on any chosen face, with a cube rotation prefix (e.g., `z2`) to bring the chosen face down, displayed in csTimer's notation format. It was originally flagged in the PRD as potentially too complex for the initial build. It was fully implemented in Phase 3 using IDA* directly in TypeScript rather than relying on an experimental `cubing.js` search API that wasn't stable enough at the time.
+The `cubiq-ml` FastAPI service implements Autodidactic Iteration, the same family of reinforcement learning behind DeepCubeA: the model generates its own training data by scrambling a solved cube to random depths and learning to estimate the move distance back to solved. A dual-head ResNet regresses a value (moves remaining) from one head and a policy distribution over 18 moves from the other. A live MDP research dashboard polls training status every two seconds, charts loss and solve-rate history, and shows the policy probability bars for the current scramble — users can trigger a greedy or MCTS rollout and compare move efficiency directly against Kociemba's optimal solution, which is used only as a ground-truth benchmark, never as part of the solving path itself.
 
-### ML architecture: Autodidactic Iteration
+### One workspace, deep-linkable
 
-The `cubiq-ml` FastAPI service implements Autodidactic Iteration (ADI), the same family of reinforcement learning used in DeepCubeA. The model generates its own training data by scrambling a solved cube to random depths and learning to estimate the move distance back to solved. The network is a dual-head ResNet: one head regresses a value (estimated moves remaining), one head outputs a policy distribution over 18 moves.
-
-A subtle training failure was caught and fixed: the policy network collapsed to always recommending the same move because `argmin` was used deterministically when multiple actions had equal estimated value at the start of training. The model never explored. The fix was adding noise to action selection during self-play.
-
-### MDP research dashboard
-
-The frontend polls `/mdp/status` every two seconds during training, charts loss and solve-rate history with Recharts, and displays the policy probability bars for the current scramble in real time. Users can trigger a greedy rollout or MCTS solve and compare move efficiency directly against the Kociemba optimal solution.
+`/solvers` is a single sticky-scramble workspace — one tab per puzzle plus a Research tab for the MDP dashboard — each backed by its own scramble slot and a shared 3D preview panel, so switching puzzles never loses your place. A "Solve this" button on a completed timer solve deep-links straight into the matching puzzle's solver tab via `/solvers?puzzle=<id>&scramble=<alg>`, with the scramble pre-filled.
 
 ## Outcome
 
-Six weeks, 12 commits, ~4,900 lines of TypeScript and Python. Four pages (Timer, Stats, History, Solvers), eight ML API endpoints, WCA-compliant ao5/ao12/ao50/ao100 stats with correct trim-best/worst logic. The Zustand store persists to localStorage with `skipHydration` to avoid SSR mismatches. All solve data exports as JSON for import into other tools.
+Six months of ongoing work, ~70 commits, ~13,700 lines split roughly evenly between TypeScript and Python. What began as a cross solver flagged in the PRD as possibly too complex for an early phase shipped fully in Phase 3 — and every solver after it went considerably further than the original plan specified, growing into a from-scratch engine for all 8 major twisty puzzles plus a self-training RL model, none of it borrowed from an existing cube-solving library beyond `cubing.js` for rendering and `kociemba` as a benchmark. It runs as a local prototype — no public deployment yet — with WCA-compliant ao5/ao12/ao50/ao100 stats, a Zustand store persisted to localStorage with `skipHydration` to avoid SSR mismatches, and full JSON export/import for every solve.
