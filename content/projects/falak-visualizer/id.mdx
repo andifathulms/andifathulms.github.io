@@ -1,0 +1,29 @@
+## Permasalahan
+
+Di Indonesia dan sebagian besar dunia Muslim, awal Ramadan, Syawal, dan Dzulhijjah adalah titik kebingungan publik yang berulang: organisasi berbeda kadang mengumumkan tanggal awal yang berbeda karena mereka menggunakan kriteria *hisab* (perhitungan) yang berbeda untuk apakah hilal baru terlihat. Proses resmi pemerintah menggabungkan perhitungan dengan laporan rukyat fisik, tetapi publik jarang melihat matematika di baliknya — mereka hanya mendapat pengumuman. Konverter tanggal hijriah yang ada saat ini adalah tabel lookup sederhana tanpa astronomi nyata di baliknya, atau alat resmi yang memberi vonis tanpa cara untuk memeriksa alasannya.
+
+## Pendekatan
+
+### Astronomi dihitung dari prinsip dasar, bukan diambil dari API
+
+Alih-alih memanggil API ephemeris pihak ketiga, Falak mengimplementasikan model posisi matahari VSOP87 terpotong dan model posisi bulan ELP2000/Meeus langsung dalam Python. Ini menjaga alat tetap mandiri — tanpa kunci API, tanpa batas laju, berfungsi offline — dan, untuk produk kalender keagamaan, dapat diaudit: setiap angka yang ditampilkan aplikasi dapat ditelusuri kembali ke rumus di repositori, bukan kotak hitam.
+
+### Tiga metode yang bersaing, ditampilkan berdampingan
+
+Alih-alih memilih satu kriteria "benar" untuk visibilitas hilal, engine mengimplementasikan tiga metode nyata yang bersaing — Wujudul Hilal, MABIMS-2021 imkanur rukyat, dan kriteria Odeh — sebagai fungsi murni independen, dengan tampilan Method Divergence khusus yang menunjukkan persis di mana mereka tidak sepakat. Ini mencerminkan perdebatan nyata di dunia nyata alih-alih menutupinya dengan satu jawaban yang percaya diri.
+
+### Divalidasi sebelum dipercaya
+
+Urutan pembangunan proyek menegakkan aturan bahwa tidak ada fitur perhitungan yang dirilis tanpa validasi. Sebelum pekerjaan API atau UI apa pun dimulai, engine astronomi diperiksa silang terhadap Skyfield menggunakan ephemeris JPL DE440 — sumber independen setara riset — untuk 50 konjungsi bulan historis, cocok dalam toleransi 5 menit. Skyfield adalah dependensi dev/test saja dan tidak pernah diimpor oleh backend produksi, menjaga aturan "tanpa API astronomi pihak ketiga saat runtime" sambil tetap membuktikan akurasi engine terhadapnya.
+
+### Tidak ada vonis tanpa buktinya
+
+Setiap kesimpulan yang dihitung — apakah hilal terlihat, jam berapa Maghrib, berapa arah kiblat — dipasangkan dengan cara untuk memeriksa angka mentah yang menghasilkannya (altitude, elongasi, umur bulan, lag time) melalui komponen `CalculationPanel` bersama. Ini adalah respons langsung terhadap keluhan "kotak hitam" yang memotivasi proyek ini sejak awal.
+
+### Cache di depan perhitungan, tidak pernah sebagai sumber kebenaran
+
+Model Postgres menyimpan hasil yang dihitung untuk digunakan ulang, tetapi cache miss selalu jatuh kembali ke perhitungan ulang dari engine deterministik — tidak pernah nilai basi atau placeholder, aturan non-negotiable eksplisit dalam codebase. Peta visibilitas se-Indonesia perlu kriteria hilal dievaluasi di ratusan titik lat/lon, yang akan lambat secara sinkron, sehingga task Celery pra-menghitung grid pada langkah 0,5° dan peta frontend cukup membaca dari cache tersebut.
+
+## Hasil
+
+67 commit selama kurang lebih tiga hari kalender, solo, dari repositori kosong hingga 10 endpoint API dan 8 halaman frontend — sekitar 3.045 baris Python backend dan 2.895 baris TypeScript frontend, dengan 66 dari 66 test backend lulus termasuk cross-check Skyfield yang diwajibkan. Pembangunan melangkah jauh melampaui rencana MVP-nya sendiri begitu engine yang tervalidasi sudah ada: Method Divergence, Kalender Visibilitas, pelacakan Akurasi Isbat terhadap catatan Kemenag historis nyata, charting trajektori altitude/elongasi hilal, dan kalibrasi matahari Rashdul Qibla — memungkinkan siapa pun mengkalibrasi arah kiblat mereka menggunakan bayangan tanpa instrumen — semuanya awalnya ditunda ke "Phase 2" tetapi tetap dirilis. Repositori publik, terverifikasi berfungsi end-to-end via Docker Compose; belum di-deploy ke URL langsung.

@@ -1,0 +1,29 @@
+## The problem
+
+In Indonesia and much of the Muslim world, the start of Ramadan, Syawal, and Dzulhijjah is a recurring point of public confusion: different organizations sometimes announce different start dates because they use different *hisab* (calculation) criteria for whether the new crescent moon is visible. The government's official process combines calculation with physical moon-sighting reports, but the public rarely sees the underlying math — they just get an announcement. Existing hijri-date converters are either simple lookup tables with no real astronomy behind them, or official tools that give a verdict with no way to inspect why.
+
+## The approach
+
+### Astronomy computed from first principles, not fetched
+
+Instead of calling a third-party ephemeris API, Falak implements a truncated VSOP87 solar-position model and an ELP2000/Meeus lunar-position model directly in Python. This keeps the tool self-contained — no API keys, no rate limits, works offline — and, for a religious-calendar product, auditable: every number the app shows can be traced back to a formula in the repository, not a black box.
+
+### Three competing methods, shown side by side
+
+Rather than picking one "correct" criterion for crescent visibility, the engine implements three real, competing methods — Wujudul Hilal, MABIMS-2021 imkanur rukyat, and the Odeh criterion — as independent pure functions, with a dedicated Method Divergence view showing exactly where they disagree. That reflects the actual real-world debate instead of papering over it with a single confident answer.
+
+### Validated before being trusted
+
+The project's build order enforces a rule that no calculation feature ships without validation. Before any API or UI work began, the astronomy engine was cross-checked against Skyfield using the JPL DE440 ephemeris — a research-grade, independent source — for 50 historical lunar conjunctions, matching within a 5-minute tolerance. Skyfield is a dev/test-only dependency and is never imported by the production backend, preserving the "no third-party astronomy API at runtime" rule while still proving the engine's accuracy against one.
+
+### No verdict without its receipts
+
+Every computed conclusion — is the hilal visible, what time is Maghrib, what's the qibla bearing — is paired with a way to inspect the raw numbers that produced it (altitude, elongation, moon age, lag time) through a shared `CalculationPanel` component. That's a direct response to the "black box" complaint that motivated the project in the first place.
+
+### Cache in front of calculation, never as the source of truth
+
+Postgres models store computed results for reuse, but a cache miss always falls back to recomputing from the deterministic engine — never a stale or placeholder value, an explicit non-negotiable rule in the codebase. The Indonesia-wide visibility map needs hilal criteria evaluated at hundreds of lat/lon points, which would be slow synchronously, so a Celery task precomputes the grid at 0.5° steps and the frontend map simply reads from that cache.
+
+## Outcome
+
+67 commits over roughly three calendar days, solo, from an empty repository to 10 API endpoints and 8 frontend pages — about 3,045 lines of backend Python and 2,895 lines of frontend TypeScript, with 66 of 66 backend tests passing including the mandated Skyfield cross-check. The build moved well past its own MVP plan once the validated engine was in place: Method Divergence, a Visibility Calendar, Isbat Accuracy tracking against real historical Kemenag records, hilal altitude/elongation trajectory charting, and Rashdul Qibla sun-calibration — letting anyone calibrate their qibla direction using a shadow with no instruments — were all originally deferred to "Phase 2" but shipped anyway. Public repository, verified working end-to-end via Docker Compose; not yet deployed to a live URL.

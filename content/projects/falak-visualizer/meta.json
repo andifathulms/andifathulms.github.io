@@ -1,0 +1,28 @@
+{
+  "slug": "falak-visualizer",
+  "title": "Falak",
+  "tagline": "Hijri calendar, prayer times, and qibla direction computed from real moon/sun astronomy — every verdict shows its numbers",
+  "categoryTags": [
+    "Personal Project",
+    "Web App",
+    "Astronomy"
+  ],
+  "techStack": [
+    "Django",
+    "Next.js",
+    "TypeScript",
+    "PostgreSQL",
+    "D3.js",
+    "Celery",
+    "Redis",
+    "Docker"
+  ],
+  "status": "active",
+  "role": "Fullstack Developer",
+  "timeframe": "Jul 2026",
+  "liveUrl": null,
+  "githubUrl": "https://github.com/andifathulms/falak-visualizer",
+  "heroImage": "/images/projects/falak-visualizer/hero.jpeg",
+  "order": 15,
+  "featured": false
+}
