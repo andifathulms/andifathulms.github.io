@@ -19,13 +19,13 @@
   ],
   "status": "active",
   "role": "Fullstack Developer",
-  "timeframe": "Mar – May 2026",
+  "timeframe": "Mar – Jun 2026",
   "liveUrl": "https://jdih.ikn.go.id",
   "githubUrl": [
     "https://github.com/thdoikn/jdih-v2-backend.git",
     "https://github.com/thdoikn/jdih-v2-frontend.git"
   ],
-  "heroImage": "/images/projects/jdih/cover.svg",
+  "heroImage": "/images/projects/jdih/hero.jpeg",
   "order": 5,
   "featured": false
 }

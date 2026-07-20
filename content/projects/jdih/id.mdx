@@ -1,35 +1,39 @@
-# JDIH OIKN
-
 ## Permasalahan
 
-OIKN (Otorita Ibu Kota Nusantara) adalah badan pemerintah baru yang menerbitkan instrumen hukumnya sendiri — peraturan, keputusan, MoU, dan lainnya. Sebelum sistem ini, dokumen hukum tersebar di utas email dan drive lokal, publik tidak memiliki cara untuk menemukan regulasi OIKN resmi, tidak ada proses review yang terkontrol, akses ke dokumen sensitif ditegakkan secara informal tanpa jejak audit, dan pelaporan tahunan yang diwajibkan oleh regulasi harus disusun secara manual.
+OIKN (Otorita Ibu Kota Nusantara) adalah badan pemerintah baru yang menerbitkan instrumen hukumnya sendiri — peraturan, keputusan, MoU, dan lainnya. Sebelum sistem ini, dokumen hukum tersebar di utas email dan drive lokal, publik tidak memiliki cara untuk menemukan regulasi OIKN resmi, tidak ada proses review yang terkontrol, akses ke dokumen sensitif ditegakkan secara informal tanpa jejak audit, dan pelaporan tahunan yang diwajibkan oleh Peraturan Kepala OIKN No. 14 Tahun 2025 harus disusun secara manual.
+
+JDIH (Jaringan Dokumentasi dan Informasi Hukum) adalah jaringan informasi hukum yang diwajibkan secara nasional. OIKN membutuhkan implementasi yang patuh, mencakup portal publik dan alur kerja editorial internal.
 
 ## Pendekatan
 
-### Kontrol akses tiga tingkat dengan penegakan sisi server
+### Hierarki peran yang tumbuh mengikuti struktur organisasi
 
-Dokumen diklasifikasikan sebagai terbuka, terbatas, atau tertutup. Dokumen terbatas memerlukan permohonan akses yang harus disetujui oleh pejabat walidata, dengan durasi kedaluwarsa opsional. Penegakan akses terjadi di level endpoint unduhan, bukan hanya di UI — API `/accesses/check/` memungkinkan frontend menampilkan CTA yang tepat (unduh, minta akses, atau prompt login) tanpa membocorkan URL dokumen.
+Rencana awal hanya empat peran. Dalam produksi menjadi lima: `superadmin`, `admin_jdih` (Direktorat Hukum), `admin_anggota`, `walidata`, `registered`. Nuansa yang membenarkan pemisahan ini — `admin_jdih` bisa menyetujui dokumen meski berada di bawah `superadmin`, sementara `admin_anggota`, meski juga "admin", hanya bisa membuat dan mengedit, tidak pernah menyetujui. Setiap endpoint admin mendeklarasikan kelas permission eksplisit (`IsAdminOrAbove`, `IsWalidata`, `IsSuperAdmin`) dari satu `permissions.py`, dan frontend mencerminkan batasan yang sama — rute review dokumen dibatasi untuk `admin_jdih`, `walidata`, dan `superadmin`, secara eksplisit mengecualikan `admin_anggota`.
 
-### Alur kerja editorial dengan pemisahan peran
+### Kontrol akses tiga tingkat yang ditegakkan di endpoint unduhan, bukan UI
 
-Dokumen melalui status `draft → review → published`. Staf admin mengunggah dan mengajukan; peran walidata terpisah yang menyetujui. Ini memastikan tinjauan empat mata dan mencegah persetujuan mandiri.
+Dokumen diklasifikasikan terbuka, terbatas, atau tertutup. Dokumen terbatas memerlukan permohonan akses yang harus disetujui pejabat walidata, dengan kedaluwarsa opsional. Endpoint `/accesses/check/` memungkinkan frontend menampilkan CTA yang tepat — unduh, minta akses, atau prompt login — tanpa pernah membocorkan URL dokumen ke orang yang tidak berhak, dan setiap akses serta unduhan ditulis ke jejak audit.
 
-### Ringkasan dokumen AI offline
+### Fitur AI yang matang dalam tiga tahap: rilis, perkuat, atur
 
-Ketika dokumen disetujui, task Celery secara otomatis mengekstrak teks dari PDF yang diunggah menggunakan `pdfplumber`, menjalankan NLP untuk menghasilkan ringkasan bahasa sederhana menggunakan `sumy` dan `nltk`, dan menyimpan hasilnya. Seluruh pipeline berjalan di server tanpa panggilan API eksternal — tradeoff yang disengaja setelah integrasi Gemini Flash awal dihapus karena mengirimkan dokumen hukum pemerintah ke API cloud pihak ketiga adalah risiko kepatuhan.
+Ringkasan dokumen pertama kali dirilis menggunakan API Gemini Flash (v1.8.0) untuk membuktikan fitur ini layak dibangun. Pada v1.9.0 dibangun ulang sebagai pipeline sepenuhnya offline — `pdfplumber` mengekstrak teks PDF, `sumy` dan `nltk` menghasilkan ringkasan ekstraktif bahasa sederhana, classifier berbobot kata kunci menetapkan domain hukum — karena mengirim dokumen hukum pemerintah ke API cloud pihak ketiga adalah risiko kepatuhan yang tidak bisa diambil sistem JDIH. Itu sudah menjadi titik henti yang wajar, tapi satu bulan kerja lanjutan yang senyap (tidak pernah diberi version bump di changelog in-app) menambahkan lapisan governance di atasnya: model `RingkasanEvalRun`, editor koreksi manusia ("gold summary") untuk staf, pass glosarium legalese-ke-bahasa-sederhana, dan evaluasi kualitas terjadwal mingguan yang memberi makan perintah benchmark `evaluate_ai_summaries` — mengubah summarizer dari generator sekali pakai menjadi sesuatu yang menangkap penurunan kualitasnya sendiri seiring waktu.
 
 ### Deteksi hubungan hukum otomatis
 
-Task Celery terpisah memindai judul dokumen yang diterbitkan untuk pola kutipan hukum Indonesia ("mencabut Perka No. 14 Tahun 2022"), mencari dokumen yang direferensikan, dan membuat `RelationCandidate` untuk ditinjau admin. Hubungan yang dikonfirmasi ditampilkan sebagai pohon peraturan yang dapat dinavigasi.
+Task Celery memindai judul dokumen yang diterbitkan untuk pola kutipan hukum Indonesia — "mencabut Perka No. 14 Tahun 2022" — mencari dokumen yang direferensikan, dan membuat `RelationCandidate` untuk ditinjau admin. Hubungan yang dikonfirmasi ditampilkan sebagai pohon peraturan yang dapat dinavigasi di `/pohon-peraturan`, menunjukkan dokumen mana yang mencabut, mengubah, atau mengimplementasikan satu sama lain.
 
-### Statistik pra-agregasi
+### Statistik yang tidak pernah menyentuh kueri COUNT langsung
 
-Dashboard admin tidak pernah menjalankan kueri `COUNT(*)` langsung. Task Celery Beat malam hari (`refresh_statistik_harian`) menghitung ulang semua baris statistik.
+Baik dashboard admin maupun halaman `/statistik` publik (heatmap aktivitas 365 hari, jenis dokumen yang sedang tren, domain hukum teratas berdasarkan engagement) membaca dari tabel pra-agregasi yang di-refresh setiap malam oleh Celery Beat, bukan menghitung apa pun secara langsung terhadap korpus dokumen yang terus bertambah. Fallback yang ditambahkan kemudian membaca langsung dari log aktivitas jika tabel malam hari belum terisi, sehingga dashboard tidak pernah menampilkan nol yang keras.
 
-### Autentikasi dual
+### Autentikasi dual tanpa konflik sesi
 
-Staf OIKN login via Keycloak SSO (`sso.ikn.go.id`). Backend OIDC memetakan klaim Keycloak ke catatan pengguna JDIH. Pengguna eksternal menggunakan email+password standar dengan JWT. Kedua alur coexist tanpa konflik sesi.
+Staf OIKN login via Keycloak SSO; backend OIDC memetakan klaim departemen, NIP, dan nama langsung ke catatan pengguna JDIH. Pengguna eksternal dan publik menggunakan email-kata sandi biasa dengan JWT. Keduanya coexist karena Keycloak digunakan murni sebagai langkah autentikasi yang mencetak JWT untuk frontend — sesi Keycloak itu sendiri tidak pernah meninggalkan server.
+
+### Fitur pembangun kepercayaan di luar mandat
+
+Di luar yang secara ketat diwajibkan Perka 14/2025: pengguna terverifikasi dapat menandai dokumen untuk referensi nanti; sistem notifikasi in-app dengan badge belum dibaca memberi tahu pengguna ketika status permohonan akses mereka berubah; sistem rating bintang 1-5 yang dimoderasi menampilkan testimoni yang disetujui di beranda; dan pencarian dokumen faceted yang dapat dibagikan via URL mengekspor hingga 2.000 baris ke CSV untuk analisis offline.
 
 ## Hasil
 
-Versi 1.10.0, aktif di produksi. Digunakan oleh Direktorat Hukum OIKN di sebelas rilis yang dilacak (v1.0.0 → v1.10.0) selama sebelas minggu. Sistem mencakup 88 endpoint API, 9 aplikasi Django, 24 model, 76 file source frontend, dan 8 task Celery bernama. Portal publik menyediakan akses dokumen terbuka kepada publik Indonesia; staf internal mengakses alur kerja editorial mereka melalui codebase yang sama.
+Versi 1.10.0 adalah rilis terakhir yang tercatat di changelog in-app, tetapi riwayat commit sesungguhnya — 100 commit backend dan 91 commit frontend di `main`, diverifikasi independen — berjalan satu bulan penuh lebih lanjut, hingga 24 Juni 2026, mencakup kurang lebih enam belas minggu total. Sistem kini mencakup 7 aplikasi Django, 25 model database, 90 endpoint API, 9 task Celery bernama, dan 76 file source frontend (~15.800 baris). Pesan commit awal longgar; konvensi `type(scope): message` yang konsisten mengambil alih sejak pertengahan April dan bertahan sepanjang seluruh pembangunan governance AI — sinyal kecil namun nyata bahwa proses semakin matang seiring cakupan fitur. Aktif di produksi untuk staf Direktorat Hukum OIKN, dengan portal publik melayani dokumen terbuka kepada siapa pun yang berkunjung.
