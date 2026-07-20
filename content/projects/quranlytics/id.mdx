@@ -1,0 +1,29 @@
+## Permasalahan
+
+Aplikasi Quran yang ada — Quran.com, Tanzil, eQuran — dibangun untuk membaca: tipografi bersih, audio, terjemahan. Tidak satu pun memungkinkan pembaca biasa menginterogasi teksnya sendiri, seperti memverifikasi apakah kata "hari" benar-benar muncul 365 kali, atau menemukan setiap ayat yang menyebut rahmat dan azab sekaligus, tanpa kerja konkordansi manual. Pembaca sehari-hari yang menemukan klaim "mukjizat" numerik atau linguistik secara online tidak memiliki cara untuk memeriksanya, dan kreator konten dakwah yang ingin mengutip pola tertentu tidak memiliki tooling yang dibangun untuk itu. Quranlytics adalah pembaca sekaligus lapisan analisis di atas data yang sama, sehingga eksplorasi tidak pernah memerlukan keluar dari aplikasi.
+
+## Pendekatan
+
+### Statistik termaterialisasi, tidak pernah dihitung langsung
+
+Hitungan kata, root, dan frasa tidak pernah dijalankan terhadap tabel ~77.000 kata pada permintaan pengguna. Perintah manajemen menghitungnya lebih dulu ke tabel termaterialisasi Postgres yang didukung cache Redis 24 jam, sehingga interaksi inti — klik klaim, lihat verifikasinya seketika — tetap cepat meski menghitung satu root di 6.236 ayat bukan operasi murah untuk dilakukan secara langsung.
+
+### Menjahit dua sumber data untuk morfologi nyata
+
+API Quran.com memberikan teks ayat dan terjemahan tetapi tanpa morfologi root/lemma. Quranic Arabic Corpus menyediakan itu, berkunci posisi kata, sehingga ingestion menarik keduanya dan menggabungkannya satu-ke-satu berdasarkan posisi `surah:ayat:kata`. Sekitar 50.000 dari 77.000 kata membawa root trilateral yang dapat diselesaikan; sisanya adalah partikel dan kata benda khusus yang mencakup kurang lebih 1.650 root berbeda. Versi awal parser morfologi memiliki bug nyata — mengambil lemma dan root dari segmen klitik (awalan/akhiran) alih-alih stem kata sesungguhnya — tertangkap dan diperbaiki dengan test khusus setelah data yang salah muncul.
+
+### Embedding lokal alih-alih API hosted
+
+Pencarian semantik berjalan pada `sentence-transformers`, model multibahasa yang dijalankan lokal di dalam container untuk meng-embed setiap ayat dari terjemahan Inggris dan Indonesianya, disimpan via `pgvector` untuk pencarian kemiripan dan clustering tema KMeans. Tanpa biaya API per-kueri, dan berfungsi sepenuhnya offline — penyimpangan yang disengaja dari rencana awal menggunakan API embedding hosted, karena dataset bersifat statis dan dihitung sekali alih-alih dikueri langsung terhadap korpus yang berubah.
+
+### Verifier yang "jujur" alih-alih yang percaya diri
+
+Klaim numerik populer tentang Al-Quran beredar terus-menerus secara online, sering disajikan sebagai kebenaran begitu saja. Verifier klaim numerik sebaliknya melaporkan status tiga arah — Terverifikasi, Diperdebatkan, atau Terbantahkan — konsisten dengan batasan cakupan proyek sendiri: tidak ada klaim otomatis tentang apa yang dibuktikan suatu pola, sajikan datanya dan biarkan pembaca menafsirkan.
+
+### Analisis publik, state personal berlapis di atasnya
+
+Autentikasi JWT dan state per-pengguna — bookmark, catatan, progres membaca, streak — berdampingan dengan endpoint membaca dan analitik yang sepenuhnya publik. Pengguna anonim mendapat membaca dan analisis lengkap; akun hanya menambahkan personalisasi di atasnya, tidak pernah membatasi kumpulan fitur inti.
+
+## Hasil
+
+121 commit, solo, selama 14 hari dari repositori kosong — sekitar 6.900 baris Python backend di 6 aplikasi Django dan 9.900 baris TypeScript frontend, dengan 26 merge commit di kurang lebih 28 feature branch meski merupakan proyek satu penulis. Dataset lengkap mencakup seluruh 114 surah dan 6.236 ayat, dengan morfologi terselesaikan untuk sekitar 50.000 dari 77.000 kata. Lebih dari separuh riwayat commit adalah kerja yang berada di luar rencana awal: pewarnaan tajwīd, mode hafalan ḥifẓ, murottal berkelanjutan dengan pemilih qari, perencanaan penyelesaian khatmah, penampil struktur chiastic dengan pasangan ayat cermin berwarna serasi, dan dua explorer kurasi yang sama sekali baru — 99 Asmaul Husna dan indeks Nabi-Nabi dalam Al-Quran — plus lapisan komunitas (discoveries, voting, profil publik, ekspor PNG) yang tidak direncanakan hingga fase belakangan. Pipeline deploy produksi ada via GitHub Actions dan GHCR, tetapi sistem belum langsung di URL publik.

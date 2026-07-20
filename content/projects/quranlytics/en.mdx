@@ -1,0 +1,29 @@
+## The problem
+
+Existing Quran apps — Quran.com, Tanzil, eQuran — are built for reading: clean typography, audio, translations. None of them let an ordinary reader interrogate the text itself, like verifying whether the word "day" really appears 365 times, or finding every verse that mentions both mercy and punishment, without manual concordance work. Everyday readers who encounter numerical or linguistic "miracle" claims online have no way to check them, and da'wah content creators who want to cite specific patterns have no tooling built for that. Quranlytics is a reader and an analysis layer on top of the same data, so exploration never requires leaving the app.
+
+## The approach
+
+### Materialized stats, never computed live
+
+Word, root, and phrase counts are never run against the ~77,000-word table on a user request. Management commands precompute them ahead of time into Postgres materialized tables backed by a 24-hour Redis cache, so the core interaction — click a claim, see it verified instantly — stays fast even though counting a root across 6,236 verses is not a cheap operation to do live.
+
+### Stitching two data sources for real morphology
+
+The Quran.com API gives verse text and translations but no root or lemma morphology. The Quranic Arabic Corpus provides that, keyed by word position, so ingestion pulls both and joins them one-to-one by `surah:verse:word` position. About 50,000 of 77,000 words carry a resolvable trilateral root; the rest are particles and proper nouns spanning roughly 1,650 distinct roots. An early version of the morphology parser had a real bug — pulling lemma and root from clitic (prefix/suffix) segments instead of the actual word stem — caught and fixed with a dedicated test once the wrong data surfaced.
+
+### Local embeddings instead of a hosted API
+
+Semantic search runs on `sentence-transformers`, a multilingual model executed locally in-container to embed each verse from its English and Indonesian translations, stored via `pgvector` for similarity search and KMeans theme clustering. No per-query API cost, and it works fully offline — a deliberate departure from the original plan to use a hosted embeddings API, since the dataset is static and computed once rather than queried live against a changing corpus.
+
+### An "honest" verifier instead of a confident one
+
+Popular numerical claims about the Quran circulate constantly online, often presented as simply true. The numeric-claim verifier instead reports a three-way status — Verified, Disputed, or Refuted — consistent with the project's own scope limit: no automated claims about what a pattern proves, present the data and let the reader interpret it.
+
+### Public analysis, personal state layered on top
+
+JWT authentication and per-user state — bookmarks, notes, reading progress, streaks — sit alongside fully public reading and analytics endpoints. Anonymous users get complete reading and analysis; an account only adds personalization on top, never gates the core feature set.
+
+## Outcome
+
+121 commits, solo, over 14 days from an empty repository — about 6,900 lines of backend Python across 6 Django apps and 9,900 lines of frontend TypeScript, with 26 merge commits across roughly 28 feature branches even as a single-author project. The full dataset covers all 114 surahs and 6,236 verses, with morphology resolved for around 50,000 of 77,000 words. More than half the commit history is work that fell outside the original plan: tajwīd color-coding, ḥifẓ memorization mode, continuous recitation with a reciter picker, khatmah completion planning, a chiastic structure viewer with color-matched mirrored verse pairs, and two entirely new curated explorers — the 99 Names of Allah and a Prophets-of-the-Quran index — plus a community layer (discoveries, voting, public profiles, PNG export) that wasn't planned until a later phase. A production deploy pipeline exists via GitHub Actions and GHCR, but the system isn't live at a public URL yet.

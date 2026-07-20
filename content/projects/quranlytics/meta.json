@@ -1,0 +1,28 @@
+{
+  "slug": "quranlytics",
+  "title": "Quranlytics",
+  "tagline": "Quran reader with a full analysis layer — word/root frequency, structural patterns, and semantic search across 6,236 verses",
+  "categoryTags": [
+    "Personal Project",
+    "Web App",
+    "ML / AI"
+  ],
+  "techStack": [
+    "Django",
+    "Next.js",
+    "TypeScript",
+    "PostgreSQL",
+    "pgvector",
+    "Redis",
+    "Celery",
+    "PyTorch"
+  ],
+  "status": "active",
+  "role": "Fullstack Developer",
+  "timeframe": "Jun – Jul 2026",
+  "liveUrl": null,
+  "githubUrl": "https://github.com/andifathulms/quranlytics",
+  "heroImage": "/images/projects/quranlytics/hero.jpeg",
+  "order": 16,
+  "featured": false
+}
