@@ -1,5 +1,3 @@
-# DoseRx
-
 ## The problem
 
 Calculating weight-based medication doses is repetitive, error-prone arithmetic that a doctor redoes for every patient: multiply mg/kg by weight, divide by frequency, convert to mL, check against maximum limits. For pediatric patients, dosing is weight-sensitive and errors are dangerous. The existing tools — institutional paper references, generic phone calculators, spreadsheets — are slow and not built for one-handed mobile use at the bedside.
@@ -8,24 +6,30 @@ The primary user is a single doctor working solo on both phone (bedside) and des
 
 ## The approach
 
-### Pure calculation engine as the foundation
+### A pure calculation engine as the foundation
 
-The central decision was to keep `src/lib/calculate.ts` completely pure — no DOM, no React, no side effects. It takes typed inputs, validates them, applies dose caps, and returns a discriminated union: `CalcResult | CalcError`. UI code is forced to branch on `result.valid` before touching any numeric field, which structurally eliminates the NaN/Infinity display class of bugs. The engine is independently unit-testable and reused across all four calculator tabs without coupling.
+The central decision was to keep `src/lib/calculate.ts` completely pure — no DOM, no React, no side effects. It takes typed inputs, validates them, applies dose caps, and returns a discriminated union: `CalcResult | CalcError`. UI code is forced to branch on `result.valid` before touching any numeric field, which structurally eliminates the NaN/Infinity display class of bugs rather than guarding against it with scattered runtime checks. The engine is independently unit-testable and reused across every calculator tab without coupling.
 
-### Indonesian clinical context baked in
+### A catalog that outgrew a single file
 
-After calculating a per-dose amount, the app suggests specific tablet fractions or liquid volumes available in Indonesian pharmacies — snapping to practical fractions used in local clinical practice (¼, ½, ¾, 1, 1½, 2). The drug library grew from 8 seed drugs in the original spec to 28 drugs across 12 categories, each with dose range, max caps, stock concentration, and clinical notes.
+The drug library grew from 8 seed drugs in the original spec to 92 drugs across 16 therapeutic categories — large enough that the single `drugs.ts` file was split into seven domain modules (analgesics, anti-infectives, antiparasitics, cardiorespiratory, emergency, gastro-allergy, steroids-nutrition) behind a barrel `index.ts`. The `DrugPreset` type separates calculation fields, consumed by `calculate.ts`, from display-only catalog metadata — dosing source, search aliases, indications, side effects, contraindications, minimum age/weight, and pack sizes — so enriching the catalog for the UI can never accidentally touch the calculation path. A collapsible "Detail Obat" panel surfaces that metadata per drug as a calm reference layer that stays out of the way until tapped.
 
-The Puyer tab — a multi-drug compounded medicine calculator specific to Indonesian practice — batches up to several drugs, calculates each dose individually, and outputs a combined recipe card with tablet-fraction arithmetic that can be printed or copied. Snapping to physically cuttable fractions (¼, ½, ¾ tablet) required a dedicated `suggest.ts` module with a `SOLID_FRACTIONS` array; a naive nearest-integer round would produce unphysical quantities.
+### Indonesian clinical context baked in, not bolted on
 
-### IV infusion as a second pure engine
+After calculating a per-dose amount, the app suggests specific tablet fractions or liquid volumes available in Indonesian pharmacies, snapping to fractions actually practical in local clinical practice (¼, ½, ¾, 1, 1½, 2) rather than a raw decimal. Compounded-powder dosing (Puyer) needed the same discipline at a harder level: sachets require rounding to tablet fractions that are physically cuttable, and a naive round-to-nearest-integer would produce wrong or unphysical quantities. A dedicated `suggest.ts` module snaps to a predefined `SOLID_FRACTIONS` array and shows the actual delivered dose next to the target, so the clinician can see any rounding delta rather than trusting a hidden approximation. The Puyer engine runs `calculate()` per drug across a batch and outputs a combined, printable recipe card with tablet-fraction arithmetic and signa.
 
-The IV infusion calculator (`calculateInfusion.ts`) is a separate pure function handling a fundamentally different problem domain: drip rates in mL/hr and drops/min, supporting mcg/kg/min, mcg/kg/hr, mg/kg/hr, and unit/kg/hr dose units. It shares only the input validation pattern with the main engine.
+### A second pure engine for a different problem domain
 
-### Offline PWA with persistent history
+The IV infusion calculator (`calculateInfusion.ts`) is a separate pure function for drip rates in mL/hr and drops/min, supporting mcg/kg/min, mcg/kg/hr, mg/kg/hr, and unit/kg/hr dose units. It shares only the input validation pattern with the main engine — the underlying math doesn't overlap with weight-based oral/IV dosing at all.
 
-Deployed as a static site via GitHub Actions → GitHub Pages with PWA support — installable to a phone home screen and fully usable offline once loaded. Calculation history persists across sessions via a `storage.ts` wrapper around `localStorage`, typed to the history-entry schema. The wrapper is the only place in the codebase that reads or writes `localStorage` directly.
+### Letting the doctor override a preset without losing the guardrail
+
+The original plan assumed preset dose values would be used as-is, but in practice a doctor sometimes needs to adjust the dose/kg within a clinically valid range. An amber indicator plus a reset button now appears when a preset's dose is modified — and a follow-up fix was needed after the override wasn't actually being passed into the calculation correctly on the first attempt, evidence this interaction was less trivial than it looked.
+
+### Offline PWA with a fast, personal catalog
+
+Deployed as a static site via GitHub Actions to GitHub Pages with PWA support — installable to a phone home screen and fully usable offline once loaded. Recently-used and starred drugs surface at the top of the picker, keyed by a stable drug id and persisted locally, so a 92-drug catalog stays fast to navigate one-handed even as it grows. Calculation history persists across sessions through a typed `storage.ts` wrapper around `localStorage` — the only place in the codebase that touches it directly — with an editable free-text note per entry, tucked into a header drawer rather than crowding the calculators themselves.
 
 ## Outcome
 
-Built and deployed in a single day (23 commits, ~11 hours). 28 drugs across 12 categories, five calculator modes (Preset, Custom, Puyer, IV Infusion, History), unit tests covering normal calc, max-daily cap, max-single cap, missing concentration, and invalid inputs. The safety disclaimer required by the original product spec is visible in the app — never buried in a tooltip.
+39 commits over roughly three and a half weeks of iteration on top of an original PRD that specified 8 seed drugs and three panels. The shipped app has four calculator modes (Preset, Kustom, Puyer, Infus) plus a history drawer, a 92-drug catalog across 16 categories split into 7 typed modules, a weight-from-age estimator using APLS and Luscombe-Owens pediatric formulas, and a dark-mode pass with a dedicated medical-teal palette. Deployed and live on GitHub Pages via automated CI. The safety disclaimer required by the original product spec — this is a calculation aid, not a clinical decision-support system — stays visible in the app, never buried in a tooltip.

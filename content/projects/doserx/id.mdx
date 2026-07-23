@@ -1,29 +1,35 @@
-# DoseRx
-
 ## Permasalahan
 
-Menghitung dosis obat berbasis berat adalah aritmetika berulang dan rentan kesalahan yang harus dilakukan dokter untuk setiap pasien: kalikan mg/kg dengan berat, bagi berdasarkan frekuensi, konversi ke mL, periksa terhadap batas maksimum. Untuk pasien pediatri, dosis sensitif terhadap berat dan kesalahan berbahaya. Alat yang ada — referensi kertas institusional, kalkulator ponsel biasa, spreadsheet — lambat dan tidak dirancang untuk penggunaan satu tangan di sisi tempat tidur.
+Menghitung dosis obat berbasis berat badan adalah aritmetika berulang dan rawan kesalahan yang harus diulang dokter untuk setiap pasien: kalikan mg/kg dengan berat badan, bagi dengan frekuensi, konversi ke mL, periksa terhadap batas maksimum. Untuk pasien anak, dosis sensitif terhadap berat badan dan kesalahan berbahaya. Alat yang ada — referensi kertas institusi, kalkulator ponsel generik, spreadsheet — lambat dan tidak dibangun untuk penggunaan mobile satu tangan di samping tempat tidur pasien.
+
+Pengguna utama adalah satu dokter yang bekerja solo baik di ponsel (bedside) maupun desktop. Tanpa multi-user, tanpa auth, tanpa backend yang diperlukan.
 
 ## Pendekatan
 
 ### Engine kalkulasi murni sebagai fondasi
 
-Keputusan utama adalah menjaga `src/lib/calculate.ts` sepenuhnya murni — tanpa DOM, tanpa React, tanpa efek samping. Ia menerima input yang diketik, memvalidasinya, menerapkan batas dosis, dan mengembalikan union diskriminan: `CalcResult | CalcError`. Kode UI dipaksa untuk bercabang pada `result.valid` sebelum menyentuh field numerik apa pun, yang secara struktural menghilangkan kelas bug tampilan NaN/Infinity.
+Keputusan sentral adalah menjaga `src/lib/calculate.ts` sepenuhnya murni — tanpa DOM, tanpa React, tanpa efek samping. Ia menerima input bertipe, memvalidasinya, menerapkan batas dosis, dan mengembalikan discriminated union: `CalcResult | CalcError`. Kode UI dipaksa bercabang pada `result.valid` sebelum menyentuh field numerik apa pun, yang secara struktural menghilangkan kelas bug tampilan NaN/Infinity alih-alih menjaganya dengan pemeriksaan runtime yang tersebar. Engine dapat diuji unit secara independen dan digunakan ulang di setiap tab kalkulator tanpa coupling.
 
-### Konteks klinis Indonesia tertanam
+### Katalog yang tumbuh melampaui satu file
 
-Setelah menghitung jumlah per dosis, app menyarankan pecahan tablet atau volume cairan spesifik yang tersedia di apotek Indonesia — menjepret ke pecahan praktis yang digunakan dalam praktik klinis lokal (¼, ½, ¾, 1, 1½, 2). Library obat berkembang dari 8 obat awal dalam spesifikasi menjadi 28 obat di 12 kategori.
+Pustaka obat tumbuh dari 8 obat awal dalam spesifikasi menjadi 92 obat di 16 kategori terapeutik — cukup besar sehingga file tunggal `drugs.ts` dipecah menjadi tujuh modul domain (analgesik, anti-infektif, antiparasit, kardiorespirasi, gawat darurat, gastro-alergi, steroid-nutrisi) di belakang barrel `index.ts`. Tipe `DrugPreset` memisahkan field kalkulasi, yang dikonsumsi `calculate.ts`, dari metadata katalog tampilan-saja — sumber dosis, alias pencarian, indikasi, efek samping, kontraindikasi, usia/berat minimum, dan ukuran kemasan — sehingga memperkaya katalog untuk UI tidak akan pernah secara tidak sengaja menyentuh jalur kalkulasi. Panel "Detail Obat" yang dapat dilipat menampilkan metadata itu per obat sebagai lapisan referensi tenang yang tetap tidak mengganggu hingga diketuk.
 
-Tab Puyer — kalkulator obat racikan multi-obat yang spesifik untuk praktik Indonesia — memproses beberapa obat sekaligus, menghitung setiap dosis secara individual, dan menghasilkan kartu resep dengan aritmetika pecahan tablet yang dapat dicetak atau disalin. Menjepret ke pecahan yang dapat dipotong secara fisik (¼, ½, ¾ tablet) memerlukan modul `suggest.ts` khusus; pembulatan ke integer terdekat biasa akan menghasilkan kuantitas yang tidak fisik.
+### Konteks klinis Indonesia yang tertanam, bukan ditempel
 
-### Kalkulator infus IV sebagai engine murni kedua
+Setelah menghitung jumlah per-dosis, aplikasi menyarankan pecahan tablet atau volume cairan spesifik yang tersedia di apotek Indonesia, menyesuaikan ke pecahan yang benar-benar praktis dalam praktik klinis lokal (¼, ½, ¾, 1, 1½, 2) alih-alih desimal mentah. Dosis puyer (bubuk racikan) membutuhkan kedisiplinan yang sama di level yang lebih sulit: sachet memerlukan pembulatan ke pecahan tablet yang secara fisik dapat dipotong, dan pembulatan-ke-bilangan-bulat-terdekat yang naif akan menghasilkan jumlah yang salah atau tidak fisis. Modul `suggest.ts` khusus menyesuaikan ke array `SOLID_FRACTIONS` yang telah ditentukan dan menampilkan dosis yang sebenarnya diberikan di samping target, sehingga klinisi dapat melihat delta pembulatan apa pun alih-alih mempercayai aproksimasi tersembunyi. Engine Puyer menjalankan `calculate()` per obat di seluruh batch dan menghasilkan kartu resep gabungan yang dapat dicetak dengan aritmetika pecahan tablet dan signa.
 
-Kalkulator infus IV (`calculateInfusion.ts`) adalah fungsi murni terpisah yang menangani domain masalah yang berbeda: laju tetes dalam mL/jam dan tetes/menit, mendukung unit dosis mcg/kg/menit, mcg/kg/jam, mg/kg/jam, dan unit/kg/jam.
+### Engine murni kedua untuk domain masalah berbeda
 
-### PWA offline dengan riwayat persisten
+Kalkulator infus IV (`calculateInfusion.ts`) adalah fungsi murni terpisah untuk kecepatan tetes dalam mL/jam dan tetes/menit, mendukung satuan dosis mcg/kg/menit, mcg/kg/jam, mg/kg/jam, dan unit/kg/jam. Ia hanya berbagi pola validasi input dengan engine utama — matematika di baliknya sama sekali tidak tumpang tindih dengan dosis oral/IV berbasis berat badan.
 
-Di-deploy sebagai situs statis via GitHub Actions → GitHub Pages dengan dukungan PWA — dapat dipasang ke layar beranda ponsel dan digunakan sepenuhnya offline setelah dimuat. Riwayat kalkulasi persisten antar sesi via wrapper `storage.ts` di sekitar `localStorage`.
+### Membiarkan dokter menimpa preset tanpa kehilangan pengaman
+
+Rencana awal mengasumsikan nilai dosis preset akan digunakan apa adanya, tetapi dalam praktik dokter kadang perlu menyesuaikan dosis/kg dalam rentang yang valid secara klinis. Indikator amber plus tombol reset kini muncul ketika dosis preset dimodifikasi — dan perbaikan lanjutan diperlukan setelah override ternyata tidak diteruskan dengan benar ke kalkulasi pada percobaan pertama, bukti bahwa interaksi ini kurang sepele dari yang terlihat.
+
+### PWA offline dengan katalog personal yang cepat
+
+Di-deploy sebagai situs statis via GitHub Actions ke GitHub Pages dengan dukungan PWA — dapat diinstal ke layar utama ponsel dan sepenuhnya dapat digunakan offline setelah dimuat. Obat yang baru digunakan dan favorit muncul di atas pemilih, berkunci id obat yang stabil dan persisten lokal, sehingga katalog 92 obat tetap cepat dinavigasi satu tangan bahkan saat bertambah. Riwayat kalkulasi persisten lintas sesi melalui wrapper `storage.ts` bertipe di sekitar `localStorage` — satu-satunya tempat dalam codebase yang menyentuhnya langsung — dengan catatan teks bebas yang dapat diedit per entri, terselip dalam drawer header alih-alih memenuhi kalkulator itu sendiri.
 
 ## Hasil
 
-Dibangun dan di-deploy dalam satu hari (23 commit, ~11 jam). 28 obat di 12 kategori, lima mode kalkulator (Preset, Kustom, Puyer, Infus IV, Riwayat), unit test yang mencakup kalkulasi normal, batas dosis harian maksimum, batas dosis tunggal maksimum, konsentrasi yang hilang, dan input tidak valid. Disclaimer keselamatan yang dipersyaratkan oleh spesifikasi produk terlihat di app — tidak pernah tersembunyi di tooltip.
+39 commit selama kurang lebih tiga setengah minggu iterasi di atas PRD awal yang menspesifikasikan 8 obat awal dan tiga panel. Aplikasi yang dirilis memiliki empat mode kalkulator (Preset, Kustom, Puyer, Infus) plus drawer riwayat, katalog 92 obat di 16 kategori terpecah menjadi 7 modul bertipe, estimator berat-dari-usia menggunakan formula pediatrik APLS dan Luscombe-Owens, dan pass mode gelap dengan palet medical-teal khusus. Di-deploy dan langsung di GitHub Pages via CI otomatis. Disclaimer keamanan yang diwajibkan spesifikasi produk awal — ini alat bantu hitung, bukan sistem pendukung keputusan klinis — tetap terlihat di aplikasi, tidak pernah terkubur dalam tooltip.

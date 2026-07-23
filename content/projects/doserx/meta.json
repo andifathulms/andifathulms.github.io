@@ -1,7 +1,7 @@
 {
   "slug": "doserx",
   "title": "DoseRx",
-  "tagline": "Weight-based medication dose calculator built for bedside clinical use, with offline PWA support",
+  "tagline": "Weight-based medication dose calculator covering 92 drugs across four calculator modes, built for bedside clinical use as an offline PWA",
   "categoryTags": [
     "Personal Project",
     "Healthcare",
@@ -16,10 +16,10 @@
   ],
   "status": "active",
   "role": "Developer",
-  "timeframe": "Jun 2026",
-  "liveUrl": null,
+  "timeframe": "Jun – Jul 2026",
+  "liveUrl": "https://andifathulms.github.io/doserx/",
   "githubUrl": null,
-  "heroImage": "/images/projects/doserx/cover.svg",
+  "heroImage": "/images/projects/doserx/hero.jpeg",
   "order": 8,
   "featured": false
 }
