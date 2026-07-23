@@ -1,7 +1,7 @@
 {
   "slug": "scimotion",
   "title": "Scimotion",
-  "tagline": "Interactive science blog where every article pairs clear explanation with a live, controllable animation",
+  "tagline": "Interactive science library — 86 articles across 8 fields, each pairing clear explanation with a live, controllable animation",
   "categoryTags": [
     "Personal Project",
     "Content",
@@ -17,10 +17,10 @@
   ],
   "status": "active",
   "role": "Designer & Developer",
-  "timeframe": "Jun 2026",
-  "liveUrl": null,
+  "timeframe": "Jun – Jul 2026",
+  "liveUrl": "https://andifathulms.github.io/scimotion/",
   "githubUrl": null,
-  "heroImage": "/images/projects/scimotion/cover.svg",
+  "heroImage": "/images/projects/scimotion/hero.jpeg",
   "order": 10,
   "featured": true
 }

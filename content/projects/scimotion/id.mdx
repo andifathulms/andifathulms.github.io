@@ -1,31 +1,33 @@
-# Scimotion
-
 ## Permasalahan
 
-Penulisan sains memiliki celah: persamaan dan diagram diam di halaman, tetapi konsep yang mereka wakili bersifat dinamis. Pembaca bisa menghafal rumus transformasi Fourier tanpa pernah benar-benar memahami *mengapa* dekomposisi sinyal bekerja. Media sains yang ada terlalu dangkal (video pop-sains) atau terlalu dalam (makalah akademis tanpa visual). Scimotion menargetkan non-spesialis yang ingin kedalaman konseptual nyata dan kemampuan untuk memanipulasi hal yang sedang mereka coba pahami.
+Penulisan sains memiliki celah: persamaan dan diagram diam di halaman, tetapi konsep yang mereka wakili bersifat dinamis. Pembaca bisa menghafal rumus transformasi Fourier tanpa pernah benar-benar memahami *mengapa* dekomposisi sinyal bekerja. Media sains yang ada terlalu dangkal (video pop-sains) atau terlalu dalam (makalah akademis tanpa visual). Scimotion menargetkan non-spesialis yang penasaran — pelajar, pembelajar mandiri, profesional dari bidang berdekatan — yang menginginkan kedalaman konseptual nyata dan kemampuan untuk memanipulasi hal yang sedang mereka coba pahami.
 
 ## Pendekatan
 
-### MDX + gray-matter sebagai content layer
+### MDX sebagai content layer, dengan taksonomi yang ditegakkan compiler
 
-Artikel adalah file `.mdx` dengan frontmatter YAML. Layer data (`lib/articles.ts`) membaca frontmatter pada build time menggunakan `gray-matter`, memungkinkan daftar artikel yang sepenuhnya statis tanpa database. Body artikel di-render sisi server via `next-mdx-remote` dengan `remark-math` dan `rehype-katex` yang terpasang, sehingga persamaan KaTeX di-render tanpa JavaScript sisi client.
+Artikel adalah file `.mdx` dengan frontmatter YAML, dibaca saat build time oleh `gray-matter` untuk daftar artikel yang sepenuhnya statis tanpa database. Seiring taksonomi bidang tumbuh dari 4 menjadi 8 — memisahkan Biologi dari Kedokteran, menambahkan Kimia, Bumi & Iklim, dan Astronomi & Kosmologi sebagai bidang kelas satu — menjaga warna, deskripsi, dan logika slug tetap sinkron di beranda, direktori bidang, dan setiap badge menjadi risiko nyata. Solusinya adalah menjadikan `lib/topics.ts` satu-satunya sumber kebenaran, bertipe map `Record<Topic, …>`, sehingga bidang baru tidak akan pernah ter-compile hingga setiap map mendeskripsikannya secara lengkap — mengubah masalah disiplin dokumentasi menjadi sesuatu yang ditegakkan sistem tipe.
 
-### Satu komponen animasi per artikel — mandiri
+### Batas antara filesystem dan browser bundle
 
-Setiap widget interaktif adalah komponen React client yang mandiri di bawah `components/animations/`. Mereka tidak berbagi state global — masing-masing mengelola lifecycle play/pause/reset-nya sendiri. Hook bersama `useAnimationTrigger` berbasis `IntersectionObserver` memicu setiap animasi ketika pengguna menggulir 30% ke dalam viewport. Tidak ada yang berjalan di luar layar.
+Karena situs dirilis sebagai static export, import `fs` yang nyasar hingga ke kode client akan merusak build. `lib/topics.ts` sengaja dijaga bebas dari akses filesystem apa pun, sementara `lib/articles.ts` — yang membaca direktori konten — tidak pernah diimpor oleh komponen client. Batas itu didokumentasikan langsung dalam file agar perubahan di masa depan tidak meruntuhkannya kembali.
 
-### Tidak ada library animasi untuk widget sains
+### Learning path sebagai lapisan pengurutan terpisah
 
-Semua logika animasi — menggambar canvas, pembaruan path SVG, loop `requestAnimationFrame` — ditulis tangan. Framer Motion hanya digunakan untuk chrome UI: efek spring-hover kartu dan animasi stagger entrance pada hero homepage. Ini adalah constraint yang disengaja untuk menjaga ukuran bundle dapat diprediksi dan rendering deterministik.
+`lib/paths.ts` mendefinisikan 9 urutan bacaan terkurasi dan berurutan, setiap artikel hanya termasuk dalam satu path sehingga navigasi prev/next tetap tidak ambigu. Urutannya sendiri disengaja dan dijelaskan dalam komentar kode — misalnya, mengapa kinetika mendahului asam-basa, karena Ka adalah konstanta kesetimbangan yang baru masuk akal setelah dasar kinetika.
 
-### Cakupan melebihi spesifikasi awal
+### Komponen animasi mandiri, dipicu hanya saat terlihat
 
-PRD menyebutkan satu animasi per artikel, lima artikel total. Yang dikirim: 15 artikel di empat area topik (Matematika, Fisika, Ilmu Komputer, Kedokteran), 18 komponen animasi, dan Framer Motion ditambahkan untuk chrome UI. Beberapa artikel memerlukan widget kedua karena satu animasi panjang meninggalkan pertanyaan yang bisa dijawab oleh widget sekunder yang terfokus.
+Setiap widget interaktif adalah komponen React client yang mandiri di bawah `components/animations/`, tidak berbagi state global — masing-masing mengelola lifecycle play/pause/reset-nya sendiri secara independen. Hook Intersection Observer bersama memicu setiap animasi hanya ketika pembaca menggulir ke dalamnya, sehingga tidak ada yang berjalan di luar layar membakar siklus. Satu registry memetakan nama widget ke komponen agar MDX dapat merujuknya berdasarkan nama.
 
-### Static-first dengan komponen client yang selektif
+### Tidak ada library animasi untuk sains itu sendiri
 
-Halaman adalah server component secara default. Hanya blok animasi, bilah kemajuan membaca, toggle tema, dan wrapper Framer Motion yang `'use client'`. Payload HTML awal ringan dan sepenuhnya dapat diindeks.
+Semua logika animasi — menggambar canvas, pembaruan path SVG, loop `requestAnimationFrame` — ditulis tangan. Framer Motion hanya digunakan untuk chrome UI: entrance kartu, spring hover, hero dot-grid beranda — tidak pernah untuk visualisasi sains interaktif itu sendiri. Ini adalah constraint yang disengaja untuk menjaga ukuran bundle dapat diprediksi dan rendering deterministik; simulasi fisika seharusnya tidak mewarisi perilaku penjadwalan dari library animasi tujuan umum.
+
+### Re-platforming tanpa merusak yang sudah berfungsi
+
+Target deployment berpindah dari Vercel ke static export GitHub Pages penuh di tengah jalan, yang berarti menambahkan `output: 'export'`, `trailingSlash: true`, dan base path `/scimotion` dengan jalan keluar untuk domain kustom di masa depan. Beberapa rute perlu ditandai `force-static`, dan CI kini menjalankan gerbang type-check dan lint sebelum publikasi, sehingga regresi tertangkap sebelum dirilis, bukan sesudahnya.
 
 ## Hasil
 
-38 commit, empat hari pengembangan aktif. 15 artikel MDX, 18 komponen animasi yang dikode tangan (simulasi berbasis canvas, visualizer step-through SVG, widget histogram), palet gelap hangat yang menggantikan skema navy dingin awal setelah implementasi pertama terasa steril untuk konten sains, dan sistem berbagi sosial dengan salin clipboard dan umpan balik toast. Dikonfigurasi untuk deployment zero-config di Vercel.
+146 commit selama kurang lebih lima minggu, sebagian besar terkonsentrasi dalam sembilan hari pembangunan aktif. Yang dimulai sebagai proof of concept 5 artikel menjadi pustaka sungguhan: 86 artikel di 8 bidang, didukung 172 komponen animasi yang dikode tangan — simulasi canvas gerak Brown, pendulum, dan eksperimen celah ganda, visualizer step-through SVG untuk binary search dan rumus Euler, widget data untuk Central Limit Theorem dan diagram Hubble — kurang lebih dua widget per artikel. Setiap artikel dilengkapi kuis pilihan ganda, callout key-takeaway, dan daftar isi otomatis; semuanya dirangkai oleh 9 learning path terkurasi, sistem tag, dan pencarian teks penuh. Perubahan palet di tengah pembangunan menggantikan tema gelap navy dingin awal dengan yang lebih hangat setelah implementasi pertama terasa steril untuk konten sains — perubahan yang menyentuh setiap komponen bersama, bukan sekadar file konfigurasi. Langsung di `andifathulms.github.io/scimotion`.

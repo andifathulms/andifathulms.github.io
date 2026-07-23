@@ -1,31 +1,33 @@
-# Scimotion
-
 ## The problem
 
 Science writing has a gap: equations and diagrams sit flat on the page, but the concepts they represent are dynamic. A reader can memorize the Fourier transform formula without ever grasping why decomposing a signal works. Existing science media either goes too shallow (pop-sci videos) or too deep (academic papers with no visuals). Scimotion targets curious non-specialists — students, self-learners, professionals from adjacent fields — who want real conceptual depth and the ability to manipulate the thing they're trying to understand.
 
 ## The approach
 
-### MDX + gray-matter as the content layer
+### MDX as the content layer, with a compiler-enforced taxonomy
 
-Articles are `.mdx` files with YAML frontmatter. The data layer (`lib/articles.ts`) reads frontmatter at build time using `gray-matter`, enabling fully static article listing with zero database. Article bodies are rendered server-side via `next-mdx-remote` with `remark-math` and `rehype-katex` piped in, so KaTeX equations render without any client-side JavaScript.
+Articles are `.mdx` files with YAML frontmatter, read at build time by `gray-matter` for a fully static article listing with zero database. As the field taxonomy grew from 4 to 8 — splitting Biology out of Medicine, adding Chemistry, Earth & Climate, and Astronomy & Cosmology as first-class fields — keeping colors, descriptions, and slug logic in sync across the homepage, the field directory, and every badge became a real risk. The fix was making `lib/topics.ts` the single source of truth, typed as `Record<Topic, …>` maps, so a new field simply won't compile until every map fully describes it — turning a documentation-discipline problem into one the type system enforces.
 
-### One animation component per article — self-contained
+### A boundary between the filesystem and the browser bundle
 
-Every interactive widget is a self-contained React client component under `components/animations/`. They share zero global state — each manages its own play/pause/reset lifecycle independently. A shared `useAnimationTrigger` hook based on `IntersectionObserver` fires each animation when the user scrolls 30% into the viewport. Nothing runs off-screen.
+Because the site ships as a static export, a stray `fs` import reaching client code breaks the build. `lib/topics.ts` is deliberately kept free of any filesystem access, while `lib/articles.ts` — which does read the content directory — never gets imported by a client component. That boundary is documented in-file specifically so a future change doesn't collapse it back together.
 
-### No animation library for science widgets
+### Learning paths as a separate ordering layer
 
-All animation logic — canvas drawing, SVG path updates, `requestAnimationFrame` loops — is hand-written. Framer Motion is used only for UI chrome: card spring-hover effects and stagger entrance animations on the homepage hero. This was a deliberate constraint to keep bundle size predictable and rendering deterministic. A physics simulation shouldn't depend on how a UI animation library handles its internal scheduler.
+`lib/paths.ts` defines 9 curated, ordered reading sequences, each article belonging to exactly one path so prev/next navigation stays unambiguous. The ordering itself is intentional and explained in code comments — for instance, why kinetics precedes acids and bases, since Ka is an equilibrium constant that only makes sense after the kinetics groundwork.
 
-### Static-first with selective client components
+### Self-contained animation components, triggered only when visible
 
-Pages are server components by default. Only animation blocks, the reading progress bar, the theme toggle, and Framer Motion wrappers are `'use client'`. The initial HTML payload is lean and fully indexable.
+Every interactive widget is a self-contained React client component under `components/animations/`, sharing zero global state — each manages its own play/pause/reset lifecycle independently. A shared Intersection Observer hook fires each animation only once the reader scrolls into it, so nothing runs off-screen burning cycles. A single registry maps widget names to components for MDX to reference by name.
 
-### Scope beyond the original spec
+### No animation library for the science itself
 
-The PRD specified one animation per article, five articles total, and no animation library. Shipped: 15 articles across four topic areas (Mathematics, Physics, Computer Science, Medicine), 18 animation components, and Framer Motion added for UI chrome. Several articles warranted a second widget — for example, the Sieve of Eratosthenes article has a prime gap visualization alongside the main sieve animation, because a single long animation left questions a focused secondary widget could answer.
+All animation logic — canvas drawing, SVG path updates, `requestAnimationFrame` loops — is hand-written. Framer Motion is used only for UI chrome: card entrances, hover springs, the homepage dot-grid hero — never for the interactive science visualizations themselves. That's a deliberate constraint to keep bundle size predictable and rendering deterministic; a physics simulation shouldn't inherit the scheduling behavior of a general-purpose animation library.
+
+### Re-platforming without breaking what already worked
+
+The deployment target moved from Vercel to a fully static GitHub Pages export partway through, which meant adding `output: 'export'`, `trailingSlash: true`, and a `/scimotion` base path with an escape hatch for a future custom domain. Several routes needed to be marked `force-static`, and CI now runs a type-check and lint gate before publishing, so a regression is caught before it ships rather than after.
 
 ## Outcome
 
-38 commits, four days of active development. 15 MDX articles, 18 hand-coded animation components (canvas-based simulations, SVG step-through visualisers, histogram widgets), a warm dark palette that replaced the original cold navy scheme after seeing the first implementation felt sterile for science content, and a social share system with clipboard copy and toast feedback. Configured for Vercel zero-config deployment.
+146 commits over roughly five weeks, most of it concentrated into nine active building days. What started as a 5-article proof of concept became a genuine library: 86 articles across 8 fields, backed by 172 hand-coded animation components — canvas simulations of Brownian motion and a pendulum and the double-slit experiment, SVG step-through visualizers for binary search and Euler's formula, data widgets for the Central Limit Theorem and the Hubble diagram — roughly two widgets per article. Every article ships with a multiple-choice quiz, key-takeaway callouts, and an auto-generated table of contents; the whole thing is threaded together by 9 curated learning paths, a tag system, and full-text search. A mid-build palette pivot replaced an initially cold navy dark theme with a warmer one after the first implementation felt sterile for science content — a change that touched every shared component, not just a config file. Live at `andifathulms.github.io/scimotion`.
