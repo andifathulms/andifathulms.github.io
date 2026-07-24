@@ -1,0 +1,33 @@
+## The problem
+
+The Hadith corpus is the second most important body of text in Islam after the Quran, but it's much harder to study analytically. Existing sites are good readers but offer almost nothing for the questions serious students actually ask: who narrated this hadith, and how reliable was each person in the chain? Where do two different chains for the "same" hadith converge or diverge? Which narrators sit at the center of the whole transmission network? A hard constraint shapes the whole product: the platform never issues its own religious verdicts. Arabic text is shown exactly as sourced, and every reliability grade is attributed to a classical scholar, never asserted by the app.
+
+## The approach
+
+### A split-brain architecture built for precomputation
+
+A Django/DRF API owns all data and heavy computation; a separate Next.js frontend is a pure presentation layer talking to it over REST. Hadith analytics — counts, similarity, centrality — are expensive over a corpus of tens of thousands of rows, but the corpus itself is essentially static. So the design pushes everything into management commands and Celery jobs that populate materialized tables, and request-time handlers only ever read precomputed rows. That's the core performance decision the rest of the system builds on.
+
+### Extracting chains that were never structured to begin with
+
+The source dataset ships hadith text but no structured narrator graph. Rather than hand-transcribe chains, a heuristic parser segments the isnad region of each Arabic matn using transmission verbs — حدثنا ("narrated to us"), عن ("from") — and pulls out narrator names to build a teacher-to-student edge graph. This is explicitly framed as a structural heuristic, not a scholarly authority, with provenance disclaimers surfaced in the UI rather than presented as settled fact. Getting it right was the hardest problem in the build: a long tail of commits fights text-parsing artifacts — stronger name cleaning so chains actually carry narrators instead of stray matn fragments, dropping fragment narrators, collapsing unnamed (mubham) narrators into a sentinel rather than inventing an identity for them.
+
+### The right renderer for the right graph size
+
+A single hadith's chain is a handful of nodes, so it renders in React Flow for rich per-node interactivity. The global narrator network is hundreds of nodes and up — React Flow doesn't scale to that — so it renders on a D3-force canvas instead. That split was written into the spec from the start rather than discovered as a performance problem after the fact.
+
+### Integrity as an architectural rule, not a UI feature
+
+Grades always carry attribution to the scholar who issued them; narrators default to "not yet assessed" rather than a color that could be misread as a verdict; unnamed narrators collapse into a sentinel instead of being invented. These aren't one-off polish passes — they show up as recurring, deliberate commits throughout the build, including a dedicated pass to unify the grading color palette after an earlier version's colors carried unintended implications.
+
+### Shipping finished backend work that had no frontend yet
+
+Partway through, it became clear the backend had six working analytics endpoints with no surface for a user to actually reach them. A full sprint pivoted from building new systems to exposing the ones that already worked — the grade-distribution explorer, the word-frequency tool, the corpus dashboard, the parallel-narrations panel, and the centrality leaderboard all landed in that single wave, rather than being built and shipped incrementally as they were finished.
+
+### AI scoped down to what could ship honestly
+
+The original plan called for embedding-based semantic topic search. What shipped instead is a curated topic browser over real, uncapped counts — no OpenAI dependency, no embeddings infrastructure. A pragmatic call to ship real value the corpus actually supports rather than add cost and complexity for a feature that would have been harder to keep honest.
+
+## Outcome
+
+86 commits, solo, over an intense five-day build — about 5,100 lines of frontend TypeScript and 3,800 lines of backend Python, spanning 19 Django models and roughly 30 REST endpoints across 18 frontend route pages. The shipped feature set outgrew the original spec: models like `HadithGrading`, `WordFrequencyHadith`, `NarratorStats`, `BookGradeStats`, and a full `Collection`/`ReadingHistory` personal layer weren't in the original schema. A complete production pipeline exists — GitHub Actions builds backend and frontend images to GHCR on every push to `main`, with CI running lint, migration checks, and tests — but the corpus depends on running the ingestion pipeline locally, so this is best described as production-ready and staged for launch rather than a live public service yet.

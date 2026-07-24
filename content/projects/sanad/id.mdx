@@ -1,0 +1,33 @@
+## Permasalahan
+
+Korpus Hadis adalah kumpulan teks terpenting kedua dalam Islam setelah Al-Quran, tetapi jauh lebih sulit dipelajari secara analitis. Situs yang ada adalah pembaca yang baik tetapi hampir tidak menawarkan apa pun untuk pertanyaan yang benar-benar diajukan pelajar serius: siapa yang meriwayatkan hadis ini, dan seberapa dapat dipercaya setiap orang dalam sanadnya? Di mana dua sanad berbeda untuk hadis yang "sama" bertemu atau berpisah? Perawi mana yang berada di pusat seluruh jaringan periwayatan? Satu batasan keras membentuk seluruh produk: platform tidak pernah mengeluarkan vonis keagamaannya sendiri. Teks Arab ditampilkan persis seperti sumbernya, dan setiap tingkat kesahihan dilekatkan pada ulama klasik, tidak pernah diklaim oleh aplikasi.
+
+## Pendekatan
+
+### Arsitektur split-brain yang dibangun untuk pra-komputasi
+
+API Django/DRF memiliki semua data dan komputasi berat; frontend Next.js terpisah adalah lapisan presentasi murni yang berbicara dengannya melalui REST. Analitik hadis — hitungan, kemiripan, sentralitas — mahal terhadap korpus puluhan ribu baris, tetapi korpusnya sendiri pada dasarnya statis. Maka desainnya mendorong semuanya ke perintah manajemen dan job Celery yang mengisi tabel termaterialisasi, dan handler saat request hanya pernah membaca baris pra-terhitung. Itulah keputusan performa inti yang menjadi fondasi sistem lainnya.
+
+### Mengekstrak sanad yang sejak awal tidak terstruktur
+
+Dataset sumber menyediakan teks hadis tetapi tanpa graf perawi terstruktur. Alih-alih mentranskripsi sanad secara manual, parser heuristik mensegmentasi region isnad dari setiap matn Arab menggunakan kata kerja periwayatan — حدثنا ("meriwayatkan kepada kami"), عن ("dari") — dan mengambil nama perawi untuk membangun graf edge guru-ke-murid. Ini secara eksplisit dibingkai sebagai heuristik struktural, bukan otoritas keilmuan, dengan disclaimer provenansi ditampilkan di UI alih-alih disajikan sebagai fakta yang settled. Membuatnya benar adalah masalah tersulit dalam pembangunan: rangkaian panjang commit melawan artefak parsing teks — pembersihan nama yang lebih kuat agar sanad benar-benar membawa perawi bukan fragmen matn yang nyasar, membuang perawi fragmen, meruntuhkan perawi tak bernama (mubham) menjadi sentinel alih-alih mengarang identitas untuk mereka.
+
+### Renderer yang tepat untuk ukuran graf yang tepat
+
+Sanad satu hadis adalah segelintir node, sehingga dirender di React Flow untuk interaktivitas per-node yang kaya. Jaringan perawi global berjumlah ratusan node ke atas — React Flow tidak skalabel ke jumlah itu — sehingga dirender di canvas D3-force sebagai gantinya. Pemisahan itu ditulis dalam spesifikasi sejak awal, bukan ditemukan sebagai masalah performa belakangan.
+
+### Integritas sebagai aturan arsitektural, bukan fitur UI
+
+Tingkat kesahihan selalu membawa atribusi ke ulama yang mengeluarkannya; perawi secara default "belum dinilai" alih-alih warna yang bisa disalahartikan sebagai vonis; perawi tak bernama diruntuhkan menjadi sentinel alih-alih diciptakan. Ini bukan sentuhan akhir satu kali — muncul sebagai commit berulang dan disengaja sepanjang pembangunan, termasuk pass khusus untuk menyatukan palet warna grading setelah warna versi sebelumnya membawa implikasi yang tidak diinginkan.
+
+### Merilis kerja backend yang selesai tetapi belum punya frontend
+
+Di tengah jalan, menjadi jelas bahwa backend memiliki enam endpoint analitik yang berfungsi tanpa permukaan bagi pengguna untuk benar-benar menjangkaunya. Satu sprint penuh berpindah dari membangun sistem baru menjadi mengekspos yang sudah berfungsi — explorer distribusi grade, alat frekuensi kata, dashboard korpus, panel parallel-narrations, dan leaderboard sentralitas semuanya mendarat dalam satu gelombang itu, alih-alih dibangun dan dirilis bertahap seiring selesainya.
+
+### AI diturunkan cakupannya ke yang bisa dirilis secara jujur
+
+Rencana awal meminta pencarian topik semantik berbasis embedding. Yang dirilis alih-alih adalah topic browser terkurasi atas hitungan nyata yang tidak dibatasi — tanpa dependensi OpenAI, tanpa infrastruktur embedding. Keputusan pragmatis untuk merilis nilai nyata yang benar-benar didukung korpus alih-alih menambah biaya dan kompleksitas untuk fitur yang akan lebih sulit dijaga kejujurannya.
+
+## Hasil
+
+86 commit, solo, selama pembangunan lima hari yang intens — sekitar 5.100 baris TypeScript frontend dan 3.800 baris Python backend, mencakup 19 model Django dan kurang lebih 30 endpoint REST di 18 halaman rute frontend. Kumpulan fitur yang dirilis melampaui spesifikasi awal: model seperti `HadithGrading`, `WordFrequencyHadith`, `NarratorStats`, `BookGradeStats`, dan lapisan personal `Collection`/`ReadingHistory` penuh tidak ada dalam skema awal. Pipeline produksi lengkap ada — GitHub Actions membangun image backend dan frontend ke GHCR pada setiap push ke `main`, dengan CI menjalankan lint, pemeriksaan migrasi, dan test — tetapi korpus bergantung pada menjalankan pipeline ingestion secara lokal, sehingga ini paling tepat digambarkan sebagai siap produksi dan menunggu peluncuran, bukan layanan publik yang sudah langsung.

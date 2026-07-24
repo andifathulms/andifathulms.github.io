@@ -1,0 +1,28 @@
+{
+  "slug": "sanad",
+  "title": "Sanad",
+  "tagline": "Hadith reader and analysis platform — interactive narrator-chain graphs, corpus analytics, and honest scholar-attributed grading",
+  "categoryTags": [
+    "Personal Project",
+    "Web App",
+    "Data Platform"
+  ],
+  "techStack": [
+    "Django",
+    "Next.js",
+    "TypeScript",
+    "PostgreSQL",
+    "NetworkX",
+    "Celery",
+    "Redis",
+    "React Flow"
+  ],
+  "status": "active",
+  "role": "Fullstack Developer",
+  "timeframe": "Jun 2026",
+  "liveUrl": null,
+  "githubUrl": "https://github.com/andifathulms/sanad",
+  "heroImage": "/images/projects/sanad/hero.jpeg",
+  "order": 17,
+  "featured": false
+}
