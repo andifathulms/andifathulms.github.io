@@ -14,7 +14,7 @@ export default function ProjectCard({ project, privateBadgeLabel }: ProjectCardP
   return (
     <Link
       href={`/work/${project.slug}`}
-      className="group block border-t border-gold/20 pt-6 pb-6 hover:border-gold/40 transition-all duration-300 hover:-translate-y-1"
+      className="group flex h-full flex-col border-t border-gold/20 pt-6 pb-6 hover:border-gold/40 transition-all duration-300 hover:-translate-y-1"
     >
       {/* Hero image */}
       <div className="aspect-video bg-navy/50 border border-cream/5 rounded overflow-hidden mb-5 relative">
@@ -52,7 +52,9 @@ export default function ProjectCard({ project, privateBadgeLabel }: ProjectCardP
       </h3>
       <p className="text-sm text-cream/60 mb-4 leading-relaxed">{project.tagline}</p>
 
-      <TechStackChips stack={project.techStack} maxVisible={4} />
+      <div className="mt-auto pt-4">
+        <TechStackChips stack={project.techStack} maxVisible={4} />
+      </div>
     </Link>
   );
 }

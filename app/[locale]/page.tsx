@@ -122,7 +122,7 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const featuredProjects = getFeaturedProjects();
+  const featuredProjects = getFeaturedProjects(6);
 
   return (
     <>
