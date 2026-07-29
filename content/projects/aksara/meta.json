@@ -1,0 +1,28 @@
+{
+  "slug": "aksara",
+  "title": "Aksara",
+  "tagline": "Knowledge management platform for Indonesia's new-capital authority — a searchable home for OIKN's regulations, reports, and studies with an internal submit-and-approve workflow behind it",
+  "categoryTags": [
+    "Government",
+    "Knowledge Platform",
+    "Web App"
+  ],
+  "techStack": [
+    "Django",
+    "React",
+    "TypeScript",
+    "PostgreSQL",
+    "Celery",
+    "Redis",
+    "Keycloak",
+    "Docker"
+  ],
+  "status": "active",
+  "role": "Fullstack Developer",
+  "timeframe": "Jul 2026",
+  "liveUrl": "https://aksara.ikn.go.id",
+  "githubUrl": null,
+  "heroImage": "/images/projects/aksara/hero.jpeg",
+  "order": 1,
+  "featured": true
+}

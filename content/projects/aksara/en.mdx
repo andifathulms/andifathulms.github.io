@@ -1,0 +1,33 @@
+# Aksara
+
+## The problem
+
+OIKN (Otorita Ibu Kota Nusantara) produces a high volume of institutional knowledge across ten Eselon-1 units — regulations, technical reports, academic studies, field knowledge — but the previous system had it effectively locked away. Nothing was findable: there was no global search, and the listing was a raw DataTable, so staff went back to asking colleagues for files over chat. Contributing was painful: a two-step, overly long form with no draft support, so knowledge simply never got uploaded. And managers were blind — no overview of what existed, what was pending review, or which units were actually contributing.
+
+Three audiences share the same platform: the **public** (citizens, researchers, press browsing published knowledge without logging in), **OIKN staff** (uploading and consuming internal material), and **knowledge managers** (verifiers, curators, and admins who approve, organise, and report on it). The hard constraint that shaped everything: much of this material is *not* public. Regulations are open; internal evaluations are staff-only; some unit documents are restricted to the owning directorate. Every listing, search result, homepage highlight, and file download had to be access-filtered on the server, per requesting user, without ever leaking a title or a file URL to someone who shouldn't see it.
+
+## The approach
+
+### A two-ID system for every knowledge product
+
+Internally each product is a UUID from the moment it's a draft. On *first publish* it also gets a public code — `AKS-2026-0042-K7mP` — and that code is what appears in the public URL (`/pengetahuan/AKS-2026-0042-K7mP`). Public URLs must be permanent and citable, but drafts and rejected items must have no guessable public address, and a title-based slug would break the moment someone fixed a typo. The sequential part is allocated under a row lock so two simultaneous publishes can't collide, and codes are reserved forever — never recycled, and reactivated if a product is unpublished then republished.
+
+### Access control lives in the queryset, not the UI
+
+Three levels — Publik / Internal OIKN / Terbatas — are resolved server-side against the user's work unit, echelon, roles, and any approved time-boxed access grants. The browser is never sent a restricted document and asked to hide it. Even file downloads go through an access-checked endpoint rather than a raw `/media/` path — that was a security fix mid-build, after realising attachment URLs were directly enumerable. Direct-linking a restricted item as a logged-out visitor renders a full block page that leaks nothing.
+
+### Workflow status is system-managed
+
+Draft → Menunggu Verifikasi → Menunggu Kurasi → Terpublikasi (plus Dikembalikan / Ditolak) can only change through transition services, never a manual field edit. The two-stage review runs on split-screen verification and curation queues with three decisions each — approve, return with a mandatory note, or reject. Every transition, return note, and admin intervention is appended to an immutable per-document timeline ("Riwayat Alur"), alongside a global audit log. Edit-after-publish keeps the live version public until the revision is re-curated.
+
+### Search behind an interface
+
+Postgres full-text search (GIN indexes, ranked, highlighted) is the shipped backend, but call sites talk to a `SearchBackend` abstraction so Elasticsearch can be dropped in later without touching views. A `pg_trgm` trigram fallback handles typos and powers a "did you mean" recovery built from previously-successful queries. Every filter, page, and sort lives in the URL as a query param, so a filtered result set is bookmarkable, shareable, and survives a refresh — important for a discovery-first product where people send each other links.
+
+### Portal-per-role, and a federated JDIH feed
+
+The PRD offered a role-switcher navigation model; two days in it was replaced with portal-per-role — Kontributor, Verifikator, Kurator, and Administrator each get their own named portal and sidebar — because "Ganti Peran" read as a mode toggle rather than a place, and multi-role users kept losing track of which hat they were wearing. National legal-documentation (JDIH) records are indexed as light metadata via a daily Celery sync and live-fetched server-side with an hour cache and graceful-degradation fallback; regulations are merged inline into the main discovery listing rather than sitting in a separate silo. The integration is read-only and one-way — the API key never leaves the server.
+
+## Outcome
+
+Deployed and running for OIKN, with the public portal serving open knowledge to any visitor. Built solo from an empty repo — 109 commits over roughly two and a half weeks — spanning 14 Django apps, ~30 data models, 66 API endpoints documented via OpenAPI, and a 36-page React SPA (~12,800 lines of TypeScript) across the public portal and backoffice, backed by 156 backend tests concentrated on the two genuinely dangerous surfaces: the access-control rules and the AKS-ID generation logic. The stack is deliberately boring — no ML, no vector search, no second datastore. "Recommended knowledge" is rule-based by design, because for a government client, being able to explain exactly why a system produced an output matters more than squeezing out marginal accuracy.

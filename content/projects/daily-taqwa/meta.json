@@ -10,6 +10,6 @@
   "liveUrl": "https://dailytaqwa.kotacerdas.id/login",
   "githubUrl": "https://github.com/thdoikn/daily-taqwa.git",
   "heroImage": "/images/projects/daily-taqwa/hero.jpg",
-  "order": 1,
-  "featured": true
+  "order": 1.5,
+  "featured": false
 }

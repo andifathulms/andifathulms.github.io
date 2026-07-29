@@ -1,0 +1,33 @@
+# Aksara
+
+## Permasalahan
+
+OIKN (Otorita Ibu Kota Nusantara) menghasilkan pengetahuan institusional dalam jumlah besar di sepuluh unit Eselon-1 — regulasi, laporan teknis, kajian akademik, pengetahuan lapangan — tetapi sistem sebelumnya membuatnya praktis terkunci. Tidak ada yang bisa ditemukan: tanpa pencarian global, dan daftarnya berupa DataTable mentah, sehingga staf kembali menanyakan file ke rekan lewat chat. Berkontribusi terasa menyakitkan: formulir dua langkah yang terlalu panjang tanpa dukungan draf, sehingga pengetahuan sama sekali tidak pernah terunggah. Dan para manajer buta — tidak ada gambaran apa yang tersedia, apa yang menunggu review, atau unit mana yang benar-benar berkontribusi.
+
+Tiga audiens berbagi platform yang sama: **publik** (warga, peneliti, pers yang menjelajahi pengetahuan terpublikasi tanpa login), **staf OIKN** (mengunggah dan mengonsumsi materi internal), dan **pengelola pengetahuan** (verifikator, kurator, dan admin yang menyetujui, menata, dan melaporkannya). Kendala keras yang membentuk semuanya: sebagian besar materi ini *tidak* publik. Regulasi bersifat terbuka; evaluasi internal hanya untuk staf; sebagian dokumen unit dibatasi pada direktorat pemiliknya. Setiap daftar, hasil pencarian, sorotan beranda, dan unduhan file harus difilter akses di sisi server, per pengguna yang meminta, tanpa pernah membocorkan judul atau URL file kepada orang yang tidak berhak melihatnya.
+
+## Pendekatan
+
+### Sistem dua-ID untuk setiap produk pengetahuan
+
+Secara internal, setiap produk adalah UUID sejak menjadi draf. Pada *publikasi pertama*, ia juga mendapat kode publik — `AKS-2026-0042-K7mP` — dan kode itulah yang muncul di URL publik (`/pengetahuan/AKS-2026-0042-K7mP`). URL publik harus permanen dan dapat disitasi, tetapi draf dan item yang ditolak tidak boleh punya alamat publik yang bisa ditebak, dan slug berbasis judul akan rusak begitu seseorang membetulkan salah ketik. Bagian sekuensial dialokasikan di bawah row lock agar dua publikasi bersamaan tidak bertabrakan, dan kode dicadangkan selamanya — tidak pernah didaur ulang, dan diaktifkan kembali jika produk di-unpublish lalu dipublikasikan ulang.
+
+### Kontrol akses hidup di queryset, bukan di UI
+
+Tiga level — Publik / Internal OIKN / Terbatas — diselesaikan di sisi server terhadap unit kerja, eselon, peran pengguna, dan pemberian akses berbatas waktu yang telah disetujui. Browser tidak pernah dikirimi dokumen terbatas lalu diminta menyembunyikannya. Bahkan unduhan file melewati endpoint yang diperiksa akses, bukan path `/media/` mentah — itu adalah perbaikan keamanan di tengah pembangunan, setelah menyadari URL lampiran bisa dienumerasi langsung. Membuka tautan langsung item terbatas sebagai pengunjung yang belum login memunculkan halaman blokir penuh yang tidak membocorkan apa pun.
+
+### Status alur kerja dikelola sistem
+
+Draft → Menunggu Verifikasi → Menunggu Kurasi → Terpublikasi (ditambah Dikembalikan / Ditolak) hanya bisa berubah melalui layanan transisi, tidak pernah lewat edit field manual. Review dua tahap berjalan pada antrian verifikasi dan kurasi layar-terbagi dengan tiga keputusan masing-masing — setujui, kembalikan dengan catatan wajib, atau tolak. Setiap transisi, catatan pengembalian, dan intervensi admin ditambahkan ke timeline per-dokumen yang tak bisa diubah ("Riwayat Alur"), berdampingan dengan log audit global. Edit-setelah-publish menjaga versi live tetap publik sampai revisi dikurasi ulang.
+
+### Pencarian di balik antarmuka
+
+Postgres full-text search (indeks GIN, terperingkat, tersorot) adalah backend yang dikirim, tetapi call site berbicara ke abstraksi `SearchBackend` sehingga Elasticsearch bisa dipasang belakangan tanpa menyentuh view. Fallback trigram `pg_trgm` menangani salah ketik dan menggerakkan pemulihan "did you mean" yang dibangun dari kueri yang sebelumnya berhasil. Setiap filter, halaman, dan urutan hidup di URL sebagai query param, sehingga hasil terfilter bisa di-bookmark, dibagikan, dan bertahan saat refresh — penting untuk produk yang mengutamakan penemuan, tempat orang saling mengirim tautan.
+
+### Portal-per-peran, dan feed JDIH terfederasi
+
+PRD menawarkan model navigasi role-switcher; dua hari berjalan, ia diganti dengan portal-per-peran — Kontributor, Verifikator, Kurator, dan Administrator masing-masing mendapat portal dan sidebar bernama sendiri — karena "Ganti Peran" terbaca sebagai sakelar mode alih-alih sebuah tempat, dan pengguna multi-peran terus kehilangan jejak peran mana yang sedang dipakainya. Catatan dokumentasi hukum nasional (JDIH) diindeks sebagai metadata ringan lewat sinkronisasi Celery harian dan diambil live di sisi server dengan cache satu jam serta fallback degradasi yang anggun; regulasi digabung inline ke daftar penemuan utama alih-alih berada di silo terpisah. Integrasinya read-only dan satu arah — kunci API tidak pernah meninggalkan server.
+
+## Hasil
+
+Ter-deploy dan berjalan untuk OIKN, dengan portal publik menyajikan pengetahuan terbuka kepada setiap pengunjung. Dibangun sendiri dari repo kosong — 109 commit dalam kurang lebih dua setengah minggu — mencakup 14 aplikasi Django, ~30 model data, 66 endpoint API yang terdokumentasi via OpenAPI, dan SPA React 36 halaman (~12.800 baris TypeScript) di sisi portal publik dan backoffice, didukung 156 tes backend yang dipusatkan pada dua permukaan yang benar-benar berbahaya: aturan kontrol akses dan logika pembangkitan AKS-ID. Stack-nya sengaja membosankan — tanpa ML, tanpa vector search, tanpa datastore kedua. "Pengetahuan yang direkomendasikan" berbasis aturan secara desain, karena bagi klien pemerintah, kemampuan menjelaskan persis mengapa sebuah sistem menghasilkan suatu keluaran lebih penting daripada mengejar akurasi marginal.
