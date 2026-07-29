@@ -15,12 +15,12 @@
     "Docker",
     "Recharts"
   ],
-  "status": "private",
+  "status": "active",
   "role": "Fullstack Developer",
   "timeframe": "Jun 2026",
-  "liveUrl": null,
+  "liveUrl": "https://dataintegrator.ikn.go.id",
   "githubUrl": null,
-  "heroImage": "/images/projects/dashboard-sakti/cover.svg",
+  "heroImage": "/images/projects/dashboard-sakti/hero.jpeg",
   "order": 7,
   "featured": false
 }
