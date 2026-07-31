@@ -1,43 +1,67 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import type { ProjectMeta } from '@/lib/content';
 import ProjectCard from './ProjectCard';
 
-type Filter = 'all' | 'government' | 'independent';
+type Filter = 'all' | 'government' | 'independent' | 'live';
+const VALID: Filter[] = ['all', 'government', 'independent', 'live'];
 
-function groupOf(project: ProjectMeta): Exclude<Filter, 'all'> {
+function groupOf(project: ProjectMeta): 'government' | 'independent' {
   return project.categoryTags.includes('Government') ? 'government' : 'independent';
+}
+
+function isLive(project: ProjectMeta): boolean {
+  return Boolean(project.liveUrl) && !project.liveIsStaging;
 }
 
 export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
   const t = useTranslations('work');
   const [filter, setFilter] = useState<Filter>('all');
 
-  const counts = useMemo(() => {
-    const gov = projects.filter((p) => groupOf(p) === 'government').length;
-    return { all: projects.length, government: gov, independent: projects.length - gov };
-  }, [projects]);
+  // Deep-link support: /work?filter=government (e.g. from the home stat band).
+  useEffect(() => {
+    const f = new URLSearchParams(window.location.search).get('filter');
+    if (f && VALID.includes(f as Filter)) setFilter(f as Filter);
+  }, []);
+
+  const selectFilter = (f: Filter) => {
+    setFilter(f);
+    // Keep the URL shareable without a full navigation.
+    const qs = f === 'all' ? '' : `?filter=${f}`;
+    window.history.replaceState(null, '', window.location.pathname + qs);
+  };
+
+  const government = useMemo(() => projects.filter((p) => groupOf(p) === 'government'), [projects]);
+  const independent = useMemo(() => projects.filter((p) => groupOf(p) === 'independent'), [projects]);
+  const live = useMemo(() => projects.filter(isLive), [projects]);
+
+  const counts: Record<Filter, number> = {
+    all: projects.length,
+    government: government.length,
+    independent: independent.length,
+    live: live.length,
+  };
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t('filter_all') },
     { key: 'government', label: t('filter_government') },
     { key: 'independent', label: t('filter_independent') },
+    { key: 'live', label: t('filter_live') },
   ];
-
-  const government = projects.filter((p) => groupOf(p) === 'government');
-  const independent = projects.filter((p) => groupOf(p) === 'independent');
 
   const sections =
     filter === 'government'
-      ? [{ key: 'government' as const, label: t('filter_government'), items: government }]
+      ? [{ key: 'government', label: t('filter_government'), items: government }]
       : filter === 'independent'
-        ? [{ key: 'independent' as const, label: t('filter_independent'), items: independent }]
-        : [
-            { key: 'government' as const, label: t('filter_government'), items: government },
-            { key: 'independent' as const, label: t('filter_independent'), items: independent },
-          ];
+        ? [{ key: 'independent', label: t('filter_independent'), items: independent }]
+        : filter === 'live'
+          ? [{ key: 'live', label: t('filter_live'), items: live }]
+          : [
+              { key: 'government', label: t('filter_government'), items: government },
+              { key: 'independent', label: t('filter_independent'), items: independent },
+            ];
 
   return (
     <>
@@ -49,7 +73,7 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
             <button
               key={key}
               type="button"
-              onClick={() => setFilter(key)}
+              onClick={() => selectFilter(key)}
               aria-pressed={active}
               className={`font-mono text-xs px-3.5 py-1.5 rounded border transition-colors ${
                 active
