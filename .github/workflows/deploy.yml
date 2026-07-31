@@ -32,6 +32,9 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
+          # Optional privacy analytics — set repo variable GOATCOUNTER_URL to
+          # https://YOURCODE.goatcounter.com/count to enable. Unset = disabled.
+          NEXT_PUBLIC_GOATCOUNTER_URL: ${{ vars.GOATCOUNTER_URL }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5

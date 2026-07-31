@@ -8,6 +8,7 @@ import { routing } from '@/i18n/routing';
 import { SITE_URL, SITE_NAME, PERSON } from '@/lib/site';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import Analytics from '@/components/Analytics';
 import '../globals.css';
 
 const fraunces = Fraunces({
@@ -138,6 +139,7 @@ export default async function LocaleLayout({
             {children}
           </main>
           <Footer />
+          <Analytics />
         </NextIntlClientProvider>
       </body>
     </html>
