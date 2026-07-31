@@ -140,6 +140,12 @@
     "availability": "Di luar pekerjaan pemerintahan, sesekali saya mengerjakan proyek freelance — aplikasi web dan tools internal untuk tim yang membutuhkan pemikiran jernih dan eksekusi solid.",
     "stack_title": "Tools yang saya gunakan",
     "connect_label": "Temukan saya",
+    "pull_quote": "Saya suka sistem yang berfungsi — scope jelas, terdokumentasi, dan mudah dikembangkan orang berikutnya.",
+    "stack_frontend": "Frontend",
+    "stack_backend": "Backend",
+    "stack_infra": "Data & Infrastruktur",
+    "selected_work_label": "Proyek pilihan",
+    "view_all_work": "Lihat semua proyek",
     "cta_title": "Mari bekerja bersama",
     "cta_body": "Jika Anda memiliki proyek yang membutuhkan pemikiran jernih dan eksekusi solid — saya ingin mendengarnya.",
     "cta_button": "Hubungi saya"

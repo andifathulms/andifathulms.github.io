@@ -140,6 +140,12 @@
     "availability": "Outside my government work, I occasionally take on freelance projects — web applications and internal tools for teams that need clear thinking and solid execution.",
     "stack_title": "Tools I reach for",
     "connect_label": "Find me",
+    "pull_quote": "I like systems that work — clearly scoped, well documented, and easy for the next person to extend.",
+    "stack_frontend": "Frontend",
+    "stack_backend": "Backend",
+    "stack_infra": "Data & Infrastructure",
+    "selected_work_label": "Selected work",
+    "view_all_work": "View all projects",
     "cta_title": "Let's work together",
     "cta_body": "If you have a project that needs clear thinking and solid execution — I'd like to hear about it.",
     "cta_button": "Get in touch"

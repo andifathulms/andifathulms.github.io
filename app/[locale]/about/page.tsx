@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import StackIcon from '@/components/StackIcon';
 import SocialLinks from '@/components/SocialLinks';
+import { getFeaturedProjects, getPortfolioStats } from '@/lib/content';
 
 export async function generateMetadata({
   params,
@@ -20,11 +21,6 @@ export async function generateMetadata({
   };
 }
 
-const stack = [
-  'Next.js', 'Django', 'TypeScript', 'React', 'PostgreSQL',
-  'Redis', 'Celery', 'Tailwind CSS', 'Node.js', 'Python', 'Docker',
-];
-
 export default async function AboutPage({
   params,
 }: {
@@ -33,8 +29,24 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'about' });
+  const ts = await getTranslations({ locale, namespace: 'home.stats' });
 
   const hasPhoto = existsSync(path.join(process.cwd(), 'public/images/about/photo.jpg'));
+  const stats = getPortfolioStats();
+  const featured = getFeaturedProjects(4);
+
+  const statItems = [
+    { value: stats.total, label: ts('systems_shipped') },
+    { value: stats.government, label: ts('government') },
+    { value: stats.independent, label: ts('independent') },
+    { value: stats.live, label: ts('live') },
+  ];
+
+  const stackGroups = [
+    { label: t('stack_frontend'), items: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'] },
+    { label: t('stack_backend'), items: ['Django', 'Python', 'Node.js', 'Celery'] },
+    { label: t('stack_infra'), items: ['PostgreSQL', 'Redis', 'Docker'] },
+  ];
 
   return (
     <div className="pt-28 pb-24 px-6">
@@ -90,6 +102,27 @@ export default async function AboutPage({
           </div>
         </div>
 
+        {/* Stats echo — instant credibility for direct landings */}
+        <div className="border-y border-gold/20 py-6 mb-16">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            {statItems.map((s) => (
+              <div key={s.label}>
+                <p className="font-heading text-2xl md:text-3xl font-medium text-gold leading-none mb-1.5">
+                  {s.value}
+                </p>
+                <p className="text-xs text-cream/50 leading-snug">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Positioning statement */}
+        <figure className="max-w-3xl mb-16 border-l-2 border-gold/50 pl-6">
+          <blockquote className="font-heading text-2xl md:text-3xl font-medium text-cream/90 leading-snug">
+            {t('pull_quote')}
+          </blockquote>
+        </figure>
+
         <div className="max-w-2xl">
           {/* 2. Bio paragraphs */}
           <div className="space-y-6 text-cream/75 leading-relaxed">
@@ -107,24 +140,63 @@ export default async function AboutPage({
             <p className="text-cream/70 leading-relaxed">{t('availability')}</p>
           </div>
 
-          {/* 4. Tech stack */}
+          {/* 4. Tech stack — grouped by layer */}
           <div className="border-t border-gold/20 mt-14 pt-10">
-            <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-5">
+            <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-6">
               {t('stack_title')}
             </p>
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-4 gap-y-6">
-              {stack.map((tech) => (
-                <div key={tech} className="flex flex-col items-center gap-2">
-                  <StackIcon name={tech} className="w-6 h-6 text-cream/50" />
-                  <span className="font-mono text-xs text-cream/40 text-center leading-tight">
-                    {tech}
-                  </span>
+            <div className="space-y-8">
+              {stackGroups.map((group) => (
+                <div key={group.label}>
+                  <p className="font-mono text-xs text-cream/40 mb-4">{group.label}</p>
+                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-4 gap-y-6">
+                    {group.items.map((tech) => (
+                      <div key={tech} className="flex flex-col items-center gap-2">
+                        <StackIcon name={tech} className="w-6 h-6 text-cream/50" />
+                        <span className="font-mono text-xs text-cream/40 text-center leading-tight">
+                          {tech}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 5. CTA */}
+          {/* 5. Selected work — connect the narrative to real projects */}
+          {featured.length > 0 && (
+            <div className="border-t border-gold/20 mt-14 pt-10">
+              <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-5">
+                {t('selected_work_label')}
+              </p>
+              <div className="flex flex-wrap gap-2.5 mb-5">
+                {featured.map((project) => (
+                  <Link
+                    key={project.slug}
+                    href={`/work/${project.slug}`}
+                    className="group inline-flex items-center gap-1.5 rounded border border-cream/15 px-3.5 py-2 text-sm text-cream/70 transition-colors hover:border-gold/50 hover:text-gold"
+                  >
+                    {project.title}
+                    <span
+                      aria-hidden="true"
+                      className="text-gold opacity-50 transition-opacity group-hover:opacity-100"
+                    >
+                      →
+                    </span>
+                  </Link>
+                ))}
+              </div>
+              <Link
+                href="/work"
+                className="text-sm text-gold hover:text-gold/80 transition-colors"
+              >
+                {t('view_all_work')} →
+              </Link>
+            </div>
+          )}
+
+          {/* 6. CTA */}
           <div className="border-t border-gold/20 mt-14 pt-10">
             <h2 className="font-heading text-2xl font-medium text-cream mb-3">
               {t('cta_title')}
