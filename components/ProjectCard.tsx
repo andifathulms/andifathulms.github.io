@@ -49,6 +49,12 @@ export default function ProjectCard({ project, privateBadgeLabel }: ProjectCardP
 
       <h3 className="font-heading text-xl font-medium text-cream mb-1.5 group-hover:text-gold transition-colors">
         {project.title}
+        <span
+          aria-hidden="true"
+          className="ml-1.5 inline-block text-gold opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 motion-reduce:transition-none motion-reduce:translate-x-0"
+        >
+          →
+        </span>
       </h3>
       <p className="text-sm text-cream/60 mb-4 leading-relaxed">{project.tagline}</p>
 
