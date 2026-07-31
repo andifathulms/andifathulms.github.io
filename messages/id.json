@@ -111,7 +111,11 @@
     "next_project": "Proyek berikutnya",
     "prev_project": "Proyek sebelumnya",
     "all_projects": "Semua proyek",
-    "results_label": "Hasil"
+    "results_label": "Hasil",
+    "access_internal": "Perlu login",
+    "access_internal_hint": "Sistem internal — perlu login; tidak dapat dilihat publik.",
+    "access_registration": "Registrasi terbuka",
+    "access_registration_hint": "Perlu login, tetapi siapa pun dapat mendaftar sendiri."
   },
   "about": {
     "title": "Tentang",

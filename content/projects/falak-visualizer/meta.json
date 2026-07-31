@@ -24,5 +24,6 @@
   "githubUrl": "https://github.com/andifathulms/falak-visualizer",
   "heroImage": "/images/projects/falak-visualizer/hero.jpeg",
   "order": 15,
-  "featured": false
+  "featured": false,
+  "access": "public"
 }

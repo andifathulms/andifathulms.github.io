@@ -9,6 +9,9 @@ interface QuickFactsStripProps {
 export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
   const t = useTranslations('case_study');
   const isPrivate = project.status === 'private';
+  // Access badge only makes sense when there's a public URL to click through to.
+  const accessBadge =
+    project.liveUrl && project.access && project.access !== 'public' ? project.access : null;
 
   return (
     <div className="border-y border-gold/20 py-6 my-10">
@@ -74,6 +77,26 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
                   {t('view_live')} ↗
                 </a>
               ))}
+            {accessBadge === 'internal' && (
+              <span
+                title={t('access_internal_hint')}
+                className="font-mono text-xs text-cream/45 border border-cream/15 px-3 py-1.5 rounded inline-flex items-center gap-1.5"
+              >
+                <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <rect x="2.5" y="6" width="9" height="6" rx="1" stroke="currentColor" strokeWidth="1.2" />
+                  <path d="M4.5 6V4.5a2.5 2.5 0 015 0V6" stroke="currentColor" strokeWidth="1.2" />
+                </svg>
+                {t('access_internal')}
+              </span>
+            )}
+            {accessBadge === 'registration' && (
+              <span
+                title={t('access_registration_hint')}
+                className="font-mono text-xs text-gold/70 border border-gold/25 px-3 py-1.5 rounded inline-flex items-center gap-1.5"
+              >
+                {t('access_registration')}
+              </span>
+            )}
             {Array.isArray(project.githubUrl)
               ? project.githubUrl.map((url, i) => (
                   <a

@@ -27,5 +27,6 @@
   ],
   "heroImage": "/images/projects/jdih/hero.jpeg",
   "order": 5,
-  "featured": true
+  "featured": true,
+  "access": "public"
 }

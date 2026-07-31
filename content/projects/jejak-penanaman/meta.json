@@ -23,5 +23,6 @@
   "githubUrl": "https://github.com/thdoikn/jejak-penanaman",
   "heroImage": "/images/projects/jejak-penanaman/hero.jpeg",
   "order": 6,
-  "featured": false
+  "featured": false,
+  "access": "registration"
 }

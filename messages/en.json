@@ -111,7 +111,11 @@
     "next_project": "Next project",
     "prev_project": "Previous project",
     "all_projects": "All projects",
-    "results_label": "Outcomes"
+    "results_label": "Outcomes",
+    "access_internal": "Login required",
+    "access_internal_hint": "Internal system — sign-in required; not publicly viewable.",
+    "access_registration": "Open registration",
+    "access_registration_hint": "Sign-in required, but anyone can self-register."
   },
   "about": {
     "title": "About",

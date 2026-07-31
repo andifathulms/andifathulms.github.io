@@ -2,8 +2,20 @@
   "slug": "daily-taqwa",
   "title": "Daily Taqwa",
   "tagline": "Tamper-resistant prayer attendance system for ~2,000 OIKN government employees at Masjid Negara IKN",
-  "categoryTags": ["Government", "Internal Tool", "Web App"],
-  "techStack": ["Django", "Next.js", "TypeScript", "PostgreSQL", "Redis", "Docker", "Keycloak"],
+  "categoryTags": [
+    "Government",
+    "Internal Tool",
+    "Web App"
+  ],
+  "techStack": [
+    "Django",
+    "Next.js",
+    "TypeScript",
+    "PostgreSQL",
+    "Redis",
+    "Docker",
+    "Keycloak"
+  ],
   "status": "active",
   "role": "Fullstack Developer",
   "timeframe": "Apr – Jun 2026",
@@ -11,5 +23,6 @@
   "githubUrl": "https://github.com/thdoikn/daily-taqwa.git",
   "heroImage": "/images/projects/daily-taqwa/hero.jpg",
   "order": 1.5,
-  "featured": false
+  "featured": false,
+  "access": "internal"
 }

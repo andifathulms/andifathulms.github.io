@@ -25,5 +25,6 @@
   "githubUrl": "https://github.com/thdoikn/lantara-v2",
   "heroImage": "/images/projects/lantara/hero.jpeg",
   "order": 2,
-  "featured": true
+  "featured": true,
+  "access": "public"
 }

@@ -22,5 +22,6 @@
   "githubUrl": null,
   "heroImage": "/images/projects/dashboard-sakti/hero.jpeg",
   "order": 7,
-  "featured": false
+  "featured": false,
+  "access": "internal"
 }

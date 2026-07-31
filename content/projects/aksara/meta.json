@@ -24,5 +24,6 @@
   "githubUrl": null,
   "heroImage": "/images/projects/aksara/hero.jpeg",
   "order": 1,
-  "featured": true
+  "featured": true,
+  "access": "public"
 }

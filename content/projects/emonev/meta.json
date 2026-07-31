@@ -27,5 +27,6 @@
   ],
   "heroImage": "/images/projects/emonev/hero.jpeg",
   "order": 4,
-  "featured": false
+  "featured": false,
+  "access": "internal"
 }

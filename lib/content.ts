@@ -12,6 +12,13 @@ export interface ProjectMeta {
   timeframe?: string;
   liveUrl: string | null;
   liveIsStaging?: boolean;
+  /**
+   * Access level of the live URL:
+   * - 'public': freely viewable (default when omitted)
+   * - 'internal': login wall, nothing visible without credentials
+   * - 'registration': login wall, but anyone can self-register
+   */
+  access?: 'public' | 'internal' | 'registration';
   githubUrl: string | string[] | null;
   heroImage: string;
   order?: number;

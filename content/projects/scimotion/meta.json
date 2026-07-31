@@ -22,5 +22,6 @@
   "githubUrl": null,
   "heroImage": "/images/projects/scimotion/hero.jpeg",
   "order": 10,
-  "featured": true
+  "featured": true,
+  "access": "public"
 }

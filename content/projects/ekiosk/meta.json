@@ -27,5 +27,6 @@
   ],
   "heroImage": "/images/projects/ekiosk/hero.jpeg",
   "order": 3,
-  "featured": false
+  "featured": false,
+  "access": "internal"
 }
