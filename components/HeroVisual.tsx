@@ -5,7 +5,7 @@
  */
 export default function HeroVisual() {
   return (
-    <div className="relative aspect-square w-full max-w-sm mx-auto" aria-hidden="true">
+    <div className="hero-visual relative aspect-square w-full max-w-sm mx-auto" aria-hidden="true">
       <svg
         viewBox="0 0 340 340"
         fill="none"
@@ -13,18 +13,15 @@ export default function HeroVisual() {
         role="presentation"
       >
         {/* faint concentric hairline frames for depth */}
-        <rect x="8" y="8" width="324" height="324" rx="16" stroke="currentColor" strokeOpacity="0.08" />
-        <rect x="40" y="40" width="260" height="260" rx="10" stroke="currentColor" strokeOpacity="0.14" />
+        <rect className="hv-fade" x="8" y="8" width="324" height="324" rx="16" stroke="currentColor" strokeOpacity="0.08" />
+        <rect className="hv-fade" x="40" y="40" width="260" height="260" rx="10" stroke="currentColor" strokeOpacity="0.14" />
 
-        {/* clay accent tick — small nod to the secondary accent */}
-        <line x1="170" y1="12" x2="170" y2="34" stroke="var(--color-clay)" strokeOpacity="0.5" strokeWidth="2" />
-
-        {/* gold corner brackets (the logo-mark motif) */}
+        {/* gold corner brackets (the logo-mark motif) — stroke-draw in */}
         <g stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeOpacity="0.85">
-          <path d="M40 84 V40 H84" />
-          <path d="M256 40 H300 V84" />
-          <path d="M300 256 V300 H256" />
-          <path d="M84 300 H40 V256" />
+          <path className="hv-draw" pathLength={1} d="M40 84 V40 H84" />
+          <path className="hv-draw" pathLength={1} d="M256 40 H300 V84" />
+          <path className="hv-draw" pathLength={1} d="M300 256 V300 H256" />
+          <path className="hv-draw" pathLength={1} d="M84 300 H40 V256" />
         </g>
 
         {/* serif A */}
@@ -32,7 +29,7 @@ export default function HeroVisual() {
           x="170"
           y="228"
           textAnchor="middle"
-          className="font-heading"
+          className="font-heading hv-a"
           fontSize="180"
           fontWeight="500"
           fill="currentColor"
