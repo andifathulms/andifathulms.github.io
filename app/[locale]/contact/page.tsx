@@ -1,5 +1,9 @@
+import { existsSync } from 'fs';
+import path from 'path';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
+import CopyButton from '@/components/CopyButton';
+import { CONTACT } from '@/lib/site';
 
 export async function generateMetadata({
   params,
@@ -23,6 +27,10 @@ export default async function ContactPage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'contact' });
 
+  const mailto = `mailto:${CONTACT.email}?subject=${encodeURIComponent(t('email_subject'))}`;
+  const whatsapp = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(t('whatsapp_message'))}`;
+  const hasResume = existsSync(path.join(process.cwd(), 'public', CONTACT.resumePath.replace(/^\//, '')));
+
   return (
     <div className="pt-28 pb-24 px-6">
       <div className="max-w-5xl mx-auto">
@@ -34,31 +42,72 @@ export default async function ContactPage({
           <p className="text-cream/70 leading-relaxed mb-12">{t('body')}</p>
 
           <div className="flex flex-col gap-4 mb-12">
+            {/* Email */}
             <div className="border-t border-gold/20 pt-5">
               <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-2">
                 {t('email_label')}
               </p>
-              <a
-                href="mailto:officialandifathul@gmail.com"
-                className="text-cream hover:text-gold transition-colors"
-              >
-                officialandifathul@gmail.com
-              </a>
+              <div className="flex items-center gap-3 flex-wrap">
+                <a
+                  href={mailto}
+                  className="text-cream hover:text-gold transition-colors"
+                >
+                  {CONTACT.email}
+                </a>
+                <CopyButton
+                  value={CONTACT.email}
+                  copyLabel={t('copy')}
+                  copiedLabel={t('copied')}
+                />
+              </div>
             </div>
 
+            {/* WhatsApp */}
             <div className="border-t border-gold/20 pt-5">
               <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-2">
                 {t('whatsapp_label')}
               </p>
               <a
-                href="https://wa.me/6281234567890"
+                href={whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-cream hover:text-gold transition-colors"
               >
-                WhatsApp ↗
+                {t('whatsapp_cta')}
               </a>
             </div>
+
+            {/* LinkedIn */}
+            <div className="border-t border-gold/20 pt-5">
+              <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-2">
+                {t('linkedin_label')}
+              </p>
+              <a
+                href={CONTACT.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cream hover:text-gold transition-colors"
+              >
+                {t('linkedin_cta')}
+              </a>
+            </div>
+
+            {/* Résumé — only rendered when the PDF is present */}
+            {hasResume && (
+              <div className="border-t border-gold/20 pt-5">
+                <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-2">
+                  {t('resume_label')}
+                </p>
+                <a
+                  href={CONTACT.resumePath}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cream hover:text-gold transition-colors"
+                >
+                  {t('resume_download')} ↓
+                </a>
+              </div>
+            )}
           </div>
 
           <p className="font-mono text-xs text-cream/30 border-t border-gold/10 pt-6">
