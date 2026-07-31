@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -10,14 +11,37 @@ import {
   getProjectContent,
   getAdjacentProjects,
   getProjectScreenshots,
+  extractHeadings,
+  readingTimeMinutes,
+  slugify,
 } from '@/lib/content';
 import { routing } from '@/i18n/routing';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import QuickFactsStrip from '@/components/QuickFactsStrip';
 import MetricsStrip from '@/components/MetricsStrip';
 import ReadingProgress from '@/components/ReadingProgress';
+import CaseStudyToc from '@/components/CaseStudyToc';
 import TechStackChips from '@/components/TechStackChips';
 import ScreenshotGallery from '@/components/ScreenshotGallery';
+
+// Flatten heading children to a string so the anchor id matches the TOC slug.
+function nodeText(node: ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(nodeText).join('');
+  if (node && typeof node === 'object' && 'props' in node) {
+    return nodeText((node as { props: { children?: ReactNode } }).props.children);
+  }
+  return '';
+}
+
+const mdxComponents = {
+  h2: ({ children }: { children?: ReactNode }) => (
+    <h2 id={slugify(nodeText(children))}>{children}</h2>
+  ),
+  h3: ({ children }: { children?: ReactNode }) => (
+    <h3 id={slugify(nodeText(children))}>{children}</h3>
+  ),
+};
 
 export function generateStaticParams() {
   const slugs = getAllProjectSlugs();
@@ -77,6 +101,8 @@ export default async function CaseStudyPage({
   const t = await getTranslations({ locale, namespace: 'case_study' });
   const { prev, next } = getAdjacentProjects(slug);
   const screenshots = getProjectScreenshots(slug);
+  const toc = extractHeadings(content);
+  const readingMinutes = readingTimeMinutes(content);
 
   return (
     <article className="pt-28 pb-24">
@@ -116,14 +142,19 @@ export default async function CaseStudyPage({
       </div>
 
       <div className="max-w-5xl mx-auto px-6">
-        {/* Back to work index */}
-        <Link
-          href="/work"
-          className="group mt-6 inline-flex items-center gap-1.5 font-mono text-xs text-cream/40 hover:text-gold transition-colors"
-        >
-          <span className="transition-transform group-hover:-translate-x-0.5">←</span>
-          {t('all_projects')}
-        </Link>
+        {/* Back to work index + reading time */}
+        <div className="mt-6 flex items-center justify-between gap-4">
+          <Link
+            href="/work"
+            className="group inline-flex items-center gap-1.5 font-mono text-xs text-cream/40 hover:text-gold transition-colors"
+          >
+            <span className="transition-transform group-hover:-translate-x-0.5">←</span>
+            {t('all_projects')}
+          </Link>
+          <span className="font-mono text-xs text-cream/40">
+            {t('min_read', { min: readingMinutes })}
+          </span>
+        </div>
 
         {/* Quick facts */}
         <QuickFactsStrip project={project} />
@@ -133,9 +164,18 @@ export default async function CaseStudyPage({
           <MetricsStrip metrics={project.metrics} label={t('results_label')} />
         )}
 
-        {/* MDX content */}
-        <div className="prose-case-study max-w-2xl">
-          <MDXRemote source={content} />
+        {/* Body + sticky table of contents */}
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
+          <div className="prose-case-study max-w-2xl">
+            <MDXRemote source={content} components={mdxComponents} />
+          </div>
+          {toc.length > 1 && (
+            <aside className="hidden lg:block">
+              <div className="sticky top-24">
+                <CaseStudyToc items={toc} label={t('on_this_page')} />
+              </div>
+            </aside>
+          )}
         </div>
 
         {/* Screenshots gallery */}
@@ -150,6 +190,20 @@ export default async function CaseStudyPage({
           </p>
           <TechStackChips stack={project.techStack} maxVisible={20} size="md" />
         </div>
+
+        {/* Conversion CTA */}
+        <section className="border-t border-gold/20 mt-16 pt-12 text-center">
+          <h2 className="font-heading text-2xl md:text-3xl font-medium text-cream mb-3">
+            {t('cta_title')}
+          </h2>
+          <p className="text-cream/60 mb-6 max-w-md mx-auto">{t('cta_body')}</p>
+          <Link
+            href="/contact"
+            className="inline-block px-7 py-3 bg-gold text-navy text-sm font-medium rounded hover:bg-gold/90 transition-colors"
+          >
+            {t('cta_button')}
+          </Link>
+        </section>
 
         {/* Next / prev navigation */}
         {(prev || next) && (

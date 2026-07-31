@@ -116,7 +116,12 @@
     "access_internal": "Perlu login",
     "access_internal_hint": "Sistem internal — perlu login; tidak dapat dilihat publik.",
     "access_registration": "Registrasi terbuka",
-    "access_registration_hint": "Perlu login, tetapi siapa pun dapat mendaftar sendiri."
+    "access_registration_hint": "Perlu login, tetapi siapa pun dapat mendaftar sendiri.",
+    "on_this_page": "Di halaman ini",
+    "min_read": "{min} mnt baca",
+    "cta_title": "Punya proyek serupa?",
+    "cta_body": "Jika Anda butuh sistem yang dibangun dengan ketelitian yang sama — scope jelas, eksekusi solid — mari bicara.",
+    "cta_button": "Mulai percakapan"
   },
   "about": {
     "title": "Tentang",

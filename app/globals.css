@@ -143,6 +143,19 @@ body {
   margin-bottom: 1rem;
 }
 
+/* Anchor jumps (TOC) should clear the fixed header. */
+.prose-case-study h2,
+.prose-case-study h3 {
+  scroll-margin-top: 6rem;
+}
+
+/* Lead-in: style the first body paragraph as an editorial lead. */
+.prose-case-study > h2:first-of-type + p {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: rgba(232, 227, 216, 0.92);
+}
+
 .prose-case-study h3 {
   font-family: var(--font-fraunces), Lora, Georgia, serif;
   font-size: 1.125rem;

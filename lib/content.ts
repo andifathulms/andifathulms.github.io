@@ -92,6 +92,47 @@ export function getProjectContent(slug: string, locale: string): string | null {
   return raw.replace(/^#\s+.+\n+/, '');
 }
 
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export interface TocItem {
+  level: 2 | 3;
+  text: string;
+  slug: string;
+}
+
+/** Pull h2/h3 headings from MDX source for the table of contents (skips code fences). */
+export function extractHeadings(mdx: string): TocItem[] {
+  const items: TocItem[] = [];
+  let inFence = false;
+  for (const raw of mdx.split('\n')) {
+    const line = raw.trim();
+    if (line.startsWith('```')) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+    const m = /^(#{2,3})\s+(.*)$/.exec(line);
+    if (m) {
+      const level = m[1].length as 2 | 3;
+      const text = m[2].replace(/[*_`]/g, '').trim();
+      items.push({ level, text, slug: slugify(text) });
+    }
+  }
+  return items;
+}
+
+/** Rough reading-time estimate at ~200 words/min. */
+export function readingTimeMinutes(mdx: string): number {
+  const words = mdx.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+}
+
 export function getAllProjectSlugs(): string[] {
   if (!fs.existsSync(PROJECTS_DIR)) return [];
   return fs

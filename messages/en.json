@@ -116,7 +116,12 @@
     "access_internal": "Login required",
     "access_internal_hint": "Internal system — sign-in required; not publicly viewable.",
     "access_registration": "Open registration",
-    "access_registration_hint": "Sign-in required, but anyone can self-register."
+    "access_registration_hint": "Sign-in required, but anyone can self-register.",
+    "on_this_page": "On this page",
+    "min_read": "{min} min read",
+    "cta_title": "Have a project like this?",
+    "cta_body": "If you need a system built with the same care — clear scope, solid execution — let's talk.",
+    "cta_button": "Start a conversation"
   },
   "about": {
     "title": "About",
