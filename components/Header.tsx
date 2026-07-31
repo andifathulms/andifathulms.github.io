@@ -56,7 +56,7 @@ export default function Header() {
                 key={href}
                 href={href}
                 aria-current={active ? 'page' : undefined}
-                className={`text-sm transition-colors ${
+                className={`nav-link text-sm transition-colors ${
                   active ? 'text-gold' : 'text-cream/70 hover:text-cream'
                 }`}
               >

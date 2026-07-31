@@ -103,6 +103,32 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Animated gold underline for header nav links (hover + active page). */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 1px;
+  background-color: var(--color-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.nav-link:hover::after,
+.nav-link[aria-current='page']::after {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-link::after {
+    transition: none;
+  }
+}
+
 /* MDX prose styles for case study content */
 .prose-case-study {
   color: #E8E3D8;
