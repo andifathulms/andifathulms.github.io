@@ -15,6 +15,7 @@ import { routing } from '@/i18n/routing';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import QuickFactsStrip from '@/components/QuickFactsStrip';
 import MetricsStrip from '@/components/MetricsStrip';
+import ReadingProgress from '@/components/ReadingProgress';
 import TechStackChips from '@/components/TechStackChips';
 import ScreenshotGallery from '@/components/ScreenshotGallery';
 
@@ -79,6 +80,7 @@ export default async function CaseStudyPage({
 
   return (
     <article className="pt-28 pb-24">
+      <ReadingProgress />
       {/* Hero banner */}
       <div className="relative aspect-video md:aspect-[21/6] bg-navy/50 mb-0 overflow-hidden">
         {project.heroImage && (
