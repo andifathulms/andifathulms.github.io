@@ -1,14 +1,15 @@
 import { useTranslations } from 'next-intl';
 import type { PortfolioStats } from '@/lib/content';
+import CountUp from './CountUp';
 
 export default function StatBand({ stats }: { stats: PortfolioStats }) {
   const t = useTranslations('home.stats');
 
   const items = [
-    { value: `${stats.total}`, label: t('systems_shipped') },
-    { value: `${stats.government}`, label: t('government') },
-    { value: `${stats.independent}`, label: t('independent') },
-    { value: `${stats.live}`, label: t('live') },
+    { value: stats.total, label: t('systems_shipped') },
+    { value: stats.government, label: t('government') },
+    { value: stats.independent, label: t('independent') },
+    { value: stats.live, label: t('live') },
   ];
 
   return (
@@ -19,7 +20,7 @@ export default function StatBand({ stats }: { stats: PortfolioStats }) {
             <div key={item.label}>
               <dt className="sr-only">{item.label}</dt>
               <dd className="font-heading text-4xl md:text-5xl font-medium text-gold leading-none mb-2.5">
-                {item.value}
+                <CountUp end={item.value} />
               </dd>
               <p className="text-sm text-cream/55 leading-snug">{item.label}</p>
             </div>
