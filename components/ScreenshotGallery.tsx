@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import type { ProjectScreenshot } from '@/lib/content';
 
@@ -14,6 +14,8 @@ interface Props {
 export default function ScreenshotGallery({ screenshots, label }: Props) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   const hasMore = screenshots.length > GRID_LIMIT;
   const visible = showAll ? screenshots : screenshots.slice(0, GRID_LIMIT);
@@ -30,16 +32,51 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
 
   useEffect(() => {
     if (activeIndex === null) return;
+
+    // Remember what was focused so we can restore it when the lightbox closes.
+    triggerRef.current = document.activeElement as HTMLElement | null;
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
+      if (e.key === 'Escape') {
+        close();
+        return;
+      }
       if (e.key === 'ArrowLeft') prev();
       if (e.key === 'ArrowRight') next();
+      // Keep Tab focus inside the dialog.
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, a[href], [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement;
+        if (e.shiftKey && (active === first || !dialogRef.current.contains(active))) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
+
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    // Move focus into the dialog once it mounts.
+    const raf = requestAnimationFrame(() => {
+      dialogRef.current
+        ?.querySelector<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])')
+        ?.focus();
+    });
+
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      cancelAnimationFrame(raf);
+      // Return focus to the thumbnail that opened the lightbox.
+      triggerRef.current?.focus();
     };
   }, [activeIndex, close, prev, next]);
 
@@ -97,8 +134,12 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-6 md:p-12 bg-navy/90 backdrop-blur-sm"
           onClick={close}
+          role="dialog"
+          aria-modal="true"
+          aria-label={label}
         >
           <div
+            ref={dialogRef}
             className="relative w-full max-w-4xl flex flex-col gap-4"
             onClick={(e) => e.stopPropagation()}
           >
