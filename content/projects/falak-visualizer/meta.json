@@ -8,19 +8,19 @@
     "Astronomy"
   ],
   "techStack": [
-    "Django",
     "Next.js",
     "TypeScript",
-    "PostgreSQL",
     "D3.js",
-    "Celery",
-    "Redis",
-    "Docker"
+    "Web Workers",
+    "Python",
+    "Django",
+    "Vitest",
+    "GitHub Pages"
   ],
   "status": "active",
   "role": "Fullstack Developer",
   "timeframe": "Jul 2026",
-  "liveUrl": null,
+  "liveUrl": "https://andifathulms.github.io/falak-visualizer/",
   "githubUrl": "https://github.com/andifathulms/falak-visualizer",
   "heroImage": "/images/projects/falak-visualizer/hero.jpeg",
   "order": 15,
