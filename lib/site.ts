@@ -12,6 +12,14 @@ export const CONTACT = {
   resumePath: '/andi-fathul-mukminin-cv.pdf',
 };
 
+// Social / professional channels — surfaced on About, home, and footer.
+export const SOCIALS = [
+  { label: 'LinkedIn', href: 'https://linkedin.com/in/andifathulmukminin', icon: 'linkedin' },
+  { label: 'GitHub', href: 'https://github.com/andifathulms', icon: 'github' },
+  { label: 'TikTok', href: 'https://tiktok.com/@nusantaramapper', icon: 'tiktok' },
+  { label: 'Email', href: `mailto:${CONTACT.email}`, icon: 'email' },
+] as const;
+
 // Person behind the studio — used for JSON-LD structured data.
 export const PERSON = {
   name: 'Andi Fathul Mukminin',

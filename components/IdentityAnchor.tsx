@@ -3,6 +3,7 @@ import path from 'path';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import SocialLinks from './SocialLinks';
 
 function PhotoOrFallback({ hasPhoto }: { hasPhoto: boolean }) {
   if (hasPhoto) {
@@ -47,7 +48,7 @@ export default function IdentityAnchor() {
             <p className="text-cream/70 leading-relaxed mb-6 text-lg">
               {t('bio')}
             </p>
-            <div className="flex flex-wrap gap-2 mb-8">
+            <div className="flex flex-wrap gap-2 mb-6">
               {chips.map((chip) => (
                 <span
                   key={chip}
@@ -57,6 +58,7 @@ export default function IdentityAnchor() {
                 </span>
               ))}
             </div>
+            <SocialLinks className="mb-8" />
             <Link
               href="/about"
               className="text-sm text-gold hover:text-gold/80 transition-colors"

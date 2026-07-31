@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import StackIcon from '@/components/StackIcon';
+import SocialLinks from '@/components/SocialLinks';
 
 export async function generateMetadata({
   params,
@@ -77,6 +78,14 @@ export default async function AboutPage({
                   <span className="text-cream/75 text-sm">{value}</span>
                 </div>
               ))}
+            </div>
+
+            {/* Social / professional channels */}
+            <div className="mt-8">
+              <p className="font-mono text-xs text-gold/50 uppercase tracking-wider mb-3">
+                {t('connect_label')}
+              </p>
+              <SocialLinks />
             </div>
           </div>
         </div>
