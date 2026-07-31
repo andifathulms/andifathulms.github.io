@@ -26,10 +26,10 @@
   "order": 1,
   "featured": true,
   "metrics": [
+    { "value": "~2.5 wks", "label": "Scaffold to deployed staging" },
     { "value": "66", "label": "API endpoints, OpenAPI-documented" },
-    { "value": "36", "label": "React screens across portal & backoffice" },
-    { "value": "156", "label": "Backend tests on access & ID logic" },
-    { "value": "~2.5 wks", "label": "Solo, empty repo to deployed" }
+    { "value": "156", "label": "Backend tests on the riskiest logic" },
+    { "value": "43", "label": "OIKN work units modelled" }
   ],
   "access": "public"
 }

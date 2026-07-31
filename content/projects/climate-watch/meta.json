@@ -20,9 +20,10 @@
   "status": "active",
   "role": "Fullstack Developer",
   "timeframe": "Jul 2026",
-  "liveUrl": null,
+  "liveUrl": "https://andifathulms.github.io/climatewatch/",
   "githubUrl": "https://github.com/andifathulms/climatewatch",
   "heroImage": "/images/projects/climate-watch/hero.jpeg",
   "order": 14,
-  "featured": false
+  "featured": false,
+  "access": "public"
 }
