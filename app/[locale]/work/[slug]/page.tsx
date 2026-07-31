@@ -12,7 +12,9 @@ import {
   getProjectScreenshots,
 } from '@/lib/content';
 import { routing } from '@/i18n/routing';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
 import QuickFactsStrip from '@/components/QuickFactsStrip';
+import MetricsStrip from '@/components/MetricsStrip';
 import TechStackChips from '@/components/TechStackChips';
 import ScreenshotGallery from '@/components/ScreenshotGallery';
 
@@ -32,10 +34,28 @@ export async function generateMetadata({
   const project = getProjectMeta(slug);
   if (!project) return {};
 
-  const t = await getTranslations({ locale, namespace: 'case_study' });
+  // heroImage is a root-relative path; metadataBase (set in the locale layout)
+  // resolves it to an absolute URL for social cards.
+  const image = project.heroImage || '/og.png';
   return {
     title: project.title,
     description: project.tagline,
+    alternates: {
+      canonical: `/${locale}/work/${slug}`,
+    },
+    openGraph: {
+      type: 'article',
+      title: `${project.title} — ${SITE_NAME}`,
+      description: project.tagline,
+      url: `${SITE_URL}/${locale}/work/${slug}`,
+      images: [{ url: image, width: 1200, height: 630, alt: project.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${project.title} — ${SITE_NAME}`,
+      description: project.tagline,
+      images: [image],
+    },
   };
 }
 
@@ -94,8 +114,22 @@ export default async function CaseStudyPage({
       </div>
 
       <div className="max-w-5xl mx-auto px-6">
+        {/* Back to work index */}
+        <Link
+          href="/work"
+          className="group mt-6 inline-flex items-center gap-1.5 font-mono text-xs text-cream/40 hover:text-gold transition-colors"
+        >
+          <span className="transition-transform group-hover:-translate-x-0.5">←</span>
+          {t('all_projects')}
+        </Link>
+
         {/* Quick facts */}
         <QuickFactsStrip project={project} />
+
+        {/* Outcomes — only renders when meta.json declares metrics */}
+        {project.metrics && project.metrics.length > 0 && (
+          <MetricsStrip metrics={project.metrics} label={t('results_label')} />
+        )}
 
         {/* MDX content */}
         <div className="prose-case-study max-w-2xl">

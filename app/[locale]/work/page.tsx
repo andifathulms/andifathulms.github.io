@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
-import ProjectCard from '@/components/ProjectCard';
+import WorkGallery from '@/components/WorkGallery';
 import { getAllProjects } from '@/lib/content';
 
 export async function generateMetadata({
@@ -43,15 +43,7 @@ export default async function WorkPage({
             Projects coming soon.
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.slug}
-                project={project}
-                privateBadgeLabel={t('private_badge')}
-              />
-            ))}
-          </div>
+          <WorkGallery projects={projects} />
         )}
       </div>
     </div>
