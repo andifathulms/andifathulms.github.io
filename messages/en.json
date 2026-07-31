@@ -34,6 +34,10 @@
         {
           "title": "DevOps & Infrastructure",
           "description": "CI/CD, containerization, cloud deployment on Vercel, Railway, and VPS environments."
+        },
+        {
+          "title": "AI & Automation",
+          "description": "LLM-powered features, data pipelines, and workflow automation — from document intelligence to chatbots and reporting."
         }
       ]
     },
@@ -64,6 +68,12 @@
       ],
       "note": "This site itself was built this way. The PRD and technical spec that produced it are part of the repository."
     },
+    "stats": {
+      "systems_shipped": "Systems shipped",
+      "government": "Government platforms",
+      "independent": "Independent projects",
+      "live": "Live in production"
+    },
     "identity_anchor": {
       "label": "About me",
       "name": "Andi Fathul Mukminin",
@@ -83,7 +93,11 @@
   "work": {
     "title": "Work",
     "subtitle": "Case studies across government, startup, and independent projects.",
-    "private_badge": "Private / internal system"
+    "private_badge": "Private / internal system",
+    "filter_all": "All",
+    "filter_government": "Government",
+    "filter_independent": "Independent",
+    "count_label": "projects"
   },
   "case_study": {
     "role": "Role",
@@ -95,7 +109,9 @@
     "private_badge": "Private / internal system",
     "screenshots": "Screenshots",
     "next_project": "Next project",
-    "prev_project": "Previous project"
+    "prev_project": "Previous project",
+    "all_projects": "All projects",
+    "results_label": "Outcomes"
   },
   "about": {
     "title": "About",
@@ -123,6 +139,15 @@
     "body": "The fastest way to get a response is via email or WhatsApp. I'm based in Indonesia (WIB/UTC+7) and typically reply within one business day.",
     "email_label": "Email",
     "whatsapp_label": "WhatsApp",
+    "linkedin_label": "LinkedIn",
+    "resume_label": "Résumé",
+    "resume_download": "Download CV (PDF)",
+    "copy": "Copy",
+    "copied": "Copied",
+    "email_subject": "Project inquiry — via AFM Studio",
+    "whatsapp_message": "Hi Andi, I found your portfolio and I'd like to discuss a project.",
+    "whatsapp_cta": "Chat on WhatsApp ↗",
+    "linkedin_cta": "Connect on LinkedIn ↗",
     "note": "For project inquiries, a few sentences about what you're building and your timeline is enough to start. No formal brief required."
   },
   "footer": {

@@ -34,6 +34,10 @@
         {
           "title": "DevOps & Infrastruktur",
           "description": "CI/CD, containerisasi, deployment cloud di Vercel, Railway, dan lingkungan VPS."
+        },
+        {
+          "title": "AI & Otomasi",
+          "description": "Fitur berbasis LLM, pipeline data, dan otomasi alur kerja — dari document intelligence hingga chatbot dan pelaporan."
         }
       ]
     },
@@ -64,6 +68,12 @@
       ],
       "note": "Situs ini sendiri dibangun dengan cara ini. PRD dan spesifikasi teknis yang menghasilkannya adalah bagian dari repositori."
     },
+    "stats": {
+      "systems_shipped": "Sistem dikirim",
+      "government": "Platform pemerintah",
+      "independent": "Proyek mandiri",
+      "live": "Live di produksi"
+    },
     "identity_anchor": {
       "label": "Tentang saya",
       "name": "Andi Fathul Mukminin",
@@ -83,7 +93,11 @@
   "work": {
     "title": "Proyek",
     "subtitle": "Studi kasus dari proyek pemerintah, startup, dan mandiri.",
-    "private_badge": "Sistem privat / internal"
+    "private_badge": "Sistem privat / internal",
+    "filter_all": "Semua",
+    "filter_government": "Pemerintah",
+    "filter_independent": "Mandiri",
+    "count_label": "proyek"
   },
   "case_study": {
     "role": "Peran",
@@ -95,7 +109,9 @@
     "private_badge": "Sistem privat / internal",
     "screenshots": "Tangkapan Layar",
     "next_project": "Proyek berikutnya",
-    "prev_project": "Proyek sebelumnya"
+    "prev_project": "Proyek sebelumnya",
+    "all_projects": "Semua proyek",
+    "results_label": "Hasil"
   },
   "about": {
     "title": "Tentang",
@@ -123,6 +139,15 @@
     "body": "Cara tercepat untuk mendapat respons adalah melalui email atau WhatsApp. Saya berbasis di Indonesia (WIB/UTC+7) dan biasanya membalas dalam satu hari kerja.",
     "email_label": "Email",
     "whatsapp_label": "WhatsApp",
+    "linkedin_label": "LinkedIn",
+    "resume_label": "Resume",
+    "resume_download": "Unduh CV (PDF)",
+    "copy": "Salin",
+    "copied": "Tersalin",
+    "email_subject": "Pertanyaan proyek — via AFM Studio",
+    "whatsapp_message": "Halo Andi, saya menemukan portofolio Anda dan ingin mendiskusikan sebuah proyek.",
+    "whatsapp_cta": "Chat via WhatsApp ↗",
+    "linkedin_cta": "Terhubung di LinkedIn ↗",
     "note": "Untuk pertanyaan proyek, beberapa kalimat tentang apa yang Anda bangun dan timeline Anda sudah cukup untuk memulai. Tidak perlu brief formal."
   },
   "footer": {
