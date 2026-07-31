@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import type { PortfolioStats } from '@/lib/content';
 import CountUp from './CountUp';
 
@@ -6,26 +7,37 @@ export default function StatBand({ stats }: { stats: PortfolioStats }) {
   const t = useTranslations('home.stats');
 
   const items = [
-    { value: stats.total, label: t('systems_shipped') },
-    { value: stats.government, label: t('government') },
-    { value: stats.independent, label: t('independent') },
-    { value: stats.live, label: t('live') },
+    { value: stats.total, label: t('systems_shipped'), filter: 'all' },
+    { value: stats.government, label: t('government'), filter: 'government' },
+    { value: stats.independent, label: t('independent'), filter: 'independent' },
+    { value: stats.live, label: t('live'), filter: 'live' },
   ];
 
   return (
     <section className="border-t border-gold/20 py-16 px-6">
       <div className="max-w-5xl mx-auto">
-        <dl className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
           {items.map((item) => (
-            <div key={item.label}>
-              <dt className="sr-only">{item.label}</dt>
-              <dd className="font-heading text-4xl md:text-5xl font-medium text-gold leading-none mb-2.5">
+            <Link
+              key={item.label}
+              href={item.filter === 'all' ? '/work' : `/work?filter=${item.filter}`}
+              className="group block"
+            >
+              <span className="block font-heading text-4xl md:text-5xl font-medium text-gold leading-none mb-2.5">
                 <CountUp end={item.value} />
-              </dd>
-              <p className="text-sm text-cream/55 leading-snug">{item.label}</p>
-            </div>
+              </span>
+              <span className="inline-flex items-center gap-1 text-sm text-cream/55 transition-colors group-hover:text-cream">
+                {item.label}
+                <span
+                  aria-hidden="true"
+                  className="text-gold opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 motion-reduce:transition-none motion-reduce:translate-x-0"
+                >
+                  →
+                </span>
+              </span>
+            </Link>
           ))}
-        </dl>
+        </div>
       </div>
     </section>
   );
