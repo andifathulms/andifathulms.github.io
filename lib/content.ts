@@ -16,6 +16,30 @@ export interface ProjectMeta {
   heroImage: string;
   order?: number;
   featured?: boolean;
+  /** Optional headline outcomes shown near the top of the case study. */
+  metrics?: { value: string; label: string }[];
+}
+
+export interface PortfolioStats {
+  total: number;
+  government: number;
+  independent: number;
+  live: number;
+}
+
+/**
+ * Aggregate, verifiable counts derived from the real project set — no hardcoded
+ * marketing numbers, so the home stat band never drifts from the content.
+ */
+export function getPortfolioStats(): PortfolioStats {
+  const projects = getAllProjects().filter((p) => p.status !== 'placeholder');
+  const isGov = (p: ProjectMeta) => p.categoryTags.includes('Government');
+  return {
+    total: projects.length,
+    government: projects.filter(isGov).length,
+    independent: projects.filter((p) => !isGov(p)).length,
+    live: projects.filter((p) => p.liveUrl && !p.liveIsStaging).length,
+  };
 }
 
 const PROJECTS_DIR = path.join(process.cwd(), 'content', 'projects');

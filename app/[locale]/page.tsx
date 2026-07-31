@@ -3,11 +3,12 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import Hero from '@/components/Hero';
+import StatBand from '@/components/StatBand';
 import IdentityAnchor from '@/components/IdentityAnchor';
 import ServiceCard from '@/components/ServiceCard';
 import ProjectCard from '@/components/ProjectCard';
 import ProcessSection from '@/components/ProcessSection';
-import { getFeaturedProjects } from '@/lib/content';
+import { getFeaturedProjects, getPortfolioStats } from '@/lib/content';
 
 export async function generateMetadata({
   params,
@@ -25,7 +26,7 @@ export async function generateMetadata({
 function ServicesSection() {
   const t = useTranslations('home.services');
 
-  const items = [0, 1, 2, 3, 4].map((i) => ({
+  const items = [0, 1, 2, 3, 4, 5].map((i) => ({
     title: t(`items.${i}.title`),
     description: t(`items.${i}.description`),
   }));
@@ -123,10 +124,12 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
   const featuredProjects = getFeaturedProjects(6);
+  const stats = getPortfolioStats();
 
   return (
     <>
       <Hero />
+      <StatBand stats={stats} />
       <IdentityAnchor />
       <ServicesSection />
       <FeaturedWorkSection projects={featuredProjects} />
