@@ -2,6 +2,9 @@ import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import type { ProjectMeta } from '@/lib/content';
 import TechStackChips from './TechStackChips';
+import CardPreview from './CardPreview';
+
+const CARD_SIZES = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw';
 
 interface ProjectCardProps {
   project: ProjectMeta;
@@ -21,21 +24,14 @@ export default function ProjectCard({
       href={`/work/${project.slug}`}
       className="group flex h-full flex-col border-t border-gold/20 pt-6 pb-6 hover:border-gold/40 transition-all duration-300 hover:-translate-y-1"
     >
-      {/* Hero image */}
+      {/* Hero image + hover screenshot preview */}
       <div className="aspect-video bg-navy/50 border border-cream/5 rounded overflow-hidden mb-5 relative">
-        {project.heroImage ? (
-          <Image
-            src={project.heroImage}
-            alt={project.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover opacity-70 transition-transform duration-500 group-hover:scale-[1.04] group-hover:opacity-90"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="font-mono text-xs text-cream/20">no image</span>
-          </div>
-        )}
+        <CardPreview
+          hero={project.heroImage}
+          images={project.previewImages ?? []}
+          alt={project.title}
+          sizes={CARD_SIZES}
+        />
 
         {/* Live indicator — signals a reachable deployed site (matches the Live
             filter: production only, not staging). */}

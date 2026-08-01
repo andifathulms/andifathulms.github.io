@@ -23,6 +23,8 @@ export interface ProjectMeta {
   heroImage: string;
   /** App/logo icon, auto-detected from public/images/projects/<slug>/icon.*. */
   icon?: string | null;
+  /** First few screenshots, used for the card hover-preview carousel. */
+  previewImages?: string[];
   order?: number;
   featured?: boolean;
   /** Optional headline outcomes shown near the top of the case study. */
@@ -76,7 +78,12 @@ export function getAllProjects(): ProjectMeta[] {
       const metaPath = path.join(PROJECTS_DIR, slug, 'meta.json');
       if (!fs.existsSync(metaPath)) return null;
       const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
-      return { ...meta, slug, icon: getProjectIcon(slug) } as ProjectMeta;
+      return {
+        ...meta,
+        slug,
+        icon: getProjectIcon(slug),
+        previewImages: getProjectScreenshots(slug).slice(0, 4).map((s) => s.src),
+      } as ProjectMeta;
     })
     .filter((p): p is ProjectMeta => p !== null);
 
