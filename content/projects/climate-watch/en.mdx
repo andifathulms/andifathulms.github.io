@@ -1,12 +1,12 @@
 ## The problem
 
-Climate change is discussed constantly in the abstract, but almost nobody in Indonesia can point to their own city's actual numbers. Historical weather data exists through global reanalysis datasets, but it's raw, ungrouped, and inaccessible to a non-technical reader. Iklim's job is to take decades of daily temperature and rainfall records and turn them into charts a curious person, student, journalist, or farmer can read in seconds — not a spreadsheet they have to interpret themselves.
+Climate change is discussed constantly in the abstract, but almost nobody in Indonesia can point to their own city's actual numbers. Historical weather data exists through global reanalysis datasets, but it's raw, ungrouped, and inaccessible to a non-technical reader. ClimateWatch's job is to take decades of daily temperature and rainfall records and turn them into charts a curious person, student, journalist, or farmer can read in seconds — not a spreadsheet they have to interpret themselves.
 
 ## The approach
 
 ### Reanalysis data, not sparse ground stations
 
-Indonesia's ground weather station coverage is sparse, so Iklim uses ERA5 — a satellite and model-based historical reanalysis dataset served through Open-Meteo — which gives gap-free daily data back to 1950 for any latitude and longitude, station or not.
+Indonesia's ground weather station coverage is sparse, so ClimateWatch uses ERA5 — a satellite and model-based historical reanalysis dataset served through Open-Meteo — which gives gap-free daily data back to 1950 for any latitude and longitude, station or not.
 
 ### Precompute, never aggregate on request
 
@@ -26,7 +26,7 @@ Every other chart uses Recharts; only the signature calendar-heatmap "Climate Fi
 
 ### A design system that survived a mid-project inversion
 
-Iklim shipped first with the PRD's warm light "Musim" palette, then pivoted two weeks in to a full dark "Musim Nokturnal" redesign — keeping the same earth-toned identity on a warm volcanic-ink canvas rather than a generic blue-slate dark mode. Every data-encoding color was validated against the real surfaces for WCAG contrast and monotonic perceptual intensity, with color always following the entity (city A is always the same series color across every chart) rather than the metric.
+ClimateWatch shipped first with the PRD's warm light "Musim" palette, then pivoted two weeks in to a full dark "Musim Nokturnal" redesign — keeping the same earth-toned identity on a warm volcanic-ink canvas rather than a generic blue-slate dark mode. Every data-encoding color was validated against the real surfaces for WCAG contrast and monotonic perceptual intensity, with color always following the entity (city A is always the same series color across every chart) rather than the metric.
 
 ## Outcome
 

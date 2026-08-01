@@ -1,12 +1,12 @@
 ## Permasalahan
 
-Perubahan iklim terus-menerus dibicarakan secara abstrak, tetapi hampir tidak ada orang di Indonesia yang bisa menunjukkan angka aktual kotanya sendiri. Data cuaca historis ada melalui dataset reanalysis global, tetapi mentah, tidak terkelompok, dan tidak dapat diakses pembaca non-teknis. Tugas Iklim adalah mengambil puluhan tahun catatan suhu dan curah hujan harian dan mengubahnya menjadi grafik yang bisa dibaca dalam hitungan detik oleh orang yang penasaran, pelajar, jurnalis, atau petani — bukan spreadsheet yang harus mereka tafsirkan sendiri.
+Perubahan iklim terus-menerus dibicarakan secara abstrak, tetapi hampir tidak ada orang di Indonesia yang bisa menunjukkan angka aktual kotanya sendiri. Data cuaca historis ada melalui dataset reanalysis global, tetapi mentah, tidak terkelompok, dan tidak dapat diakses pembaca non-teknis. Tugas ClimateWatch adalah mengambil puluhan tahun catatan suhu dan curah hujan harian dan mengubahnya menjadi grafik yang bisa dibaca dalam hitungan detik oleh orang yang penasaran, pelajar, jurnalis, atau petani — bukan spreadsheet yang harus mereka tafsirkan sendiri.
 
 ## Pendekatan
 
 ### Data reanalysis, bukan stasiun darat yang jarang
 
-Cakupan stasiun cuaca darat Indonesia jarang, sehingga Iklim menggunakan ERA5 — dataset reanalysis historis berbasis satelit dan model yang disajikan melalui Open-Meteo — yang memberikan data harian tanpa celah kembali ke 1950 untuk lintang dan bujur mana pun, stasiun atau bukan.
+Cakupan stasiun cuaca darat Indonesia jarang, sehingga ClimateWatch menggunakan ERA5 — dataset reanalysis historis berbasis satelit dan model yang disajikan melalui Open-Meteo — yang memberikan data harian tanpa celah kembali ke 1950 untuk lintang dan bujur mana pun, stasiun atau bukan.
 
 ### Pra-hitung, tidak pernah agregasi saat permintaan
 
@@ -26,7 +26,7 @@ Setiap grafik lain menggunakan Recharts; hanya heatmap kalender andalan "Climate
 
 ### Sistem desain yang bertahan dari inversi di tengah proyek
 
-Iklim pertama kali dirilis dengan palet terang hangat "Musim" milik PRD, lalu berpindah dua minggu kemudian ke redesain gelap penuh "Musim Nokturnal" — mempertahankan identitas earth-tone yang sama pada kanvas volcanic-ink hangat alih-alih dark mode biru-slate generik. Setiap warna pengkode-data divalidasi terhadap permukaan nyata untuk kontras WCAG dan intensitas perseptual monoton, dengan warna selalu mengikuti entitas (kota A selalu warna seri yang sama di setiap grafik) bukan metrik.
+ClimateWatch pertama kali dirilis dengan palet terang hangat "Musim" milik PRD, lalu berpindah dua minggu kemudian ke redesain gelap penuh "Musim Nokturnal" — mempertahankan identitas earth-tone yang sama pada kanvas volcanic-ink hangat alih-alih dark mode biru-slate generik. Setiap warna pengkode-data divalidasi terhadap permukaan nyata untuk kontras WCAG dan intensitas perseptual monoton, dengan warna selalu mengikuti entitas (kota A selalu warna seri yang sama di setiap grafik) bukan metrik.
 
 ## Hasil
 
