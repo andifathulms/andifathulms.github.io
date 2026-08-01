@@ -72,7 +72,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs text-gold border border-gold/30 px-3 py-1.5 rounded hover:border-gold/60 transition-colors"
+                  className="font-mono text-xs font-medium bg-gold text-navy px-3.5 py-1.5 rounded hover:bg-gold/90 transition-colors inline-flex items-center gap-1.5"
                 >
                   {t('view_live')} ↗
                 </a>

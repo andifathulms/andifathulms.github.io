@@ -80,6 +80,7 @@ function FeaturedWorkSection({ projects }: { projects: ReturnType<typeof getFeat
               key={project.slug}
               project={project}
               privateBadgeLabel={tw('private_badge')}
+              liveBadgeLabel={tw('live_badge')}
             />
           ))}
         </div>

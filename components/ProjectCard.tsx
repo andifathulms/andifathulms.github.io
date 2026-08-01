@@ -6,9 +6,14 @@ import TechStackChips from './TechStackChips';
 interface ProjectCardProps {
   project: ProjectMeta;
   privateBadgeLabel: string;
+  liveBadgeLabel?: string;
 }
 
-export default function ProjectCard({ project, privateBadgeLabel }: ProjectCardProps) {
+export default function ProjectCard({
+  project,
+  privateBadgeLabel,
+  liveBadgeLabel = 'Live',
+}: ProjectCardProps) {
   const isPrivate = project.status === 'private';
 
   return (
@@ -31,6 +36,15 @@ export default function ProjectCard({ project, privateBadgeLabel }: ProjectCardP
             <span className="font-mono text-xs text-cream/20">no image</span>
           </div>
         )}
+
+        {/* Live indicator — signals a reachable deployed site (matches the Live
+            filter: production only, not staging). */}
+        {project.liveUrl && !project.liveIsStaging && (
+          <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-navy/80 px-2.5 py-1 font-mono text-[0.65rem] text-gold backdrop-blur-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+            {liveBadgeLabel}
+          </span>
+        )}
       </div>
 
       {/* Category tags */}
@@ -47,15 +61,27 @@ export default function ProjectCard({ project, privateBadgeLabel }: ProjectCardP
         )}
       </div>
 
-      <h3 className="font-heading text-xl font-medium text-cream mb-1.5 group-hover:text-gold transition-colors">
-        {project.title}
-        <span
-          aria-hidden="true"
-          className="ml-1.5 inline-block text-gold opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 motion-reduce:transition-none motion-reduce:translate-x-0"
-        >
-          →
-        </span>
-      </h3>
+      <div className="flex items-center gap-2.5 mb-1.5">
+        {project.icon && (
+          <Image
+            src={project.icon}
+            alt=""
+            aria-hidden="true"
+            width={32}
+            height={32}
+            className="h-8 w-8 flex-shrink-0 rounded-lg border border-cream/10 object-cover"
+          />
+        )}
+        <h3 className="font-heading text-xl font-medium text-cream group-hover:text-gold transition-colors">
+          {project.title}
+          <span
+            aria-hidden="true"
+            className="ml-1.5 inline-block text-gold opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 motion-reduce:transition-none motion-reduce:translate-x-0"
+          >
+            →
+          </span>
+        </h3>
+      </div>
       <p className="text-sm text-cream/60 mb-4 leading-relaxed">{project.tagline}</p>
 
       <div className="mt-auto pt-4">

@@ -122,6 +122,16 @@ export default async function CaseStudyPage({
         <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/20" />
         <div className="absolute inset-0 flex flex-col justify-end px-6 pb-10">
           <div className="max-w-5xl mx-auto w-full">
+            {project.icon && (
+              <Image
+                src={project.icon}
+                alt=""
+                aria-hidden="true"
+                width={56}
+                height={56}
+                className="mb-4 h-12 w-12 md:h-14 md:w-14 rounded-xl border border-cream/15 object-cover"
+              />
+            )}
             {/* Category tags */}
             <div className="flex flex-wrap gap-2 mb-4">
               {project.categoryTags.map((tag) => (

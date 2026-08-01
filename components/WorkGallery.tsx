@@ -103,6 +103,7 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
                   key={project.slug}
                   project={project}
                   privateBadgeLabel={t('private_badge')}
+                  liveBadgeLabel={t('live_badge')}
                 />
               ))}
             </div>

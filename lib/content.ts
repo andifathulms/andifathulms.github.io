@@ -21,6 +21,8 @@ export interface ProjectMeta {
   access?: 'public' | 'internal' | 'registration';
   githubUrl: string | string[] | null;
   heroImage: string;
+  /** App/logo icon, auto-detected from public/images/projects/<slug>/icon.*. */
+  icon?: string | null;
   order?: number;
   featured?: boolean;
   /** Optional headline outcomes shown near the top of the case study. */
@@ -51,6 +53,17 @@ export function getPortfolioStats(): PortfolioStats {
 
 const PROJECTS_DIR = path.join(process.cwd(), 'content', 'projects');
 
+/** Look for an app icon at public/images/projects/<slug>/icon.{svg,png,webp,jpg,jpeg}. */
+export function getProjectIcon(slug: string): string | null {
+  const dir = path.join(process.cwd(), 'public', 'images', 'projects', slug);
+  for (const ext of ['svg', 'png', 'webp', 'jpg', 'jpeg']) {
+    if (fs.existsSync(path.join(dir, `icon.${ext}`))) {
+      return `/images/projects/${slug}/icon.${ext}`;
+    }
+  }
+  return null;
+}
+
 export function getAllProjects(): ProjectMeta[] {
   if (!fs.existsSync(PROJECTS_DIR)) return [];
 
@@ -63,7 +76,7 @@ export function getAllProjects(): ProjectMeta[] {
       const metaPath = path.join(PROJECTS_DIR, slug, 'meta.json');
       if (!fs.existsSync(metaPath)) return null;
       const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
-      return { ...meta, slug } as ProjectMeta;
+      return { ...meta, slug, icon: getProjectIcon(slug) } as ProjectMeta;
     })
     .filter((p): p is ProjectMeta => p !== null);
 
@@ -80,7 +93,7 @@ export function getProjectMeta(slug: string): ProjectMeta | null {
   const metaPath = path.join(PROJECTS_DIR, slug, 'meta.json');
   if (!fs.existsSync(metaPath)) return null;
   const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
-  return { ...meta, slug };
+  return { ...meta, slug, icon: getProjectIcon(slug) };
 }
 
 export function getProjectContent(slug: string, locale: string): string | null {
