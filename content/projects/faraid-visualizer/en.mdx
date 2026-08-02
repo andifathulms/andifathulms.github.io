@@ -1,0 +1,31 @@
+## The problem
+
+Islamic inheritance division (*faraid*) is a routine source of family disputes in Indonesia, because almost nobody outside pesantren-trained scholars can actually perform the calculation. Existing online calculators fail in three specific ways: they're oversimplified, they silently pick one school of law without saying so, or they're black boxes that emit a number with no derivation. The insight the product is built on: people accept an outcome they can see reasoned out, not one they're simply told — so the derivation *is* the product, not a debug view.
+
+A sharper problem sits underneath. Indonesian state law (KHI, Inpres No. 1/1991) and classical Syafi'i fiqh are not the same rules. They diverge on load-bearing points — substitute heirs (*ahli waris pengganti*, KHI Pasal 185), where the residue goes when no eligible heirs exist, and marital community property (*harta bersama*) being deducted before the estate is divided at all. Most calculators blur the two. This one models them as two separate rule sets and can run the same family under both, side by side, to show exactly where the answers part ways.
+
+## The approach
+
+### The rule engine is a ledger, not a feature
+
+The engine is isolated in its own package with zero Django imports and zero third-party dependencies — not even a math library, just stdlib `Fraction`/`Decimal`. Every function returns a structured record — `{heir, share, rule_applied, source_id}` — never a bare number. A share you can't trace to a rule, and a rule you can't trace to a source, are both treated as bugs.
+
+### The engine refuses to guess
+
+When a heir configuration doesn't match a known pattern, it raises `UnsupportedConfiguration` and the UI says "this configuration isn't supported yet." There is no fallback branch, no nearest-match, no default rule — the intricate sub-cases of *al-jadd wa al-ikhwah* (mu'adda, akdariyya) and dzawil arham routing beyond KHI's coverage all raise rather than approximate. The UI presents this as correct behaviour, not an error state: dressing a principled refusal as a crash would teach users to distrust the one thing protecting them from a wrong number.
+
+### Citations are a data layer, built before any logic
+
+`sources.py` was the first engine commit, by design: 34 citations — 13 KHI pasal, 11 named classical references, 3 Qur'anic ayat pointers, 3 hadith with narrator, 2 case-law commentaries, 2 ijma. Looking up an unknown `source_id` raises rather than returning a placeholder, so an uncited rule fails in tests instead of shipping. Qur'an and hadith are stored as pointers only, never reproduced text. KHI and Syafi'i are separate `RulesetConfig` objects — each owns its own rule choices and citations — because the failure mode explicitly designed against was reusing Syafi'i logic under a different label.
+
+### One engine, two deployments
+
+After the Django/Postgres stack was working, the presentation layer was extracted into a Django-free `faraid_web` package, leaving the API as transport only. That split let the browser download Pyodide and run *the same Python package the API runs* — client-side, under WebAssembly. The alternative, porting the engine to TypeScript, would mean re-earning the entire validation test bank in a second language and keeping two implementations honest forever. There is one engine. The forcing function for going fully static was privacy: inheritance data is about as sensitive as personal data gets, and a static site can't leak what it never receives. Nothing leaves the device — a case is shareable only because the whole thing is encoded into the URL, and every value decoded from a URL is re-validated as hostile input before use.
+
+### The test suite is the deploy gate
+
+CI runs the validation bank, then the API contract tests, then greps the engine packages for any LLM/model-call import — the "no AI in the calculation path" rule enforced mechanically, not by convention — then verifies the built site actually contains the engine bundle before publishing. A red test blocks the deploy. The cost of the static pivot is documented honestly rather than hidden: the README publishes measured load figures (~9 MB Python runtime, ~20s to engine-ready cold, ~0.8s warm), states the rejected TypeScript-port alternative, and explains the mitigations — the form is usable immediately while the engine preloads in the background, and the PDF renderer loads only on export.
+
+## Outcome
+
+Live at [andifathulms.github.io/faraid-visualizer](https://andifathulms.github.io/faraid-visualizer/), a fully static site auto-published from `main` — no backend, no account, no inheritance data ever transmitted. 39 commits, solo, over roughly a month in three concentrated bursts: engine → API → UI → PDF on day one, the static pivot on 01 Aug, and a live-recalculating UX rebuild on 02 Aug. The Django/DRF API wasn't deleted — it stays as the reference implementation, still tested in CI, with both deployments asserted to produce byte-identical results. Tier 1 (KHI + classical Syafi'i) ships non-beta at 100% pass on a 61-example validation bank plus a separate KHI-vs-Syafi'i divergence suite; Tier 2 (Hanafi, Maliki, Hanbali) is implemented but explicitly Beta-badged until a ≥30-example validation pass per madhab. Known gaps — akdariyya/mu'adda sub-cases, dzawil arham beyond KHI, wasiat wajibah — are surfaced as explicit errors rather than approximated, which is the whole point.

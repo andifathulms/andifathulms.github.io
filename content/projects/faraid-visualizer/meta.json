@@ -1,0 +1,35 @@
+{
+  "slug": "faraid-visualizer",
+  "title": "Faraid Visualizer",
+  "tagline": "Islamic inheritance calculator that shows the full reasoning — every share traced to a Qur'an, hadith, or Indonesian state-law citation, with KHI and classical Syafi'i run side by side",
+  "categoryTags": [
+    "Personal Project",
+    "Web App",
+    "Islamic Law"
+  ],
+  "techStack": [
+    "Python",
+    "Next.js",
+    "TypeScript",
+    "Pyodide",
+    "React Flow",
+    "Django",
+    "reportlab",
+    "GitHub Pages"
+  ],
+  "status": "active",
+  "role": "Fullstack Developer",
+  "timeframe": "Jul – Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/faraid-visualizer/",
+  "githubUrl": "https://github.com/andifathulms/faraid-visualizer",
+  "heroImage": "/images/projects/faraid-visualizer/hero.jpeg",
+  "order": 15.5,
+  "featured": false,
+  "metrics": [
+    { "value": "0", "label": "Third-party deps in the rule engine" },
+    { "value": "34", "label": "Rules mapped to cited sources" },
+    { "value": "61", "label": "Worked examples in the validation bank" },
+    { "value": "5", "label": "Rule sets — KHI + 4 classical madhab" }
+  ],
+  "access": "public"
+}

@@ -1,0 +1,31 @@
+## Permasalahan
+
+Pembagian waris Islam (*faraid*) adalah sumber sengketa keluarga yang berulang di Indonesia, karena hampir tidak ada orang di luar ulama terdidik pesantren yang benar-benar bisa melakukan perhitungannya. Kalkulator daring yang ada gagal dalam tiga cara spesifik: terlalu disederhanakan, diam-diam memilih satu mazhab tanpa menyebutnya, atau kotak hitam yang mengeluarkan angka tanpa penurunan. Wawasan yang mendasari produk ini: orang menerima hasil yang bisa mereka lihat dinalarkan, bukan yang sekadar diberitahukan — sehingga penurunan itulah produknya, bukan tampilan debug.
+
+Masalah yang lebih tajam ada di bawahnya. Hukum negara Indonesia (KHI, Inpres No. 1/1991) dan fikih Syafi'i klasik bukanlah aturan yang sama. Keduanya berbeda pada titik-titik penting — ahli waris pengganti (KHI Pasal 185), ke mana sisa harta pergi ketika tidak ada ahli waris yang berhak, dan harta bersama yang dipotong sebelum harta warisan dibagi sama sekali. Kebanyakan kalkulator mengaburkan keduanya. Yang ini memodelkannya sebagai dua rule set terpisah dan dapat menjalankan keluarga yang sama di bawah keduanya, berdampingan, untuk menunjukkan persis di mana jawabannya berpisah.
+
+## Pendekatan
+
+### Rule engine adalah buku besar, bukan fitur
+
+Engine diisolasi dalam paketnya sendiri tanpa impor Django dan tanpa dependensi pihak ketiga — bahkan tanpa library matematika, hanya `Fraction`/`Decimal` dari stdlib. Setiap fungsi mengembalikan catatan terstruktur — `{heir, share, rule_applied, source_id}` — tidak pernah angka telanjang. Bagian yang tidak bisa ditelusuri ke sebuah aturan, dan aturan yang tidak bisa ditelusuri ke sebuah sumber, keduanya diperlakukan sebagai bug.
+
+### Engine menolak menebak
+
+Ketika konfigurasi ahli waris tidak cocok dengan pola yang dikenal, ia memunculkan `UnsupportedConfiguration` dan UI menyatakan "konfigurasi ini belum didukung." Tidak ada cabang fallback, tidak ada pencocokan terdekat, tidak ada aturan default — sub-kasus rumit *al-jadd wa al-ikhwah* (mu'adda, akdariyya) dan perutean dzawil arham di luar cakupan KHI semuanya memunculkan error alih-alih mendekati. UI menyajikan ini sebagai perilaku benar, bukan keadaan error: mengemas penolakan berprinsip sebagai crash akan mengajari pengguna untuk tidak memercayai satu hal yang melindungi mereka dari angka yang salah.
+
+### Kutipan adalah lapisan data, dibangun sebelum logika apa pun
+
+`sources.py` adalah commit engine pertama, secara sengaja: 34 kutipan — 13 pasal KHI, 11 referensi klasik bernama, 3 penunjuk ayat Al-Qur'an, 3 hadis dengan perawi, 2 komentar yurisprudensi, 2 ijma. Mencari `source_id` yang tidak dikenal memunculkan error alih-alih mengembalikan placeholder, sehingga aturan tak berkutip gagal dalam pengujian alih-alih dirilis. Al-Qur'an dan hadis disimpan hanya sebagai penunjuk, tidak pernah teks yang direproduksi. KHI dan Syafi'i adalah objek `RulesetConfig` terpisah — masing-masing memiliki pilihan aturan dan kutipannya sendiri — karena mode kegagalan yang secara eksplisit dirancang untuk dihindari adalah menggunakan ulang logika Syafi'i dengan label berbeda.
+
+### Satu engine, dua deployment
+
+Setelah stack Django/Postgres berfungsi, lapisan presentasi diekstrak ke paket `faraid_web` bebas-Django, menyisakan API sebagai transport saja. Pemisahan itu memungkinkan browser mengunduh Pyodide dan menjalankan *paket Python yang sama seperti yang dijalankan API* — di sisi klien, di bawah WebAssembly. Alternatifnya, memport engine ke TypeScript, berarti harus memenangkan ulang seluruh bank uji validasi dalam bahasa kedua dan menjaga dua implementasi tetap jujur selamanya. Hanya ada satu engine. Pendorong untuk sepenuhnya statis adalah privasi: data warisan sekitar sesensitif data pribadi bisa jadi, dan situs statis tidak bisa membocorkan apa yang tak pernah diterimanya. Tidak ada yang meninggalkan perangkat — sebuah kasus dapat dibagikan hanya karena seluruhnya dikodekan ke dalam URL, dan setiap nilai yang didekode dari URL divalidasi ulang sebagai input bermusuhan sebelum dipakai.
+
+### Suite pengujian adalah gerbang deploy
+
+CI menjalankan bank validasi, lalu uji kontrak API, lalu memindai paket engine untuk impor pemanggilan LLM/model apa pun — aturan "tanpa AI di jalur perhitungan" yang ditegakkan secara mekanis, bukan oleh konvensi — lalu memverifikasi situs yang dibangun benar-benar memuat bundel engine sebelum menerbitkan. Uji yang merah memblokir deploy. Biaya pivot statis didokumentasikan dengan jujur alih-alih disembunyikan: README menerbitkan angka pemuatan terukur (~9 MB runtime Python, ~20 detik hingga engine siap saat dingin, ~0,8 detik saat hangat), menyatakan alternatif port TypeScript yang ditolak, dan menjelaskan mitigasinya — formulir langsung dapat dipakai sementara engine dimuat di latar belakang, dan perender PDF hanya dimuat saat ekspor.
+
+## Hasil
+
+Live di [andifathulms.github.io/faraid-visualizer](https://andifathulms.github.io/faraid-visualizer/), situs sepenuhnya statis yang diterbitkan otomatis dari `main` — tanpa backend, tanpa akun, tanpa data warisan yang pernah dikirimkan. 39 commit, solo, selama kurang lebih sebulan dalam tiga ledakan terpusat: engine → API → UI → PDF di hari pertama, pivot statis pada 1 Agu, dan pembangunan ulang UX perhitungan langsung pada 2 Agu. API Django/DRF tidak dihapus — ia tetap sebagai implementasi rujukan, masih diuji di CI, dengan kedua deployment dipastikan menghasilkan hasil identik byte-per-byte. Tier 1 (KHI + Syafi'i klasik) dirilis non-beta dengan 100% lulus pada bank validasi 61 contoh plus suite divergensi KHI-vs-Syafi'i terpisah; Tier 2 (Hanafi, Maliki, Hanbali) sudah diimplementasikan tetapi diberi badge Beta secara eksplisit hingga lulus validasi ≥30 contoh per mazhab. Celah yang diketahui — sub-kasus akdariyya/mu'adda, dzawil arham di luar KHI, wasiat wajibah — dimunculkan sebagai error eksplisit alih-alih didekati, dan itulah intinya.
