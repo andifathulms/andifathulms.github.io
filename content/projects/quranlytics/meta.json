@@ -24,5 +24,23 @@
   "githubUrl": "https://github.com/andifathulms/quranlytics",
   "heroImage": "/images/projects/quranlytics/hero.jpeg",
   "order": 16,
-  "featured": true
+  "featured": true,
+  "metrics": [
+    {
+      "value": "6,236",
+      "label": "Verses, full Quran ingested"
+    },
+    {
+      "value": "~77K",
+      "label": "Words with morphology"
+    },
+    {
+      "value": "~16.8K",
+      "label": "Lines of Python + TS"
+    },
+    {
+      "value": "121",
+      "label": "Commits over 14 days"
+    }
+  ]
 }

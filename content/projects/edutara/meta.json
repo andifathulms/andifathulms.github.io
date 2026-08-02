@@ -24,5 +24,23 @@
   "githubUrl": null,
   "heroImage": "/images/projects/edutara/cover.svg",
   "order": 13,
-  "featured": false
+  "featured": false,
+  "metrics": [
+    {
+      "value": "12",
+      "label": "Django apps in a multi-role LMS"
+    },
+    {
+      "value": "43",
+      "label": "Database models"
+    },
+    {
+      "value": "~19.5K",
+      "label": "Lines of Python + TS"
+    },
+    {
+      "value": "124",
+      "label": "Commits, 109 in first 2 days"
+    }
+  ]
 }

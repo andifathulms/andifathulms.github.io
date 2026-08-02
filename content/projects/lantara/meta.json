@@ -26,5 +26,23 @@
   "heroImage": "/images/projects/lantara/hero.jpeg",
   "order": 2,
   "featured": true,
+  "metrics": [
+    {
+      "value": "~2,200",
+      "label": "KBLI permit codes modelled"
+    },
+    {
+      "value": "43",
+      "label": "Models across 13 Django apps"
+    },
+    {
+      "value": "241",
+      "label": "Commits over ~3 weeks"
+    },
+    {
+      "value": "~30.5K",
+      "label": "Lines of Python + TS"
+    }
+  ],
   "access": "public"
 }

@@ -23,5 +23,23 @@
   "heroImage": "/images/projects/scimotion/hero.jpeg",
   "order": 10,
   "featured": true,
+  "metrics": [
+    {
+      "value": "86",
+      "label": "Illustrated science articles"
+    },
+    {
+      "value": "172",
+      "label": "Interactive animations"
+    },
+    {
+      "value": "8",
+      "label": "Fields, math to medicine"
+    },
+    {
+      "value": "~72.7K",
+      "label": "Lines of TS/TSX/MDX"
+    }
+  ],
   "access": "public"
 }

@@ -28,5 +28,23 @@
   "heroImage": "/images/projects/emonev/hero.jpeg",
   "order": 4,
   "featured": false,
+  "metrics": [
+    {
+      "value": "24",
+      "label": "KPIs across a 2022–2045 roadmap"
+    },
+    {
+      "value": "6",
+      "label": "Role levels, deputi to guest"
+    },
+    {
+      "value": "227",
+      "label": "Commits (82 back + 145 front)"
+    },
+    {
+      "value": "~39K",
+      "label": "Lines of app code"
+    }
+  ],
   "access": "internal"
 }

@@ -23,5 +23,23 @@
   "heroImage": "/images/projects/dashboard-sakti/hero.jpeg",
   "order": 7,
   "featured": false,
+  "metrics": [
+    {
+      "value": "2 days",
+      "label": "Empty repo to working platform"
+    },
+    {
+      "value": "7",
+      "label": "Airflow ETL tasks per run"
+    },
+    {
+      "value": "9",
+      "label": "REST endpoints"
+    },
+    {
+      "value": "~5K",
+      "label": "Lines of Python + JSX"
+    }
+  ],
   "access": "internal"
 }

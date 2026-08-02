@@ -25,5 +25,23 @@
   "heroImage": "/images/projects/falak-visualizer/hero.jpeg",
   "order": 15,
   "featured": false,
+  "metrics": [
+    {
+      "value": "$0",
+      "label": "Hosting — runs in the browser"
+    },
+    {
+      "value": "~2,083",
+      "label": "Golden vectors pinning both engines"
+    },
+    {
+      "value": "2",
+      "label": "Engine ports, one oracle"
+    },
+    {
+      "value": "86",
+      "label": "Commits, single author"
+    }
+  ],
   "access": "public"
 }

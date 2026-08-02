@@ -24,5 +24,23 @@
   "githubUrl": "https://github.com/andifathulms/sanad",
   "heroImage": "/images/projects/sanad/hero.jpeg",
   "order": 17,
-  "featured": false
+  "featured": false,
+  "metrics": [
+    {
+      "value": "19",
+      "label": "Django models"
+    },
+    {
+      "value": "~30",
+      "label": "REST endpoints"
+    },
+    {
+      "value": "14",
+      "label": "Ingestion & graph commands"
+    },
+    {
+      "value": "86",
+      "label": "Commits in ~5 days"
+    }
+  ]
 }

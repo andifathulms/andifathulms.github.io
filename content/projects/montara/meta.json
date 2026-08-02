@@ -24,5 +24,23 @@
   "githubUrl": null,
   "heroImage": "/images/projects/montara/cover.svg",
   "order": 12,
-  "featured": false
+  "featured": false,
+  "metrics": [
+    {
+      "value": "18",
+      "label": "Routed pages"
+    },
+    {
+      "value": "37",
+      "label": "Models across 11 Django apps"
+    },
+    {
+      "value": "111+",
+      "label": "Frontend tests"
+    },
+    {
+      "value": "~31.5K",
+      "label": "Lines of code"
+    }
+  ]
 }

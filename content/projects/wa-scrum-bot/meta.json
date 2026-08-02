@@ -21,5 +21,23 @@
   "githubUrl": "https://github.com/thdoikn/wa-scrum-bot",
   "heroImage": "/images/projects/wa-scrum-bot/hero.jpeg",
   "order": 11,
-  "featured": false
+  "featured": false,
+  "metrics": [
+    {
+      "value": "14",
+      "label": "Team members monitored"
+    },
+    {
+      "value": "8",
+      "label": "Daily cron jobs"
+    },
+    {
+      "value": "3",
+      "label": "Self-service chat commands"
+    },
+    {
+      "value": "25",
+      "label": "Commits over 18 days"
+    }
+  ]
 }

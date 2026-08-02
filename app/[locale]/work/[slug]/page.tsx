@@ -105,7 +105,7 @@ export default async function CaseStudyPage({
   const readingMinutes = readingTimeMinutes(content);
 
   return (
-    <article className="pt-28 pb-24">
+    <article className="pt-28 pb-8">
       <ReadingProgress />
       {/* Hero banner */}
       <div className="relative aspect-video md:aspect-[21/6] bg-navy/50 mb-0 overflow-hidden">
@@ -224,8 +224,19 @@ export default async function CaseStudyPage({
                 className="group flex flex-col gap-1 max-w-xs"
               >
                 <span className="font-mono text-xs text-cream/30">{t('prev_project')}</span>
-                <span className="font-heading text-base text-cream group-hover:text-gold transition-colors">
-                  ← {prev.title}
+                <span className="font-heading text-base text-cream group-hover:text-gold transition-colors inline-flex items-center gap-2">
+                  <span className="transition-transform group-hover:-translate-x-0.5">←</span>
+                  {prev.icon && (
+                    <Image
+                      src={prev.icon}
+                      alt=""
+                      aria-hidden="true"
+                      width={24}
+                      height={24}
+                      className="h-6 w-6 rounded-md border border-cream/15 object-cover"
+                    />
+                  )}
+                  {prev.title}
                 </span>
               </Link>
             ) : (
@@ -237,8 +248,19 @@ export default async function CaseStudyPage({
                 className="group flex flex-col gap-1 max-w-xs text-right ml-auto"
               >
                 <span className="font-mono text-xs text-cream/30">{t('next_project')}</span>
-                <span className="font-heading text-base text-cream group-hover:text-gold transition-colors">
-                  {next.title} →
+                <span className="font-heading text-base text-cream group-hover:text-gold transition-colors inline-flex items-center gap-2 justify-end">
+                  {next.icon && (
+                    <Image
+                      src={next.icon}
+                      alt=""
+                      aria-hidden="true"
+                      width={24}
+                      height={24}
+                      className="h-6 w-6 rounded-md border border-cream/15 object-cover"
+                    />
+                  )}
+                  {next.title}
+                  <span className="transition-transform group-hover:translate-x-0.5">→</span>
                 </span>
               </Link>
             )}

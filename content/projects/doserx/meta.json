@@ -22,5 +22,23 @@
   "heroImage": "/images/projects/doserx/hero.jpeg",
   "order": 8,
   "featured": false,
+  "metrics": [
+    {
+      "value": "92",
+      "label": "Drugs across 16 categories"
+    },
+    {
+      "value": "4",
+      "label": "Dose calculators + history"
+    },
+    {
+      "value": "~5K",
+      "label": "Lines of TypeScript"
+    },
+    {
+      "value": "39",
+      "label": "Commits over ~3.5 weeks"
+    }
+  ],
   "access": "public"
 }

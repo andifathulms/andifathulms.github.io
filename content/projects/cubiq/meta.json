@@ -23,5 +23,23 @@
   "githubUrl": null,
   "heroImage": "/images/projects/cubiq/hero.jpeg",
   "order": 9,
-  "featured": true
+  "featured": true,
+  "metrics": [
+    {
+      "value": "8",
+      "label": "Twisty puzzles solved from scratch"
+    },
+    {
+      "value": "19",
+      "label": "Solver API endpoints"
+    },
+    {
+      "value": "~13.7K",
+      "label": "Lines across engine + UI"
+    },
+    {
+      "value": "70",
+      "label": "Commits over ~11 weeks"
+    }
+  ]
 }

@@ -24,5 +24,23 @@
   "heroImage": "/images/projects/jejak-penanaman/hero.jpeg",
   "order": 6,
   "featured": false,
+  "metrics": [
+    {
+      "value": "~90",
+      "label": "Backend API URL patterns"
+    },
+    {
+      "value": "28",
+      "label": "Frontend screens"
+    },
+    {
+      "value": "13",
+      "label": "Django models across 5 apps"
+    },
+    {
+      "value": "78",
+      "label": "Commits over ~3 months"
+    }
+  ],
   "access": "registration"
 }

@@ -24,5 +24,23 @@
   "heroImage": "/images/projects/daily-taqwa/hero.jpg",
   "order": 1.5,
   "featured": false,
+  "metrics": [
+    {
+      "value": "~2,000",
+      "label": "OIKN employees served"
+    },
+    {
+      "value": "~500",
+      "label": "Concurrent check-ins targeted"
+    },
+    {
+      "value": "9",
+      "label": "Django apps"
+    },
+    {
+      "value": "85",
+      "label": "Commits over ~12 weeks"
+    }
+  ],
   "access": "internal"
 }

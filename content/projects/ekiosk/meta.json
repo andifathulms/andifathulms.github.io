@@ -28,5 +28,23 @@
   "heroImage": "/images/projects/ekiosk/hero.jpeg",
   "order": 3,
   "featured": false,
+  "metrics": [
+    {
+      "value": "2",
+      "label": "Control rooms: kiosk CMS + fleet"
+    },
+    {
+      "value": "0",
+      "label": "Heavy deps in the ETA engine"
+    },
+    {
+      "value": "~24.7K",
+      "label": "Lines across both apps"
+    },
+    {
+      "value": "246",
+      "label": "Commits across two repos"
+    }
+  ],
   "access": "internal"
 }
