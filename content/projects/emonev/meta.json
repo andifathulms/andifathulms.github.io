@@ -25,7 +25,7 @@
     "https://github.com/thdoikn/emonevp2e-backend",
     "https://github.com/thdoikn/emonevp2e-frontend"
   ],
-  "heroImage": "/images/projects/emonev/hero.jpeg",
+  "heroImage": "/images/projects/emonev/hero.webp",
   "order": 4,
   "featured": false,
   "metrics": [
