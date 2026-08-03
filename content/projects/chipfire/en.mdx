@@ -1,0 +1,35 @@
+# Chipfire
+
+## The problem
+
+Chain Reaction is a well-known grid game with dozens of browser clones — and almost all of them get two things wrong. The first is the rule itself: when a cell reaches capacity it should *subtract* its critical mass, not empty to zero. Most implementations zero it, which still looks like a working game but is quietly a different one — a bug that never announces itself. The second is architecture: every online version reaches for a backend — a lobby, a matchmaker, an authoritative server, and the hosting bill behind them. That cost is exactly why most small games never get an online mode at all.
+
+Chipfire is built for two audiences at once. For a player: a fast, offline-capable game you learn in two minutes and play against a friend on another device — no account, no install. For a technical reader, it's a demonstration that "multiplayer with no backend" is a real answer to a real constraint, and an invitation to ask how.
+
+## The approach
+
+### One property carries everything: determinism
+
+`applyMove(state, move)` is a pure function that produces byte-identical results on any device, any browser, any time — no clock, no `Math.random`, no floating point anywhere, integers only, including in the AI's scoring. That single property buys four features at once: because the same moves always produce the same game, **a game *is* its move list**. Replay, undo, shareable game codes, and peer-to-peer sync all fall out of it for free. Nothing derived is ever stored or sent as truth.
+
+### No server — and no referee either
+
+In peer-to-peer play each browser holds its own copy of the game. Only moves and a 32-bit hash of the resulting position cross the wire — never the position itself. Both sides run the same pure function on the same moves and compare hashes every turn. A mismatch means the players have silently drifted into different games — the worst possible failure — so the app **stops immediately, says so, and offers to rebuild from the move list**. It never quietly picks a winner.
+
+### The players are the signalling server
+
+Two browsers behind home routers can't find each other, and WebRTC deliberately leaves that first handshake unspecified. Chipfire renders it as a compressed, pasteable code: one code out over WhatsApp, one code back, and the channel opens — with zero infrastructure and nothing that can be rate-limited or shut down.
+
+### Ordering is a rule, not an accident
+
+The cascade resolves through an explicit FIFO queue in a fixed scan order — never recursion, which would blow the stack on exactly the long chains that make the game interesting, and never iteration over a `Set` or object keys, the single most likely source of cross-device divergence and one that never shows up in single-machine testing. A cell's critical mass is derived from one adjacency function, never hardcoded per cell — which is what keeps hex or wrap-around boards a later addition rather than a rewrite.
+
+### Honest about what doesn't work
+
+Roughly 10–20% of connections — strict corporate networks, certain NAT configurations — can't establish a direct peer path without a paid relay server, which would break the no-backend premise. Rather than hide that behind an endless spinner, Chipfire detects the failure fast, explains it plainly, and offers local play right there.
+
+## Outcome
+
+Live and deployed on GitHub Pages, gated on typecheck, lint, and the full test suite — including a 3,000-game simulation and cross-instance agreement run on *every* deploy, because determinism is the property everything else rests on. Hotseat play for 2–4, an AI opponent running minimax with alpha-beta pruning in a Web Worker, peer-to-peer play over pasted codes, a replay viewer, shareable game codes, and an interactive tutorial whose lessons are asserted in the test suite are all complete and playable.
+
+Built solo and spec-first, from an empty directory to a deployed site in under 24 hours — roughly 6,700 lines of TypeScript across 66 files, a 984-line deterministic engine, a 300-line AI, and 70 tests, on three runtime dependencies (`next`, `react`, `react-dom`) and zero backend services.

@@ -1,0 +1,34 @@
+{
+  "slug": "chipfire",
+  "title": "Chipfire",
+  "tagline": "A browser game of chain-reaction explosions — play a friend on another device with no server, no account, and no backend anywhere",
+  "categoryTags": [
+    "Personal Project",
+    "Game",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "WebRTC",
+    "Web Workers",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer & Architect",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/chipfire/id/",
+  "githubUrl": "https://github.com/andifathulms/chipfire",
+  "heroImage": "/images/projects/chipfire/hero.webp",
+  "order": 15,
+  "featured": false,
+  "metrics": [
+    { "value": "0", "label": "Backend servers — P2P over WebRTC" },
+    { "value": "~6,700", "label": "Lines of TypeScript, no game libraries" },
+    { "value": "70", "label": "Tests + a 3,000-game simulation" },
+    { "value": "<24 hrs", "label": "Spec-first, empty repo to deployed" }
+  ],
+  "access": "public"
+}
