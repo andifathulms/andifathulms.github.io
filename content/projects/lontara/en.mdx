@@ -1,0 +1,37 @@
+# Lontara
+
+## The problem
+
+Lontara, the script of the Bugis language, is **defective**: the Unicode Buginese block has 23 consonants and five vowel signs but *no virama* — no way to write a bare consonant. So the script never records syllable-final consonants, doubled consonants, prenasalisation, or the glottal stop. `mata`, `matta`, and `manta` are all written identically; a human reader recovers the intended word from vocabulary and context.
+
+Existing converters hide this. They take Lontara in and emit one confident Latin string — a guess presented as an answer. The consequences are specific and real: a signmaker puts a misspelled name on a permanent sign; a learner is taught a rule that doesn't exist; someone reading family manuscripts gets one reading where six are valid, with no sign that a choice was even made.
+
+So the product isn't the conversion. It's the **enumeration** — naming what the script leaves undetermined, and citing a rule for every step it does take.
+
+## The approach
+
+### Orthographic rules are data, not code
+
+All 11 rules live in a JSON file, each with an id, a status (`cited` / `provisional` / `derived`), and a citation. The engine is a small interpreter over that file. The reason isn't elegance — it's that a Bugis-literate reviewer who doesn't program has to be able to audit the orthography. One command prints the whole rule set with its citations; a page renders the same data in the browser.
+
+### Ambiguity is a type, not a warning
+
+A resolved ambiguity carries `{ class, candidates, chosen, reason, spans }` where `reason` is *required* — so a choice made without a justification is literally unconstructable. The four classes (final consonant, gemination, prenasalisation, glottal stop) are a closed set; adding one is a deliberate schema change, not a quiet edit.
+
+### The reader inverts the writer over a lexicon
+
+The obvious reader branches at every syllable over every consonant that could close it — but that needs an inventory of Bugis final consonants the project can't cite, and guessing it would produce a confident-looking tree of readings that simply aren't Bugis. Instead, enumeration *inverts the writer over the lexicon*: a valid reading is a lexicon entry which, run forward through the writer, reproduces exactly this Lontara string. No uncited rule about finals is needed, and every reading carries the trace that proves it. The cost — completeness is relative to the lexicon, not absolute — is stated on every result rather than hidden.
+
+### The rule set was 56% wrong, and measurement caught it
+
+Bugis Wikipedia carries community-authored Lontara–Latin pairs. Extracting 97 of them and scoring the rules against them showed **56% agreement** — and surfaced three real defects (one Unicode vowel mapping was literally *reversed* from what the character names implied; `é` was missing as a vowel entirely; the glottal stop is written `q` in practice). Fixing them took agreement to **94%**, and a test now pins that rate and requires every remaining disagreement to be named and explained. Two suspicious findings are recorded and *deliberately not acted on* — a reason to ask a reviewer, not to guess.
+
+### Honest about what isn't done
+
+The lexicon is 1,323 entries, all corpus-attested and marked as such — and the build *fails* if any of them claims a frequency it can't support, because 85% of the source dump turned out to be bot-generated stubs. Unicode discipline is a hard rule throughout: NFC normalisation and grapheme-cluster segmentation, never indexing a string by code unit for glyph logic — the single most common defect in aksara tooling.
+
+## Outcome
+
+Live and public on GitHub Pages: a reader that returns a *tree* of plausible Latin readings with each branch labelled by the ambiguity that caused it, a writer that lays Bugis Latin onto a palm-leaf band and marks dropped information *on the connector that dropped it*, an on-screen Lontara keyboard (most phones have none), a full script reference with a rendering-conformance page, and an orthography-disclosure page listing all seven open questions straight from the rule data. Bilingual, offline after first load, four runtime dependencies, and no transliteration library — the rule interpreter *is* the project.
+
+Built solo in six days: 35 commits, ~9,300 lines of source, 281 passing tests. And by its own rules it is **deployed but not launched** — the reader ships only once a Bugis reviewer signs off, an unmet gate the code enforces and every page discloses. For a tool whose defining failure is confident wrongness, declaring what it doesn't yet know is the point, not a caveat.

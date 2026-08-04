@@ -1,0 +1,33 @@
+{
+  "slug": "lontara",
+  "title": "Lontara",
+  "tagline": "A free tool for reading and writing the Bugis Lontara script — and, crucially, showing every possible reading when the script itself doesn't say which word is meant",
+  "categoryTags": [
+    "Personal Project",
+    "Language Tool",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Zod",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Jul – Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/lontara/",
+  "githubUrl": "https://github.com/andifathulms/lontara",
+  "heroImage": "/images/projects/lontara/hero.webp",
+  "order": 17,
+  "featured": false,
+  "metrics": [
+    { "value": "1,323", "label": "Lexicon entries, each with provenance" },
+    { "value": "94%", "label": "Corpus rule agreement (up from 56%)" },
+    { "value": "281", "label": "Passing tests, no transliteration library" },
+    { "value": "7", "label": "Open questions recorded, not guessed" }
+  ],
+  "access": "public"
+}
