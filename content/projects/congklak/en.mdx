@@ -1,0 +1,35 @@
+# Congklak
+
+## The problem
+
+Congklak — also *dakon*, *congkak*, *sungka* — is played across the archipelago, and **the rules genuinely differ by region**. When does the game end: when a player has no legal move, or the moment they have three empty holes? Does landing in an empty hole on your own side capture the opposite one, or end your turn? Must a seed complete a full lap before it can *menembak*? Published sources contradict each other on all three.
+
+Every existing congklak app picks one reading silently and presents it as "the rules". That flattens a living regional tradition into one anonymous version — and it means two players who learned the game in different places can't tell whether the app is wrong or they are. So the disagreement *is* the feature here: rulesets are **cited data**, the active one is always named, and where two documented readings conflict, both are recorded with their sources and the weight of each source declared.
+
+## The approach
+
+### The rules live in one pure function
+
+`applyMove(state, move, ruleset)` is the whole game — no clock, no unseeded randomness, no floating point, no browser APIs, so the same inputs give byte-identical output on any device. Everything else — undo, replay, the AI's search, peer-to-peer sync — is a consequence of that one property rather than a separate feature. A game is its move list *plus a ruleset id*; state is never the source of truth, always reconstructible by replay, which makes shareable codes, the replay viewer, and desync recovery essentially free.
+
+### Rules are data, not code branches
+
+There is no `if (region === 'jawa')` anywhere in the engine. Each regional variant is a JSON pack with its options, its sources, and its documented divergences, and a build-time validator refuses to ship a pack without a citation. When the Malay "complete a lap before you can capture" rule needed behaviour the schema couldn't express, the *schema* was extended — the engine was never special-cased.
+
+### Seed conservation is asserted, not assumed
+
+There are exactly 98 seeds. A relay loop that drops or duplicates one is the classic mancala bug, and it is completely silent — the game plays on, wrongly. So a conservation check sums all 16 positions after *every single event*, in every test and in dev builds. It was written before the sowing loop, not after — which is how you catch the bug the same hour you write it.
+
+### Sources contradict each other — so cite, don't flatten
+
+Source weight is declared per source: government cultural documentation, a specialist mancala reference, and mass media are distinguished rather than treated as equal. The Sleman government source contradicts *itself* on when the game ends — both readings are recorded, and the pack implements the one stated most firmly. A widely-circulated news article inverts the *menembak* rule relative to both other kinds of source — recorded as a divergence, and explicitly **not** implemented, with a note that it's logged because it circulates, not because it carries equal weight. The fourth ruleset was refused: packs that differ where no source supports the difference are taste, not rulesets.
+
+### Tested where it counts — and driven by hand where tests can't see
+
+The engine is covered by fixtures per ruleset, long-relay adversarial positions, determinism and replay checks, and a simulation running thousands of random games per ruleset. But **every UI bug in this project was invisible to a green test suite** — the AI silently not moving at animated speeds, three specified typefaces that no code ever loaded, the board collapsing to 160px on a phone. Each was found by driving the built site in real browsers with a ruler, and the repo's own guidance now says so: never trust a UI change because the tests pass.
+
+## Outcome
+
+Live and public on GitHub Pages, with ruleset validation gating every deploy. It ships three cited regional rulesets (`umum`, `jawa-sleman`, `congkak-melayu`) with a selector, a sources page showing each source's confidence, and a divergence ledger; a **comparison view** that replays one move list under two rulesets side by side and marks the first point they diverge; animated relay sowing with speed control; a minimax AI in a Web Worker across three depths; peer-to-peer play over both manual paste and a brokered code, with a ruleset handshake at connect and a state hash exchanged every turn; a replay viewer; and a learn mode.
+
+Built solo — 36 commits, ~8,600 lines of TypeScript, 120 tests, five runtime dependencies, zero backend. Traditional vocabulary is kept throughout: *lumbung*, *biji*, *menembak*, *dakon* stay in the code, comments, and UI — the product rename never flattened the game's own language.

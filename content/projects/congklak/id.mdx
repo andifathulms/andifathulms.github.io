@@ -1,0 +1,35 @@
+# Congklak
+
+## Masalahnya
+
+Congklak — juga *dakon*, *congkak*, *sungka* — dimainkan di seluruh nusantara, dan **aturannya benar-benar berbeda menurut daerah**. Kapan permainan berakhir: saat seorang pemain tak punya langkah sah, atau begitu ia punya tiga lubang kosong? Apakah mendarat di lubang kosong di sisi sendiri menangkap lubang seberang, atau mengakhiri giliran? Haruskah biji menyelesaikan satu putaran penuh sebelum bisa *menembak*? Sumber-sumber terbitan saling bertentangan pada ketiganya.
+
+Setiap aplikasi congklak yang ada memilih satu bacaan diam-diam dan menyajikannya sebagai "aturan". Itu meratakan tradisi daerah yang hidup menjadi satu versi anonim — dan berarti dua pemain yang belajar permainan ini di tempat berbeda tidak bisa tahu apakah aplikasinya yang salah atau mereka. Maka pertentangan itulah fiturnya di sini: ruleset adalah **data terkutip**, yang aktif selalu disebutkan, dan di mana dua bacaan terdokumentasi berkonflik, keduanya dicatat beserta sumbernya dan bobot tiap sumber dinyatakan.
+
+## Pendekatannya
+
+### Aturan berada di satu fungsi murni
+
+`applyMove(state, move, ruleset)` adalah seluruh permainan — tanpa clock, tanpa keacakan yang tak berbenih, tanpa floating point, tanpa API browser, sehingga input yang sama memberi keluaran identik byte-per-byte di perangkat mana pun. Segala hal lain — undo, replay, pencarian AI, sinkronisasi peer-to-peer — adalah konsekuensi dari satu properti itu, bukan fitur terpisah. Sebuah permainan adalah daftar langkahnya *plus id ruleset*; status tidak pernah menjadi sumber kebenaran, selalu bisa direkonstruksi lewat replay, yang membuat kode permainan yang bisa dibagikan, penonton replay, dan pemulihan desync praktis gratis.
+
+### Aturan adalah data, bukan cabang kode
+
+Tidak ada `if (region === 'jawa')` di mana pun dalam mesin. Setiap varian daerah adalah pak JSON dengan opsinya, sumbernya, dan divergensi terdokumentasinya, dan validator build menolak merilis pak tanpa kutipan. Ketika aturan Melayu "selesaikan satu putaran sebelum bisa menangkap" butuh perilaku yang tak bisa diungkapkan skema, *skema* itulah yang diperluas — mesin tidak pernah dikhususkan.
+
+### Konservasi biji ditegaskan, bukan diasumsikan
+
+Ada tepat 98 biji. Loop relay yang menjatuhkan atau menggandakan satu biji adalah bug mancala klasik, dan sepenuhnya senyap — permainan berlanjut, dengan salah. Maka pemeriksaan konservasi menjumlahkan seluruh 16 posisi setelah *setiap kejadian*, di setiap tes dan di build dev. Ia ditulis sebelum loop penaburan, bukan sesudahnya — itulah cara menangkap bug pada jam yang sama saat menulisnya.
+
+### Sumber saling bertentangan — jadi kutip, jangan ratakan
+
+Bobot sumber dinyatakan per sumber: dokumentasi budaya pemerintah, referensi mancala spesialis, dan media massa dibedakan alih-alih dianggap setara. Sumber pemerintah Sleman bertentangan dengan *dirinya sendiri* soal kapan permainan berakhir — kedua bacaan dicatat, dan pak mengimplementasikan yang dinyatakan paling tegas. Sebuah artikel berita yang beredar luas membalik aturan *menembak* relatif terhadap kedua jenis sumber lain — dicatat sebagai divergensi, dan secara eksplisit **tidak** diimplementasikan, dengan catatan bahwa ia dicatat karena beredar, bukan karena berbobot setara. Ruleset keempat ditolak: pak yang berbeda di mana tak ada sumber mendukung perbedaan itu adalah selera, bukan ruleset.
+
+### Diuji di tempat yang penting — dan dikemudikan tangan di tempat tes tak melihat
+
+Mesin dicakup oleh fixture per ruleset, posisi relay panjang yang adversarial, pemeriksaan determinisme dan replay, serta simulasi yang menjalankan ribuan permainan acak per ruleset. Tetapi **setiap bug UI di proyek ini tak terlihat oleh test suite yang hijau** — AI yang diam-diam tak bergerak pada kecepatan animasi, tiga tipografi yang ditentukan tetapi tak pernah dimuat kode apa pun, papan yang menciut jadi 160px di ponsel. Masing-masing ditemukan dengan mengemudikan situs yang ter-build di browser sungguhan dengan penggaris, dan panduan repo ini kini menyatakannya: jangan pernah percaya perubahan UI hanya karena tes lolos.
+
+## Hasil
+
+Live dan publik di GitHub Pages, dengan validasi ruleset menjaga setiap deploy. Ia menyajikan tiga ruleset daerah terkutip (`umum`, `jawa-sleman`, `congkak-melayu`) dengan pemilih, halaman sumber yang menampilkan tingkat keyakinan tiap sumber, dan buku besar divergensi; sebuah **tampilan perbandingan** yang memutar satu daftar langkah di bawah dua ruleset berdampingan dan menandai titik pertama keduanya menyimpang; penaburan relay beranimasi dengan kontrol kecepatan; AI minimax di Web Worker pada tiga kedalaman; permainan peer-to-peer lewat paste manual maupun kode broker, dengan jabat tangan ruleset saat menyambung dan hash status dipertukarkan tiap giliran; penonton replay; dan mode belajar.
+
+Dibangun sendiri — 36 commit, ~8.600 baris TypeScript, 120 tes, lima dependensi runtime, nol backend. Kosakata tradisional dipertahankan di seluruhnya: *lumbung*, *biji*, *menembak*, *dakon* tetap di kode, komentar, dan UI — penggantian nama produk tidak pernah meratakan bahasa permainan itu sendiri.
