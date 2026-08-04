@@ -1,0 +1,36 @@
+{
+  "slug": "gempa-watch",
+  "title": "GempaWatch",
+  "tagline": "A free public site that tells anyone in Indonesia how earthquake-prone their own area is — using 57 years of official records, not just the latest tremor",
+  "categoryTags": [
+    "Personal Project",
+    "Data Platform",
+    "Web App"
+  ],
+  "techStack": [
+    "Django",
+    "PostGIS",
+    "PostgreSQL",
+    "Celery",
+    "Next.js",
+    "TypeScript",
+    "Leaflet",
+    "Recharts",
+    "Docker"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Jul – Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/gempawatch/",
+  "githubUrl": "https://github.com/andifathulms/gempawatch",
+  "heroImage": "/images/projects/gempa-watch/hero.webp",
+  "order": 16,
+  "featured": false,
+  "metrics": [
+    { "value": "69,641", "label": "Earthquake events, 1970–2026" },
+    { "value": "24", "label": "Regions risk-profiled" },
+    { "value": "39", "label": "Python≡TypeScript parity assertions" },
+    { "value": "51", "label": "Commits, solo over ~5 weeks" }
+  ],
+  "access": "public"
+}

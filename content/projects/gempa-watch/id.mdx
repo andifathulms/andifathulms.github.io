@@ -1,0 +1,36 @@
+# GempaWatch
+
+## Masalahnya
+
+Indonesia adalah negara paling aktif secara seismik di Bumi, dan aplikasi yang menampilkan daftar gempa terbaru sudah berlimpah. Tetapi daftar menjawab pertanyaan yang salah. Pertanyaan yang sebenarnya dimiliki orang bersifat personal: *"Apakah kota saya berbahaya? Perlukah saya khawatir? Apakah di sini lebih parah daripada di Jakarta?"*
+
+Dua celah struktural membuat itu sulit dijawab. **BMKG**, lembaga resmi Indonesia, hanya menerbitkan *15 kejadian terakhir* per feed — otoritatif soal apa yang baru terjadi, tetapi bisu soal pola. **USGS** punya arsip historis lengkap, tetapi bersifat global, berbahasa Inggris, dan mengembalikan GeoJSON mentah yang tidak bisa dipakai warga awam. GempaWatch menggabungkan keduanya — USGS untuk kedalaman historis, BMKG untuk otoritas real-time dan gempa *dirasakan* yang lebih kecil yang tidak pernah dicatat USGS — lalu mengubah gabungan data itu menjadi profil risiko berbahasa lugas untuk satu titik tertentu di peta.
+
+## Pendekatannya
+
+### Pertanyaan spasial butuh basis data spasial
+
+Setiap pertanyaan penting di sini bersifat geografis — "kejadian dalam radius 100km dari sini", "garis patahan terdekat", "titik ini ada di wilayah mana". Melakukannya dengan kolom lintang/bujur biasa berarti jawaban yang salah (jarak Euclidean di atas bola) atau pemindaian seluruh tabel atas ~70.000 kejadian. PostGIS menjadikannya kueri geografis ber-indeks. Profil per wilayah mengagregasi seluruh riwayat — terlalu mahal untuk dijalankan saat halaman dimuat — jadi tugas Celery malam hari membangun ulang semua profil dan API tinggal membaca hasil cache-nya. Satu-satunya pengecualian adalah alat "cek lokasi saya": satu titik, satu radius, cukup murah untuk dihitung langsung.
+
+### Satu angka yang jujur, bukan empat hitungan mentah
+
+Tidak ada yang bisa menafsirkan "217 kejadian M4+, 14 M5+, 2 M6+". Skor tertimbang 0–100 yang transparan melakukan penafsiran itu — frekuensi (40 poin), magnitudo terbesar yang tercatat (30), proporsi gempa dangkal yang lebih merusak (15), dan kedekatan ke patahan yang diketahui (15) — setiap bobot didokumentasikan di halaman metodologi publik. Wilayah juga diperingkat ke persentil nasional, sehingga warga mendapat *"lebih aktif secara seismik daripada 84% wilayah Indonesia"* alih-alih sekadar angka. Dan tidak pernah bahasa prediktif: hanya kerangka historis, dengan catatan tegas bahwa ini **bukan** sistem peringatan tsunami dan tautan ke peringatan resmi BMKG.
+
+### Pivot: pipeline CI menjadi pipeline data
+
+Rancangan awal adalah server — Django di VM, Celery melakukan polling tiap lima menit. Sebulan berjalan, proyek berpindah ke **build statis tanpa backend di GitHub Pages**, yang memunculkan rentetan masalah nyata, masing-masing diselesaikan alih-alih ditutup-tutupi:
+
+- **Membekukan API tanpa pergeseran payload.** Alih-alih menulis fixture manual, sebuah perintah menjalankan view DRF yang *sebenarnya* dan menuang keluarannya ke pohon JSON yang mencerminkan URL live. Dua klien API berada di balik satu antarmuka, dipilih oleh konstanta build-time sehingga yang tak terpakai di-tree-shake.
+- **Menjalankan mesin risiko di browser.** Tanpa backend, pengecekan titik tunggal tidak bisa memanggil Django, jadi mesin Python diport ke TypeScript. Karena dua implementasi metodologi *pasti* diam-diam menyimpang, port itu dijaga oleh **golden fixture**: keluaran Django dipatok di 39 titik, dan sebuah test suite memastikan TypeScript mereproduksi setiap titik secara persis. Deploy **menolak rilis jika tidak cocok** — divergensi berarti situs statis melaporkan angka risiko yang berbeda dari API.
+- **Memuat ~70.000 kejadian di ponsel.** Mesin klien mengemas kejadian ke dalam typed array paralel — ~1,1 MB alih-alih puluhan MB objek JS — dan tetap Float64, karena Float32 tidak bisa menyimpan magnitudo seperti 6,6 secara persis dan akan memunculkan kembali ketidakcocokan yang justru dijaga oleh fixture.
+- **Tidak kehilangan riwayat BMKG.** BMKG hanya memaparkan 15 kejadian terakhirnya, jadi setiap catatan lama bertahan hanya karena run sebelumnya menyimpannya. Basis data yang terakumulasi dibawa antar-run CI yang efemeral di cache Actions — salinan kerja, bukan cadangan — jadi ia dicadangkan harian sebagai artifact plus snapshot bulanan permanen sebagai release asset, keduanya `continue-on-error` sehingga cadangan yang gagal tidak pernah bisa menghalangi publikasi data gempa.
+
+### Jujur tentang batasannya
+
+README menyatakan biayanya dengan lugas: kesegaran statis 70–90 menit (penjadwal GitHub menunda saat beban tinggi), peringatan email butuh server, dan cakupan adalah 24 wilayah administratif — jadi persentil nasional dihitung terhadap 24 itu, bukan seluruh ~514 kabupaten/kota. Tidak ada yang dipalsukan; rute yang butuh backend dinamai `*.live.tsx` dan hanya didaftarkan untuk build live.
+
+## Hasil
+
+Live dan publik di GitHub Pages, menyajikan **69.641 kejadian gempa** sepanjang 1970–2026, digabung dan dideduplikasi dari BMKG dan USGS — BMKG menang atas setiap duplikat, sebagai sumber yang lebih otoritatif secara lokal. Ia menyajikan peta 24 jam, laporan geolokasi "apakah saya di zona risiko?", profil risiko untuk 24 wilayah dengan grafik magnitudo-frekuensi, kedalaman, dan lini masa kejadian, papan peringkat wilayah dan perbandingan berdampingan, peta patahan dan bahaya, dan kartu risiko yang bisa dibagikan.
+
+Situs statis yang dirilis benar-benar produksi — ia memperbarui diri sesuai jadwal, membawa data terakumulasi nyata, punya strategi cadangan dua lapis, dan menjaga setiap deploy dengan uji korektnes. Di baliknya ada aplikasi server Django + Celery yang lengkap — implementasi kanonik, yang bisa dijalankan di Docker Compose. Dibangun sendiri: 51 commit selama ~5 minggu, ~19.000 baris berubah, dan workflow CI/CD 320 baris yang sekaligus menjadi pipeline data.
