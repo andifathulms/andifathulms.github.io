@@ -1,0 +1,33 @@
+{
+  "slug": "stemmer-visualizer",
+  "title": "Stemmer Visualizer",
+  "tagline": "Takes an Indonesian word and shows, step by step, how the standard algorithm strips it to its root — including the steps it abandoned, and the cases where more than one root is genuinely possible",
+  "categoryTags": [
+    "Personal Project",
+    "Language Tool",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Zod",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/stemmer-visualizer/id/",
+  "githubUrl": "https://github.com/andifathulms/stemmer-visualizer",
+  "heroImage": "/images/projects/stemmer-visualizer/hero.webp",
+  "order": 21,
+  "featured": false,
+  "metrics": [
+    { "value": "44", "label": "Stemming rules as cited data" },
+    { "value": "~30,000", "label": "Root-word dictionary, swappable live" },
+    { "value": "315", "label": "Words checked vs Sastrawi, divergences classified" },
+    { "value": "0", "label": "NLP libraries at runtime" }
+  ],
+  "access": "public"
+}

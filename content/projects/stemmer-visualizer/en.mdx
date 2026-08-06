@@ -1,0 +1,33 @@
+# Stemmer Visualizer
+
+## The problem
+
+Almost every piece of Indonesian search or language software runs a **stemmer** first, so that *mempelajari*, *pelajaran*, and *belajar* all reduce to **ajar** and count as the same word. In Indonesia that stemmer is nearly always Nazief & Adriani, usually via the Sastrawi library, used as a black box: word in, root out. Three costs of that opacity:
+
+- **A wrong answer looks exactly like a right one.** Over-stemming and under-stemming both produce a plausible Indonesian string. Without seeing which rule fired and which dictionary lookup succeeded, you can't tell them apart.
+- **The dictionary is invisible.** The algorithm consults a root-word dictionary at nearly every step, so the output depends on the dictionary as much as on the rules — but it ships bundled and unseen.
+- **Ambiguity is silently resolved.** *beruang* is either `ber-` + *uang* ("has money") or the root *beruang* ("bear"). The algorithm returns one and says nothing. In a search index, that silent choice is a silent error.
+
+## The approach
+
+### Rules are data, and the build refuses an uncited one
+
+None of the 44 rules is written in TypeScript. Each lives in JSON with an id, pattern, rewrite, precedence, source citation, and any recoding it triggers; the engine is an interpreter over that data. A linguist who doesn't code can audit the rule set, and the trace can name the exact rule that fired because rule ids are first-class. A validator checks schema, citations, and precedence conflicts, and gates the deploy — a rule without a citation fails the build.
+
+### The dictionary is a parameter, and ambiguity is a first-class result
+
+The engine signature is `(word, variant, ruleSet, dictionary) → StemTrace` — the dictionary is always explicit, never an import, which is what makes the editable dictionary panel possible and lets tests swap dictionaries to *prove* the cause of a disagreement. One rule set drives two traversals: one follows precedence and returns the algorithm's answer, the other explores every segmentation the morphology admits. The tests assert *soundness* (the returned root must appear in the candidate set), not equality — enumeration deliberately finds more, and that surplus is the product. For *beruang* the app reports two valid roots instead of silently picking one.
+
+### Sastrawi is an oracle, not an authority
+
+A development script runs PySastrawi over a word list and records the pairs as fixtures. Running it over 315 words produced nine divergences — and three were genuinely *our* bugs: two bad dictionary entries and one missing rule (`per-` before a consonant), whose fix also corrected *pertemuan* → *temu*. The remaining six are classified in writing — our bug, or a documented Sastrawi choice — never auto-aligned to make a test pass, and each is pinned by an assertion so nobody can quietly "fix" a divergence without rewriting its entry.
+
+### Honest about what isn't verified
+
+The primary papers are paywalled or gone, so **every rule is marked `unverified`**, each citation points at where it should be checked, and a `GAPS.md` records what was tried and where to look next — with a test asserting the count of unverified rules, so verifying one *forces* the assertion to update. Switching to Sastrawi's ~30,000-word dictionary resolved two divergences but knowingly broke *perusakan* → *rusa* (deer), because a bigger dictionary opens a wrong branch; that regression was accepted and written up, because coverage and correctness aren't the same axis.
+
+## Outcome
+
+Live and public, bilingual (Indonesian default), offline. It ships a trace view (every step as a ruled line — operation, rule id and source, before/after, the dictionary lookup and its result, with abandoned branches struck through in pencil grey), a candidate tree marking each leaf dictionary-valid or not, an editable dictionary panel where removing a word breaks a previously-correct stem, a rule reference rendered straight from the JSON, a six-word **failure gallery** recomputed live, and a document mode that flags ambiguous and unmatched words in a pasted paragraph.
+
+Built solo in one ~9-hour sitting — ~5,480 lines of TypeScript, 44 cited rules, 59 tests, five runtime dependencies and zero NLP libraries. Sastrawi is linked prominently as the library to actually use in production; this is framed as an educational tool, not an authority, with its unverified status and documented divergences published rather than hidden.
