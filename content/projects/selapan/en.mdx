@@ -1,0 +1,33 @@
+# Selapan
+
+## The problem
+
+*Weton* — a person's Javanese birthday-cycle, used across Java for naming ceremonies, weddings, and the mourning calendar — looks like a table lookup but is actually four overlapping cycles: the 5-day *pasaran*, the 7-day week, the 210-day *wuku*, and a lunar year that begins in 1633 CE, plus a historical correction system called the *kurup* that shifts every 120 years.
+
+Existing weton sites are ad-supported, cite nothing, show no method, and disagree with each other. Three failure modes were the actual design targets: they **hardcode the current *kurup***, so any historical date is wrong; they **happily convert dates before 1633 CE**, where the lunar system didn't exist; and they **show no working**, so a wrong answer is undetectable by the reader. There's a fourth, socially real gap: some communities reckon by the older **Aboge** rule rather than **Asapon** — which is why Aboge villages sometimes observe Idul Fitri a day after the national determination — and no site surfaces that divergence; they simply contradict those users.
+
+There's also an ethical problem the project treats as a first-class requirement. Weton feeds *primbon* — character readings, marriage compatibility, auspicious days — which many take seriously and many others reject. The response is a hard separation between *computed* and *interpreted*, enforced in the type system, the data schema, the build validator, and the colour palette.
+
+## The approach
+
+### Julian Day Number as the only internal representation
+
+Every date becomes an integer day count at the UI boundary; everything downstream is integer arithmetic. There's no `Date` object anywhere in the engine — no timezones, no DST, no locale, no clock ("today" is resolved in the UI and passed in as a parameter). No date library, on purpose: date-fns, Luxon, and Temporal all carry timezone semantics that are *actively wrong* for a cycle-modulo calendar. The dependency list is four packages.
+
+### Every cycle is a modulo against a *cited* anchor
+
+Anchors live in JSON with a source, a locator, and a verification date — no epoch is ever hardcoded in a `.ts` file. The build fails on an uncited or self-inconsistent anchor: the validator recomputes each anchor's JDN from its stated Gregorian date and rejects mismatches. Validity ranges are per-subsystem, not global — a request for 1500 CE returns a structured refusal for the lunar subsystem *and* valid *pasaran* and *wuku* values, because those cycles are genuinely continuous. Refusals are typed objects, never a thrown string, a silent null, or a nearest-match fudge.
+
+### The trace is the product
+
+The engine's signature is `(jdn, options) → CalendarTrace`, and every value in that trace carries a `Derivation` — anchor id, anchor JDN, offset, modulus, result, source, and a verified/unverified status. Every expandable figure in the UI is rendered from that structure, so a value without a derivation *cannot be displayed* — the UI can't drift from the arithmetic. Colour carries the ethical line: indigo renders computed values only, rubric red renders traditional/primbon material only, grey marks out-of-range and unverified — mirroring the rubrication of printed *primbon* almanacs, so a reader learns the distinction in seconds without being lectured.
+
+### Honesty as a build artifact
+
+Where a datum is inferred rather than transcribed — the *kurup* Ajumgi span, a 1987 transition projection, the *wuku* epoch (which rests on a single source, where a phase error of a whole *wuku* would pass every period test) — it's marked `unverified` in the data, rendered grey, and listed on a public sources-and-gaps page. The validator rejects a `verified` claim that names no independent cross-check. And the whole interpretive *primbon* layer is deliberately withheld: its schema and validator already run (citation required, attribution must begin "Menurut", any second-person phrasing or scoring rejected at build time), but it won't ship without a named reviewer familiar with Javanese practice.
+
+## Outcome
+
+Live and public, bilingual (Indonesian default), fully static. It ships a conversion with an expandable trace (every figure opens to anchor → offset → modulus → result → citation, so any answer can be redone by hand from the screen); the **Aboge/Asapon divergence view** — the same date reckoned both ways with the mechanism beside it, the feature nothing else on the internet has; animated concentric cycle wheels that visibly realign at 35 days (*selapan*) and 210; a wall-calendar month grid; *selapanan*/*slametan* reckoning presented as plain, cited date arithmetic with no interpretation attached (it serves people during bereavement); *pranata mangsa*; and a sources-and-gaps page that publishes what's still unverified rather than hiding it.
+
+Built solo in a single day — ~6,300 lines of source, 126 tests (the longest an invariant over 36,524 consecutive days), four production dependencies and no date library. Framed as a personal project, not an authority, with regional variation acknowledged and the incomplete parts surfaced in the UI.

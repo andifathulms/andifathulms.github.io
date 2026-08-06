@@ -1,0 +1,33 @@
+{
+  "slug": "selapan",
+  "title": "Selapan",
+  "tagline": "A Javanese calendar that converts any date into its traditional reckoning — and, unlike every other site that does this, shows the arithmetic behind each number and cites where the reference points came from",
+  "categoryTags": [
+    "Personal Project",
+    "Calendar Tool",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Zod",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/selapan/id/",
+  "githubUrl": "https://github.com/andifathulms/selapan",
+  "heroImage": "/images/projects/selapan/hero.webp",
+  "order": 24,
+  "featured": false,
+  "metrics": [
+    { "value": "4", "label": "Interlocking cycles, every number traced to a citation" },
+    { "value": "126", "label": "Tests, cycle-exact over a century of days" },
+    { "value": "1633", "label": "CE lunar epoch — it refuses dates before it" },
+    { "value": "0", "label": "Date libraries — pure integer JDN math" }
+  ],
+  "access": "public"
+}
