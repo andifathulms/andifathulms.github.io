@@ -1,0 +1,32 @@
+# Git Rebase Simulator
+
+## Masalahnya
+
+Rebase adalah operasi Git yang paling ditakuti pengembang, dan ketakutan itu beralasan: ia rutin salah dijelaskan sebagai "memindahkan commit ke basis baru". Ia tidak memindahkan apa pun. Ia menulis commit *baru* dengan id *baru* dan meninggalkan yang asli tetap ada di repositori, tanpa referensi. Hampir setiap kepanikan "pekerjaan saya hilang" — dan obatnya, reflog — bermula dari satu kesalahpahaman itu.
+
+Visualiser yang ada benar-benar bagus (Learn Git Branching ditautkan dengan menonjol, bukan disaingi), tetapi semuanya berbagi tiga kekurangan: **id commit palsu** (`C1`, `C2` — `C3` yang di-rebase tetap *terlihat seperti* `C3`, jadi notasinya menghapus pelajarannya); **tak ada yang menunjukkan apa yang ditinggalkan** (commit yatim menjadi tak terlihat, jadi langkah pemulihan tak pernah diajarkan); dan **tanpa isi berkas, maka tanpa konflik nyata** — padahal justru di situlah rebase menyakitkan.
+
+## Pendekatannya
+
+### Modelkan object store dengan jujur, dan pelajarannya muncul gratis
+
+Alih-alih menganimasikan diagram dan menarasikan apa yang "akan" dilakukan Git, aplikasi mengimplementasikan model data Git dan membiarkan visualisasi membacanya. Empat keputusan menopang semuanya:
+
+- **Object store bersifat append-only.** Objek dibuat, tak pernah dimutasi, tak pernah dihapus kecuali oleh `gc` eksplisit. Setiap operasi adalah "buat objek, pindahkan ref". Sebuah asersi bersama berjalan setelah *setiap* perintah di *setiap* tes: tiap objek yang ada sebelumnya harus tetap ada dan identik byte-per-byte sesudahnya. Kode yang memutasi commit di sini bukan sekadar punya bug — ia mengajarkan kebalikan dari kebenaran.
+- **Hash dihitung, tak pernah ditetapkan.** Hash selalu hash dari serialisasi kanonik objek. Karena hash sebuah commit mencakup induknya, mengubah induk mengubah hash — jadi rebase menghasilkan id yang jelas berbeda *secara otomatis*, tanpa special-case. SHA-1 ditulis tangan (99 baris, diperiksa terhadap vektor RFC 3174) alih-alih memakai `SubtleCrypto` yang async dan hanya-browser, yang akan membuat mesin tidak murni dan tak teruji di Node.
+- **Mesinnya murni:** `(state, command) → { state, events }`, dengan timestamp dari clock virtual di dalam state. Sepenuhnya teruji di Node, dan deterministik.
+- **Sesi adalah daftar baris perintah, bukan snapshot.** Memutar ulang baris-baris itu membangun kembali repositori byte-per-byte, jadi URL berbagi meng-encode skripnya — dan tak pernah bisa berselisih dengan apa yang sebenarnya dilakukan perintah.
+
+### Diuji terhadap yang asli
+
+Mode kegagalan paling berisiko bagi alat pengajaran adalah *salah tapi masuk akal*. Maka sebuah skrip pengembangan memanggil biner `git` sungguhan di sembilan skenario (dua terhadap bare repo sungguhan, sehingga `push` diperiksa terhadap aturan fast-forward Git sendiri) dan merekam strukturnya. Suite menegaskan *struktur* — hubungan induk, posisi ref, objek mana yang baru versus dipakai ulang, kesamaan tree — tak pernah kesamaan hash literal, yang akan tidak jujur, karena Git sungguhan juga melipat timestamp dan identitas penulis (UI menyatakan ini dengan lugas alih-alih mengklaim paritas).
+
+### Perintah tak didukung gagal dengan lantang, disebut namanya
+
+`pull` ditolak dengan sengaja — ia menyembunyikan separuh pekerjaannya yang menulis ulang riwayat — dengan pesan yang menyebut `fetch` plus `merge`/`rebase`. Sama untuk `--rebase-merges` dan me-revert merge tanpa `-m`. Jawaban salah yang percaya diri adalah keluaran terburuk yang bisa diberikan proyek ini.
+
+## Hasil
+
+Live dan publik, berlisensi MIT, offline setelah muat pertama. Ketik `rebase main` dan id tujuh-karakter berubah di depan mata Anda — karena induknya berubah, bukan karena label ditukar. Commit yatim tetap terlihat di papan, diabukan dan tak bertali; panel reflog mendaftar setiap pergerakan ref beserta penyebabnya dan memulihkan yatim dalam satu klik. Isi berkas nyata menghasilkan konflik three-way nyata dengan penanda Git sendiri serta `--continue`/`--abort`/`--skip`. Tampilan perbandingan menunjukkan merge vs rebase berdampingan — bentuk riwayat berbeda, tree akhir identik — yang sekaligus payoff pengajaran dan asersi tes. Ditambah rebase interaktif, remote `origin` tersimulasi, dan enam skenario terkurasi.
+
+Dibangun sendiri — ~11.700 baris sumber, 17 perintah Git, 186 tes, tiga dependensi runtime dan tanpa pustaka Git, hashing, atau graph-layout. Data yang tak biasa: implementasi model objek Git lengkap dengan oracle biner-nyata, dibangun dalam satu sesi ~5 jam terhadap spesifikasi yang ditulis lebih dulu.

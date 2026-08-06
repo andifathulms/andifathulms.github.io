@@ -1,0 +1,32 @@
+# Git Rebase Simulator
+
+## The problem
+
+Rebase is the Git operation developers fear most, and the fear is earned: it's routinely misexplained as "moving commits onto a new base". It doesn't move anything. It writes *new* commits with *new* ids and leaves the originals sitting in the repository, unreferenced. Almost every "I lost my work" panic — and its cure, the reflog — follows from that one misunderstanding.
+
+Existing visualisers are genuinely good (Learn Git Branching is linked prominently, not competed with), but they share three omissions: **fake commit ids** (`C1`, `C2` — a rebased `C3` still *looks like* `C3`, so the notation erases the lesson); **nothing shows what was left behind** (orphaned commits go invisible, so the recovery move never gets taught); and **no file content, therefore no real conflicts** — which is exactly where rebase hurts.
+
+## The approach
+
+### Model the object store honestly, and the lessons emerge for free
+
+Rather than animating a diagram and narrating what Git "would" do, the app implements Git's data model and lets the visualisation read off it. Four decisions carry the whole thing:
+
+- **The object store is append-only.** Objects are created, never mutated, never deleted except by explicit `gc`. Every operation is "create objects, move refs". A shared assertion runs after *every* command in *every* test: each object present before must still be present and byte-identical after. Code that mutates a commit here doesn't just have a bug — it teaches the opposite of the truth.
+- **Hashes are computed, never assigned.** A hash is always the hash of the object's canonical serialization. Because a commit's hash covers its parent, changing the parent changes the hash — so rebase produces visibly different ids *automatically*, with no special-casing. SHA-1 is hand-written (99 lines, checked against the RFC 3174 vectors) rather than using the async, browser-only `SubtleCrypto`, which would have made the engine impure and untestable in Node.
+- **The engine is pure:** `(state, command) → { state, events }`, with timestamps from a virtual clock in state. Fully testable in Node, and deterministic.
+- **A session is a list of command lines, not a snapshot.** Replaying the lines rebuilds the repository byte-for-byte, so a shared URL encodes the script — and can never disagree with what the commands actually do.
+
+### Tested against the real thing
+
+The riskiest failure mode for a teaching tool is being *plausibly wrong*. So a development script shells out to the actual `git` binary across nine scenarios (two against a real bare repo, so `push` is checked against Git's own fast-forward rule) and records the structure. The suite asserts *structure* — parent relationships, ref positions, which objects are new versus reused, tree equality — never literal hash equality, which would be dishonest, since real Git also folds in timestamps and author identity (the UI states this plainly rather than claiming parity).
+
+### Unsupported commands fail loudly, by name
+
+`pull` is refused on purpose — it hides the half of its job that rewrites history — with an error naming `fetch` plus `merge`/`rebase`. Same for `--rebase-merges` and reverting a merge without `-m`. A confident wrong answer is the worst output this project could give.
+
+## Outcome
+
+Live and public, MIT-licensed, offline after first load. Type `rebase main` and the seven-character ids change in front of you — because the parent changed, not because a label was swapped. Orphaned commits stay visible on the board, greyed and unstrung; the reflog panel lists every ref movement with its cause and recovers an orphan in one click. Real file content produces real three-way conflicts with Git's own markers and `--continue`/`--abort`/`--skip`. A comparison view shows merge vs. rebase side by side — different history shapes, identical final trees — which is both the teaching payoff and a test assertion. Plus interactive rebase, a simulated `origin` remote, and six curated scenarios.
+
+Built solo — ~11,700 lines of source, 17 Git commands, 186 tests, three runtime dependencies and no Git, hashing, or graph-layout library. The unusual data point: a complete Git object-model implementation with a real-binary test oracle, built in a single ~5-hour sitting against a spec written first.
