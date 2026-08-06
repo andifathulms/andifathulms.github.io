@@ -1,0 +1,33 @@
+# Myers Visualizer
+
+## The problem
+
+`git diff` runs on essentially every working day of a developer's life, and almost nobody knows what it does. Three gaps this tool targets:
+
+- **The algorithm is invisible.** A diff is experienced only as output. That it's a shortest-path search over a grid — an expanding frontier, a backtracking step — is not something the output hints at.
+- **Ugly diffs go unexplained.** Everyone has seen a diff attribute a closing brace to the wrong function, or render "insert 2 lines" as "delete 5, add 7". Developers treat it as a quirk. It isn't: **a shortest edit script is usually not unique**, and which minimal one you see is decided by the algorithm's tie-breaking, not by any judgement about readability.
+- **Nobody knows why `git --patience` exists.** Alternative diff algorithms ship with git because *minimal* isn't the same as *readable*. Seeing that tradeoff on the same input is the fastest way to understand it.
+
+## The approach
+
+### The engine is a pure, recorded function
+
+`(a, b, options) → { script, trace, stats }` — no React, no DOM, no clock, no randomness. Identical inputs produce byte-identical output, and the search is *recorded* once, so stepping backwards is free: the UI replays a recording rather than re-running anything. The search operates on integer token ids, never strings — which is what real implementations do, and turns "what counts as equal?" (line vs. character, whitespace) into an explicit, user-visible setting instead of a hidden assumption.
+
+### The verifier came before the algorithm
+
+`apply.ts` (edit script + A → B) and a brute-force BFS oracle (true minimal `D`) were written *before* the Myers implementation, so it was built against an independent check rather than tested after the fact. Every algorithm, on every input, under every option, must produce a script that applies to A and yields B exactly. And the suite never asserts two algorithms produce the *same* script — because minimal scripts aren't unique — only that they agree on `D`. Getting that wrong yields a test suite that fails on correct code.
+
+### The lattice is canvas, and the offset lives in one place
+
+The edit graph draws on canvas, never DOM — no element per cell at any size, so per-frame work is O(frontier), not O(N·M), guarded by a unit test and calibrated by a real-browser benchmark. The `V` array is indexed by `k = x − y`, which goes negative; an off-by-one there is the classic Myers bug and produces plausible output on symmetric input, so the offset is centralised behind one named accessor and never inlined. The search runs in a Web Worker with a step budget, so the deliberately pathological worst-case preset can't hang the UI.
+
+### Honest presets, honestly measured
+
+Two preset claims were written before they were checked, and both were false — this implementation's tie-breaking does *not* pick the misattributed brace on the first input tried. Both were replaced with inputs that genuinely demonstrate the phenomenon, and each preset now asserts its claim in tests. The render budget was upgraded from an assertion to a measurement: a headless-Chrome benchmark builds, serves, drives the spike, and reads the numbers back.
+
+## Outcome
+
+Live and public as an installable PWA, fully offline after first load. It ships the edit graph on canvas (explored region, advancing frontier, snakes, and the chosen path drawn back through it), the `V`-array strip beside it, ambiguity enumeration (how many equally-minimal scripts exist, steppable), a four-algorithm comparison (greedy Myers, linear-space Myers, patience, histogram — all agreeing on `D` while patience halves the hunk count), the linear-space middle-snake variant with a live memory counter, full playback control, 8 asserted presets, and two locales.
+
+Built solo — ~8,900 lines of TypeScript, 152 tests, four diff algorithms plus a BFS oracle implemented from Myers' 1986 paper, on three runtime dependencies and no diff library. Measured: a 300×300 lattice holds 59.9 fps over 220 frames; the worst case at the input cap is `D = 600` across 135,152 search steps, and the UI stays responsive.

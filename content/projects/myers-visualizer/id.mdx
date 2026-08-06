@@ -1,0 +1,33 @@
+# Myers Visualizer
+
+## Masalahnya
+
+`git diff` berjalan hampir di setiap hari kerja seorang pengembang, dan hampir tidak ada yang tahu apa yang dilakukannya. Tiga celah yang disasar alat ini:
+
+- **Algoritmanya tak terlihat.** Diff hanya dialami sebagai keluaran. Bahwa ia adalah pencarian jalur terpendek di atas sebuah grid — dengan frontier yang mengembang dan langkah backtracking — sama sekali tak tersirat dari keluaran itu.
+- **Diff yang jelek tak dijelaskan.** Semua orang pernah melihat diff mengaitkan kurung penutup ke fungsi yang salah, atau menampilkan "sisip 2 baris" sebagai "hapus 5, tambah 7". Pengembang menganggapnya keanehan. Bukan: **skrip suntingan terpendek biasanya tidak unik**, dan mana yang minimal yang Anda lihat ditentukan oleh tie-breaking algoritma, bukan pertimbangan keterbacaan.
+- **Tak ada yang tahu kenapa `git --patience` ada.** Algoritma diff alternatif hadir bersama git karena *minimal* tidak sama dengan *terbaca*. Melihat trade-off itu pada input yang sama adalah cara tercepat memahaminya.
+
+## Pendekatannya
+
+### Mesinnya adalah fungsi murni yang terekam
+
+`(a, b, options) → { script, trace, stats }` — tanpa React, tanpa DOM, tanpa clock, tanpa keacakan. Input yang sama menghasilkan keluaran identik byte-per-byte, dan pencariannya *direkam* sekali, sehingga melangkah mundur itu gratis: UI memutar rekaman alih-alih menjalankan ulang. Pencarian bekerja atas id token integer, bukan string — yang dilakukan implementasi sungguhan, dan mengubah "apa yang dianggap sama?" (baris vs karakter, spasi) menjadi setelan eksplisit yang terlihat pengguna, bukan asumsi tersembunyi.
+
+### Verifikatornya ditulis sebelum algoritma
+
+`apply.ts` (skrip suntingan + A → B) dan oracle BFS brute-force (`D` minimal sejati) ditulis *sebelum* implementasi Myers, sehingga dibangun terhadap pemeriksa independen alih-alih diuji belakangan. Setiap algoritma, atas setiap input, di bawah setiap opsi, harus menghasilkan skrip yang diterapkan ke A dan menghasilkan B persis. Dan suite tidak pernah menegaskan dua algoritma menghasilkan skrip yang *sama* — karena skrip minimal tidak unik — hanya bahwa keduanya sepakat pada `D`. Salah di sini menghasilkan test suite yang gagal pada kode yang benar.
+
+### Kisi digambar di canvas, dan offset-nya di satu tempat
+
+Edit graph digambar di canvas, bukan DOM — tanpa elemen per sel di ukuran mana pun, sehingga kerja per-frame adalah O(frontier), bukan O(N·M), dijaga uji unit dan dikalibrasi benchmark browser sungguhan. Array `V` diindeks oleh `k = x − y`, yang bernilai negatif; off-by-one di sana adalah bug Myers klasik dan menghasilkan keluaran yang tampak masuk akal pada input simetris, jadi offset-nya dipusatkan di balik satu accessor bernama dan tak pernah di-inline. Pencarian berjalan di Web Worker dengan anggaran langkah, sehingga preset worst-case yang sengaja patologis tak bisa menggantung UI.
+
+### Preset yang jujur, diukur dengan jujur
+
+Dua klaim preset ditulis sebelum diperiksa, dan keduanya salah — tie-breaking implementasi ini *tidak* memilih kurung yang salah atribusi pada input pertama yang dicoba. Keduanya diganti dengan input yang benar-benar mendemonstrasikan fenomenanya, dan tiap preset kini menegaskan klaimnya dalam tes. Anggaran render dinaikkan dari asersi menjadi pengukuran: benchmark headless-Chrome membangun, menyajikan, mengemudikan spike, dan membaca angkanya kembali.
+
+## Hasil
+
+Live dan publik sebagai PWA yang bisa dipasang, sepenuhnya offline setelah muat pertama. Ia menyajikan edit graph di canvas (wilayah terjelajah, frontier yang maju, snake, dan jalur terpilih yang digambar balik melewatinya), strip array `V` di sampingnya, enumerasi ambiguitas (berapa banyak skrip sama-minimal yang ada, bisa dilangkahi), perbandingan empat algoritma (Myers greedy, Myers linear-space, patience, histogram — semua sepakat pada `D` sementara patience memangkas jumlah hunk separuhnya), varian middle-snake linear-space dengan penghitung memori langsung, kontrol pemutaran penuh, 8 preset ter-asersi, dan dua bahasa.
+
+Dibangun sendiri — ~8.900 baris TypeScript, 152 tes, empat algoritma diff plus oracle BFS diimplementasikan dari makalah Myers 1986, di atas tiga dependensi runtime dan tanpa pustaka diff. Terukur: kisi 300×300 menahan 59,9 fps sepanjang 220 frame; worst-case di batas input adalah `D = 600` melintasi 135.152 langkah pencarian, dan UI tetap responsif.

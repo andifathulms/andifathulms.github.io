@@ -1,0 +1,34 @@
+{
+  "slug": "myers-visualizer",
+  "title": "Myers Visualizer",
+  "tagline": "An interactive tool that plays back, step by step, what happens inside `git diff` — and why it sometimes blames the wrong line",
+  "categoryTags": [
+    "Personal Project",
+    "Developer Tool",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Canvas",
+    "Web Workers",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/myers-visualizer/en/",
+  "githubUrl": "https://github.com/andifathulms/myers-visualizer",
+  "heroImage": "/images/projects/myers-visualizer/hero.webp",
+  "order": 19,
+  "featured": false,
+  "metrics": [
+    { "value": "4", "label": "Diff algorithms hand-written from the paper" },
+    { "value": "59.9 fps", "label": "300×300 lattice, rendered on canvas" },
+    { "value": "152", "label": "Tests, incl. a brute-force minimal-D oracle" },
+    { "value": "0", "label": "Diff libraries — the algorithm is the project" }
+  ],
+  "access": "public"
+}
