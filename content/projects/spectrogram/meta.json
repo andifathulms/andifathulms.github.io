@@ -1,0 +1,34 @@
+{
+  "slug": "spectrogram",
+  "title": "Spectrogram",
+  "tagline": "Turns sound into a picture in real time — speak, whistle or play into your mic and watch which pitches are present — with the underlying mathematics written from scratch, not borrowed from the browser",
+  "categoryTags": [
+    "Personal Project",
+    "Audio & DSP",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Web Audio API",
+    "Web Workers",
+    "Canvas",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/spectrogram/en/",
+  "githubUrl": "https://github.com/andifathulms/spectrogram",
+  "heroImage": "/images/projects/spectrogram/hero.webp",
+  "order": 25,
+  "featured": false,
+  "metrics": [
+    { "value": "0", "label": "Network requests at runtime — enforced by the build" },
+    { "value": "256", "label": "Tests, incl. a naive-DFT correctness oracle" },
+    { "value": "~101×", "label": "Real-time FFT, hand-written, zero DSP libraries" },
+    { "value": "4", "label": "Independent proofs the transform is correct" }
+  ],
+  "access": "public"
+}
