@@ -1,0 +1,34 @@
+# Raft Simulator
+
+## Masalahnya
+
+Raft adalah algoritma konsensus di balik sistem seperti etcd, Consul, dan CockroachDB — mesin yang menjaga sebuah klaster tetap sepakat pada satu versi kebenaran bahkan saat mesin mati atau jaringan terbelah. Ia sengaja dirancang agar bisa diajarkan, namun alat-alat yang ada semuanya berhenti di tempat yang sama.
+
+Visualiser kanonik, RaftScope, ditulis oleh penulis makalahnya sendiri dan menunjukkan mekanismenya dengan baik: pemilihan terjadi, pesan berterbangan, log terisi. Yang tak ditunjukkannya adalah *penalarannya* — Anda menyaksikan sebuah aturan dipatuhi tetapi tak pernah tahu untuk apa. Dua celah menyusul, dan proyek ini dibangun di atas keduanya:
+
+- **Tak ada yang memeriksa jaminannya.** Seluruh nilai Raft adalah lima properti keamanan yang dinyatakan. Tak ada visualiser yang mengevaluasinya terus-menerus dan memberi tahu Anda mana yang sedang berlaku.
+- **Tak ada yang membiarkan Anda mematikan sebuah aturan.** Setiap aturan tak-jelas di Raft membela satu properti spesifik. Rute tercepat memahami sebuah aturan adalah menghapusnya dan menyaksikan propertinya gagal. Figure 8 di makalah persis argumen ini, disajikan sebagai diagram statis yang tak sepenuhnya diserap kebanyakan pembaca. Ia seharusnya sebuah tombol.
+
+## Pendekatannya
+
+### Determinisme membeli segalanya
+
+Simulasinya adalah fungsi murni: `(config, seed, actions, ablation flags) → EventTrace`, identik byte-per-byte di mesin mana pun. Satu keputusan itu membeli perjalanan waktu, tautan yang bisa dibagikan, laporan bug yang bisa direproduksi, dan fuzzing — semuanya gratis. Clock virtual menggantikan waktu dinding (memajukan waktu berarti mengeluarkan kejadian berikutnya dari antrean prioritas, jadi seribu detik tersimulasi berjalan dalam mikrodetik), tiap server adalah state machine murni, dan tak ada float di mana pun — term, indeks, dan timestamp semuanya integer.
+
+### Figure 2 diimplementasikan harfiah, dan pemeriksanya independen
+
+State machine diimplementasikan aturan demi aturan dari Figure 2 makalah, tiap aturan membawa komentar yang menyebut figure dan receiver rule yang diimplementasikannya — karena alat pengajaran yang keliru secara halus mengajarkan Raft yang keliru dengan percaya diri, disertai animasi bagus. Yang krusial, pemeriksa keamanan **tak berbagi kode dengan algoritma**: ia tak meng-import apa pun dari implementasi Raft kecuali tipe, dan mengevaluasi kelima properti dari definisi terbitannya atas state klaster global. Pemeriksa yang memakai ulang asumsi implementasi akan dengan senang hati memvalidasi bug-nya sendiri, jadi isolasinya struktural, bukan konvensi.
+
+### Flag ablasi jujur, dua arah
+
+Ketujuhnya berada di satu berkas, masing-masing dikonsultasikan di tepat satu call site bernama — jadi tak ada tempat kedua yang diam-diam masih menegakkan sebuah aturan, dan tak ada cara sebuah sakelar menjadi label UI tanpa apa pun di baliknya. Setiap toggle punya tes yang membuktikan pelanggaran terjadi saat mati *dan* tidak terjadi saat menyala. Setiap run dengan sebuah flag mati ditandai secara permanen dan kasatmata *modified Raft* — di UI dan di tautan mana pun yang dibagikan — sehingga tak seorang pun men-screenshot run yang rusak dan mengiranya algoritma sungguhan.
+
+### Ketepatan menjaga peluncuran
+
+Rencana milestone dengan sengaja menunda peluncuran publik sampai tiga sinyal ketepatan independen hijau: pemeriksa independen, fuzzing acak terhadap kelima properti, dan fixture konformansi Figure 2 per-aturan. Bahkan fitur yang semula di luar cakupan — kompaksi log penuh (§7) dan perubahan keanggotaan lewat joint consensus (§6) — dibangun dan dirilis, yang terakhir mengganti `majority(n)` sepenuhnya dengan `hasQuorum(configuration, …)` yang mensyaratkan mayoritas kedua belahan.
+
+## Hasil
+
+Live dan publik, bisa dipasang dan sepenuhnya offline. Ia menyajikan pemeriksaan keamanan berkelanjutan (kelima properti dievaluasi setelah setiap kejadian, menyebut properti, indeks, term, dan node saat pelanggaran); **log ledger** — log setiap server sebagai kolom bergaris yang disejajarkan pada indeks, sehingga divergensi terbaca sebagai garis putus dan perbaikan terbaca sebagai pemimpin berjalan mundur dan menimpa; panel ablasi dengan tiap aturan dilabeli properti yang dibelanya dan bagian makalah yang membenarkannya; 12 skenario bikinan tangan (`split-vote`, `figure-8`, `log-divergence-repair`…); dan run yang bisa dibagikan dan direproduksi yang meng-encode ke URL — cara Anda mengirim rekan sebuah Figure 8 langsung.
+
+Dibangun sendiri — ~11.500 baris TypeScript, 161 tes (49 fixture Figure 2, 23 kompaksi, 16 keanggotaan, kedua arah dari ketujuh toggle ablasi, dan fuzz), di atas tiga dependensi runtime dan nol pustaka untuk simulasi, keacakan, penjadwalan, atau layout. Kelima properti keamanan berlaku sepanjang **10.000 run acak** dengan kompaksi dan perubahan keanggotaan keduanya aktif. RaftScope dan makalahnya ditautkan dengan hangat; kontribusi yang diklaim adalah ablasi dan pemeriksaan invarian, bukan penggantian.

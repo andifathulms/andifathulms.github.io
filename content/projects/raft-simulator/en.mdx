@@ -1,0 +1,34 @@
+# Raft Simulator
+
+## The problem
+
+Raft is the consensus algorithm behind systems like etcd, Consul, and CockroachDB — the machinery that keeps a cluster agreeing on one version of the truth even when machines crash or the network splits. It's deliberately designed to be teachable, yet the existing tools all stop at the same place.
+
+The canonical visualiser, RaftScope, was written by the paper's own author and shows the mechanism well: elections happen, messages fly, logs fill in. What it doesn't show is the *reasoning* — you watch a rule being obeyed but never find out what it's for. Two gaps follow, and this project is built on both:
+
+- **Nothing checks the guarantees.** Raft's entire value is five stated safety properties. No visualiser evaluates them continuously and tells you which is currently holding.
+- **Nothing lets you turn a rule off.** Every non-obvious rule in Raft defends one specific property. The fastest route to understanding a rule is to remove it and watch the property fail. Figure 8 of the paper is precisely this argument, presented as a static diagram most readers don't fully absorb. It should be a button.
+
+## The approach
+
+### Determinism buys everything else
+
+The simulation is a pure function: `(config, seed, actions, ablation flags) → EventTrace`, byte-identical on any machine. That one decision buys time travel, shareable links, reproducible bug reports, and fuzzing — all for free. A virtual clock replaces wall time (advancing time means popping the next event off a priority queue, so a thousand simulated seconds run in microseconds), each server is a pure state machine, and there are no floats anywhere — terms, indices, and timestamps are all integers.
+
+### Figure 2 implemented literally, and the checker is independent
+
+The state machine is implemented rule by rule from the paper's Figure 2, each rule carrying a comment naming the figure and receiver rule it implements — because a teaching tool that is subtly incorrect teaches incorrect Raft confidently, with good animations. Crucially, the safety checker **shares no code with the algorithm**: it imports nothing from the Raft implementation except types and evaluates the five properties from their published definitions over global cluster state. A checker that reused the implementation's assumptions would cheerfully validate its own bugs, so the isolation is structural, not a convention.
+
+### Ablation flags are honest, both directions
+
+All seven live in one file, each consulted at exactly one named call site — so there's no second place quietly still enforcing a rule, and no way for a switch to become a UI label with nothing behind it. Every toggle has a test proving the violation happens with it off *and* doesn't happen with it on. Any run with a flag off is permanently and visibly marked *modified Raft* — in the UI and in any shared link — so nobody screenshots a broken run and mistakes it for the real algorithm.
+
+### Correctness gated the launch
+
+The milestone plan deliberately delayed public launch until three independent correctness signals were green: the independent checker, randomized fuzzing against the five properties, and per-rule Figure 2 conformance fixtures. Even features originally out of scope — full log compaction (§7) and membership changes via joint consensus (§6) — were built and shipped, the latter replacing `majority(n)` entirely with `hasQuorum(configuration, …)` requiring majorities of both halves.
+
+## Outcome
+
+Live and public, installable and fully offline. It ships continuous safety checking (all five properties evaluated after every event, naming the property, index, terms, and nodes on violation); the **log ledger** — every server's log as a ruled column aligned on index, so divergence reads as a broken line and repair reads as the leader walking back and overwriting; the ablation panel with each rule labelled by the property it defends and the paper section that justifies it; 12 hand-built scenarios (`split-vote`, `figure-8`, `log-divergence-repair`…); and shareable, reproducible runs that encode into the URL — how you send a colleague a live Figure 8.
+
+Built solo — ~11,500 lines of TypeScript, 161 tests (49 Figure 2 fixtures, 23 compaction, 16 membership, both directions of all 7 ablation toggles, and fuzz), on three runtime dependencies and zero libraries for simulation, randomness, scheduling, or layout. All five safety properties hold across **10,000 randomized runs** with compaction and membership changes both active. RaftScope and the paper are linked warmly; the contribution claimed is ablation and invariant checking, not replacement.
