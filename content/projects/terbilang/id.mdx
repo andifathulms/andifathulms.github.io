@@ -1,0 +1,33 @@
+# Terbilang
+
+## Masalahnya
+
+Dokumen komersial Indonesia secara hukum dan konvensi memuat jumlah dua kali: sekali dalam angka, sekali dieja dalam kata (*terbilang*). Setiap sistem akuntansi, penggajian, dan faktur di negeri ini membutuhkan fungsi ini, jadi hampir setiap sistem menulis versinya sendiri — dan sebagian besar salah dengan cara yang sampai ke kertas cetakan:
+
+- **Ketidakteraturan ejaan.** Bahasa Indonesia melebur `se-` pada angka 1 di depan untuk *sepuluh*, *sebelas*, *seratus*, *seribu* — tetapi pemakaian baku mengambil **`satu juta`**, bukan *sejuta*. Aturannya tampak seragam padahal tidak. Implementasi naif menghasilkan `satu ribu`.
+- **Kebocoran kelompok kosong.** `1.000.001` adalah *satu juta satu*, bukan *satu juta nol ribu satu*. Kelompok `000` harus tidak menghasilkan apa pun — bug struktural yang paling umum di ekosistem.
+- **Korupsi float yang senyap.** JavaScript kehilangan presisi integer di atas 2⁵³ ≈ 9×10¹⁵. Implementasi berbasis `number` benar hingga *triliun* dan diam-diam salah tepat sesudahnya — jadi ia lolos pengujian sekilas lalu merusak faktur sungguhan.
+
+## Pendekatannya
+
+### Pustaka lebih dulu; situs hanya mendemonstrasikannya
+
+Tak ada di dalam paket yang tahu bahwa browser ada — tanpa React, tanpa DOM, tanpa `Intl`, tanpa `Date`. Ia berperilaku identik di Node dan browser, dan situs meng-import-nya alih-alih mengimplementasikan ulang apa pun. Pustaka terbit punya **nol dependensi runtime**, sebuah kendala keras alih-alih hasil, diverifikasi oleh build yang menjaga deklarasi tipe bebas dari tipe DOM dan framework.
+
+### `BigInt` dari ujung ke ujung, `number` tak di mana pun
+
+API menerima `bigint` atau string digit dan *tak pernah* `number` — memberikannya adalah penolakan bertipe, bukan koersi. Tak ada `parseInt`, tak ada `Number()`, tak ada aritmetika `number` di mana pun pada jalur nilai. Inilah seluruh alasan proyek ini ada, dan itu ditegaskan oleh test suite permanen di atas 2⁵³, bukan diperiksa sekali dengan tangan.
+
+### Menolak alih-alih menebak
+
+Magnitudo di luar jangkauan, input non-integer, kata yang tak bisa diurai, dan opsi yang bertentangan semuanya mengembalikan error discriminated-union terstruktur yang menyebut persis apa yang gagal — tak pernah string usaha-terbaik, tak pernah hasil parsial, tak pernah clamp senyap. Kata skala berhenti di *kuadriliun* (10¹⁵), karena KBBI memuat lemanya; apa pun di 10¹⁸ atau lebih ditolak, karena pemakaian di sana genuinely belum mapan dan pustaka tak akan mengekstrapolasi polanya. Jumlah yang salah-tapi-masuk-akal pada dokumen lebih buruk daripada tanpa jumlah.
+
+### Verifikasi menyeluruh, bukan sampel
+
+Domainnya terbatas dan fungsinya murni, jadi ia bisa diverifikasi *lengkap*. Seluruh 1.000.001 nilai dari 0 sampai 1.000.000 diformat, diperiksa strukturnya, diurai kembali, dan dibandingkan dengan aslinya — **setiap commit, dalam sekitar lima detik** — tidak disampel, tidak dilewati, tidak ditandai lambat. Ia menjaga CI. Memiliki parser jugalah yang membuat uji bolak-balik ini mungkin: `format` dan `parse` adalah invers persis di bawah opsi yang identik, dan invarian itulah yang benar-benar dibuktikan sapuan menyeluruh itu. Penguraian adalah arah yang lebih sulit — *dua ratus lima puluh ribu* adalah `(2×100 + 5×10) × 1000`, bukan `200 + 50000`.
+
+## Hasil
+
+Sebuah pustaka dual ESM/CJS (terbangun, siap diterbitkan, nol dependensi runtime) plus situs dwibahasa publik yang mendemonstrasikannya, mampu offline dengan tema siang/malam yang disetel sebelum paint pertama. Pengubah menggambar tiap kelompok tiga-angka sebagai kurung berlabel di atas digit — *juta*, *ribu* — saat Anda mengetik, dan kelompok kosong runtuh kasatmata menjadi nihil, yang menunjukkan bug paling umum ekosistem *tidak* terjadi. Ia menyajikan mode dokumen kuitansi (`# seribu lima ratus rupiah #`), lima opsi varian terkutip yang masing-masing mendokumentasikan pemakaian di balik kedua pilihan, enam penolakan bertipe yang ditampilkan dalam perlakuan khusus, dan halaman survei implementasi yang dikirim kosong secara sengaja — tak ada yang diklaim tentang paket yang tidak benar-benar diukur.
+
+Dibangun sendiri dalam satu sesi ~7 jam — ~4.370 baris TypeScript, API publik yang sengaja kecil (2 fungsi, 8 tipe, 4 konstanta), nol dependensi runtime, dan 1.000.001 asersi menyeluruh per run. Arah balik dan bukti menyeluruh itulah yang tak dimiliki kebanyakan implementasi di ruang ini; kerigorannya ada pada verifikasi, bukan pada jam kerja.

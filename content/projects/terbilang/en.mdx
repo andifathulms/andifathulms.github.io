@@ -1,0 +1,33 @@
+# Terbilang
+
+## The problem
+
+Indonesian commercial documents legally and conventionally carry the amount twice: once in digits, once spelled out in words (*terbilang*). Every accounting, payroll, and invoicing system in the country needs this function, so almost every one writes its own — and a large share get it wrong in ways that reach printed paper:
+
+- **Spelling irregularities.** Indonesian fuses `se-` onto a leading 1 for *sepuluh*, *sebelas*, *seratus*, *seribu* — but standard usage takes **`satu juta`**, not *sejuta*. The rule looks uniform and isn't. Naive implementations emit `satu ribu`.
+- **Empty-group leakage.** `1.000.001` is *satu juta satu*, never *satu juta nol ribu satu*. A group of `000` must emit nothing at all — the single most common structural bug in the ecosystem.
+- **Silent float corruption.** JavaScript loses integer precision above 2⁵³ ≈ 9×10¹⁵. A `number`-based implementation is correct all the way through *triliun* and silently wrong immediately after — so it passes casual testing and then corrupts a real invoice.
+
+## The approach
+
+### A library first; the site only demonstrates it
+
+Nothing in the package knows a browser exists — no React, no DOM, no `Intl`, no `Date`. It behaves identically in Node and the browser, and the site imports it rather than reimplementing anything. The published library has **zero runtime dependencies**, a hard constraint rather than an outcome, verified by a build that keeps the type declarations free of DOM and framework types.
+
+### `BigInt` end to end, `number` nowhere
+
+The API accepts a `bigint` or a digit string and *never* a `number` — passing one is a typed refusal, not a coercion. There's no `parseInt`, no `Number()`, no `number` arithmetic anywhere in the value path. This is the whole reason the project exists, and it's asserted by a permanent test suite above 2⁵³, not verified once by hand.
+
+### Refuse rather than guess
+
+Out-of-range magnitude, non-integer input, unparseable words, and contradictory options all return a structured discriminated-union error naming exactly what failed — never a best-effort string, never a partial result, never a silent clamp. Scale words stop at *kuadriliun* (10¹⁵), because KBBI carries the lemma; anything at 10¹⁸ or above is rejected, because usage there is genuinely unsettled and the library won't extrapolate the pattern. A wrong-but-plausible amount on a document is worse than no amount.
+
+### Exhaustive verification, not sampling
+
+The domain is bounded and the function is pure, so it can be verified *completely*. All 1,000,001 values from 0 to 1,000,000 are formatted, structurally checked, parsed back, and compared to the original — **every commit, in about five seconds** — not sampled, not skipped, not marked slow. It gates CI. Having a parser is also what makes this round-trip test possible: `format` and `parse` are exact inverses under identical options, and that invariant is what the exhaustive sweep actually proves. Parsing is the harder direction — *dua ratus lima puluh ribu* is `(2×100 + 5×10) × 1000`, not `200 + 50000`.
+
+## Outcome
+
+A dual ESM/CJS library (built, ready to publish, zero runtime deps) plus a public bilingual site that demonstrates it, offline-capable with a before-first-paint day/night theme. The converter draws each three-digit group as a labelled bracket above the digits — *juta*, *ribu* — as you type, and empty groups visibly collapse to nothing, which shows the ecosystem's most common bug *not* happening. It ships a cheque/kwitansi document mode (`# seribu lima ratus rupiah #`), five cited variant options each documenting the usage behind both choices, six typed refusals surfaced in a reserved treatment, and an implementation-survey page that ships empty by design — nothing is claimed about a package that wasn't actually measured.
+
+Built solo in one ~7-hour sitting — ~4,370 lines of TypeScript, a deliberately small public API (2 functions, 8 types, 4 constants), zero runtime dependencies, and 1,000,001 exhaustive assertions per run. The reverse direction and the exhaustive proof are what most implementations in this space don't have; the rigour is in the verification, not the hours.

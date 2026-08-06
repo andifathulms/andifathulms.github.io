@@ -1,0 +1,33 @@
+{
+  "slug": "terbilang",
+  "title": "Terbilang",
+  "tagline": "Turns Indonesian numbers into the words required on invoices and cheques — 1.500 becomes seribu lima ratus — and reads them back, correctly, at any size an accounting system can throw at it",
+  "categoryTags": [
+    "Personal Project",
+    "Library",
+    "Web App"
+  ],
+  "techStack": [
+    "TypeScript",
+    "BigInt",
+    "Next.js",
+    "React",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/terbilang/id/",
+  "githubUrl": "https://github.com/andifathulms/terbilang",
+  "heroImage": "/images/projects/terbilang/hero.webp",
+  "order": 23,
+  "featured": false,
+  "metrics": [
+    { "value": "1,000,001", "label": "Exhaustive round-trips every commit (~5s)" },
+    { "value": "0", "label": "Runtime dependencies in the library" },
+    { "value": "BigInt", "label": "End to end — correct past 2⁵³" },
+    { "value": "6", "label": "Typed refusals — refuse, never guess" }
+  ],
+  "access": "public"
+}
