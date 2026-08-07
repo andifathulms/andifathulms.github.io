@@ -1,0 +1,33 @@
+{
+  "slug": "kpr-simulator",
+  "title": "KPR Simulator",
+  "tagline": "A free, ad-free Indonesian mortgage calculator that shows what happens after the bank's fixed-rate period ends — the part every other calculator leaves out — and the exact floating rate at which your instalment stops being affordable",
+  "categoryTags": [
+    "Personal Project",
+    "Finance Tool",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Zod",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/kpr-simulator/id/",
+  "githubUrl": "https://github.com/andifathulms/kpr-simulator",
+  "heroImage": "/images/projects/kpr-simulator/hero.webp",
+  "order": 27,
+  "featured": false,
+  "metrics": [
+    { "value": "1,614", "label": "Test assertions, full run in ~2s" },
+    { "value": "27", "label": "Cited regulatory parameters" },
+    { "value": "7", "label": "Unknowns refused by name, not faked" },
+    { "value": "0", "label": "Runtime network — figures stay in the URL hash" }
+  ],
+  "access": "public"
+}

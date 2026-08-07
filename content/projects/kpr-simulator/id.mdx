@@ -1,0 +1,36 @@
+# KPR Simulator
+
+## Masalahnya
+
+KPR adalah komitmen finansial terbesar yang akan dibuat kebanyakan rumah tangga Indonesia, dan setiap kalkulator salah soal risiko utamanya dalam empat hal:
+
+- **Mereka mengasumsikan satu suku bunga untuk seluruh 20 tahun.** Bank Indonesia mengutip bunga tetap selama 2–3 tahun lalu pinjaman mengambang. Keluarga yang menganggarkan sekitar Rp3,2 juta sebulan mendapati Rp4,8 juta di tahun keempat — ketidakpastian finansial terbesar dalam produk ini, dan tak ada kalkulator yang menampilkannya sama sekali.
+- **"Flat" dan "efektif" rutin dikacaukan.** Keduanya tak sebanding, keduanya diiklankan, dan kebanyakan peminjam tak bisa tahu mana yang dikutipkan.
+- **Mereka menampilkan angka, bukan derivasi** — tanpa rincian berapa dari pembayaran yang murni bunga, tanpa membedakan parameter hukum dari pilihan diskresi bank.
+- **Mereka iklan** — hampir setiap kalkulator KPR di hasil pencarian Indonesia ada untuk menghasilkan prospek bagi bank atau portal properti.
+
+Maka proyek ini membingkai ulang pertanyaannya. Bukan *"apakah saya mampu Rp3,2 juta?"* melainkan *"pinjaman saya jebol di 13,4%, dan margin bank saya di atas suku bunga dasar tak dipublikasikan — berapa?"* — pertanyaan yang bisa dibawa peminjam ke pertemuan bank dan ditanyakan langsung.
+
+## Pendekatannya
+
+### Mesin murni yang tak tahu hari ini tanggal berapa
+
+Intinya adalah `(inputs, product, rulePacks) => Schedule`, tanpa `new Date()` di mana pun — periode waktu selalu argumen `{ year, month }` eksplisit, jadi perhitungan bisa direproduksi selamanya dan bisa dicek terhadap rekening koran enam bulan kemudian. **Uang selalu integer** — rupiah tak pernah menyentuh bilangan floating-point, dan pembulatan adalah langkah bernama eksplisit dalam derivasi yang menyatakan konvensi yang diikutinya. Justru di situlah kalkulator melenceng beberapa rupiah dari rekening koran; bisa menunjuk langkah tempat itu terjadi diperlakukan sebagai fitur.
+
+### Pemecah ambang, dan dua rute independen ke sebuah angka
+
+Biseksi atas mesin amortisasi menemukan suku bunga mengambang persis di mana angsuran melampaui porsi pendapatan yang dipilih — menangani kasus tepi yang jujur (*sudah jebol di suku bunga nol*, *masih terjangkau di atas plafon*) sebagai keluaran bernama yang berbeda alih-alih tebakan. Dan angka bunga efektif diperiksa oleh **pemecah IRR independen yang tak berbagi kode** dengan derivasi bunga efektif, jadi masing-masing adalah pemeriksa sejati bagi yang lain alih-alih helper yang memvalidasi bug-nya sendiri.
+
+### Fakta hidup di data; yang tak diketahui ditolak dengan namanya
+
+Setiap angka teregulasi — suku subsidi, plafon harga, plafon pendapatan, tarif pajak — hidup di rule pack dengan dasar hukum, URL sumber, dan tanggal berlaku/verifikasinya; build *gagal* pada parameter tak terkutip. Ketika riset tak bisa memverifikasi rasio LTV, uang muka minimum, atau tenor FLPP terhadap peraturan yang masih berlaku, mereka menjadi **tujuh celah yang dideklarasikan yang ditolak aplikasi dengan namanya** dan dijelaskan dalam dua bahasa, alih-alih angka yang masuk akal. *Kalkulator yang menunjukkan tujuh hal yang tak diketahuinya lebih sulit dijual daripada yang menunjukkan angka — trade itu diambil dengan sengaja.* Warna membawa kejujuran: amber menandai pita suku-mengambang dan setiap nilai yang diasumsikan, merah menandai batas keterjangkauan; tak ada lagi yang memakai keduanya, jadi antarmuka memisahkan yang dihitung dari yang diasumsikan tanpa satu paragraf peringatan.
+
+### Koreksi yang dibuatnya atas brief-nya sendiri
+
+PRD menyatakan "flat 5% kira-kira setara 9% efektif." Itu berlaku pada tenor 1–5 tahun tetapi tidak pada tenor KPR — angka terhitung adalah 7,95% pada 20 tahun. Tes menegaskan bentuk terhitung dan aplikasi menyatakan angka terhitung; brief-nya dikoreksi alih-alih kodenya dibengkokkan agar cocok.
+
+## Hasil
+
+Live dan publik, tanpa iklan, dwibahasa, dengan **nol permintaan jaringan saat runtime** dan input di-encode ke *hash* URL — bukan query string — sehingga angka pendapatan dan pinjaman secara fisik tak bisa mencapai log server. Ia menyajikan elevasi jadwal (pokok dan bunga bertumpuk sepanjang seluruh tenor, dengan garis dimensi juru gambar di batas periode tetap dan pita ketidakpastian amber yang membuka di luarnya), halaman ambang, flat-versus-efektif berdampingan, jalur bersubsidi (FLPP) dengan pemeriksaan kelayakan per-kriteria, total biaya kepemilikan dengan item teregulasi dikutip dan item diskresi bank dilabeli *tipikal*, simulator pembayaran ekstra, dan penjelajah parameter yang memaparkan setiap angka beserta kutipannya.
+
+Dibangun sendiri selama dua hari — ~9.500 baris sumber, **1.614 asersi tes** (1.186 di sapuan konservasi saja) dalam ~2 detik, 27 parameter terkutip, empat dependensi produksi, dan tanpa pustaka keuangan, mata uang, tanggal, atau charting. Ia tak pernah menasihati, memeringkat, atau menyebut bank; ia menyatakan dengan lugas bahwa suku mengambang tak diketahui dan tak dipublikasikan dan bahwa angka sebaiknya dikonfirmasi ke bank.
