@@ -21,7 +21,7 @@ function PhotoOrFallback({ hasPhoto }: { hasPhoto: boolean }) {
   }
 
   return (
-    <div className="w-64 h-64 md:w-72 md:h-72 mx-auto md:mx-0 rounded-2xl bg-navy border border-gold/20 flex items-center justify-center flex-shrink-0">
+    <div className="w-64 h-64 md:w-72 md:h-72 mx-auto md:mx-0 rounded-2xl bg-navy border border-line flex items-center justify-center flex-shrink-0">
       <span className="font-heading text-display text-accent select-none">AF</span>
     </div>
   );
@@ -33,7 +33,7 @@ export default function IdentityAnchor() {
   const chips = t.raw('chips') as string[];
 
   return (
-    <section className="reveal border-t border-gold/20 py-24 px-6">
+    <section className="reveal border-t border-line py-section-tight px-gutter">
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <PhotoOrFallback hasPhoto={hasPhoto} />
@@ -42,7 +42,7 @@ export default function IdentityAnchor() {
             <p className="font-mono text-meta text-gold uppercase tracking-widest mb-4">
               {t('label')}
             </p>
-            <h2 className="font-heading text-h2 font-medium text-cream mb-5">
+            <h2 className="font-heading text-h3 font-medium text-cream mb-4">
               {t('name')}
             </h2>
             <p className="text-text-muted leading-relaxed mb-6 text-lead">

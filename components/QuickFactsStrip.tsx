@@ -14,7 +14,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
     project.liveUrl && project.access && project.access !== 'public' ? project.access : null;
 
   return (
-    <div className="border-y border-gold/20 py-6 my-10">
+    <div className="border-y border-line py-6 my-10">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {/* Role */}
         {project.role && (
@@ -46,7 +46,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
       </div>
 
       {/* Action links or private badge */}
-      <div className="mt-5 pt-5 border-t border-gold/10 flex flex-wrap gap-3">
+      <div className="mt-5 pt-5 border-t border-line flex flex-wrap gap-3">
         {isPrivate ? (
           <span className="font-mono text-meta text-text-subtle border border-cream/10 px-3 py-1.5 rounded">
             {t('private_badge')}

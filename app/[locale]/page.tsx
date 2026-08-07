@@ -7,6 +7,7 @@ import IdentityAnchor from '@/components/IdentityAnchor';
 import ServiceCard from '@/components/ServiceCard';
 import ProjectCard from '@/components/ProjectCard';
 import ProcessSection from '@/components/ProcessSection';
+import SectionHeading from '@/components/SectionHeading';
 import { getFeaturedProjects, getPortfolioStats } from '@/lib/content';
 
 export async function generateMetadata({
@@ -31,15 +32,10 @@ function ServicesSection() {
   }));
 
   return (
-    <section className="reveal border-t border-gold/20 py-24 px-6">
+    <section className="reveal border-t border-line py-section-tight px-gutter">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-12">
-          <h2 className="font-heading text-h2 font-medium text-cream mb-3">
-            {t('title')}
-          </h2>
-          <p className="text-text-muted">{t('subtitle')}</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <SectionHeading title={t('title')} subtitle={t('subtitle')} className="mb-block" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
           {items.map((item) => (
             <ServiceCard key={item.title} title={item.title} description={item.description} />
           ))}
@@ -56,15 +52,10 @@ function FeaturedWorkSection({ projects }: { projects: ReturnType<typeof getFeat
   if (projects.length === 0) return null;
 
   return (
-    <section className="reveal border-t border-gold/20 py-24 px-6">
+    <section className="reveal border-t border-line py-section px-gutter">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <h2 className="font-heading text-h2 font-medium text-cream mb-3">
-              {t('title')}
-            </h2>
-            <p className="text-text-muted">{t('subtitle')}</p>
-          </div>
+        <div className="flex items-end justify-between mb-block">
+          <SectionHeading tone="primary" title={t('title')} subtitle={t('subtitle')} />
           <Link
             href="/work"
             className="hidden md:block text-sm text-accent hover:text-cream transition-colors whitespace-nowrap"
@@ -99,12 +90,15 @@ function CtaSection() {
   const t = useTranslations('home.cta');
 
   return (
-    <section className="reveal border-t border-gold/20 py-24 px-6">
+    <section className="reveal border-t border-line py-section px-gutter">
       <div className="max-w-5xl mx-auto text-center">
-        <h2 className="font-heading text-h2 font-medium text-cream mb-4">
-          {t('title')}
-        </h2>
-        <p className="text-text-muted mb-8 max-w-md mx-auto">{t('subtitle')}</p>
+        <SectionHeading
+          tone="primary"
+          align="center"
+          title={t('title')}
+          subtitle={t('subtitle')}
+          className="mb-block"
+        />
         <Link
           href="/contact"
           className="inline-block px-8 py-3 bg-gold text-navy text-sm font-medium rounded hover:bg-gold/90 transition-colors"
@@ -128,10 +122,12 @@ export default async function HomePage({
 
   return (
     <>
+      {/* Evidence before adjectives: the work answers "is this person any
+          good" faster than the services grid or the bio can. */}
       <Hero stats={stats} />
+      <FeaturedWorkSection projects={featuredProjects} />
       <IdentityAnchor />
       <ServicesSection />
-      <FeaturedWorkSection projects={featuredProjects} />
       <ProcessSection />
       <CtaSection />
     </>

@@ -7,7 +7,7 @@ export default function Footer() {
   const tn = useTranslations('nav');
 
   return (
-    <footer className="border-t border-gold/20 mt-24">
+    <footer className="border-t border-line mt-24">
       <div className="max-w-5xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
           {/* Left: tagline + copyright */}

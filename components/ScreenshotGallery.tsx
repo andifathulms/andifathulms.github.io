@@ -81,7 +81,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
   }, [activeIndex, close, prev, next]);
 
   return (
-    <div className="border-t border-gold/20 mt-16 pt-10">
+    <div className="border-t border-line mt-16 pt-10">
       <p className="font-mono text-meta text-accent uppercase tracking-wider mb-6">{label}</p>
 
       {/* Grid */}
@@ -121,7 +121,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
       {hasMore && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="mt-5 font-mono text-meta text-accent hover:text-gold border border-gold/20 hover:border-gold/40 px-4 py-2 rounded transition-colors"
+          className="mt-5 font-mono text-meta text-accent hover:text-gold border border-line hover:border-gold/40 px-4 py-2 rounded transition-colors"
         >
           {showAll
             ? 'Show less ↑'

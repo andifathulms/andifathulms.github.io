@@ -11,7 +11,7 @@ export default function MetricsStrip({ metrics, label }: MetricsStripProps) {
   if (!metrics || metrics.length === 0) return null;
 
   return (
-    <section className="border-b border-gold/20 pb-8 mb-10" aria-label={label}>
+    <section className="border-b border-line pb-8 mb-10" aria-label={label}>
       <p className="font-mono text-meta text-accent uppercase tracking-wider mb-5">
         {label}
       </p>

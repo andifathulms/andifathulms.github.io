@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl';
+import SectionHeading from './SectionHeading';
 
 export default function ProcessSection() {
   const t = useTranslations('home.process');
@@ -22,14 +23,9 @@ export default function ProcessSection() {
   ];
 
   return (
-    <section className="reveal border-t border-gold/20 py-24 px-6">
+    <section className="reveal border-t border-line py-section-tight px-gutter">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-14">
-          <h2 className="font-heading text-h2 font-medium text-cream mb-3">
-            {t('title')}
-          </h2>
-          <p className="text-text-muted max-w-lg">{t('subtitle')}</p>
-        </div>
+        <SectionHeading title={t('title')} subtitle={t('subtitle')} className="mb-block" />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
           {steps.map((step) => (
@@ -41,7 +37,7 @@ export default function ProcessSection() {
           ))}
         </div>
 
-        <p className="font-mono text-meta text-text-subtle border-t border-gold/10 pt-6">
+        <p className="font-mono text-meta text-text-subtle border-t border-line pt-6">
           {t('note')}
         </p>
       </div>

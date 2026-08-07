@@ -65,7 +65,7 @@ export default async function AboutPage({
               />
             </div>
           ) : (
-            <div className="w-64 h-64 md:w-80 md:h-80 mx-auto md:mx-0 rounded-2xl bg-navy border border-gold/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-64 h-64 md:w-80 md:h-80 mx-auto md:mx-0 rounded-2xl bg-navy border border-line flex items-center justify-center flex-shrink-0">
               <span className="font-heading text-display text-accent select-none">AF</span>
             </div>
           )}
@@ -103,7 +103,7 @@ export default async function AboutPage({
         </div>
 
         {/* Stats echo — instant credibility for direct landings */}
-        <div className="border-y border-gold/20 py-6 mb-16">
+        <div className="border-y border-line py-6 mb-16">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {statItems.map((s) => (
               <div key={s.label}>
@@ -133,7 +133,7 @@ export default async function AboutPage({
           </div>
 
           {/* 3. Availability */}
-          <div className="border-t border-gold/20 mt-14 pt-10">
+          <div className="border-t border-line mt-14 pt-10">
             <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
               {t('availability_label')}
             </p>
@@ -141,7 +141,7 @@ export default async function AboutPage({
           </div>
 
           {/* 4. Tech stack — grouped by layer */}
-          <div className="border-t border-gold/20 mt-14 pt-10">
+          <div className="border-t border-line mt-14 pt-10">
             <p className="font-mono text-meta text-accent uppercase tracking-wider mb-6">
               {t('stack_title')}
             </p>
@@ -166,7 +166,7 @@ export default async function AboutPage({
 
           {/* 5. Selected work — connect the narrative to real projects */}
           {featured.length > 0 && (
-            <div className="border-t border-gold/20 mt-14 pt-10">
+            <div className="border-t border-line mt-14 pt-10">
               <p className="font-mono text-meta text-accent uppercase tracking-wider mb-5">
                 {t('selected_work_label')}
               </p>
@@ -197,7 +197,7 @@ export default async function AboutPage({
           )}
 
           {/* 6. CTA */}
-          <div className="border-t border-gold/20 mt-14 pt-10">
+          <div className="border-t border-line mt-14 pt-10">
             <h2 className="font-heading text-h2 font-medium text-cream mb-3">
               {t('cta_title')}
             </h2>

@@ -92,7 +92,7 @@ export default async function ContactPage({
 
             <p className="text-text-muted leading-relaxed mb-8">{t('body')}</p>
 
-            <p className="font-mono text-meta text-text-subtle border-t border-gold/10 pt-6 max-w-md">
+            <p className="font-mono text-meta text-text-subtle border-t border-line pt-6 max-w-md">
               {t('note')}
             </p>
           </div>

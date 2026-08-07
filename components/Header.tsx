@@ -29,7 +29,7 @@ export default function Header() {
   }, [menuOpen]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-gold/10 bg-navy/95 backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-line bg-navy/95 backdrop-blur-sm">
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link
           href="/"
@@ -92,7 +92,7 @@ export default function Header() {
         <nav
           id="mobile-nav"
           aria-label={ta('main_nav')}
-          className="md:hidden border-t border-gold/10 bg-navy px-6 py-4 flex flex-col gap-4"
+          className="md:hidden border-t border-line bg-navy px-6 py-4 flex flex-col gap-4"
         >
           {navLinks.map(({ href, label }) => {
             const active = pathname === href || pathname.startsWith(href + '/');

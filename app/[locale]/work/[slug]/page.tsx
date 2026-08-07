@@ -194,7 +194,7 @@ export default async function CaseStudyPage({
         )}
 
         {/* Full tech stack */}
-        <div className="border-t border-gold/20 mt-16 pt-8">
+        <div className="border-t border-line mt-16 pt-8">
           <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
             {t('stack')}
           </p>
@@ -202,7 +202,7 @@ export default async function CaseStudyPage({
         </div>
 
         {/* Conversion CTA */}
-        <section className="border-t border-gold/20 mt-16 pt-12 text-center">
+        <section className="border-t border-line mt-16 pt-12 text-center">
           <h2 className="font-heading text-h2 font-medium text-cream mb-3">
             {t('cta_title')}
           </h2>
@@ -217,7 +217,7 @@ export default async function CaseStudyPage({
 
         {/* Next / prev navigation */}
         {(prev || next) && (
-          <nav className="border-t border-gold/20 mt-16 pt-10 flex justify-between gap-8">
+          <nav className="border-t border-line mt-16 pt-10 flex justify-between gap-8">
             {prev ? (
               <Link
                 href={`/work/${prev.slug}`}
