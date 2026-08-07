@@ -1,0 +1,31 @@
+# Sketch Lab
+
+## Masalahnya
+
+Bloom filter, Count-Min sketch, dan HyperLogLog adalah struktur data yang pernah didengar setiap insinyur backend dan nyaris tak ada yang benar-benar bisa memakainya. Mereka menggerakkan hal yang diandalkan orang setiap hari — basis data melewati pembacaan disk, CDN menghitung pengunjung unik, stream processor menemukan top-N heavy hitter — tetapi literaturnya makalah dan huruf Yunani, dan kebanyakan penjelasan blog meratakan satu hal yang penting: **kesalahannya satu-sisi dan bisa dihitung di muka.** "Tidak" dari Bloom filter adalah bukti; "ya"-nya adalah petunjuk. Meratakannya menjadi "akurat 2%" mengajarkan hal yang salah.
+
+Inti masalahnya adalah kepercayaan: tak ada yang mengadopsi struktur aproksimatif yang tak bisa mereka verifikasi. Maka alat ini menjalankan `Set`/`Map` sungguhan atas stream yang sama sebagai kebenaran dasar dan menandai setiap false positive saat terjadi — untuk dua audiens: insinyur yang perlu *menyetel ukurannya* untuk nyata, dan insinyur yang perlu *diyakinkan* bahwa itu aman.
+
+## Pendekatannya
+
+### Kualitas hash adalah gerbang, bukan detail
+
+Setiap jaminan kesalahan dalam proyek mengasumsikan hashing seragam, dan hash buruk membatalkan semuanya *secara senyap* — kode berjalan, gambar tampak baik, angka salah. Maka MurmurHash3 tulisan-tangan mendapat suite-nya sendiri (avalanche + chi-squared) sebelum satu struktur pun ada, dan ia berjalan sebagai **job pertama di CI, menjaga setiap job lain dan deploy.** Jika hash buruk, tak ada hasil hilir yang bermakna.
+
+### Properti absolut dan probabilistik dipisah secara fisik
+
+"Bloom filter tak pernah mengembalikan tidak untuk item yang disisipkan" bukan klaim statistik, dan ia hidup di direktori tes tempat tak ada toleransi yang diizinkan. "Laju false-positive terukur jatuh dalam batas prediksi" hidup di tempat lain, dengan benih tetap, banyak percobaan, dan toleransi *diturunkan dari varians estimator dan ditulis.* Mencampurnya adalah cara seseorang akhirnya menerapkan toleransi pada properti yang tak punya. Batas ditegaskan atas hitungan lewat ekor Poisson alih-alih atas laju lewat pita normal — dalam rezim peristiwa-langka tempat filter yang tersetel baik beroperasi, aproksimasi normal tak berguna dan menghasilkan justru kegagalan palsu yang mengajari tim melebarkan toleransi sampai suite tak bermakna.
+
+### Angka memori adalah byte teralokasi nyata
+
+Perbandingan terhadap struktur eksak adalah kejujuran proyek, jadi memori adalah `byteLength` aktual dari typed array — tak pernah hasil formula yang disajikan sebagai pengukuran. Segalanya berbenih dan deterministik (keadaan identik byte-per-byte di mesin mana pun, tanpa `Math.random` tak berbenih di inti), dan run panjang pergi ke Web Worker dengan buffer ditransfer alih-alih diklon.
+
+### Tesnya melakukan sains sungguhan
+
+Beberapa temuan menggeser angka alih-alih toleransi. Sebuah uji batas gagal pada ~2.500× laju buku teks di satu konfigurasi berlebih; investigasi melacaknya ke *lantai kebetulan* struktural dalam derivasi hash Kirsch-Mitzenmacher — `(4n/m²)·(1+f)/(1−f)` — dan **suku yang hilang ditambahkan ke model, toleransi tak pernah dilebarkan.** Sebuah penjaga yang ditambahkan untuk Bloom diam-diam memangkas separuh ruang sidik-jari Cuckoo filter (terukur persis 2,0× batasnya) dan diperbaiki dengan menggeser melewati bit yang dipaksa. Dan perbandingan yang diperiksa dua-arah menemukan Cuckoo ini justru *kalah* dari Bloom pada byte nyata di setiap ε — jadi teksnya mengatakan persis apa yang diberikannya (penghapusan), bukan kemenangan ruang yang tak dimilikinya.
+
+## Hasil
+
+Live dan publik, dwibahasa, offline setelah muat pertama. Ia menyajikan empat struktur probabilistik yang diimplementasikan dari makalahnya (Bloom 1970, Count-Min 2005, HyperLogLog 2007 termasuk rezim linear-counting rentang-kecil yang dilewati kebanyakan penjelasan, dan Cuckoo filter kunci-parsial dengan penghapusan yang berfungsi); **slider memori** — seret memori teralokasi turun dan saksikan kesalahan prediksi dari formula melacak kesalahan terukur dari stream sungguhan; struktur eksak berjalan di samping sebagai kebenaran dasar, menandai setiap false positive beserta item dan slot yang bertabrakan; kalkulator parameter (nyatakan n dan target ε, dapatkan m, k, dan memori hasilnya dalam *byte nyata*); verifikasi merge; dan stream seragam / Zipfian / adversarial / teks yang bisa dikonfigurasi, semuanya bisa dibagikan lewat URL.
+
+Dibangun sendiri dalam satu build ~12 jam — ~11.900 baris TypeScript dengan test suite yang menjadi area terbesar ketiga dalam basis kode, 328 asersi di balik gerbang kualitas-hash, di atas tiga dependensi runtime dan nol pustaka hashing, sketch, atau charting. Ia instrumen portofolio yang selesai alih-alih pustaka produksi — non-goal eksplisit — tetapi kelas-produksi dalam verifikasinya: murni, deterministik, bertipe ketat.

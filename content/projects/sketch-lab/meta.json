@@ -1,0 +1,33 @@
+{
+  "slug": "sketch-lab",
+  "title": "Sketch Lab",
+  "tagline": "Shows how databases store approximate answers about huge amounts of data in a tiny fixed amount of memory — with the exact, slow version running side by side so you can watch how wrong the approximation actually is",
+  "categoryTags": [
+    "Personal Project",
+    "Developer Tool",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Canvas",
+    "Web Workers",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/sketch-lab/en/",
+  "githubUrl": "https://github.com/andifathulms/sketch-lab",
+  "heroImage": "/images/projects/sketch-lab/hero.webp",
+  "order": 28,
+  "featured": false,
+  "metrics": [
+    { "value": "4", "label": "Probabilistic structures, hand-written from papers" },
+    { "value": "328", "label": "Assertions behind a hash-quality gate" },
+    { "value": "Real bytes", "label": "Memory measured, never formula'd" },
+    { "value": "3", "label": "Runtime deps — zero sketch libraries" }
+  ],
+  "access": "public"
+}
