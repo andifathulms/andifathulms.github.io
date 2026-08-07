@@ -6,8 +6,9 @@
   },
   "home": {
     "hero": {
-      "headline": "Membangun software di ibu kota baru Indonesia.",
-      "subheadline": "Fullstack developer di Otorita IKN — membangun sistem produksi untuk Nusantara, dan aplikasi web sebagai proyek mandiri.",
+      "eyebrow": "Andi Fathul Mukminin — Fullstack Developer",
+      "headline": "Sistem fullstack untuk pemerintah, startup, dan semua di antaranya.",
+      "subheadline": "Saya merancang dan mengirim perangkat lunak produksi dari hulu ke hilir — dari dokumen kebutuhan sampai deploy. Saat ini membangun untuk ibu kota baru Indonesia di Otorita IKN, dengan proyek mandiri di samping itu.",
       "cta_work": "Lihat proyek saya",
       "cta_start": "Mulai proyek"
     },
@@ -69,6 +70,7 @@
       "note": "Situs ini sendiri dibangun dengan cara ini. PRD dan spesifikasi teknis yang menghasilkannya adalah bagian dari repositori."
     },
     "stats": {
+      "title": "Sudah dikirim",
       "systems_shipped": "Sistem dikirim",
       "government": "Platform pemerintah",
       "independent": "Proyek mandiri",

@@ -1,18 +1,22 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import HeroVisual from './HeroVisual';
+import type { PortfolioStats } from '@/lib/content';
+import StatBand from './StatBand';
 
-export default function Hero() {
+export default function Hero({ stats }: { stats: PortfolioStats }) {
   const t = useTranslations('home.hero');
 
   return (
-    <section className="pt-40 pb-24 px-6">
+    <section className="pt-32 pb-section px-gutter">
       <div className="max-w-5xl mx-auto grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 items-center">
         <div>
-          <h1 className="anim-fade-up font-heading text-display font-medium text-cream leading-tight mb-6">
+          <p className="anim-fade-up font-mono text-meta uppercase tracking-widest text-accent mb-5">
+            {t('eyebrow')}
+          </p>
+          <h1 className="anim-fade-up font-heading text-display font-medium text-cream mb-6">
             {t('headline')}
           </h1>
-          <p className="anim-fade-up anim-delay-1 text-lead text-text-muted max-w-xl leading-relaxed mb-10">
+          <p className="anim-fade-up anim-delay-1 text-lead text-text-muted max-w-xl mb-10">
             {t('subheadline')}
           </p>
           <div className="anim-fade-up anim-delay-2 flex flex-wrap gap-4">
@@ -31,9 +35,10 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Decorative brand motif — desktop only, keeps the top fold from feeling empty */}
-        <div className="anim-fade-up anim-delay-1 hidden lg:block">
-          <HeroVisual />
+        {/* Proof, not decoration — the portfolio counts sit inside the fold so
+            a first-time visitor gets evidence before they scroll. */}
+        <div className="anim-fade-up anim-delay-2">
+          <StatBand stats={stats} variant="hero" />
         </div>
       </div>
     </section>

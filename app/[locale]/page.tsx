@@ -3,7 +3,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import Hero from '@/components/Hero';
-import StatBand from '@/components/StatBand';
 import IdentityAnchor from '@/components/IdentityAnchor';
 import ServiceCard from '@/components/ServiceCard';
 import ProjectCard from '@/components/ProjectCard';
@@ -129,8 +128,7 @@ export default async function HomePage({
 
   return (
     <>
-      <Hero />
-      <StatBand stats={stats} />
+      <Hero stats={stats} />
       <IdentityAnchor />
       <ServicesSection />
       <FeaturedWorkSection projects={featuredProjects} />

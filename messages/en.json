@@ -6,8 +6,9 @@
   },
   "home": {
     "hero": {
-      "headline": "Building software at Indonesia's new capital.",
-      "subheadline": "Fullstack developer at Otorita IKN — shipping production systems for Nusantara, and web applications as independent projects on the side.",
+      "eyebrow": "Andi Fathul Mukminin — Fullstack Developer",
+      "headline": "Fullstack systems for governments, startups, and everyone between.",
+      "subheadline": "I design and ship production software end to end — from the requirements doc to the deploy. Currently building for Indonesia's new capital at Otorita IKN, with independent projects on the side.",
       "cta_work": "See my work",
       "cta_start": "Start a project"
     },
@@ -69,6 +70,7 @@
       "note": "This site itself was built this way. The PRD and technical spec that produced it are part of the repository."
     },
     "stats": {
+      "title": "Shipped to date",
       "systems_shipped": "Systems shipped",
       "government": "Government platforms",
       "independent": "Independent projects",
