@@ -1,0 +1,31 @@
+# Gizi Masakan
+
+## The problem
+
+Nutrition apps used in Indonesia run on foreign food databases. Search *nasi padang*, *gado-gado*, or *soto betawi* and you get nothing, or a US approximation of a dish that shares almost nothing with the thing on the plate. The apps that *do* carry Indonesian dishes have the opposite failure: one confident number, no working shown. *"550 kcal for gado-gado."* Whose gado-gado? How much peanut sauce? The number can't be checked, so it can't be corrected.
+
+And nearly all of them are framed as **trackers** — daily budgets, calories remaining, streaks. That framing suits weight loss and little else. Indonesia's actual nutrition burden is stunting and micronutrient deficiency far more than overconsumption, so the useful question is *am I getting enough iron and protein*, not *have I stayed under my ceiling* — and calorie-budget framing is actively harmful to people with disordered eating.
+
+## The approach
+
+### The recipe is the product, not a footnote
+
+Every dish page shows the ingredient list and gram weights directly beneath the numbers. The weights are editable inline and the cooking method is switchable (fried → boiled), and everything — totals, contribution bars, adequacy fills — recomputes as you type. This isn't a power feature; it's how the tool tells the truth, because the variance between two warungs' gado-gado is larger than any precision the app could claim.
+
+### Never silently drop a missing value
+
+The single most dangerous failure mode in a nutrition calculator is quietly omitting an ingredient it has no data for: the total still looks plausible but understates the dish. So missing ingredients, values, and factors each produce a **named gap** in the output — the total still shows, labelled incomplete — and tests assert this in both directions (an incomplete recipe must name its gap; a complete one must name none). Retention has exactly two states: factor-adjusted with the factor cited, or explicitly marked unadjusted. There is no implicit "assume full retention" — that's a silent assumption wearing a number's clothes.
+
+### A licence gate that fails the build
+
+The obviously better ingredient source is TKPI (Kemenkes' Indonesian food composition table) — but it's a copyrighted book with an all-rights-reserved notice, outside the UU 28/2014 exemption for regulations. So a TKPI adapter exists in the codebase and **ships disabled behind a licence gate**, with the exclusion and its legal reason recorded in the manifest; the build fails if a source's licence is absent. Both adapters emit the same `IngredientTable` and nothing downstream branches on provenance, so if permission ever arrives, accuracy improves without touching anything else.
+
+### Honest about its own gaps — applied to itself
+
+The project's own thesis is turned on its own data. All 40 recipes' gram weights are currently *estimates*, every row marked `perkiraan` and rendered in terracotta so a reader can see it — and the docs record, against the PRD's own advice, that reaching forty guessed dishes was the wrong trade and weighing is the highest-value work left. The household-measure (URT) table ships **deliberately empty** rather than populated from a guess, because an invariant forbids unmeasured entries. Choosing an empty table over a plausible one is the whole thesis applied to itself.
+
+## Outcome
+
+Live and public, bilingual (Indonesian default), fully static with **zero runtime network requests** — a build-time pipeline downloads the USDA FoodData Central bulk CSV, filters to a 70-ingredient curated list, projects to 29 nutrients, and ships a 28.9 KB table; raw CSVs are never committed. It shows the plate with the recipe strip and re-ranking contribution bars beneath it, inline recipe editing including cooking method, a named-gaps panel, a per-nutrient computation trace (which ingredient contributed what, at which gram weight, from which FDC entry, with which retention factor, and the arithmetic stated), and AKG adequacy by age/sex group from Permenkes 28/2019 — rendered as *how much of the requirement this contributes*, never a consumed-from-budget bar. No trackers anywhere: enforced by a test that drops a stray timestamp from the saved-recipe store.
+
+Built solo in one ~8-hour day — ~7,700 lines of TypeScript, 282 tests, four runtime dependencies. It states plainly that ingredient values are US-database approximations for Indonesian ingredients, that dish numbers are estimates from a stated recipe, and that it is not medical advice.

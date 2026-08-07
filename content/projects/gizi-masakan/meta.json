@@ -1,0 +1,33 @@
+{
+  "slug": "gizi-masakan",
+  "title": "Gizi Masakan",
+  "tagline": "Tells you the nutrition of Indonesian dishes — and shows the exact recipe it used to get that number, so you can correct it if your kitchen does it differently",
+  "categoryTags": [
+    "Personal Project",
+    "Nutrition Tool",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Zod",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/gizi-masakan/id/",
+  "githubUrl": "https://github.com/andifathulms/gizi-masakan",
+  "heroImage": "/images/projects/gizi-masakan/hero.webp",
+  "order": 26,
+  "featured": false,
+  "metrics": [
+    { "value": "40", "label": "Indonesian dishes, recipe shown & editable" },
+    { "value": "282", "label": "Tests — every number is auditable" },
+    { "value": "0", "label": "Runtime network requests" },
+    { "value": "29", "label": "Nutrients from USDA FoodData Central" }
+  ],
+  "access": "public"
+}
