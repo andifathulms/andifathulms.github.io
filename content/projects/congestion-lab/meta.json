@@ -1,0 +1,33 @@
+{
+  "slug": "congestion-lab",
+  "title": "Congestion Lab",
+  "tagline": "Shows, packet by packet, how the internet decides how fast to send data — and why your video call stutters the moment someone in the house starts a download",
+  "categoryTags": [
+    "Personal Project",
+    "Networking",
+    "Web App"
+  ],
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Web Workers",
+    "SVG",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/tcp-congestion/en/",
+  "githubUrl": "https://github.com/andifathulms/tcp-congestion",
+  "heroImage": "/images/projects/congestion-lab/hero.webp",
+  "order": 30,
+  "featured": false,
+  "metrics": [
+    { "value": "5", "label": "Congestion algorithms from their RFCs" },
+    { "value": "4", "label": "Analytic oracles gating the deploy" },
+    { "value": "288k", "label": "Packets/run simulated, flat heap" },
+    { "value": "0", "label": "Charting libraries — SVG hand-written" }
+  ],
+  "access": "public"
+}

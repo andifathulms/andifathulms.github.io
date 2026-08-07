@@ -1,0 +1,34 @@
+# Congestion Lab
+
+## Masalahnya
+
+Kontrol kongesti TCP mengatur kecepatan hampir setiap koneksi internet, dan ia diajarkan sebagai gambar — "gigi gergaji" — yang kebanyakan orang tak pernah lihat dihasilkan. Empat konsekuensi praktis yang disasar proyek ini secara langsung:
+
+- **Orang menyalahkan bandwidth untuk masalah latensi.** Pertumbuhan window terjadi sekali per perjalanan bolak-balik, jadi server sejauh 300 ms pulih dari paket yang hilang enam kali lebih lambat daripada yang 50 ms pada bandwidth identik. Itu tak terlihat tanpa simulator.
+- **"Slow start" salah nama** — ia menggandakan window tiap perjalanan bolak-balik: lambat memulai, lalu meledak. Namanya mengajarkan kebalikan dari perilakunya.
+- **Bufferbloat tak terlihat.** Buffer router berlebihan berarti kehilangan kini terjadi lama setelah antrean penuh, jadi algoritma berbasis-kehilangan menambahkan *detik* latensi tanpa menjatuhkan apa pun. Ini mekanisme di balik "panggilannya jadi buruk saat unduhan dimulai".
+- **Keadilan diasumsikan alih-alih dipahami.** Konvergensi AIMD ke bagian yang setara adalah properti geometris terbukti yang gagal dengan cara-cara spesifik yang bisa diprediksi.
+
+## Pendekatannya
+
+### Gigi gergaji itu emergen, tak pernah digambar
+
+Keputusan sentral: paket individual dijadwalkan ke clock virtual, diserialisasi ke tautan, diantrekan, dijatuhkan, dan diakui — dan kurva window adalah apa pun yang *dilakukan* algoritma sebagai respons. Tak ada kurva yang dihasilkan dari formula. Simulator yang menggambar bentuk yang diharapkannya tak pernah bisa mengejutkan Anda, dan seluruh nilai proyek ada pada hasil mengejutkannya yang bisa dipercaya.
+
+### Ketepatan dibawa oracle analitik, bukan dengan melihatnya
+
+Simulator yang salah tetap menghasilkan gigi gergaji yang meyakinkan. Maka empat prediksi terbitan independen — persamaan throughput Mathis, utilisasi-vs-ukuran-buffer, ketidakadilan RTT, dan konvergensi keadilan AIMD — ditegaskan sebagai *sapuan* (bukan titik tunggal) dan **menjaga deploy.** Simulator yang berhenti mereproduksi Mathis tak bisa dikirim. Konservasi paket (`terkirim = terkirimkan + terjatuh + dalam penerbangan`) ditegaskan di tiap kejadian di tiap suite, dan mesinnya deterministik hingga waktu integer-nanodetik dengan timestamp sama dipecah oleh nomor urut eksplisit — karena float di penjadwal mengakumulasi kesalahan yang tak akan reproduksi, dan perbandingan algoritma hanya bermakna jika ia identik byte-per-byte di mana pun.
+
+### Satu kerangka pengirim; kontrol kongesti sebagai plugin
+
+Setiap algoritma mengimplementasikan antarmuka empat-metode yang sama (`onAck`, `onLoss`, `onTimeout`, `canSend`) — tak ada `if (algorithm === 'cubic')` di pengirim dan tak ada pengirim yang bercabang per algoritma, jadi tampilan perbandingan mengukur *algoritma*, bukan implementasi. Run 60 detik 100 Mbps kira-kira setengah juta paket, jadi field panas jejak hidup di typed array dan simulasi berjalan di Web Worker, di-benchmark di M0 sebelum UI ada: 288k paket dalam ~0,5 s dengan pertumbuhan heap datar.
+
+### Di mana model menolak, dan di mana realitas mengejutkannya
+
+Mekanisme yang tak bisa dimodelkan setia dicatat sebagai celah dan ditampilkan di tempat ia memengaruhi hasil, alih-alih ditebak. Dan sebuah fenomena nyata *membalik* sebuah oracle — di atas DropTail deterministik model menunjukkan efek fase Floyd–Jacobson yang kuat, cukup tajam untuk membalik bias RTT yang diharapkan — jadi alih-alih melonggarkan oracle, skenario keadilan dipindah ke RED dan efek fase ditegaskan secara eksplisit. Ketika oracle gagal, simulatornya yang salah; toleransi tak pernah dilebarkan.
+
+## Hasil
+
+Live dan publik, dwibahasa (Indonesia default), aksesibel (grafik yang bisa dinavigasi keyboard dengan pembacaan `aria-live`, ringkasan prosa untuk pembaca layar), sepenuhnya statis. Tampilan khasnya adalah **jejak empat-seri** — congestion window, kedalaman antrean bottleneck, throughput terhadap garis kapasitas, dan RTT berbagi satu sumbu-x dengan penyejajaran vertikal persis, sehingga bacaan lurus ke bawah di tiap saat menunjukkan mengapa window melakukan yang dilakukannya. Ditambah perbandingan algoritma di Tahoe, Reno/NewReno, CUBIC, Vegas, dan BBR v1 (masing-masing mengutip RFC-nya di kode dan UI); **demonstrasi bufferbloat** — aliran yang sama di atas buffer DropTail dalam versus CoDel, throughput nyaris tak beda sementara RTT beda satu orde besaran; analisis keadilan dengan indeks Jain dan diagram fase Chiu-Jain; lapisan temuan bahasa-lugas yang mengubah run selesai menjadi kalimat terkutip; dan sembilan skenario terkurasi, semuanya bisa dibagikan lewat URL.
+
+Dibangun sendiri dalam satu hari ~10 jam — ~12.100 baris TypeScript dengan inti simulasi ~3.600 baris, 148 tes di balik empat oracle penjaga-deploy, di atas tiga dependensi runtime dan **tanpa pustaka simulasi atau charting** (penjadwal dan plot SVG tulisan-tangan *itulah* proyeknya). Ia menyatakan dengan lugas bahwa ia memodelkan algoritma terbitan dan tak mengklaim paritas dengan stack kernel Linux.
