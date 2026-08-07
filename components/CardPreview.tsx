@@ -54,7 +54,7 @@ export default function CardPreview({ hero, images, alt, sizes }: CardPreviewPro
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="font-mono text-xs text-cream/20">no image</span>
+          <span className="font-mono text-meta text-text-subtle">no image</span>
         </div>
       )}
 

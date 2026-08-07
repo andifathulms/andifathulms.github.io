@@ -75,14 +75,14 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
               type="button"
               onClick={() => selectFilter(key)}
               aria-pressed={active}
-              className={`font-mono text-xs px-3.5 py-1.5 rounded border transition-colors ${
+              className={`font-mono text-meta px-3.5 py-1.5 rounded border transition-colors ${
                 active
                   ? 'border-gold/60 text-gold bg-gold/10'
-                  : 'border-cream/15 text-cream/50 hover:border-cream/35 hover:text-cream/80'
+                  : 'border-cream/15 text-text-subtle hover:border-cream/35 hover:text-text-muted'
               }`}
             >
               {label}
-              <span className="ml-1.5 text-cream/30">{counts[key]}</span>
+              <span className="ml-1.5 text-text-subtle">{counts[key]}</span>
             </button>
           );
         })}
@@ -92,8 +92,8 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
         {sections.map((section) => (
           <section key={section.key} aria-label={section.label}>
             <div className="flex items-baseline gap-3 border-b border-gold/20 pb-3 mb-8">
-              <h2 className="font-heading text-xl font-medium text-cream">{section.label}</h2>
-              <span className="font-mono text-xs text-cream/30">
+              <h2 className="font-heading text-h3 font-medium text-cream">{section.label}</h2>
+              <span className="font-mono text-meta text-text-subtle">
                 {section.items.length} {t('count_label')}
               </span>
             </div>

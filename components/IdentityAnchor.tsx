@@ -22,7 +22,7 @@ function PhotoOrFallback({ hasPhoto }: { hasPhoto: boolean }) {
 
   return (
     <div className="w-64 h-64 md:w-72 md:h-72 mx-auto md:mx-0 rounded-2xl bg-navy border border-gold/20 flex items-center justify-center flex-shrink-0">
-      <span className="font-heading text-5xl text-gold/60 select-none">AF</span>
+      <span className="font-heading text-display text-accent select-none">AF</span>
     </div>
   );
 }
@@ -39,20 +39,20 @@ export default function IdentityAnchor() {
           <PhotoOrFallback hasPhoto={hasPhoto} />
 
           <div>
-            <p className="font-mono text-xs text-gold uppercase tracking-widest mb-4">
+            <p className="font-mono text-meta text-gold uppercase tracking-widest mb-4">
               {t('label')}
             </p>
-            <h2 className="font-heading text-3xl md:text-4xl font-medium text-cream mb-5">
+            <h2 className="font-heading text-h2 font-medium text-cream mb-5">
               {t('name')}
             </h2>
-            <p className="text-cream/70 leading-relaxed mb-6 text-lg">
+            <p className="text-text-muted leading-relaxed mb-6 text-lead">
               {t('bio')}
             </p>
             <div className="flex flex-wrap gap-2 mb-6">
               {chips.map((chip) => (
                 <span
                   key={chip}
-                  className="font-mono text-xs text-cream/50 border border-cream/20 rounded px-3 py-1"
+                  className="font-mono text-meta text-text-subtle border border-cream/20 rounded px-3 py-1"
                 >
                   {chip}
                 </span>
@@ -61,7 +61,7 @@ export default function IdentityAnchor() {
             <SocialLinks className="mb-8" />
             <Link
               href="/about"
-              className="text-sm text-gold hover:text-gold/80 transition-colors"
+              className="text-sm text-accent hover:text-cream transition-colors"
             >
               {t('read_more')} →
             </Link>

@@ -82,7 +82,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
 
   return (
     <div className="border-t border-gold/20 mt-16 pt-10">
-      <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-6">{label}</p>
+      <p className="font-mono text-meta text-accent uppercase tracking-wider mb-6">{label}</p>
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -102,14 +102,14 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
                   className="w-full h-auto object-cover transition-opacity group-hover:opacity-90"
                 />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="bg-navy/80 text-cream/70 font-mono text-xs px-2 py-1 rounded">
+                  <span className="bg-navy/80 text-text-muted font-mono text-meta px-2 py-1 rounded">
                     click to enlarge
                   </span>
                 </div>
               </div>
             </button>
             {shot.caption && (
-              <figcaption className="font-mono text-xs text-cream/30 mt-2 px-0.5">
+              <figcaption className="font-mono text-meta text-text-subtle mt-2 px-0.5">
                 {shot.caption}
               </figcaption>
             )}
@@ -121,7 +121,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
       {hasMore && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="mt-5 font-mono text-xs text-gold/60 hover:text-gold border border-gold/20 hover:border-gold/40 px-4 py-2 rounded transition-colors"
+          className="mt-5 font-mono text-meta text-accent hover:text-gold border border-gold/20 hover:border-gold/40 px-4 py-2 rounded transition-colors"
         >
           {showAll
             ? 'Show less ↑'
@@ -145,12 +145,12 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
           >
             {/* Close button — top right, clearly visible */}
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-cream/30">
+              <span className="font-mono text-meta text-text-subtle">
                 {activeIndex + 1} / {screenshots.length}
               </span>
               <button
                 onClick={close}
-                className="flex items-center gap-1.5 font-mono text-xs text-cream/50 hover:text-cream border border-cream/10 hover:border-cream/30 px-3 py-1.5 rounded transition-colors"
+                className="flex items-center gap-1.5 font-mono text-meta text-text-subtle hover:text-cream border border-cream/10 hover:border-cream/30 px-3 py-1.5 rounded transition-colors"
                 aria-label="Close lightbox"
               >
                 close ✕
@@ -173,26 +173,26 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
             <div className="flex items-center justify-between gap-4">
               <button
                 onClick={prev}
-                className="font-mono text-xs text-cream/40 hover:text-cream border border-cream/10 hover:border-cream/30 px-3 py-1.5 rounded transition-colors"
+                className="font-mono text-meta text-text-subtle hover:text-cream border border-cream/10 hover:border-cream/30 px-3 py-1.5 rounded transition-colors"
                 aria-label="Previous"
               >
                 ← prev
               </button>
 
-              <span className="font-mono text-xs text-cream/50 text-center">
+              <span className="font-mono text-meta text-text-subtle text-center">
                 {screenshots[activeIndex].caption}
               </span>
 
               <button
                 onClick={next}
-                className="font-mono text-xs text-cream/40 hover:text-cream border border-cream/10 hover:border-cream/30 px-3 py-1.5 rounded transition-colors"
+                className="font-mono text-meta text-text-subtle hover:text-cream border border-cream/10 hover:border-cream/30 px-3 py-1.5 rounded transition-colors"
                 aria-label="Next"
               >
                 next →
               </button>
             </div>
 
-            <p className="font-mono text-xs text-cream/20 text-center -mt-1">
+            <p className="font-mono text-meta text-text-subtle text-center -mt-1">
               click outside or press Esc to close · ← → to navigate
             </p>
           </div>

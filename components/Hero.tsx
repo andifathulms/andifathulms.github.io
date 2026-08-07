@@ -9,10 +9,10 @@ export default function Hero() {
     <section className="pt-40 pb-24 px-6">
       <div className="max-w-5xl mx-auto grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 items-center">
         <div>
-          <h1 className="anim-fade-up font-heading text-4xl md:text-5xl lg:text-6xl font-medium text-cream leading-tight mb-6">
+          <h1 className="anim-fade-up font-heading text-display font-medium text-cream leading-tight mb-6">
             {t('headline')}
           </h1>
-          <p className="anim-fade-up anim-delay-1 text-base md:text-lg text-cream/70 max-w-xl leading-relaxed mb-10">
+          <p className="anim-fade-up anim-delay-1 text-lead text-text-muted max-w-xl leading-relaxed mb-10">
             {t('subheadline')}
           </p>
           <div className="anim-fade-up anim-delay-2 flex flex-wrap gap-4">

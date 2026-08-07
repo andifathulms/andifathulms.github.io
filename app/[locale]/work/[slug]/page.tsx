@@ -137,16 +137,16 @@ export default async function CaseStudyPage({
               {project.categoryTags.map((tag) => (
                 <span
                   key={tag}
-                  className="font-mono text-xs text-clay/80 border border-clay/30 px-2 py-0.5 rounded"
+                  className="font-mono text-meta text-accent-2 border border-clay/30 px-2 py-0.5 rounded"
                 >
                   {tag}
                 </span>
               ))}
             </div>
-            <h1 className="font-heading text-3xl md:text-5xl font-medium text-cream mb-2">
+            <h1 className="font-heading text-h1 font-medium text-cream mb-2">
               {project.title}
             </h1>
-            <p className="text-cream/70 text-lg">{project.tagline}</p>
+            <p className="text-text-muted text-lead">{project.tagline}</p>
           </div>
         </div>
       </div>
@@ -156,12 +156,12 @@ export default async function CaseStudyPage({
         <div className="mt-6 flex items-center justify-between gap-4">
           <Link
             href="/work"
-            className="group inline-flex items-center gap-1.5 font-mono text-xs text-cream/40 hover:text-gold transition-colors"
+            className="group inline-flex items-center gap-1.5 font-mono text-meta text-text-subtle hover:text-gold transition-colors"
           >
             <span className="transition-transform group-hover:-translate-x-0.5">←</span>
             {t('all_projects')}
           </Link>
-          <span className="font-mono text-xs text-cream/40">
+          <span className="font-mono text-meta text-text-subtle">
             {t('min_read', { min: readingMinutes })}
           </span>
         </div>
@@ -195,7 +195,7 @@ export default async function CaseStudyPage({
 
         {/* Full tech stack */}
         <div className="border-t border-gold/20 mt-16 pt-8">
-          <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-3">
+          <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
             {t('stack')}
           </p>
           <TechStackChips stack={project.techStack} maxVisible={20} size="md" />
@@ -203,10 +203,10 @@ export default async function CaseStudyPage({
 
         {/* Conversion CTA */}
         <section className="border-t border-gold/20 mt-16 pt-12 text-center">
-          <h2 className="font-heading text-2xl md:text-3xl font-medium text-cream mb-3">
+          <h2 className="font-heading text-h2 font-medium text-cream mb-3">
             {t('cta_title')}
           </h2>
-          <p className="text-cream/60 mb-6 max-w-md mx-auto">{t('cta_body')}</p>
+          <p className="text-text-muted mb-6 max-w-md mx-auto">{t('cta_body')}</p>
           <Link
             href="/contact"
             className="inline-block px-7 py-3 bg-gold text-navy text-sm font-medium rounded hover:bg-gold/90 transition-colors"
@@ -223,8 +223,8 @@ export default async function CaseStudyPage({
                 href={`/work/${prev.slug}`}
                 className="group flex flex-col gap-1 max-w-xs"
               >
-                <span className="font-mono text-xs text-cream/30">{t('prev_project')}</span>
-                <span className="font-heading text-base text-cream group-hover:text-gold transition-colors inline-flex items-center gap-2">
+                <span className="font-mono text-meta text-text-subtle">{t('prev_project')}</span>
+                <span className="font-heading text-lead text-cream group-hover:text-gold transition-colors inline-flex items-center gap-2">
                   <span className="transition-transform group-hover:-translate-x-0.5">←</span>
                   {prev.icon && (
                     <Image
@@ -247,8 +247,8 @@ export default async function CaseStudyPage({
                 href={`/work/${next.slug}`}
                 className="group flex flex-col gap-1 max-w-xs text-right ml-auto"
               >
-                <span className="font-mono text-xs text-cream/30">{t('next_project')}</span>
-                <span className="font-heading text-base text-cream group-hover:text-gold transition-colors inline-flex items-center gap-2 justify-end">
+                <span className="font-mono text-meta text-text-subtle">{t('next_project')}</span>
+                <span className="font-heading text-lead text-cream group-hover:text-gold transition-colors inline-flex items-center gap-2 justify-end">
                   {next.icon && (
                     <Image
                       src={next.icon}

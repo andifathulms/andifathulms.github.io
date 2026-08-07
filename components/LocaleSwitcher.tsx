@@ -14,16 +14,16 @@ export default function LocaleSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-1 font-mono text-xs">
+    <div className="flex items-center gap-1 font-mono text-meta">
       {routing.locales.map((l, i) => (
         <span key={l} className="flex items-center gap-1">
-          {i > 0 && <span className="text-cream/20">/</span>}
+          {i > 0 && <span className="text-text-subtle">/</span>}
           <button
             onClick={() => switchLocale(l)}
             className={
               l === locale
                 ? 'text-gold font-medium cursor-default'
-                : 'text-cream/50 hover:text-cream transition-colors cursor-pointer'
+                : 'text-text-subtle hover:text-cream transition-colors cursor-pointer'
             }
             disabled={l === locale}
           >

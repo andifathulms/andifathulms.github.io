@@ -66,15 +66,15 @@ export default async function AboutPage({
             </div>
           ) : (
             <div className="w-64 h-64 md:w-80 md:h-80 mx-auto md:mx-0 rounded-2xl bg-navy border border-gold/20 flex items-center justify-center flex-shrink-0">
-              <span className="font-heading text-6xl text-gold/60 select-none">AF</span>
+              <span className="font-heading text-display text-accent select-none">AF</span>
             </div>
           )}
 
           <div>
-            <p className="font-mono text-xs text-gold uppercase tracking-widest mb-4">
+            <p className="font-mono text-meta text-gold uppercase tracking-widest mb-4">
               {t('intro')}
             </p>
-            <h1 className="font-heading text-4xl md:text-5xl font-medium text-cream mb-8">
+            <h1 className="font-heading text-h1 font-medium text-cream mb-8">
               {t('title')}
             </h1>
             <div className="space-y-3">
@@ -84,17 +84,17 @@ export default async function AboutPage({
                 { label: t('location_label'), value: t('location_value') },
               ].map(({ label, value }) => (
                 <div key={label} className="flex gap-4 items-baseline">
-                  <span className="font-mono text-xs text-gold/50 uppercase tracking-wider w-28 flex-shrink-0">
+                  <span className="font-mono text-meta text-accent uppercase tracking-wider w-28 flex-shrink-0">
                     {label}
                   </span>
-                  <span className="text-cream/75 text-sm">{value}</span>
+                  <span className="text-text-muted text-body">{value}</span>
                 </div>
               ))}
             </div>
 
             {/* Social / professional channels */}
             <div className="mt-8">
-              <p className="font-mono text-xs text-gold/50 uppercase tracking-wider mb-3">
+              <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
                 {t('connect_label')}
               </p>
               <SocialLinks />
@@ -107,10 +107,10 @@ export default async function AboutPage({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {statItems.map((s) => (
               <div key={s.label}>
-                <p className="font-heading text-2xl md:text-3xl font-medium text-gold leading-none mb-1.5">
+                <p className="font-heading text-stat font-medium text-gold leading-none mb-1.5">
                   {s.value}
                 </p>
-                <p className="text-xs text-cream/50 leading-snug">{s.label}</p>
+                <p className="text-meta text-text-subtle leading-snug">{s.label}</p>
               </div>
             ))}
           </div>
@@ -118,14 +118,14 @@ export default async function AboutPage({
 
         {/* Positioning statement */}
         <figure className="max-w-3xl mb-16 border-l-2 border-gold/50 pl-6">
-          <blockquote className="font-heading text-2xl md:text-3xl font-medium text-cream/90 leading-snug">
+          <blockquote className="font-heading text-h2 font-medium text-text-muted leading-snug">
             {t('pull_quote')}
           </blockquote>
         </figure>
 
         <div className="max-w-2xl">
           {/* 2. Bio paragraphs */}
-          <div className="space-y-6 text-cream/75 leading-relaxed">
+          <div className="space-y-6 text-text-muted leading-relaxed">
             <p>{t('bio_1')}</p>
             <p>{t('bio_2')}</p>
             <p>{t('bio_3')}</p>
@@ -134,26 +134,26 @@ export default async function AboutPage({
 
           {/* 3. Availability */}
           <div className="border-t border-gold/20 mt-14 pt-10">
-            <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-3">
+            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
               {t('availability_label')}
             </p>
-            <p className="text-cream/70 leading-relaxed">{t('availability')}</p>
+            <p className="text-text-muted leading-relaxed">{t('availability')}</p>
           </div>
 
           {/* 4. Tech stack — grouped by layer */}
           <div className="border-t border-gold/20 mt-14 pt-10">
-            <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-6">
+            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-6">
               {t('stack_title')}
             </p>
             <div className="space-y-8">
               {stackGroups.map((group) => (
                 <div key={group.label}>
-                  <p className="font-mono text-xs text-cream/40 mb-4">{group.label}</p>
+                  <p className="font-mono text-meta text-text-subtle mb-4">{group.label}</p>
                   <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-4 gap-y-6">
                     {group.items.map((tech) => (
                       <div key={tech} className="flex flex-col items-center gap-2">
-                        <StackIcon name={tech} className="w-6 h-6 text-cream/50" />
-                        <span className="font-mono text-xs text-cream/40 text-center leading-tight">
+                        <StackIcon name={tech} className="w-6 h-6 text-text-subtle" />
+                        <span className="font-mono text-meta text-text-subtle text-center leading-tight">
                           {tech}
                         </span>
                       </div>
@@ -167,7 +167,7 @@ export default async function AboutPage({
           {/* 5. Selected work — connect the narrative to real projects */}
           {featured.length > 0 && (
             <div className="border-t border-gold/20 mt-14 pt-10">
-              <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-5">
+              <p className="font-mono text-meta text-accent uppercase tracking-wider mb-5">
                 {t('selected_work_label')}
               </p>
               <div className="flex flex-wrap gap-2.5 mb-5">
@@ -175,7 +175,7 @@ export default async function AboutPage({
                   <Link
                     key={project.slug}
                     href={`/work/${project.slug}`}
-                    className="group inline-flex items-center gap-1.5 rounded border border-cream/15 px-3.5 py-2 text-sm text-cream/70 transition-colors hover:border-gold/50 hover:text-gold"
+                    className="group inline-flex items-center gap-1.5 rounded border border-cream/15 px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-gold/50 hover:text-gold"
                   >
                     {project.title}
                     <span
@@ -189,7 +189,7 @@ export default async function AboutPage({
               </div>
               <Link
                 href="/work"
-                className="text-sm text-gold hover:text-gold/80 transition-colors"
+                className="text-sm text-accent hover:text-cream transition-colors"
               >
                 {t('view_all_work')} →
               </Link>
@@ -198,10 +198,10 @@ export default async function AboutPage({
 
           {/* 6. CTA */}
           <div className="border-t border-gold/20 mt-14 pt-10">
-            <h2 className="font-heading text-2xl font-medium text-cream mb-3">
+            <h2 className="font-heading text-h2 font-medium text-cream mb-3">
               {t('cta_title')}
             </h2>
-            <p className="text-cream/60 mb-6">{t('cta_body')}</p>
+            <p className="text-text-muted mb-6">{t('cta_body')}</p>
             <Link
               href="/contact"
               className="inline-block px-6 py-3 bg-gold text-navy text-sm font-medium rounded hover:bg-gold/90 transition-colors"

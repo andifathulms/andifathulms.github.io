@@ -23,10 +23,10 @@ export default function StatBand({ stats }: { stats: PortfolioStats }) {
               href={item.filter === 'all' ? '/work' : `/work?filter=${item.filter}`}
               className="group block"
             >
-              <span className="block font-heading text-4xl md:text-5xl font-medium text-gold leading-none mb-2.5">
+              <span className="block font-heading text-stat font-medium text-gold leading-none mb-2.5">
                 <CountUp end={item.value} />
               </span>
-              <span className="inline-flex items-center gap-1 text-sm text-cream/55 transition-colors group-hover:text-cream">
+              <span className="inline-flex items-center gap-1 text-body text-text-muted transition-colors group-hover:text-cream">
                 {item.label}
                 <span
                   aria-hidden="true"

@@ -50,9 +50,9 @@ export default function SocialLinks({ className = '' }: { className?: string }) 
               href={s.href}
               target={external ? '_blank' : undefined}
               rel={external ? 'noopener noreferrer' : undefined}
-              className="group inline-flex items-center gap-2 rounded border border-cream/15 px-3.5 py-2 text-sm text-cream/70 transition-colors hover:border-gold/50 hover:text-gold"
+              className="group inline-flex items-center gap-2 rounded border border-cream/15 px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-gold/50 hover:text-gold"
             >
-              <span className="text-cream/50 transition-colors group-hover:text-gold">
+              <span className="text-text-subtle transition-colors group-hover:text-gold">
                 <SocialGlyph icon={s.icon} />
               </span>
               {s.label}

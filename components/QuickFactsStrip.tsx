@@ -19,7 +19,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
         {/* Role */}
         {project.role && (
           <div>
-            <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-1.5">
+            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
               {t('role')}
             </p>
             <p className="text-sm text-cream">{project.role}</p>
@@ -29,7 +29,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
         {/* Timeframe */}
         {project.timeframe && (
           <div>
-            <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-1.5">
+            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
               {t('timeframe')}
             </p>
             <p className="font-mono text-sm text-cream">{project.timeframe}</p>
@@ -38,7 +38,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
 
         {/* Stack */}
         <div className="col-span-2">
-          <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-1.5">
+          <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
             {t('stack')}
           </p>
           <TechStackChips stack={project.techStack} maxVisible={6} size="md" />
@@ -48,7 +48,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
       {/* Action links or private badge */}
       <div className="mt-5 pt-5 border-t border-gold/10 flex flex-wrap gap-3">
         {isPrivate ? (
-          <span className="font-mono text-xs text-cream/40 border border-cream/10 px-3 py-1.5 rounded">
+          <span className="font-mono text-meta text-text-subtle border border-cream/10 px-3 py-1.5 rounded">
             {t('private_badge')}
           </span>
         ) : (
@@ -60,10 +60,10 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Staging environment — not the production URL"
-                  className="font-mono text-xs text-clay border border-clay/40 px-3 py-1.5 rounded hover:border-clay/70 transition-colors inline-flex items-center gap-1.5"
+                  className="font-mono text-meta text-accent-2 border border-clay/40 px-3 py-1.5 rounded hover:border-clay/70 transition-colors inline-flex items-center gap-1.5"
                 >
                   {t('view_staging')} ↗
-                  <span className="text-[0.65rem] uppercase tracking-wider text-clay/70 border-l border-clay/30 pl-1.5">
+                  <span className="text-meta uppercase tracking-wider text-accent-2 border-l border-clay/30 pl-1.5">
                     Staging
                   </span>
                 </a>
@@ -72,7 +72,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs font-medium bg-gold text-navy px-3.5 py-1.5 rounded hover:bg-gold/90 transition-colors inline-flex items-center gap-1.5"
+                  className="font-mono text-meta font-medium bg-gold text-navy px-3.5 py-1.5 rounded hover:bg-gold/90 transition-colors inline-flex items-center gap-1.5"
                 >
                   {t('view_live')} ↗
                 </a>
@@ -80,7 +80,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
             {accessBadge === 'internal' && (
               <span
                 title={t('access_internal_hint')}
-                className="font-mono text-xs text-cream/45 border border-cream/15 px-3 py-1.5 rounded inline-flex items-center gap-1.5"
+                className="font-mono text-meta text-text-subtle border border-cream/15 px-3 py-1.5 rounded inline-flex items-center gap-1.5"
               >
                 <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                   <rect x="2.5" y="6" width="9" height="6" rx="1" stroke="currentColor" strokeWidth="1.2" />
@@ -92,7 +92,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
             {accessBadge === 'registration' && (
               <span
                 title={t('access_registration_hint')}
-                className="font-mono text-xs text-gold/70 border border-gold/25 px-3 py-1.5 rounded inline-flex items-center gap-1.5"
+                className="font-mono text-meta text-accent border border-gold/25 px-3 py-1.5 rounded inline-flex items-center gap-1.5"
               >
                 {t('access_registration')}
               </span>
@@ -104,7 +104,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-xs text-cream/60 border border-cream/20 px-3 py-1.5 rounded hover:border-cream/40 transition-colors"
+                    className="font-mono text-meta text-text-muted border border-cream/20 px-3 py-1.5 rounded hover:border-cream/40 transition-colors"
                   >
                     {t('view_github')} {project.githubUrl!.length > 1 ? `(${i + 1})` : ''} ↗
                   </a>
@@ -114,7 +114,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-xs text-cream/60 border border-cream/20 px-3 py-1.5 rounded hover:border-cream/40 transition-colors"
+                    className="font-mono text-meta text-text-muted border border-cream/20 px-3 py-1.5 rounded hover:border-cream/40 transition-colors"
                   >
                     {t('view_github')} ↗
                   </a>

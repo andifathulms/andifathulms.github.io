@@ -14,8 +14,8 @@ export default function TechStackChips({
 
   const chipClass =
     size === 'sm'
-      ? 'font-mono text-xs px-2 py-0.5 border border-gold/30 text-gold/80 rounded'
-      : 'font-mono text-sm px-2.5 py-1 border border-gold/30 text-gold/80 rounded';
+      ? 'font-mono text-meta px-2 py-0.5 border border-gold/30 text-accent rounded'
+      : 'font-mono text-sm px-2.5 py-1 border border-gold/30 text-accent rounded';
 
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -25,7 +25,7 @@ export default function TechStackChips({
         </span>
       ))}
       {overflow > 0 && (
-        <span className={`${chipClass} text-cream/40`}>+{overflow}</span>
+        <span className={`${chipClass} text-text-subtle`}>+{overflow}</span>
       )}
     </div>
   );

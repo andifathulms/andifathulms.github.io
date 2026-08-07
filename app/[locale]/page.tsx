@@ -35,10 +35,10 @@ function ServicesSection() {
     <section className="reveal border-t border-gold/20 py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="mb-12">
-          <h2 className="font-heading text-3xl md:text-4xl font-medium text-cream mb-3">
+          <h2 className="font-heading text-h2 font-medium text-cream mb-3">
             {t('title')}
           </h2>
-          <p className="text-cream/60">{t('subtitle')}</p>
+          <p className="text-text-muted">{t('subtitle')}</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {items.map((item) => (
@@ -61,14 +61,14 @@ function FeaturedWorkSection({ projects }: { projects: ReturnType<typeof getFeat
       <div className="max-w-5xl mx-auto">
         <div className="flex items-end justify-between mb-12">
           <div>
-            <h2 className="font-heading text-3xl md:text-4xl font-medium text-cream mb-3">
+            <h2 className="font-heading text-h2 font-medium text-cream mb-3">
               {t('title')}
             </h2>
-            <p className="text-cream/60">{t('subtitle')}</p>
+            <p className="text-text-muted">{t('subtitle')}</p>
           </div>
           <Link
             href="/work"
-            className="hidden md:block text-sm text-gold hover:text-gold/80 transition-colors whitespace-nowrap"
+            className="hidden md:block text-sm text-accent hover:text-cream transition-colors whitespace-nowrap"
           >
             {t('view_all')} →
           </Link>
@@ -86,7 +86,7 @@ function FeaturedWorkSection({ projects }: { projects: ReturnType<typeof getFeat
         </div>
 
         <div className="mt-8 md:hidden">
-          <Link href="/work" className="text-sm text-gold hover:text-gold/80 transition-colors">
+          <Link href="/work" className="text-sm text-accent hover:text-cream transition-colors">
             {t('view_all')} →
           </Link>
         </div>
@@ -102,10 +102,10 @@ function CtaSection() {
   return (
     <section className="reveal border-t border-gold/20 py-24 px-6">
       <div className="max-w-5xl mx-auto text-center">
-        <h2 className="font-heading text-3xl md:text-4xl font-medium text-cream mb-4">
+        <h2 className="font-heading text-h2 font-medium text-cream mb-4">
           {t('title')}
         </h2>
-        <p className="text-cream/60 mb-8 max-w-md mx-auto">{t('subtitle')}</p>
+        <p className="text-text-muted mb-8 max-w-md mx-auto">{t('subtitle')}</p>
         <Link
           href="/contact"
           className="inline-block px-8 py-3 bg-gold text-navy text-sm font-medium rounded hover:bg-gold/90 transition-colors"

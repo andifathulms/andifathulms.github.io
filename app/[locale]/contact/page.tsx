@@ -76,10 +76,10 @@ export default async function ContactPage({
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Left: intro */}
           <div>
-            <h1 className="font-heading text-4xl md:text-5xl font-medium text-cream mb-4">
+            <h1 className="font-heading text-h1 font-medium text-cream mb-4">
               {t('title')}
             </h1>
-            <p className="font-heading text-xl text-gold mb-6">{t('subtitle')}</p>
+            <p className="font-heading text-h3 text-gold mb-6">{t('subtitle')}</p>
 
             {/* Availability status */}
             <div className="inline-flex items-center gap-2 rounded-full border border-gold/25 bg-gold/[0.04] px-3.5 py-1.5 mb-8">
@@ -87,29 +87,29 @@ export default async function ContactPage({
                 <span className="absolute inline-flex h-full w-full rounded-full bg-gold/60 motion-safe:animate-ping" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
               </span>
-              <span className="font-mono text-xs text-cream/70">{t('availability')}</span>
+              <span className="font-mono text-meta text-text-muted">{t('availability')}</span>
             </div>
 
-            <p className="text-cream/70 leading-relaxed mb-8">{t('body')}</p>
+            <p className="text-text-muted leading-relaxed mb-8">{t('body')}</p>
 
-            <p className="font-mono text-xs text-cream/30 border-t border-gold/10 pt-6 max-w-md">
+            <p className="font-mono text-meta text-text-subtle border-t border-gold/10 pt-6 max-w-md">
               {t('note')}
             </p>
           </div>
 
           {/* Right: channels */}
           <div>
-            <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-6">
+            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-6">
               {t('channels_label')}
             </p>
             <div className="flex flex-col">
               {/* Email */}
               <div className="flex items-start gap-4 border-t border-gold/15 pt-5 pb-5">
-                <span className="mt-0.5 text-gold/70">
+                <span className="mt-0.5 text-accent">
                   <ChannelIcon name="email" />
                 </span>
                 <div className="min-w-0">
-                  <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-1.5">
+                  <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
                     {t('email_label')}
                   </p>
                   <div className="flex items-center gap-3 flex-wrap">
@@ -128,11 +128,11 @@ export default async function ContactPage({
                 rel="noopener noreferrer"
                 className="group flex items-start gap-4 border-t border-gold/15 pt-5 pb-5"
               >
-                <span className="mt-0.5 text-gold/70 transition-colors group-hover:text-gold">
+                <span className="mt-0.5 text-accent transition-colors group-hover:text-gold">
                   <ChannelIcon name="whatsapp" />
                 </span>
                 <div>
-                  <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-1.5">
+                  <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
                     {t('whatsapp_label')}
                   </p>
                   <span className="text-cream transition-colors group-hover:text-gold">
@@ -148,11 +148,11 @@ export default async function ContactPage({
                 rel="noopener noreferrer"
                 className="group flex items-start gap-4 border-t border-gold/15 pt-5 pb-5"
               >
-                <span className="mt-0.5 text-gold/70 transition-colors group-hover:text-gold">
+                <span className="mt-0.5 text-accent transition-colors group-hover:text-gold">
                   <ChannelIcon name="linkedin" />
                 </span>
                 <div>
-                  <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-1.5">
+                  <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
                     {t('linkedin_label')}
                   </p>
                   <span className="text-cream transition-colors group-hover:text-gold">
@@ -169,11 +169,11 @@ export default async function ContactPage({
                   rel="noopener noreferrer"
                   className="group flex items-start gap-4 border-t border-gold/15 pt-5 pb-5"
                 >
-                  <span className="mt-0.5 text-gold/70 transition-colors group-hover:text-gold">
+                  <span className="mt-0.5 text-accent transition-colors group-hover:text-gold">
                     <ChannelIcon name="resume" />
                   </span>
                   <div>
-                    <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-1.5">
+                    <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
                       {t('resume_label')}
                     </p>
                     <span className="text-cream transition-colors group-hover:text-gold">

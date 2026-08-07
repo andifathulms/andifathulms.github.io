@@ -21,15 +21,15 @@ export default function Footer() {
                 height={32}
                 className="h-8 w-8 rounded-[7px]"
               />
-              <p className="font-heading text-lg font-medium text-cream">AFM Studio</p>
+              <p className="font-heading text-lead font-medium text-cream">AFM Studio</p>
             </div>
-            <p className="text-sm text-cream/60 leading-relaxed mb-4">{t('tagline')}</p>
-            <p className="font-mono text-xs text-cream/30">{t('copyright')}</p>
+            <p className="text-body text-text-muted leading-relaxed mb-4">{t('tagline')}</p>
+            <p className="font-mono text-meta text-text-subtle">{t('copyright')}</p>
           </div>
 
           {/* Middle: quick links */}
           <div>
-            <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-4">
+            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-4">
               {t('links_title')}
             </p>
             <nav className="flex flex-col gap-2">
@@ -41,7 +41,7 @@ export default function Footer() {
                 <Link
                   key={href}
                   href={href}
-                  className="text-sm text-cream/60 hover:text-cream transition-colors w-fit"
+                  className="text-sm text-text-muted hover:text-cream transition-colors w-fit"
                 >
                   {label}
                 </Link>
@@ -51,7 +51,7 @@ export default function Footer() {
 
           {/* Right: socials + currently building */}
           <div>
-            <p className="font-mono text-xs text-gold/60 uppercase tracking-wider mb-4">
+            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-4">
               {t('social_title')}
             </p>
             <div className="flex flex-col gap-2 mb-6">
@@ -66,15 +66,15 @@ export default function Footer() {
                   href={href}
                   target={href.startsWith('http') ? '_blank' : undefined}
                   rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  className="text-sm text-cream/60 hover:text-cream transition-colors w-fit"
+                  className="text-sm text-text-muted hover:text-cream transition-colors w-fit"
                 >
                   {label}
                 </a>
               ))}
             </div>
-            <p className="font-mono text-xs text-cream/30">
+            <p className="font-mono text-meta text-text-subtle">
               {t('currently_building')}{' '}
-              <span className="text-clay/70">AFM Studio</span>
+              <span className="text-accent-2">AFM Studio</span>
             </p>
           </div>
         </div>

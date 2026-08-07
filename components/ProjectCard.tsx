@@ -36,7 +36,7 @@ export default function ProjectCard({
         {/* Live indicator — signals a reachable deployed site (matches the Live
             filter: production only, not staging). */}
         {project.liveUrl && !project.liveIsStaging && (
-          <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-navy/80 px-2.5 py-1 font-mono text-[0.65rem] text-gold backdrop-blur-sm">
+          <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 rounded-full border border-gold/30 bg-navy/80 px-2.5 py-1 font-mono text-meta text-gold backdrop-blur-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-gold" />
             {liveBadgeLabel}
           </span>
@@ -46,12 +46,12 @@ export default function ProjectCard({
       {/* Category tags */}
       <div className="flex flex-wrap gap-1.5 mb-3">
         {project.categoryTags.map((tag) => (
-          <span key={tag} className="font-mono text-xs text-clay/70 px-2 py-0.5 border border-clay/20 rounded">
+          <span key={tag} className="font-mono text-meta text-accent-2 px-2 py-0.5 border border-clay/20 rounded">
             {tag}
           </span>
         ))}
         {isPrivate && (
-          <span className="font-mono text-xs text-cream/40 px-2 py-0.5 border border-cream/10 rounded">
+          <span className="font-mono text-meta text-text-subtle px-2 py-0.5 border border-cream/10 rounded">
             {privateBadgeLabel}
           </span>
         )}
@@ -68,7 +68,7 @@ export default function ProjectCard({
             className="h-8 w-8 flex-shrink-0 rounded-lg border border-cream/10 object-cover"
           />
         )}
-        <h3 className="font-heading text-xl font-medium text-cream group-hover:text-gold transition-colors">
+        <h3 className="font-heading text-h3 font-medium text-cream group-hover:text-gold transition-colors">
           {project.title}
           <span
             aria-hidden="true"
@@ -78,7 +78,7 @@ export default function ProjectCard({
           </span>
         </h3>
       </div>
-      <p className="text-sm text-cream/60 mb-4 leading-relaxed">{project.tagline}</p>
+      <p className="text-body text-text-muted mb-4 leading-relaxed">{project.tagline}</p>
 
       <div className="mt-auto pt-4">
         <TechStackChips stack={project.techStack} maxVisible={4} />

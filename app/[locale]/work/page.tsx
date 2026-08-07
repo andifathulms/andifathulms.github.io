@@ -31,14 +31,14 @@ export default async function WorkPage({
     <div className="pt-28 pb-24 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="mb-16">
-          <h1 className="font-heading text-4xl md:text-5xl font-medium text-cream mb-4">
+          <h1 className="font-heading text-h1 font-medium text-cream mb-4">
             {t('title')}
           </h1>
-          <p className="text-cream/60 max-w-lg">{t('subtitle')}</p>
+          <p className="text-text-muted max-w-lg">{t('subtitle')}</p>
         </div>
 
         {projects.length === 0 ? (
-          <p className="text-cream/40 font-mono text-sm">
+          <p className="text-text-subtle font-mono text-body">
             {/* Placeholder: real projects will be added incrementally */}
             Projects coming soon.
           </p>

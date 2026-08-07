@@ -25,23 +25,23 @@ export default function ProcessSection() {
     <section className="reveal border-t border-gold/20 py-24 px-6">
       <div className="max-w-5xl mx-auto">
         <div className="mb-14">
-          <h2 className="font-heading text-3xl md:text-4xl font-medium text-cream mb-3">
+          <h2 className="font-heading text-h2 font-medium text-cream mb-3">
             {t('title')}
           </h2>
-          <p className="text-cream/60 max-w-lg">{t('subtitle')}</p>
+          <p className="text-text-muted max-w-lg">{t('subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
           {steps.map((step) => (
             <div key={step.label}>
-              <p className="font-mono text-xs text-gold/60 mb-3">{step.label}</p>
-              <h3 className="font-heading text-lg font-medium text-cream mb-3">{step.title}</h3>
-              <p className="text-sm text-cream/60 leading-relaxed">{step.description}</p>
+              <p className="font-mono text-meta text-accent mb-3">{step.label}</p>
+              <h3 className="font-heading text-lead font-medium text-cream mb-3">{step.title}</h3>
+              <p className="text-body text-text-muted leading-relaxed">{step.description}</p>
             </div>
           ))}
         </div>
 
-        <p className="font-mono text-xs text-cream/30 border-t border-gold/10 pt-6">
+        <p className="font-mono text-meta text-text-subtle border-t border-gold/10 pt-6">
           {t('note')}
         </p>
       </div>

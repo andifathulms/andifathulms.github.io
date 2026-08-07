@@ -33,7 +33,7 @@ export default function Header() {
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link
           href="/"
-          className="group flex items-center gap-2.5 font-heading text-lg font-medium text-cream transition-colors hover:text-gold"
+          className="group flex items-center gap-2.5 font-heading text-lead font-medium text-cream transition-colors hover:text-gold"
         >
           <Image
             src="/images/brand/logo-mark.svg"
@@ -57,7 +57,7 @@ export default function Header() {
                 href={href}
                 aria-current={active ? 'page' : undefined}
                 className={`nav-link text-sm transition-colors ${
-                  active ? 'text-gold' : 'text-cream/70 hover:text-cream'
+                  active ? 'text-gold' : 'text-text-muted hover:text-cream'
                 }`}
               >
                 {label}
@@ -69,7 +69,7 @@ export default function Header() {
 
         {/* Mobile menu button */}
         <button
-          className="md:hidden rounded text-cream/70 hover:text-cream transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
+          className="md:hidden rounded text-text-muted hover:text-cream transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? ta('close_menu') : ta('open_menu')}
           aria-expanded={menuOpen}
@@ -102,7 +102,7 @@ export default function Header() {
                 href={href}
                 aria-current={active ? 'page' : undefined}
                 className={`text-sm transition-colors ${
-                  active ? 'text-gold' : 'text-cream/70'
+                  active ? 'text-gold' : 'text-text-muted'
                 }`}
                 onClick={() => setMenuOpen(false)}
               >
