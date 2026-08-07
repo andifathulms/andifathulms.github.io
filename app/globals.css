@@ -1,11 +1,61 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand palette */
+  /* ------------------------------------------------------------------
+     Brand palette — the identity colours. Use these for surfaces,
+     borders and decoration. For *text*, use the semantic tokens below,
+     which are pre-flattened against navy so their contrast is known.
+     ------------------------------------------------------------------ */
   --color-navy: #0D1B2A;
   --color-clay: #C9603D;
   --color-gold: #C99A3E;
   --color-cream: #E8E3D8;
+
+  /* ------------------------------------------------------------------
+     Semantic text colours. Every value is opaque and its WCAG contrast
+     ratio against the navy base (#0D1B2A) is recorded here. 4.5:1 is the
+     floor — never introduce a text colour below it, and prefer these
+     tokens over `text-cream/NN` opacity utilities, which silently fall
+     under the floor (cream/50 = 4.3:1, cream/40 = 3.2:1, clay/70 = 2.8:1).
+     ------------------------------------------------------------------ */
+  --color-text: #E8E3D8;         /* 13.6:1 — primary body + headings   */
+  --color-text-muted: #A6A7A4;   /*  7.2:1 — secondary prose, taglines */
+  --color-text-subtle: #909392;  /*  5.6:1 — the dimmest allowed text  */
+  --color-accent: #C99A3E;       /*  6.8:1 — gold: links, CTAs, chips  */
+  --color-accent-2: #D9764F;     /*  5.5:1 — clay, lightened for text  */
+
+  /* Hairline dividers — decorative, exempt from the text floor. */
+  --color-line: rgba(201, 154, 62, 0.20);
+  --color-line-strong: rgba(201, 154, 62, 0.40);
+  --color-line-muted: rgba(232, 227, 216, 0.18);
+
+  /* ------------------------------------------------------------------
+     Type scale — one scale for the whole site. Body text never goes
+     below --text-body (16px); --text-meta (14px) is the floor for
+     functional chips and metadata only, never for prose.
+     ------------------------------------------------------------------ */
+  --text-display: clamp(2.5rem, 5.2vw, 3.75rem);   /* 40 → 60px  hero h1 */
+  --text-display--line-height: 1.08;
+  --text-h2: clamp(1.875rem, 3.2vw, 2.375rem);     /* 30 → 38px  section */
+  --text-h2--line-height: 1.15;
+  --text-h3: 1.375rem;                             /* 22px  card / step  */
+  --text-h3--line-height: 1.3;
+  --text-lead: 1.125rem;                           /* 18px  hero sub     */
+  --text-lead--line-height: 1.65;
+  --text-body: 1rem;                               /* 16px  body floor   */
+  --text-body--line-height: 1.7;
+  --text-meta: 0.875rem;                           /* 14px  chips, labels*/
+  --text-meta--line-height: 1.45;
+
+  /* ------------------------------------------------------------------
+     Spacing scale — vertical rhythm. `section` is the default band;
+     `section-tight` is for supporting sections that should read as
+     secondary to the primary ones.
+     ------------------------------------------------------------------ */
+  --spacing-section: 6rem;        /*  96px */
+  --spacing-section-tight: 4.5rem;/*  72px */
+  --spacing-block: 3rem;          /*  48px */
+  --spacing-gutter: 1.5rem;       /*  24px */
 
   /* Typography — CSS vars injected by next/font on <html> */
   --font-heading: var(--font-fraunces), Lora, Georgia, serif;
@@ -14,14 +64,14 @@
 }
 
 html {
-  background-color: #0D1B2A;
+  background-color: var(--color-navy);
   scroll-behavior: smooth;
 }
 
 /* Visible keyboard focus ring across interactive elements */
 a:focus-visible,
 button:focus-visible {
-  outline: 2px solid #C99A3E;
+  outline: 2px solid var(--color-accent);
   outline-offset: 3px;
   border-radius: 3px;
 }
@@ -97,9 +147,11 @@ button:focus-visible {
 }
 
 body {
-  background-color: #0D1B2A;
-  color: #E8E3D8;
+  background-color: var(--color-navy);
+  color: var(--color-text);
   font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -129,16 +181,18 @@ body {
   }
 }
 
-/* MDX prose styles for case study content */
+/* MDX prose styles for case study content — tokens only, no literals, so
+   this block can never drift from the scale defined in @theme. */
 .prose-case-study {
-  color: #E8E3D8;
+  color: var(--color-text);
+  font-size: var(--text-body);
 }
 
 .prose-case-study h2 {
-  font-family: var(--font-fraunces), Lora, Georgia, serif;
-  font-size: 1.5rem;
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
   font-weight: 500;
-  color: #E8E3D8;
+  color: var(--color-text);
   margin-top: 2.5rem;
   margin-bottom: 1rem;
 }
@@ -151,24 +205,24 @@ body {
 
 /* Lead-in: style the first body paragraph as an editorial lead. */
 .prose-case-study > h2:first-of-type + p {
-  font-size: 1.125rem;
-  line-height: 1.7;
-  color: rgba(232, 227, 216, 0.92);
+  font-size: var(--text-lead);
+  line-height: var(--text-lead--line-height);
+  color: var(--color-text);
 }
 
 .prose-case-study h3 {
-  font-family: var(--font-fraunces), Lora, Georgia, serif;
-  font-size: 1.125rem;
+  font-family: var(--font-heading);
+  font-size: var(--text-lead);
   font-weight: 500;
-  color: #C99A3E;
+  color: var(--color-accent);
   margin-top: 2rem;
   margin-bottom: 0.75rem;
 }
 
 .prose-case-study p {
-  line-height: 1.75;
+  line-height: var(--text-body--line-height);
   margin-bottom: 1.25rem;
-  color: rgba(232, 227, 216, 0.85);
+  color: var(--color-text-muted);
 }
 
 .prose-case-study ul {
@@ -178,29 +232,29 @@ body {
 }
 
 .prose-case-study ul li {
-  line-height: 1.75;
-  color: rgba(232, 227, 216, 0.85);
+  line-height: var(--text-body--line-height);
+  color: var(--color-text-muted);
   margin-bottom: 0.375rem;
 }
 
 .prose-case-study strong {
-  color: #E8E3D8;
+  color: var(--color-text);
   font-weight: 600;
 }
 
 .prose-case-study code {
-  font-family: var(--font-jetbrains-mono), "IBM Plex Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.875em;
   background-color: rgba(201, 154, 62, 0.1);
-  color: #C99A3E;
+  color: var(--color-accent);
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
 }
 
 .prose-case-study blockquote {
-  border-left: 2px solid #C99A3E;
+  border-left: 2px solid var(--color-accent);
   padding-left: 1rem;
-  color: rgba(232, 227, 216, 0.7);
+  color: var(--color-text-muted);
   font-style: italic;
   margin: 1.5rem 0;
 }
