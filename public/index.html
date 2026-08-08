@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AFM Studio</title>
+    <!--
+      The site is a static export, which disables the next-intl middleware that
+      would normally send / to a locale. app/page.tsx used to call redirect(),
+      which a static export cannot emit — it produced a blank __next_error__
+      document at the site's front door instead. This is a plain redirect that
+      needs no JS and that crawlers follow.
+    -->
+    <meta http-equiv="refresh" content="0; url=/en/" />
+    <link rel="canonical" href="https://andifathulms.github.io/en/" />
+    <link rel="alternate" hreflang="en" href="https://andifathulms.github.io/en/" />
+    <link rel="alternate" hreflang="id" href="https://andifathulms.github.io/id/" />
+    <link rel="alternate" hreflang="x-default" href="https://andifathulms.github.io/en/" />
+    <meta name="robots" content="noindex, follow" />
+    <style>
+      body {
+        background: #0d1b2a;
+        color: #e8e3d8;
+        font-family: system-ui, sans-serif;
+        display: flex;
+        min-height: 100vh;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+      }
+      a { color: #c99a3e; }
+    </style>
+  </head>
+  <body>
+    <!-- Visible fallback: if the refresh is blocked, there is still a way in. -->
+    <p>AFM Studio — <a href="/en/">English</a> · <a href="/id/">Bahasa Indonesia</a></p>
+  </body>
+</html>
