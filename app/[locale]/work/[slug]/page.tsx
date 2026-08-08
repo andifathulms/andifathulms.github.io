@@ -169,12 +169,9 @@ export default async function CaseStudyPage({
         </div>
 
         {/* Quick facts */}
-        <QuickFactsStrip project={project} />
-
-        {/* For the reader who forwards this case study to a decision-maker */}
-        <div className="mt-6">
-          <PrintButton label={ta('print')} />
-        </div>
+        {/* Print sits at the right end of the action row — for the reader who
+            forwards this case study to a decision-maker. */}
+        <QuickFactsStrip project={project} action={<PrintButton label={ta('print')} />} />
 
         {/* Outcomes — only renders when meta.json declares metrics */}
         {project.metrics && project.metrics.length > 0 && (

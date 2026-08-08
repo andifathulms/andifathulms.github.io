@@ -4,9 +4,11 @@ import TechStackChips from './TechStackChips';
 
 interface QuickFactsStripProps {
   project: ProjectMeta;
+  /** Optional trailing control, pinned to the right end of the action row. */
+  action?: React.ReactNode;
 }
 
-export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
+export default function QuickFactsStrip({ project, action }: QuickFactsStripProps) {
   const t = useTranslations('case_study');
   const isPrivate = project.status === 'private';
   // Access badge only makes sense when there's a public URL to click through to.
@@ -46,7 +48,7 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
       </div>
 
       {/* Action links or private badge */}
-      <div className="mt-5 pt-5 border-t border-line flex flex-wrap gap-3">
+      <div className="mt-5 pt-5 border-t border-line flex flex-wrap items-center gap-3">
         {isPrivate ? (
           <span className="font-mono text-meta text-text-subtle border border-cream/10 px-3 py-1.5 rounded">
             {t('private_badge')}
@@ -121,6 +123,8 @@ export default function QuickFactsStrip({ project }: QuickFactsStripProps) {
                 )}
           </>
         )}
+
+        {action && <div className="ml-auto">{action}</div>}
       </div>
     </div>
   );
