@@ -83,10 +83,10 @@ export default async function ContactPage({
 
             {/* Availability status */}
             <div className="inline-flex items-center gap-2 rounded-full border border-line bg-gold/[0.04] px-3.5 py-1.5 mb-8">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-gold/60 motion-safe:animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
-              </span>
+              {/* Flat dot. The pulsing halo it replaces was the last
+                  glow-adjacent effect on the site, against PRD §4's "no
+                  gradients, drop shadows, or glow/neon — flat surfaces". */}
+              <span className="inline-flex h-2 w-2 rounded-full bg-gold" />
               <span className="font-mono text-meta text-text-muted">{t('availability')}</span>
             </div>
 
