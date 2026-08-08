@@ -5,7 +5,6 @@ import { Link } from '@/i18n/navigation';
 export default function Footer() {
   const t = useTranslations('footer');
   const tn = useTranslations('nav');
-  const tl = useTranslations('ledger');
 
   return (
     <footer className="border-t border-line mt-24">
@@ -38,7 +37,6 @@ export default function Footer() {
                 { href: '/work', label: tn('work') },
                 { href: '/about', label: tn('about') },
                 { href: '/contact', label: tn('contact') },
-                { href: '/ledger', label: tl('footer_link') },
               ].map(({ href, label }) => (
                 <Link
                   key={href}

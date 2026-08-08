@@ -80,44 +80,6 @@ export function getStackUsage(): StackUsage[] {
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
-export interface LedgerEntry {
-  slug: string;
-  title: string;
-  value: string;
-  label: string;
-}
-
-/**
- * Every quantitative claim the site makes about a specific project, with the
- * project it belongs to. These are declared in each manifest and rendered on
- * that project's case study, so the ledger is a view of the same data rather
- * than a second copy of it — there is nothing here to keep in sync.
- */
-export function getAllMetrics(): LedgerEntry[] {
-  return getAllProjects()
-    .filter((p) => p.status !== 'placeholder' && p.metrics?.length)
-    .flatMap((p) =>
-      (p.metrics ?? []).map((m) => ({
-        slug: p.slug,
-        title: p.title,
-        value: m.value,
-        label: m.label,
-      }))
-    );
-}
-
-/** Shipped-system count per problem shape, for the work index filter row. */
-export function getShapeCounts(): Record<ProblemShape, number> {
-  const counts = Object.fromEntries(PROBLEM_SHAPES.map((s) => [s, 0])) as Record<
-    ProblemShape,
-    number
-  >;
-  for (const p of getAllProjects().filter((p) => p.status !== 'placeholder')) {
-    if (p.problemShape) counts[p.problemShape] += 1;
-  }
-  return counts;
-}
-
 const PROJECTS_DIR = path.join(process.cwd(), 'content', 'projects');
 
 /** Look for an app icon at public/images/projects/<slug>/icon.{svg,png,webp,jpg,jpeg}. */

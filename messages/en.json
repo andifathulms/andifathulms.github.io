@@ -2,8 +2,7 @@
   "nav": {
     "work": "Work",
     "about": "About",
-    "contact": "Contact",
-    "ledger": "Numbers"
+    "contact": "Contact"
   },
   "home": {
     "hero": {
@@ -195,29 +194,5 @@
     "close_menu": "Close menu",
     "main_nav": "Main navigation",
     "print": "Print / Save as PDF"
-  },
-  "ledger": {
-    "title": "Where the numbers come from",
-    "subtitle": "Every quantitative claim on this site, and the rule or the case study behind it. If a number here can't be traced, it shouldn't be on the site.",
-    "intro": "This site makes a lot of numeric claims. Most portfolios ask you to take those on trust. This page exists because the delivery method the rest of the site describes — write the spec, make the decision traceable — should apply to the site's own claims first.",
-    "derived_title": "Counted from the project files",
-    "derived_note": "These are computed at build time from the {total} project manifests in the repository. Nothing here is typed into copy, so adding or removing a project updates every one of them at once.",
-    "col_claim": "Claim",
-    "col_value": "Value",
-    "col_rule": "How it's counted",
-    "rule_total": "Every project folder whose status isn't a placeholder.",
-    "rule_government": "Projects tagged Government.",
-    "rule_independent": "Projects not tagged Government.",
-    "rule_live": "Projects with a live URL that isn't staging.",
-    "rule_stack": "A technology's count is the number of manifests listing it.",
-    "rule_shape": "Projects carrying that problem shape in their manifest.",
-    "shapes_title": "Problem shapes",
-    "stack_title": "Stack usage",
-    "stack_link": "See all counts on the About page",
-    "metrics_title": "Declared per project",
-    "metrics_note": "{count} figures, each declared in its project's manifest and shown on that project's case study. They come from the build itself — commit counts, test counts, endpoint counts — not from estimates.",
-    "residue_title": "What isn't machine-checked",
-    "residue_note": "Two kinds of claim on this site aren't derived from a field. Prose in the case studies is written by hand and reviewed rather than computed. And figures quoted in the services section on the home page are drawn from the project they describe — \"~2,000 staff\" is Daily Taqwa's, \"75 years\" is Climate Watch's — but the quotation itself is manual, so it's the one place a number could drift. If you find one that has, it's a bug, and I'd want to know.",
-    "footer_link": "Where the numbers come from"
   }
 }

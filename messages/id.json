@@ -2,8 +2,7 @@
   "nav": {
     "work": "Proyek",
     "about": "Tentang",
-    "contact": "Kontak",
-    "ledger": "Angka"
+    "contact": "Kontak"
   },
   "home": {
     "hero": {
@@ -195,29 +194,5 @@
     "close_menu": "Tutup menu",
     "main_nav": "Navigasi utama",
     "print": "Cetak / Simpan PDF"
-  },
-  "ledger": {
-    "title": "Dari mana angka-angka ini berasal",
-    "subtitle": "Setiap klaim angka di situs ini, beserta aturan atau studi kasus di baliknya. Kalau sebuah angka tidak bisa ditelusuri, angka itu tidak layak ada di sini.",
-    "intro": "Situs ini membuat banyak klaim angka. Kebanyakan portofolio meminta Anda mempercayainya begitu saja. Halaman ini ada karena metode kerja yang dijelaskan di bagian lain situs — tulis spesifikasinya, buat keputusannya bisa ditelusuri — seharusnya berlaku lebih dulu untuk klaim situs ini sendiri.",
-    "derived_title": "Dihitung dari berkas proyek",
-    "derived_note": "Angka-angka ini dihitung saat build dari {total} manifest proyek di repositori. Tidak ada yang diketik manual, jadi menambah atau menghapus proyek memperbarui semuanya sekaligus.",
-    "col_claim": "Klaim",
-    "col_value": "Nilai",
-    "col_rule": "Cara menghitungnya",
-    "rule_total": "Setiap folder proyek yang statusnya bukan placeholder.",
-    "rule_government": "Proyek bertag Government.",
-    "rule_independent": "Proyek tanpa tag Government.",
-    "rule_live": "Proyek dengan URL live yang bukan staging.",
-    "rule_stack": "Jumlah sebuah teknologi adalah banyaknya manifest yang mencantumkannya.",
-    "rule_shape": "Proyek dengan jenis masalah tersebut di manifest-nya.",
-    "shapes_title": "Jenis masalah",
-    "stack_title": "Penggunaan teknologi",
-    "stack_link": "Lihat semua hitungan di halaman Tentang",
-    "metrics_title": "Dideklarasikan per proyek",
-    "metrics_note": "{count} angka, masing-masing dideklarasikan di manifest proyeknya dan ditampilkan di studi kasus proyek itu. Semuanya berasal dari build — jumlah commit, jumlah tes, jumlah endpoint — bukan dari perkiraan.",
-    "residue_title": "Yang tidak diperiksa mesin",
-    "residue_note": "Ada dua jenis klaim di situs ini yang tidak berasal dari sebuah field. Prosa di studi kasus ditulis tangan dan ditinjau, bukan dihitung. Lalu angka yang dikutip di bagian layanan pada halaman depan diambil dari proyek yang dijelaskannya — \"~2.000 pegawai\" milik Daily Taqwa, \"75 tahun\" milik Climate Watch — tetapi pengutipannya manual, jadi di situlah satu-satunya angka bisa melenceng. Kalau Anda menemukan yang melenceng, itu bug, dan saya ingin tahu.",
-    "footer_link": "Asal-usul angka"
   }
 }

@@ -17,8 +17,6 @@ export default function Header() {
   const navLinks = [
     { href: '/work', label: t('work') },
     { href: '/about', label: t('about') },
-    // Contact stays last: it's the terminal action, not a peer of the others.
-    { href: '/ledger', label: t('ledger') },
     { href: '/contact', label: t('contact') },
   ];
 
