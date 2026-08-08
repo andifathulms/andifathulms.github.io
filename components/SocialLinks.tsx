@@ -50,7 +50,7 @@ export default function SocialLinks({ className = '' }: { className?: string }) 
               href={s.href}
               target={external ? '_blank' : undefined}
               rel={external ? 'noopener noreferrer' : undefined}
-              className="group inline-flex items-center gap-2 rounded border border-edge px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
+              className="group min-h-touch inline-flex items-center gap-2 rounded border border-edge px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
             >
               <span className="text-text-subtle transition-colors group-hover:text-gold">
                 <SocialGlyph icon={s.icon} />

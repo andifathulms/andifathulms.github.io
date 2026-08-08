@@ -196,7 +196,7 @@ export default async function AboutPage({
                   <Link
                     key={project.slug}
                     href={`/work/${project.slug}`}
-                    className="group inline-flex items-center gap-1.5 rounded border border-edge px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
+                    className="group min-h-touch inline-flex items-center gap-1.5 rounded border border-edge px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
                   >
                     {project.title}
                     <span

@@ -84,6 +84,10 @@
      namespace maps to inline-size, so a token named `block` would generate an
      `inline-block` width utility that overrides Tailwind's display one.
      ------------------------------------------------------------------ */
+  --spacing-touch: 2.75rem;       /*  44px — minimum interactive target
+                                     (WCAG 2.5.5 AAA). Applied as min-height
+                                     on controls, so it enlarges the hit area
+                                     without changing type or padding scale. */
   --spacing-tagrow: 3.75rem;      /*  60px — two chip rows + gap; keeps card
                                      titles aligned when tags wrap        */
   --spacing-page-top: 7rem;       /* 112px — clears the 64px fixed header  */

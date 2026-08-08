@@ -60,7 +60,7 @@ function FilterChip({
       onClick={onClick}
       aria-pressed={active}
       disabled={count === 0}
-      className={`font-mono text-meta px-3.5 py-1.5 rounded border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+      className={`min-h-touch inline-flex items-center font-mono text-meta px-3.5 py-1.5 rounded border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
         active
           ? 'border-edge-accent text-gold bg-gold/10'
           : 'border-edge text-text-subtle hover:border-edge-strong hover:text-text-muted'

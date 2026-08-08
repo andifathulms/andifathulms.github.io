@@ -50,7 +50,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
       {/* Action links or private badge */}
       <div className="mt-5 pt-5 border-t border-line flex flex-wrap items-center gap-3">
         {isPrivate ? (
-          <span className="font-mono text-meta text-text-subtle border border-edge px-3 py-1.5 rounded">
+          <span className="font-mono text-meta text-text-subtle border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded">
             {t('private_badge')}
           </span>
         ) : (
@@ -62,7 +62,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Staging environment — not the production URL"
-                  className="font-mono text-meta text-accent-2 border border-line-muted px-3 py-1.5 rounded hover:border-edge-strong transition-colors inline-flex items-center gap-1.5"
+                  className="font-mono text-meta text-accent-2 border border-line-muted min-h-touch inline-flex items-center px-3 py-1.5 rounded hover:border-edge-strong transition-colors inline-flex items-center gap-1.5"
                 >
                   {t('view_staging')} ↗
                   <span className="text-meta uppercase tracking-wider text-accent-2 border-l border-line-muted pl-1.5">
@@ -82,7 +82,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
             {accessBadge === 'internal' && (
               <span
                 title={t('access_internal_hint')}
-                className="font-mono text-meta text-text-subtle border border-edge px-3 py-1.5 rounded inline-flex items-center gap-1.5"
+                className="font-mono text-meta text-text-subtle border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded inline-flex items-center gap-1.5"
               >
                 <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                   <rect x="2.5" y="6" width="9" height="6" rx="1" stroke="currentColor" strokeWidth="1.2" />
@@ -94,7 +94,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
             {accessBadge === 'registration' && (
               <span
                 title={t('access_registration_hint')}
-                className="font-mono text-meta text-accent border border-line px-3 py-1.5 rounded inline-flex items-center gap-1.5"
+                className="font-mono text-meta text-accent border border-line min-h-touch inline-flex items-center px-3 py-1.5 rounded inline-flex items-center gap-1.5"
               >
                 {t('access_registration')}
               </span>
@@ -106,7 +106,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-meta text-text-muted border border-edge px-3 py-1.5 rounded hover:border-edge-strong transition-colors"
+                    className="font-mono text-meta text-text-muted border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded hover:border-edge-strong transition-colors"
                   >
                     {t('view_github')} {project.githubUrl!.length > 1 ? `(${i + 1})` : ''} ↗
                   </a>
@@ -116,7 +116,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-meta text-text-muted border border-edge px-3 py-1.5 rounded hover:border-edge-strong transition-colors"
+                    className="font-mono text-meta text-text-muted border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded hover:border-edge-strong transition-colors"
                   >
                     {t('view_github')} ↗
                   </a>
