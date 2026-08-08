@@ -110,11 +110,18 @@ export default async function CaseStudyPage({
     <article className="pt-page-top pb-8">
       <ReadingProgress />
       {/* Hero banner */}
-      <div className="relative aspect-video md:aspect-[21/6] bg-navy/50 mb-0 overflow-hidden">
+      {/* The banner used to be a fixed aspect-ratio box with the title block
+          absolutely positioned inside it and overflow-hidden. At 320px, or at
+          200% zoom, the icon + tags + h1 + tagline needed more height than the
+          box had, and the excess was clipped (1.4.4 / 1.4.10). The content is
+          in normal flow now and sets the height; the image sits behind it, so
+          the banner can grow instead of cropping the title. */}
+      <div className="relative min-h-[12rem] md:min-h-[16rem] bg-navy/50 overflow-hidden">
         {project.heroImage && (
           <Image
             src={project.heroImage}
-            alt={project.title}
+            alt=""
+            aria-hidden="true"
             fill
             className="object-cover object-top opacity-40"
             priority
@@ -126,7 +133,7 @@ export default async function CaseStudyPage({
             what the title needed anyway: the previous gradient was weakest
             exactly where the screenshot's own headline sits. */}
         <div className="absolute inset-0 bg-navy/80" />
-        <div className="absolute inset-0 flex flex-col justify-end px-gutter pb-10">
+        <div className="relative flex min-h-[12rem] md:min-h-[16rem] flex-col justify-end px-gutter pt-10 pb-10">
           <div className="max-w-page mx-auto w-full">
             {project.icon && (
               <Image

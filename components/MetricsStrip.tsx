@@ -23,7 +23,7 @@ export default function MetricsStrip({ metrics, label }: MetricsStripProps) {
           // was also an invalid direct child of the dl wrapper.
           <div key={m.label} className="flex flex-col-reverse">
             <dt className="text-meta text-text-subtle leading-snug">{m.label}</dt>
-            <dd className="font-heading text-h2 font-medium text-cream leading-none mb-2">
+            <dd className="font-heading text-h2 font-medium text-cream leading-none mb-2 break-words hyphens-none [overflow-wrap:anywhere]">
               {m.value}
             </dd>
           </div>
