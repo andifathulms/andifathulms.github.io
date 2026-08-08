@@ -8,7 +8,7 @@ export default function Hero({ stats }: { stats: PortfolioStats }) {
 
   return (
     <section className="pt-32 pb-section px-gutter">
-      <div className="max-w-5xl mx-auto grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 items-center">
+      <div className="max-w-5xl mx-auto grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 lg:items-start">
         <div>
           <p className="anim-fade-up font-mono text-meta uppercase tracking-widest text-accent mb-5">
             {t('eyebrow')}
@@ -36,8 +36,10 @@ export default function Hero({ stats }: { stats: PortfolioStats }) {
         </div>
 
         {/* Proof, not decoration — the portfolio counts sit inside the fold so
-            a first-time visitor gets evidence before they scroll. */}
-        <div className="anim-fade-up anim-delay-2">
+            a first-time visitor gets evidence before they scroll. Top-aligned
+            with the headline (clearing the eyebrow line) so claim and evidence
+            read as a pair rather than the counts floating mid-column. */}
+        <div className="anim-fade-up anim-delay-2 lg:mt-11">
           <StatBand stats={stats} variant="hero" />
         </div>
       </div>

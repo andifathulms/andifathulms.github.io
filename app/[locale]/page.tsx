@@ -34,7 +34,7 @@ function ServicesSection() {
   return (
     <section className="reveal border-t border-line py-section-tight px-gutter">
       <div className="max-w-5xl mx-auto">
-        <SectionHeading title={t('title')} subtitle={t('subtitle')} className="mb-block" />
+        <SectionHeading title={t('title')} subtitle={t('subtitle')} className="mb-stack" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
           {items.map((item) => (
             <ServiceCard key={item.title} title={item.title} description={item.description} />
@@ -54,7 +54,7 @@ function FeaturedWorkSection({ projects }: { projects: ReturnType<typeof getFeat
   return (
     <section className="reveal border-t border-line py-section px-gutter">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-end justify-between mb-block">
+        <div className="flex items-end justify-between mb-stack">
           <SectionHeading tone="primary" title={t('title')} subtitle={t('subtitle')} />
           <Link
             href="/work"
@@ -97,7 +97,7 @@ function CtaSection() {
           align="center"
           title={t('title')}
           subtitle={t('subtitle')}
-          className="mb-block"
+          className="mb-stack"
         />
         <Link
           href="/contact"

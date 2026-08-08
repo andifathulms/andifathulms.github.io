@@ -55,10 +55,13 @@
      Spacing scale — vertical rhythm. `section` is the default band;
      `section-tight` is for supporting sections that should read as
      secondary to the primary ones.
+     Names here must not collide with a CSS display keyword: the `inline-*`
+     namespace maps to inline-size, so a token named `block` would generate an
+     `inline-block` width utility that overrides Tailwind's display one.
      ------------------------------------------------------------------ */
   --spacing-section: 6rem;        /*  96px */
   --spacing-section-tight: 4.5rem;/*  72px */
-  --spacing-block: 3rem;          /*  48px */
+  --spacing-stack: 3rem;          /*  48px — gap below a section heading */
   --spacing-gutter: 1.5rem;       /*  24px */
 
   /* Typography — CSS vars injected by next/font on <html> */
