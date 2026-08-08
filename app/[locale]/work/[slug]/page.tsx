@@ -205,7 +205,7 @@ export default async function CaseStudyPage({
           <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
             {t('stack')}
           </p>
-          <TechStackChips stack={project.techStack} maxVisible={20} size="md" />
+          <TechStackChips stack={project.techStack} maxVisible={20} size="md" linked />
         </div>
 
         {/* Conversion CTA */}

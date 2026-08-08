@@ -78,7 +78,10 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-meta font-medium bg-gold text-navy px-3.5 py-1.5 rounded hover:bg-gold/90 transition-colors inline-flex items-center gap-1.5"
+                  // min-h-touch to match its neighbours: every other control
+                  // in this row got it in the touch-target pass, so the gold
+                  // primary was the one button sitting short.
+                  className="font-mono text-meta font-medium bg-gold text-navy min-h-touch inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded hover:bg-gold/90 transition-colors"
                 >
                   {t('view_live')} ↗
                 </a>
