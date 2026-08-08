@@ -140,3 +140,13 @@ content/
   `exports/afmstudio/` lockup set. Favicon/apple-icon use the same mark
   (`app/icon.png`, `app/apple-icon.png`). Don't introduce a second, different
   mark elsewhere — this is the one logo for the site.
+
+## Project asset sizes
+
+- `public/images/projects/<slug>/icon.webp` — **128×128 WebP**. Icons render at
+  32px on cards and 56px on case study headers, so 128 covers 2× DPR with
+  headroom. They were once 512–1024px PNGs totalling 1.78 MB for 35 projects;
+  `images.unoptimized` is required for static export, so whatever is committed
+  is what ships byte-for-byte. Size a new project's icon before committing it.
+- `getProjectIcon()` resolves `svg → png → webp` in that order, so don't leave a
+  large PNG beside a small WebP — the PNG wins.
