@@ -23,6 +23,26 @@ function matchesSource(project: ProjectMeta, source: Source): boolean {
   return groupOf(project) === source;
 }
 
+/**
+ * Every term must appear somewhere in the project's own text — title, tagline,
+ * tags or stack. AND rather than OR so "django keycloak" narrows instead of
+ * widening, and substring rather than fuzzy so a result is always explainable
+ * by what the visitor typed. No index to build or keep in sync: the gallery
+ * already receives every project's fields as props.
+ */
+function matchesQuery(project: ProjectMeta, terms: string[]): boolean {
+  if (terms.length === 0) return true;
+  const haystack = [
+    project.title,
+    project.tagline,
+    ...project.categoryTags,
+    ...project.techStack,
+  ]
+    .join(' ')
+    .toLowerCase();
+  return terms.every((term) => haystack.includes(term));
+}
+
 function FilterChip({
   active,
   onClick,
@@ -56,6 +76,12 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
   const t = useTranslations('work');
   const [source, setSource] = useState<Source>('all');
   const [shape, setShape] = useState<ProblemShape | null>(null);
+  const [query, setQuery] = useState('');
+
+  const terms = useMemo(
+    () => query.toLowerCase().split(/\s+/).filter(Boolean),
+    [query]
+  );
 
   // Deep-link support: /work?filter=government&shape=explainer — the stat band
   // and the service cards both land here.
@@ -92,31 +118,36 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
   const visible = useMemo(
     () =>
       projects.filter(
-        (p) => matchesSource(p, source) && (shape === null || p.problemShape === shape)
+        (p) =>
+          matchesSource(p, source) &&
+          (shape === null || p.problemShape === shape) &&
+          matchesQuery(p, terms)
       ),
-    [projects, source, shape]
+    [projects, source, shape, terms]
   );
 
   // Each axis counts against the *other* axis's current selection, so a chip
   // never advertises results that clicking it wouldn't produce.
   const sourceCounts = useMemo(() => {
-    const pool = projects.filter((p) => shape === null || p.problemShape === shape);
+    const pool = projects.filter(
+      (p) => (shape === null || p.problemShape === shape) && matchesQuery(p, terms)
+    );
     return {
       all: pool.length,
       government: pool.filter((p) => groupOf(p) === 'government').length,
       independent: pool.filter((p) => groupOf(p) === 'independent').length,
       live: pool.filter(isLive).length,
     } as Record<Source, number>;
-  }, [projects, shape]);
+  }, [projects, shape, terms]);
 
   const shapeCounts = useMemo(() => {
-    const pool = projects.filter((p) => matchesSource(p, source));
+    const pool = projects.filter((p) => matchesSource(p, source) && matchesQuery(p, terms));
     return Object.fromEntries(
       PROBLEM_SHAPES.map((s) => [s, pool.filter((p) => p.problemShape === s).length])
     ) as Record<ProblemShape, number>;
-  }, [projects, source]);
+  }, [projects, source, terms]);
 
-  const filtered = source !== 'all' || shape !== null;
+  const filtered = source !== 'all' || shape !== null || terms.length > 0;
 
   const sections = filtered
     ? [
@@ -142,6 +173,36 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
   return (
     <>
       <div className="mb-12 flex flex-col gap-5">
+        {/* Browsing 35 projects by eye has stopped working — let people say
+            what they're after. Matches project text only, never the case study
+            body, so a hit is always visible on the card that surfaced it. */}
+        <div>
+          <label htmlFor="work-search" className="sr-only">
+            {t('search_label')}
+          </label>
+          <div className="relative max-w-md">
+            <input
+              id="work-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t('search_placeholder')}
+              autoComplete="off"
+              className="w-full rounded border border-cream/15 bg-navy px-3.5 py-2.5 pr-10 text-body text-cream placeholder:text-text-subtle transition-colors hover:border-cream/25 focus:border-gold/50 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label={t('search_clear')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 font-mono text-meta text-text-subtle transition-colors hover:text-cream"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Who paid for it */}
         <div>
           <p className="font-mono text-meta uppercase tracking-widest text-text-subtle mb-2.5">
@@ -180,6 +241,18 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
           </div>
         </div>
       </div>
+
+      {/* Announce result counts to screen readers as the filters narrow. */}
+      <p className="sr-only" role="status" aria-live="polite">
+        {t('results_count', { count: visible.length, total: projects.length })}
+      </p>
+
+      {visible.length === 0 && (
+        <div className="border-t border-line pt-8">
+          <p className="text-lead text-cream mb-2">{t('no_results')}</p>
+          <p className="text-body text-text-muted">{t('no_results_hint')}</p>
+        </div>
+      )}
 
       <div className="flex flex-col gap-16">
         {sections
