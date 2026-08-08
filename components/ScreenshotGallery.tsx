@@ -17,7 +17,6 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [showAll, setShowAll] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const triggerRef = useRef<HTMLElement | null>(null);
 
   const hasMore = screenshots.length > GRID_LIMIT;
   const visible = showAll ? screenshots : screenshots.slice(0, GRID_LIMIT);
@@ -48,7 +47,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
       return;
     }
 
-    triggerRef.current = document.activeElement as HTMLElement | null;
+    // close() returns focus to the trigger natively — no bookkeeping needed.
     if (!dialog.open) dialog.showModal();
 
     const onKey = (e: KeyboardEvent) => {
