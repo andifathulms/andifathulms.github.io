@@ -145,7 +145,7 @@
     "gallery_counter": "{current} of {total}",
     "gallery_hint": "Click outside or press Esc to close · ← → to navigate",
     "staging_hint": "Staging environment — not the production URL",
-    "copied_announcement": "Copied to clipboard"
+    "staging_badge": "Staging"
   },
   "about": {
     "title": "About",
@@ -191,7 +191,8 @@
     "linkedin_cta": "Connect on LinkedIn ↗",
     "availability": "Open to select freelance projects",
     "channels_label": "Reach me",
-    "note": "For project inquiries, a few sentences about what you're building and your timeline is enough to start. No formal brief required."
+    "note": "For project inquiries, a few sentences about what you're building and your timeline is enough to start. No formal brief required.",
+    "copied_announcement": "Copied to clipboard"
   },
   "footer": {
     "tagline": "Building software at Indonesia's new capital.",

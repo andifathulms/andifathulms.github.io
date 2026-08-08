@@ -61,13 +61,17 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Staging environment — not the production URL"
-                  className="font-mono text-meta text-accent-2 border border-line-muted min-h-touch inline-flex items-center px-3 py-1.5 rounded hover:border-edge-strong transition-colors inline-flex items-center gap-1.5"
+                  className="font-mono text-meta text-accent-2 border border-line-muted min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded hover:border-edge-strong transition-colors"
                 >
                   {t('view_staging')} ↗
+                  {/* The caveat used to live only in a `title`, which is
+                      unavailable on touch and unreliable for screen readers.
+                      It's in the accessible name now, and visible on the
+                      badge — the hardcoded English "Staging" is gone too. */}
                   <span className="text-meta uppercase tracking-wider text-accent-2 border-l border-line-muted pl-1.5">
-                    Staging
+                    {t('staging_badge')}
                   </span>
+                  <span className="sr-only">{t('staging_hint')}</span>
                 </a>
               ) : (
                 <a
@@ -80,23 +84,19 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                 </a>
               ))}
             {accessBadge === 'internal' && (
-              <span
-                title={t('access_internal_hint')}
-                className="font-mono text-meta text-text-subtle border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded inline-flex items-center gap-1.5"
-              >
+              <span className="font-mono text-meta text-text-subtle border border-edge min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded">
                 <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                   <rect x="2.5" y="6" width="9" height="6" rx="1" stroke="currentColor" strokeWidth="1.2" />
                   <path d="M4.5 6V4.5a2.5 2.5 0 015 0V6" stroke="currentColor" strokeWidth="1.2" />
                 </svg>
                 {t('access_internal')}
+                <span className="sr-only">— {t('access_internal_hint')}</span>
               </span>
             )}
             {accessBadge === 'registration' && (
-              <span
-                title={t('access_registration_hint')}
-                className="font-mono text-meta text-accent border border-line min-h-touch inline-flex items-center px-3 py-1.5 rounded inline-flex items-center gap-1.5"
-              >
+              <span className="font-mono text-meta text-accent border border-line min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded">
                 {t('access_registration')}
+                <span className="sr-only">— {t('access_registration_hint')}</span>
               </span>
             )}
             {Array.isArray(project.githubUrl)

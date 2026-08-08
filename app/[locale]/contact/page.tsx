@@ -116,7 +116,12 @@ export default async function ContactPage({
                     <a href={mailto} className="text-cream hover:text-gold transition-colors break-all">
                       {CONTACT.email}
                     </a>
-                    <CopyButton value={CONTACT.email} copyLabel={t('copy')} copiedLabel={t('copied')} />
+                    <CopyButton
+                      value={CONTACT.email}
+                      copyLabel={t('copy')}
+                      copiedLabel={t('copied')}
+                      announcement={t('copied_announcement')}
+                    />
                   </div>
                 </div>
               </div>

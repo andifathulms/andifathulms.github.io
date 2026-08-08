@@ -145,7 +145,7 @@
     "gallery_counter": "{current} dari {total}",
     "gallery_hint": "Klik di luar atau tekan Esc untuk menutup · ← → untuk navigasi",
     "staging_hint": "Lingkungan staging — bukan URL produksi",
-    "copied_announcement": "Disalin ke papan klip"
+    "staging_badge": "Staging"
   },
   "about": {
     "title": "Tentang",
@@ -191,7 +191,8 @@
     "linkedin_cta": "Terhubung di LinkedIn ↗",
     "availability": "Terbuka untuk proyek freelance tertentu",
     "channels_label": "Hubungi saya",
-    "note": "Untuk pertanyaan proyek, beberapa kalimat tentang apa yang Anda bangun dan timeline Anda sudah cukup untuk memulai. Tidak perlu brief formal."
+    "note": "Untuk pertanyaan proyek, beberapa kalimat tentang apa yang Anda bangun dan timeline Anda sudah cukup untuk memulai. Tidak perlu brief formal.",
+    "copied_announcement": "Disalin ke papan klip"
   },
   "footer": {
     "tagline": "Membangun software di ibu kota baru Indonesia.",
