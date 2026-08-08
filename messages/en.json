@@ -110,7 +110,8 @@
     "search_clear": "Clear search",
     "no_results": "No projects match that.",
     "no_results_hint": "Try a technology (Django, Keycloak) or a tag (Government, Data Platform).",
-    "results_count": "{count} of {total} shown"
+    "results_count": "{count} of {total} shown",
+    "no_image": "no image"
   },
   "case_study": {
     "role": "Role",
@@ -133,7 +134,18 @@
     "min_read": "{min} min read",
     "cta_title": "Have a project like this?",
     "cta_body": "If you need a system built with the same care — clear scope, solid execution — let's talk.",
-    "cta_button": "Start a project"
+    "cta_button": "Start a project",
+    "gallery_enlarge": "Enlarge: {caption}",
+    "gallery_enlarge_hint": "click to enlarge",
+    "gallery_show_all": "View all {count} screenshots",
+    "gallery_show_less": "Show less",
+    "gallery_close": "close",
+    "gallery_prev": "prev",
+    "gallery_next": "next",
+    "gallery_counter": "{current} of {total}",
+    "gallery_hint": "Click outside or press Esc to close · ← → to navigate",
+    "staging_hint": "Staging environment — not the production URL",
+    "copied_announcement": "Copied to clipboard"
   },
   "about": {
     "title": "About",
@@ -193,6 +205,9 @@
     "open_menu": "Open menu",
     "close_menu": "Close menu",
     "main_nav": "Main navigation",
-    "print": "Print / Save as PDF"
+    "print": "Print / Save as PDF",
+    "switch_to": "Switch to {language}",
+    "language_en": "English",
+    "language_id": "Bahasa Indonesia"
   }
 }

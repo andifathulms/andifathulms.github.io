@@ -110,7 +110,8 @@
     "search_clear": "Hapus pencarian",
     "no_results": "Tidak ada proyek yang cocok.",
     "no_results_hint": "Coba nama teknologi (Django, Keycloak) atau tag (Government, Data Platform).",
-    "results_count": "{count} dari {total} ditampilkan"
+    "results_count": "{count} dari {total} ditampilkan",
+    "no_image": "tidak ada gambar"
   },
   "case_study": {
     "role": "Peran",
@@ -133,7 +134,18 @@
     "min_read": "{min} mnt baca",
     "cta_title": "Punya proyek serupa?",
     "cta_body": "Jika Anda butuh sistem yang dibangun dengan ketelitian yang sama — scope jelas, eksekusi solid — mari bicara.",
-    "cta_button": "Mulai proyek"
+    "cta_button": "Mulai proyek",
+    "gallery_enlarge": "Perbesar: {caption}",
+    "gallery_enlarge_hint": "klik untuk memperbesar",
+    "gallery_show_all": "Lihat semua {count} tangkapan layar",
+    "gallery_show_less": "Tampilkan lebih sedikit",
+    "gallery_close": "tutup",
+    "gallery_prev": "sebelumnya",
+    "gallery_next": "berikutnya",
+    "gallery_counter": "{current} dari {total}",
+    "gallery_hint": "Klik di luar atau tekan Esc untuk menutup · ← → untuk navigasi",
+    "staging_hint": "Lingkungan staging — bukan URL produksi",
+    "copied_announcement": "Disalin ke papan klip"
   },
   "about": {
     "title": "Tentang",
@@ -193,6 +205,9 @@
     "open_menu": "Buka menu",
     "close_menu": "Tutup menu",
     "main_nav": "Navigasi utama",
-    "print": "Cetak / Simpan PDF"
+    "print": "Cetak / Simpan PDF",
+    "switch_to": "Ganti ke {language}",
+    "language_en": "English",
+    "language_id": "Bahasa Indonesia"
   }
 }

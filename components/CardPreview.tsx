@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 interface CardPreviewProps {
@@ -17,19 +18,20 @@ interface CardPreviewProps {
  * for reduced-motion users and where there are no screenshots.
  */
 export default function CardPreview({ hero, images, alt, sizes }: CardPreviewProps) {
+  const t = useTranslations('work');
   const [hovering, setHovering] = useState(false);
   const [armed, setArmed] = useState(false);
   const [index, setIndex] = useState(0);
 
   const canCycle = images.length > 0;
 
-  const onEnter = () => {
+  const start = () => {
     if (!canCycle) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    setArmed(true); // begin loading screenshots on first hover
+    setArmed(true); // begin loading screenshots on first hover/focus
     setHovering(true);
   };
-  const onLeave = () => {
+  const stop = () => {
     setHovering(false);
     setIndex(0);
   };
@@ -43,7 +45,16 @@ export default function CardPreview({ hero, images, alt, sizes }: CardPreviewPro
   }, [hovering, canCycle, images.length]);
 
   return (
-    <div className="absolute inset-0" onMouseEnter={onEnter} onMouseLeave={onLeave}>
+    // Focus events bubble from the wrapping card link, so keyboard users get
+    // the same preview a mouse user gets. The cycled images stay aria-hidden:
+    // this is an enhancement, and the hero image below carries the meaning.
+    <div
+      className="absolute inset-0"
+      onMouseEnter={start}
+      onMouseLeave={stop}
+      onFocus={start}
+      onBlur={stop}
+    >
       {hero ? (
         <Image
           src={hero}
@@ -54,7 +65,7 @@ export default function CardPreview({ hero, images, alt, sizes }: CardPreviewPro
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="font-mono text-meta text-text-subtle">no image</span>
+          <span className="font-mono text-meta text-text-subtle">{t('no_image')}</span>
         </div>
       )}
 
