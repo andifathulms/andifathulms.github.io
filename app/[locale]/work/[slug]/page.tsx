@@ -120,11 +120,12 @@ export default async function CaseStudyPage({
             priority
           />
         )}
-        {/* Scrim. The old floor (to-navy/20) left the top of the banner almost
-            untouched, so the screenshot's *own* headline and search field
-            survived at full contrast and collided with the h1 below — the page
-            title was competing with foreign text at the same size. */}
-        <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/85 to-navy/55" />
+        {/* Flat scrim. PRD §4 and CLAUDE.md both commit to "no gradients —
+            flat surfaces", and this banner held the only bg-gradient-* in the
+            repo. A single opacity darkens the whole image evenly, which is
+            what the title needed anyway: the previous gradient was weakest
+            exactly where the screenshot's own headline sits. */}
+        <div className="absolute inset-0 bg-navy/80" />
         <div className="absolute inset-0 flex flex-col justify-end px-gutter pb-10">
           <div className="max-w-5xl mx-auto w-full">
             {project.icon && (
