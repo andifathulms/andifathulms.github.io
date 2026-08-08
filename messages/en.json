@@ -14,31 +14,27 @@
     },
     "services": {
       "title": "What I build",
-      "subtitle": "From concept to production — scoped precisely, built to last.",
+      "subtitle": "Four kinds of work — each one with systems already running behind it.",
       "items": [
         {
-          "title": "Web Applications",
-          "description": "Full-stack apps built for real users and real load — Next.js, TypeScript, modern databases."
+          "title": "Systems for government and institutions",
+          "description": "{government} platforms running for Indonesia's new-capital authority — permit engines, a legal document portal, attendance for ~2,000 staff. SSO, audit trails and procurement constraints are the normal case here, not the exception.",
+          "href": "/work?filter=government"
         },
         {
-          "title": "Government & Enterprise Systems",
-          "description": "Internal tools, reporting platforms, and workflow systems for institutional clients."
+          "title": "Dashboards that survive real data",
+          "description": "Budget monitoring that pulls Kemenkeu expenditure on a schedule, construction progress across every IKN project, 75 years of climate records made legible. Scheduled pipelines, not manual exports.",
+          "href": "/work"
         },
         {
-          "title": "Data Platforms & Dashboards",
-          "description": "ETL pipelines, analytical dashboards, and data visualization for decision-making teams."
+          "title": "Web applications, shipped end to end",
+          "description": "{total} built, {live} live. Next.js and TypeScript in front, Django and Postgres behind, tests in half of them — containerised and deployed, not handed over as a repo.",
+          "href": "/work"
         },
         {
-          "title": "Startup MVPs & SaaS",
-          "description": "Independent product experience — I've shipped tools from scratch and understand what a first version needs to do."
-        },
-        {
-          "title": "DevOps & Infrastructure",
-          "description": "CI/CD, containerization, cloud deployment on Vercel, Railway, and VPS environments."
-        },
-        {
-          "title": "AI & Automation",
-          "description": "LLM-powered features, data pipelines, and workflow automation — from document intelligence to chatbots and reporting."
+          "title": "Making complex systems visible",
+          "description": "Interactive explanations of things you normally can't see: consensus protocols, diff algorithms, database isolation anomalies, congestion control. For teaching tools, technical documentation and internal training.",
+          "href": "/work?filter=independent"
         }
       ]
     },

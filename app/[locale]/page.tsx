@@ -9,6 +9,7 @@ import ProjectCard from '@/components/ProjectCard';
 import ProcessSection from '@/components/ProcessSection';
 import SectionHeading from '@/components/SectionHeading';
 import { getFeaturedProjects, getPortfolioStats } from '@/lib/content';
+import type { PortfolioStats } from '@/lib/content';
 
 export async function generateMetadata({
   params,
@@ -23,21 +24,33 @@ export async function generateMetadata({
   };
 }
 
-function ServicesSection() {
+function ServicesSection({ stats }: { stats: PortfolioStats }) {
   const t = useTranslations('home.services');
 
-  const items = [0, 1, 2, 3, 4, 5].map((i) => ({
+  // The counts come from the content, not the copy, so a service claim can
+  // never drift from the case studies that back it.
+  const items = [0, 1, 2, 3].map((i) => ({
     title: t(`items.${i}.title`),
-    description: t(`items.${i}.description`),
+    description: t(`items.${i}.description`, {
+      government: stats.government,
+      total: stats.total,
+      live: stats.live,
+    }),
+    href: t(`items.${i}.href`),
   }));
 
   return (
     <section className="reveal border-t border-line py-section-tight px-gutter">
       <div className="max-w-5xl mx-auto">
         <SectionHeading title={t('title')} subtitle={t('subtitle')} className="mb-stack" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
           {items.map((item) => (
-            <ServiceCard key={item.title} title={item.title} description={item.description} />
+            <ServiceCard
+              key={item.title}
+              title={item.title}
+              description={item.description}
+              href={item.href}
+            />
           ))}
         </div>
       </div>
@@ -127,7 +140,7 @@ export default async function HomePage({
       <Hero stats={stats} />
       <FeaturedWorkSection projects={featuredProjects} />
       <IdentityAnchor />
-      <ServicesSection />
+      <ServicesSection stats={stats} />
       <ProcessSection />
       <CtaSection />
     </>

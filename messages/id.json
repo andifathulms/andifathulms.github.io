@@ -13,32 +13,28 @@
       "cta_start": "Mulai proyek"
     },
     "services": {
-      "title": "Apa yang saya bangun",
-      "subtitle": "Dari konsep hingga produksi — dengan scope yang tepat dan hasil yang tahan lama.",
+      "title": "Yang saya bangun",
+      "subtitle": "Empat jenis pekerjaan — masing-masing sudah punya sistem yang berjalan di baliknya.",
       "items": [
         {
-          "title": "Aplikasi Web",
-          "description": "Aplikasi full-stack untuk pengguna dan beban nyata — Next.js, TypeScript, database modern."
+          "title": "Sistem untuk pemerintah dan institusi",
+          "description": "{government} platform berjalan untuk Otorita IKN — mesin perizinan, portal dokumen hukum, presensi untuk ~2.000 pegawai. SSO, jejak audit, dan batasan pengadaan adalah hal biasa di sini, bukan pengecualian.",
+          "href": "/work?filter=government"
         },
         {
-          "title": "Sistem Pemerintah & Enterprise",
-          "description": "Alat internal, platform pelaporan, dan sistem alur kerja untuk klien institusional."
+          "title": "Dashboard yang tahan data nyata",
+          "description": "Pemantauan anggaran yang menarik data belanja Kemenkeu secara terjadwal, progres konstruksi seluruh proyek IKN, 75 tahun catatan iklim yang dibuat terbaca. Pipeline terjadwal, bukan ekspor manual.",
+          "href": "/work"
         },
         {
-          "title": "Platform Data & Dashboard",
-          "description": "Pipeline ETL, dashboard analitik, dan visualisasi data untuk tim pengambil keputusan."
+          "title": "Aplikasi web, dari hulu ke hilir",
+          "description": "{total} dibangun, {live} live. Next.js dan TypeScript di depan, Django dan Postgres di belakang, pengujian di separuhnya — dikemas dalam container dan ter-deploy, bukan diserahkan sebagai repo.",
+          "href": "/work"
         },
         {
-          "title": "MVP Startup & SaaS",
-          "description": "Pengalaman produk mandiri — saya pernah membangun tools dari nol dan memahami apa yang dibutuhkan sebuah versi pertama."
-        },
-        {
-          "title": "DevOps & Infrastruktur",
-          "description": "CI/CD, containerisasi, deployment cloud di Vercel, Railway, dan lingkungan VPS."
-        },
-        {
-          "title": "AI & Otomasi",
-          "description": "Fitur berbasis LLM, pipeline data, dan otomasi alur kerja — dari document intelligence hingga chatbot dan pelaporan."
+          "title": "Membuat sistem rumit jadi terlihat",
+          "description": "Penjelasan interaktif untuk hal yang biasanya tak terlihat: protokol konsensus, algoritma diff, anomali isolasi basis data, kontrol kongesti. Untuk alat ajar, dokumentasi teknis, dan pelatihan internal.",
+          "href": "/work?filter=independent"
         }
       ]
     },

@@ -4,13 +4,12 @@
 
 AFM Studio is the freelance/personal brand portfolio site for Andi Fathul Mukminin
 Salahuddin (Fathul) — a fullstack developer working across government digital
-transformation (OIKN), startup product development (TOGA POS co-founder), and
-independent data/content work.
+transformation (OIKN) and independent data/content work.
 
 The site's job is to convert visiting clients (freelance/contract prospects) into
 inquiries by demonstrating range and credibility: production systems built for a
-sovereign capital authority, a self-founded startup with real users, and a set of
-self-directed technical projects that show genuine curiosity beyond client work.
+sovereign capital authority, and a set of self-directed technical projects that
+show genuine curiosity beyond client work.
 
 This is **not** a developer-community portfolio (no guestbook, no blog-first
 identity). It is a client-facing credibility site, first and foremost.
