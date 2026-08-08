@@ -147,7 +147,10 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
                 alt={screenshots[activeIndex].caption}
                 width={1600}
                 height={1000}
-                className="w-full h-auto object-contain max-h-[65vh]"
+                // 65vh left no room for the controls above and below once the
+                // page was zoomed; the panel scrolls now, and the image gives
+                // up height first so the controls stay reachable.
+                className="w-full h-auto object-contain max-h-[50vh] md:max-h-[65vh]"
                 priority
               />
             </div>
