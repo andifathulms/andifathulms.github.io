@@ -86,7 +86,7 @@
     "cta": {
       "title": "Ready to build something?",
       "subtitle": "Whether you have a defined spec or just an idea — let's figure out the right scope together.",
-      "button": "Start a conversation"
+      "button": "Start a project"
     }
   },
   "work": {
@@ -134,7 +134,7 @@
     "min_read": "{min} min read",
     "cta_title": "Have a project like this?",
     "cta_body": "If you need a system built with the same care — clear scope, solid execution — let's talk.",
-    "cta_button": "Start a conversation"
+    "cta_button": "Start a project"
   },
   "about": {
     "title": "About",
@@ -158,7 +158,7 @@
     "view_all_work": "View all projects",
     "cta_title": "Let's work together",
     "cta_body": "If you have a project that needs clear thinking and solid execution — I'd like to hear about it.",
-    "cta_button": "Get in touch",
+    "cta_button": "Start a project",
     "stack_note": "Counted from the {total} shipped systems below, not from memory — every number links to the projects it came from.",
     "stack_systems": "{count, plural, one {# system} other {# systems}}",
     "stack_once_label": "Used once"
