@@ -47,7 +47,7 @@ export default function ProjectCard({
           (Aksara: four tags) doesn't push its title and tagline out of line
           with its neighbours — titles align across a row either way. Cards
           only sit side by side from md up, so mobile keeps its natural height. */}
-      <div className="flex flex-wrap gap-1.5 mb-3 md:min-h-[3.7rem] md:content-start">
+      <div className="flex flex-wrap gap-1.5 mb-3 md:min-h-tagrow md:content-start">
         {project.categoryTags.map((tag) => (
           <span key={tag} className="font-mono text-meta text-accent-2 px-2 py-0.5 border border-line-muted rounded">
             {tag}

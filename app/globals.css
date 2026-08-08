@@ -66,14 +66,6 @@
   --text-meta--line-height: 1.45;
 
   /* ------------------------------------------------------------------
-     Spacing scale — vertical rhythm. `section` is the default band;
-     `section-tight` is for supporting sections that should read as
-     secondary to the primary ones.
-     Names here must not collide with a CSS display keyword: the `inline-*`
-     namespace maps to inline-size, so a token named `block` would generate an
-     `inline-block` width utility that overrides Tailwind's display one.
-     ------------------------------------------------------------------ */
-  /* ------------------------------------------------------------------
      Measures. Three, each with a job, so container width is a reading
      decision rather than a per-page guess:
        page   — shells and card grids
@@ -84,6 +76,16 @@
   --container-doc: 48rem;         /*  768px */
   --container-prose: 42rem;       /*  672px */
 
+  /* ------------------------------------------------------------------
+     Spacing scale — vertical rhythm. `section` is the default band;
+     `section-tight` is for supporting sections that should read as
+     secondary to the primary ones.
+     Names here must not collide with a CSS display keyword: the `inline-*`
+     namespace maps to inline-size, so a token named `block` would generate an
+     `inline-block` width utility that overrides Tailwind's display one.
+     ------------------------------------------------------------------ */
+  --spacing-tagrow: 3.75rem;      /*  60px — two chip rows + gap; keeps card
+                                     titles aligned when tags wrap        */
   --spacing-page-top: 7rem;       /* 112px — clears the 64px fixed header  */
   --spacing-hero-top: 8rem;       /* 128px — the home hero gets extra air  */
   --spacing-section: 6rem;        /*  96px */
