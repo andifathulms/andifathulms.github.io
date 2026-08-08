@@ -62,8 +62,8 @@ function FilterChip({
       disabled={count === 0}
       className={`font-mono text-meta px-3.5 py-1.5 rounded border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
         active
-          ? 'border-gold/60 text-gold bg-gold/10'
-          : 'border-cream/15 text-text-subtle hover:border-cream/35 hover:text-text-muted'
+          ? 'border-edge-accent text-gold bg-gold/10'
+          : 'border-edge text-text-subtle hover:border-edge-strong hover:text-text-muted'
       }`}
     >
       {children}
@@ -198,7 +198,7 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
               onChange={(e) => updateQuery(e.target.value)}
               placeholder={t('search_placeholder')}
               autoComplete="off"
-              className="w-full rounded border border-cream/15 bg-navy px-3.5 py-2.5 pr-10 text-body text-cream placeholder:text-text-subtle transition-colors hover:border-cream/25 focus:border-gold/50 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+              className="w-full rounded border border-edge bg-navy px-3.5 py-2.5 pr-10 text-body text-cream placeholder:text-text-subtle transition-colors hover:border-edge-strong focus:border-edge-accent focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             />
             {query && (
               <button

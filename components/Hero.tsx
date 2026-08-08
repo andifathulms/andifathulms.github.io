@@ -28,7 +28,7 @@ export default function Hero({ stats }: { stats: PortfolioStats }) {
             </Link>
             <Link
               href="/contact"
-              className="px-6 py-3 border border-cream/20 text-cream text-sm font-medium rounded hover:border-cream/40 transition-colors"
+              className="px-6 py-3 border border-edge text-cream text-sm font-medium rounded hover:border-edge-strong transition-colors"
             >
               {t('cta_start')}
             </Link>

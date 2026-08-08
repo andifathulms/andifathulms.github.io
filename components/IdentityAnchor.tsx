@@ -52,7 +52,7 @@ export default function IdentityAnchor() {
               {chips.map((chip) => (
                 <span
                   key={chip}
-                  className="font-mono text-meta text-text-subtle border border-cream/20 rounded px-3 py-1"
+                  className="font-mono text-meta text-text-subtle border border-edge rounded px-3 py-1"
                 >
                   {chip}
                 </span>

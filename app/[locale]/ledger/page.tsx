@@ -103,7 +103,7 @@ export default async function LedgerPage({
               <Link
                 key={shape}
                 href={`/work?shape=${shape}`}
-                className="font-mono text-meta rounded border border-cream/15 px-3.5 py-1.5 text-text-muted transition-colors hover:border-gold/50 hover:text-gold"
+                className="font-mono text-meta rounded border border-edge px-3.5 py-1.5 text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
               >
                 {tw(`shape_${shape}`)}
                 <span className="ml-1.5 text-accent">{shapes[shape]}</span>

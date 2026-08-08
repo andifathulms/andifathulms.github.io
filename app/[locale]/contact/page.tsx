@@ -82,7 +82,7 @@ export default async function ContactPage({
             <p className="font-heading text-h3 text-gold mb-6">{t('subtitle')}</p>
 
             {/* Availability status */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-gold/25 bg-gold/[0.04] px-3.5 py-1.5 mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-line bg-gold/[0.04] px-3.5 py-1.5 mb-8">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-gold/60 motion-safe:animate-ping" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
@@ -104,7 +104,7 @@ export default async function ContactPage({
             </p>
             <div className="flex flex-col">
               {/* Email */}
-              <div className="flex items-start gap-4 border-t border-gold/15 pt-5 pb-5">
+              <div className="flex items-start gap-4 border-t border-line pt-5 pb-5">
                 <span className="mt-0.5 text-accent">
                   <ChannelIcon name="email" />
                 </span>
@@ -126,7 +126,7 @@ export default async function ContactPage({
                 href={whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-start gap-4 border-t border-gold/15 pt-5 pb-5"
+                className="group flex items-start gap-4 border-t border-line pt-5 pb-5"
               >
                 <span className="mt-0.5 text-accent transition-colors group-hover:text-gold">
                   <ChannelIcon name="whatsapp" />
@@ -146,7 +146,7 @@ export default async function ContactPage({
                 href={CONTACT.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-start gap-4 border-t border-gold/15 pt-5 pb-5"
+                className="group flex items-start gap-4 border-t border-line pt-5 pb-5"
               >
                 <span className="mt-0.5 text-accent transition-colors group-hover:text-gold">
                   <ChannelIcon name="linkedin" />
@@ -167,7 +167,7 @@ export default async function ContactPage({
                   href={CONTACT.resumePath}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-start gap-4 border-t border-gold/15 pt-5 pb-5"
+                  className="group flex items-start gap-4 border-t border-line pt-5 pb-5"
                 >
                   <span className="mt-0.5 text-accent transition-colors group-hover:text-gold">
                     <ChannelIcon name="resume" />

@@ -135,7 +135,7 @@ export default async function CaseStudyPage({
                 aria-hidden="true"
                 width={56}
                 height={56}
-                className="mb-4 h-12 w-12 md:h-14 md:w-14 rounded-xl border border-cream/15 object-cover"
+                className="mb-4 h-12 w-12 md:h-14 md:w-14 rounded-xl border border-edge object-cover"
               />
             )}
             {/* Category tags */}
@@ -143,7 +143,7 @@ export default async function CaseStudyPage({
               {project.categoryTags.map((tag) => (
                 <span
                   key={tag}
-                  className="font-mono text-meta text-accent-2 border border-clay/30 px-2 py-0.5 rounded"
+                  className="font-mono text-meta text-accent-2 border border-line-muted px-2 py-0.5 rounded"
                 >
                   {tag}
                 </span>
@@ -241,7 +241,7 @@ export default async function CaseStudyPage({
                       aria-hidden="true"
                       width={24}
                       height={24}
-                      className="h-6 w-6 rounded-md border border-cream/15 object-cover"
+                      className="h-6 w-6 rounded-md border border-edge object-cover"
                     />
                   )}
                   {prev.title}
@@ -264,7 +264,7 @@ export default async function CaseStudyPage({
                       aria-hidden="true"
                       width={24}
                       height={24}
-                      className="h-6 w-6 rounded-md border border-cream/15 object-cover"
+                      className="h-6 w-6 rounded-md border border-edge object-cover"
                     />
                   )}
                   {next.title}

@@ -33,7 +33,7 @@ export default function CaseStudyToc({ items, label }: { items: TocItem[]; label
   return (
     <nav aria-label={label}>
       <p className="font-mono text-meta text-accent uppercase tracking-wider mb-4">{label}</p>
-      <ul className="border-l border-gold/15">
+      <ul className="border-l border-line">
         {items.map((item) => {
           const isActive = active === item.slug;
           return (

@@ -93,7 +93,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
               className="block w-full text-left group cursor-zoom-in"
               aria-label={`View ${shot.caption} full size`}
             >
-              <div className="relative overflow-hidden rounded border border-cream/5 bg-navy/60 transition-colors group-hover:border-cream/20">
+              <div className="relative overflow-hidden rounded border border-edge bg-navy/60 transition-colors group-hover:border-edge">
                 <Image
                   src={shot.src}
                   alt={shot.caption}
@@ -121,7 +121,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
       {hasMore && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="mt-5 font-mono text-meta text-accent hover:text-gold border border-line hover:border-gold/40 px-4 py-2 rounded transition-colors"
+          className="mt-5 font-mono text-meta text-accent hover:text-gold border border-line hover:border-edge-accent px-4 py-2 rounded transition-colors"
         >
           {showAll
             ? 'Show less ↑'
@@ -150,7 +150,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
               </span>
               <button
                 onClick={close}
-                className="flex items-center gap-1.5 font-mono text-meta text-text-subtle hover:text-cream border border-cream/10 hover:border-cream/30 px-3 py-1.5 rounded transition-colors"
+                className="flex items-center gap-1.5 font-mono text-meta text-text-subtle hover:text-cream border border-edge hover:border-edge-strong px-3 py-1.5 rounded transition-colors"
                 aria-label="Close lightbox"
               >
                 close ✕
@@ -158,7 +158,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
             </div>
 
             {/* Image — constrained so it never fills the full viewport */}
-            <div className="rounded border border-cream/10 overflow-hidden bg-navy/60">
+            <div className="rounded border border-edge overflow-hidden bg-navy/60">
               <Image
                 src={screenshots[activeIndex].src}
                 alt={screenshots[activeIndex].caption}
@@ -173,7 +173,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
             <div className="flex items-center justify-between gap-4">
               <button
                 onClick={prev}
-                className="font-mono text-meta text-text-subtle hover:text-cream border border-cream/10 hover:border-cream/30 px-3 py-1.5 rounded transition-colors"
+                className="font-mono text-meta text-text-subtle hover:text-cream border border-edge hover:border-edge-strong px-3 py-1.5 rounded transition-colors"
                 aria-label="Previous"
               >
                 ← prev
@@ -185,7 +185,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
 
               <button
                 onClick={next}
-                className="font-mono text-meta text-text-subtle hover:text-cream border border-cream/10 hover:border-cream/30 px-3 py-1.5 rounded transition-colors"
+                className="font-mono text-meta text-text-subtle hover:text-cream border border-edge hover:border-edge-strong px-3 py-1.5 rounded transition-colors"
                 aria-label="Next"
               >
                 next →

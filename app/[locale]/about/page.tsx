@@ -123,7 +123,7 @@ export default async function AboutPage({
         </div>
 
         {/* Positioning statement */}
-        <figure className="max-w-3xl mb-16 border-l-2 border-gold/50 pl-6">
+        <figure className="max-w-3xl mb-16 border-l-2 border-edge-accent pl-6">
           <blockquote className="font-heading text-h2 font-medium text-text-muted leading-snug">
             {t('pull_quote')}
           </blockquote>
@@ -196,7 +196,7 @@ export default async function AboutPage({
                   <Link
                     key={project.slug}
                     href={`/work/${project.slug}`}
-                    className="group inline-flex items-center gap-1.5 rounded border border-cream/15 px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-gold/50 hover:text-gold"
+                    className="group inline-flex items-center gap-1.5 rounded border border-edge px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
                   >
                     {project.title}
                     <span

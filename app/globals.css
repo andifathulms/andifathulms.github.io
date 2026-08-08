@@ -24,10 +24,24 @@
   --color-accent: #C99A3E;       /*  6.8:1 — gold: links, CTAs, chips  */
   --color-accent-2: #D9764F;     /*  5.5:1 — clay, lightened for text  */
 
-  /* Hairline dividers — decorative, exempt from the text floor. */
+  /* ------------------------------------------------------------------
+     Borders. Decorative, so exempt from the text contrast floor — but not
+     exempt from having a rule. Before these, 18 different opacities were in
+     circulation (cream/5 through /40, gold/15 through /60, clay/20 through
+     /70) with nothing distinguishing them, so a border's weight carried
+     accidental emphasis instead of meaning.
+
+       line          section dividers and resting edges
+       line-strong   hover / active / focus edges
+       line-muted    edges inside a surface, quieter than the surface's own
+       edge-accent   a gold edge that is doing deliberate work (CTA, quote)
+     ------------------------------------------------------------------ */
   --color-line: rgba(201, 154, 62, 0.20);
-  --color-line-strong: rgba(201, 154, 62, 0.40);
-  --color-line-muted: rgba(232, 227, 216, 0.18);
+  --color-line-strong: rgba(201, 154, 62, 0.45);
+  --color-line-muted: rgba(232, 227, 216, 0.14);
+  --color-edge: rgba(232, 227, 216, 0.20);
+  --color-edge-strong: rgba(232, 227, 216, 0.42);
+  --color-edge-accent: rgba(201, 154, 62, 0.55);
 
   /* ------------------------------------------------------------------
      Type scale — one scale for the whole site. Body text never goes
