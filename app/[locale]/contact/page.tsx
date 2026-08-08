@@ -71,7 +71,7 @@ export default async function ContactPage({
   const hasResume = existsSync(path.join(process.cwd(), 'public', CONTACT.resumePath.replace(/^\//, '')));
 
   return (
-    <div className="pt-28 pb-24 px-6">
+    <div className="pt-page-top pb-section px-gutter">
       <div className="max-w-5xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Left: intro */}

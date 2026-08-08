@@ -59,6 +59,8 @@
      namespace maps to inline-size, so a token named `block` would generate an
      `inline-block` width utility that overrides Tailwind's display one.
      ------------------------------------------------------------------ */
+  --spacing-page-top: 7rem;       /* 112px — clears the 64px fixed header  */
+  --spacing-hero-top: 8rem;       /* 128px — the home hero gets extra air  */
   --spacing-section: 6rem;        /*  96px */
   --spacing-section-tight: 4.5rem;/*  72px */
   --spacing-stack: 3rem;          /*  48px — gap below a section heading */

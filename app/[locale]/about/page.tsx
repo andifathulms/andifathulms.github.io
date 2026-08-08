@@ -52,7 +52,7 @@ export default async function AboutPage({
   const stackOnce = stackUsage.filter((tech) => tech.count === 1);
 
   return (
-    <div className="pt-28 pb-24 px-6">
+    <div className="pt-page-top pb-section px-gutter">
       <div className="max-w-5xl mx-auto">
 
         {/* 1. Photo + name + role strip */}

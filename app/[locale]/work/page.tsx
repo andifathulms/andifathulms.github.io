@@ -28,7 +28,7 @@ export default async function WorkPage({
   const projects = getAllProjects().filter((p) => p.status !== 'placeholder');
 
   return (
-    <div className="pt-28 pb-24 px-6">
+    <div className="pt-page-top pb-section px-gutter">
       <div className="max-w-5xl mx-auto">
         <div className="mb-16">
           <h1 className="font-heading text-h1 font-medium text-cream mb-4">

@@ -107,7 +107,7 @@ export default async function CaseStudyPage({
   const readingMinutes = readingTimeMinutes(content);
 
   return (
-    <article className="pt-28 pb-8">
+    <article className="pt-page-top pb-8">
       <ReadingProgress />
       {/* Hero banner */}
       <div className="relative aspect-video md:aspect-[21/6] bg-navy/50 mb-0 overflow-hidden">
@@ -125,7 +125,7 @@ export default async function CaseStudyPage({
             survived at full contrast and collided with the h1 below — the page
             title was competing with foreign text at the same size. */}
         <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/85 to-navy/55" />
-        <div className="absolute inset-0 flex flex-col justify-end px-6 pb-10">
+        <div className="absolute inset-0 flex flex-col justify-end px-gutter pb-10">
           <div className="max-w-5xl mx-auto w-full">
             {project.icon && (
               <Image
@@ -156,7 +156,7 @@ export default async function CaseStudyPage({
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-gutter">
         {/* Back to work index + reading time */}
         <div className="mt-6 flex items-center justify-between gap-4">
           <Link
