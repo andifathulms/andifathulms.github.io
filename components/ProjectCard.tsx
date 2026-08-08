@@ -22,7 +22,7 @@ export default function ProjectCard({
   return (
     <Link
       href={`/work/${project.slug}`}
-      className="group flex h-full flex-col border-t border-line pt-6 pb-6 hover:border-edge-accent transition-all duration-300 hover:-translate-y-1"
+      className="group flex h-full flex-col border-t border-line pt-6 pb-6 hover:border-edge-accent transition-all duration-300 hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       {/* Hero image + hover screenshot preview */}
       <div className="aspect-video bg-navy/50 border border-edge rounded overflow-hidden mb-5 relative">

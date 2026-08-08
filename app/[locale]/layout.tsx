@@ -135,7 +135,13 @@ export default async function LocaleLayout({
             {t('skip_to_content')}
           </a>
           <Header />
-          <main id="main" tabIndex={-1} className="outline-none">
+          {/* The skip link focuses this. It kept outline-none, so nothing
+              confirmed the jump had happened. */}
+          <main
+            id="main"
+            tabIndex={-1}
+            className="focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
+          >
             {children}
           </main>
           <Footer />

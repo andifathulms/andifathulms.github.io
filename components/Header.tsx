@@ -63,12 +63,20 @@ export default function Header() {
 
     focusables()[0]?.focus();
 
+    // Tab is trapped above, but without inert the page behind stays in the
+    // accessibility tree — a screen reader's virtual cursor could still read
+    // it while the menu claimed to be modal. `inert` is native and removes
+    // both focus and AT access in one attribute.
+    const behind = [document.getElementById('main'), document.querySelector('footer')];
+    behind.forEach((el) => el?.setAttribute('inert', ''));
+
     const { overflow } = document.body.style;
     document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = overflow;
+      behind.forEach((el) => el?.removeAttribute('inert'));
     };
   }, [menuOpen]);
 
@@ -86,7 +94,7 @@ export default function Header() {
             width={32}
             height={32}
             priority
-            className="h-8 w-8 rounded-[7px] transition-transform group-hover:scale-105"
+            className="h-8 w-8 rounded-[7px] transition-transform group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
           AFM Studio
         </Link>
