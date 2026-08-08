@@ -77,7 +77,22 @@ export default async function LocaleLayout({
   }
 
   setRequestLocale(locale);
-  const messages = await getMessages();
+  // Only the namespaces client components actually read. The provider
+  // serialises whatever it's given into every page's HTML, so passing the
+  // whole catalogue shipped the home, about and contact copy — plus every
+  // case study string — to the browser on routes that never render them.
+  // Server components don't read from here; they call getTranslations().
+  //
+  // If a *client* component starts using a new namespace, add it here or it
+  // will throw MISSING_MESSAGE at runtime. Current readers:
+  //   nav, a11y   Header, LocaleSwitcher      (every page)
+  //   work        WorkGallery, CardPreview    (home + work index)
+  //   case_study  ScreenshotGallery           (case studies)
+  const CLIENT_NAMESPACES = ['nav', 'a11y', 'work', 'case_study'] as const;
+  const allMessages = await getMessages();
+  const messages = Object.fromEntries(
+    CLIENT_NAMESPACES.filter((ns) => ns in allMessages).map((ns) => [ns, allMessages[ns]])
+  );
   const t = await getTranslations({ locale, namespace: 'a11y' });
 
   const jsonLd = {
