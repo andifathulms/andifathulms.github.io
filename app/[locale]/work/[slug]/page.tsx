@@ -116,12 +116,15 @@ export default async function CaseStudyPage({
             src={project.heroImage}
             alt={project.title}
             fill
-            className="object-cover opacity-60"
+            className="object-cover object-top opacity-40"
             priority
           />
         )}
-        {/* gradient scrim so text is always legible regardless of image brightness */}
-        <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/20" />
+        {/* Scrim. The old floor (to-navy/20) left the top of the banner almost
+            untouched, so the screenshot's *own* headline and search field
+            survived at full contrast and collided with the h1 below — the page
+            title was competing with foreign text at the same size. */}
+        <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/85 to-navy/55" />
         <div className="absolute inset-0 flex flex-col justify-end px-6 pb-10">
           <div className="max-w-5xl mx-auto w-full">
             {project.icon && (
