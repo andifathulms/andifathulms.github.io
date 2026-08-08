@@ -51,36 +51,11 @@ export async function generateMetadata({
     applicationName: SITE_NAME,
     authors: [{ name: 'Andi Fathul Mukminin' }],
     creator: 'Andi Fathul Mukminin',
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        en: '/en',
-        id: '/id',
-        'x-default': '/en',
-      },
-    },
-    openGraph: {
-      type: 'website',
-      siteName: SITE_NAME,
-      title: SITE_NAME,
-      description,
-      url: `${SITE_URL}/${locale}`,
-      locale: locale === 'id' ? 'id_ID' : 'en_US',
-      images: [
-        {
-          url: '/og.png',
-          width: 1200,
-          height: 630,
-          alt: 'AFM Studio — Andi Fathul Mukminin',
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: SITE_NAME,
-      description,
-      images: ['/og.png'],
-    },
+    // No alternates or openGraph here on purpose. Metadata objects merge by
+    // field, so anything set at the layout level is inherited verbatim by every
+    // child that doesn't override it — which is how /work, /about and /contact
+    // all came to declare the home page as their canonical. Each page calls
+    // routeMetadata() instead.
   };
 }
 

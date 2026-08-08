@@ -16,7 +16,7 @@ import {
   slugify,
 } from '@/lib/content';
 import { routing } from '@/i18n/routing';
-import { SITE_NAME, SITE_URL } from '@/lib/site';
+import { routeMetadata } from '@/lib/site';
 import QuickFactsStrip from '@/components/QuickFactsStrip';
 import PrintButton from '@/components/PrintButton';
 import MetricsStrip from '@/components/MetricsStrip';
@@ -62,27 +62,19 @@ export async function generateMetadata({
 
   // heroImage is a root-relative path; metadataBase (set in the locale layout)
   // resolves it to an absolute URL for social cards.
-  const image = project.heroImage || '/og.png';
-  return {
+  //
+  // This used to build `alternates` and `openGraph` by hand, and because those
+  // objects replace rather than merge, every case study lost the layout's
+  // hreflang languages and og:locale — 70 pages with no link between their
+  // English and Indonesian versions.
+  return routeMetadata({
+    locale,
+    path: `/work/${slug}`,
     title: project.title,
     description: project.tagline,
-    alternates: {
-      canonical: `/${locale}/work/${slug}`,
-    },
-    openGraph: {
-      type: 'article',
-      title: `${project.title} — ${SITE_NAME}`,
-      description: project.tagline,
-      url: `${SITE_URL}/${locale}/work/${slug}`,
-      images: [{ url: image, width: 1200, height: 630, alt: project.title }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${project.title} — ${SITE_NAME}`,
-      description: project.tagline,
-      images: [image],
-    },
-  };
+    image: project.heroImage || '/og.png',
+    type: 'article',
+  });
 }
 
 export default async function CaseStudyPage({

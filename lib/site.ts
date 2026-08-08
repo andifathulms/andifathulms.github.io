@@ -32,3 +32,60 @@ export const PERSON = {
     'https://tiktok.com/@nusantaramapper',
   ],
 };
+
+/**
+ * Per-route metadata. Every page must call this: a page that inherits the
+ * layout's `alternates` silently claims the *home page* as its canonical, and
+ * a page that omits `openGraph` shares the home page's share card. Both were
+ * happening on /work, /about and /contact in both locales.
+ *
+ * `path` is the locale-relative route ('' for home, '/work', '/work/aksara').
+ * Title and description must be the same strings the page renders — passing
+ * hand-written copy here is how metadata drifts from the page.
+ */
+export function routeMetadata({
+  locale,
+  path,
+  title,
+  description,
+  image,
+  type = 'website',
+}: {
+  locale: string;
+  path: string;
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'article';
+}) {
+  const url = (l: string) => `${SITE_URL}/${l}${path}`.replace(/\/?$/, '/');
+  const ogImage = image ?? '/og.png';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url(locale),
+      languages: {
+        en: url('en'),
+        id: url('id'),
+        'x-default': url('en'),
+      },
+    },
+    openGraph: {
+      type,
+      siteName: SITE_NAME,
+      title: `${title} — ${SITE_NAME}`,
+      description,
+      url: url(locale),
+      locale: locale === 'id' ? 'id_ID' : 'en_US',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image' as const,
+      title: `${title} — ${SITE_NAME}`,
+      description,
+      images: [ogImage],
+    },
+  };
+}

@@ -3,6 +3,7 @@ import path from 'path';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { routeMetadata } from '@/lib/site';
 import { Link } from '@/i18n/navigation';
 import StackIcon from '@/components/StackIcon';
 import SocialLinks from '@/components/SocialLinks';
@@ -16,10 +17,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'about' });
-  return {
+  return routeMetadata({
+    locale,
+    path: '/about',
     title: t('title'),
     description: t('intro'),
-  };
+  });
 }
 
 export default async function AboutPage({

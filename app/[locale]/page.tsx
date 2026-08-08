@@ -9,6 +9,7 @@ import ProjectCard from '@/components/ProjectCard';
 import ProcessSection from '@/components/ProcessSection';
 import SectionHeading from '@/components/SectionHeading';
 import { getFeaturedProjects, getPortfolioStats } from '@/lib/content';
+import { routeMetadata, SITE_NAME } from '@/lib/site';
 import type { PortfolioStats } from '@/lib/content';
 
 export async function generateMetadata({
@@ -18,10 +19,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'home.hero' });
-  return {
-    title: 'AFM Studio',
+  return routeMetadata({
+    locale,
+    path: '',
+    title: SITE_NAME,
     description: t('subheadline'),
-  };
+  });
 }
 
 function ServicesSection({ stats }: { stats: PortfolioStats }) {

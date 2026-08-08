@@ -4,7 +4,7 @@ import * as si from 'simple-icons';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import CopyButton from '@/components/CopyButton';
-import { CONTACT } from '@/lib/site';
+import { CONTACT, routeMetadata } from '@/lib/site';
 
 export async function generateMetadata({
   params,
@@ -13,10 +13,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'contact' });
-  return {
+  return routeMetadata({
+    locale,
+    path: '/contact',
     title: t('title'),
     description: t('subtitle'),
-  };
+  });
 }
 
 // LinkedIn is no longer distributed by simple-icons (trademark request).

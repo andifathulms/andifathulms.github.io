@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { routeMetadata } from '@/lib/site';
 import WorkGallery from '@/components/WorkGallery';
 import { getAllProjects } from '@/lib/content';
 
@@ -10,10 +11,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'work' });
-  return {
+  return routeMetadata({
+    locale,
+    path: '/work',
     title: t('title'),
     description: t('subtitle'),
-  };
+  });
 }
 
 export default async function WorkPage({
