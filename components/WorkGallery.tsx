@@ -43,7 +43,58 @@ function matchesQuery(project: ProjectMeta, terms: string[]): boolean {
   return terms.every((term) => haystack.includes(term));
 }
 
-function FilterChip({
+const chipClass = (active: boolean, empty: boolean) =>
+  `min-h-touch inline-flex items-center font-mono text-meta px-3.5 py-1.5 rounded border transition-colors ${
+    empty ? 'opacity-40 cursor-not-allowed' : ''
+  } ${
+    active
+      ? 'border-edge-accent text-gold bg-gold/10'
+      : 'border-edge text-text-subtle hover:border-edge-strong hover:text-text-muted'
+  }`;
+
+/**
+ * The source axis is single-select, so it's a native radio group: the browser
+ * conveys "3 of 4" and arrow-key navigation for free, which aria-pressed on
+ * four independent buttons never could. The input is visually hidden rather
+ * than removed, so it stays focusable and the label stays clickable.
+ */
+function RadioChip({
+  name,
+  active,
+  onSelect,
+  children,
+  count,
+}: {
+  name: string;
+  active: boolean;
+  onSelect: () => void;
+  children: React.ReactNode;
+  count: number;
+}) {
+  const empty = count === 0;
+  return (
+    <label className={chipClass(active, empty)}>
+      <input
+        type="radio"
+        name={name}
+        checked={active}
+        onChange={onSelect}
+        disabled={empty}
+        className="sr-only"
+      />
+      {children}
+      <span className="ml-1.5 text-text-subtle">{count}</span>
+    </label>
+  );
+}
+
+/**
+ * The shape axis toggles (clicking the active chip clears it), so a button
+ * with aria-pressed is the right shape here. Empty chips use aria-disabled
+ * rather than disabled so they stay reachable and their count is still
+ * announced — a keyboard user shouldn't lose information a mouse user keeps.
+ */
+function ToggleChip({
   active,
   onClick,
   children,
@@ -54,17 +105,14 @@ function FilterChip({
   children: React.ReactNode;
   count: number;
 }) {
+  const empty = count === 0;
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => !empty && onClick()}
       aria-pressed={active}
-      disabled={count === 0}
-      className={`min-h-touch inline-flex items-center font-mono text-meta px-3.5 py-1.5 rounded border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-        active
-          ? 'border-edge-accent text-gold bg-gold/10'
-          : 'border-edge text-text-subtle hover:border-edge-strong hover:text-text-muted'
-      }`}
+      aria-disabled={empty || undefined}
+      className={chipClass(active, empty)}
     >
       {children}
       <span className="ml-1.5 text-text-subtle">{count}</span>
@@ -157,6 +205,16 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
     ) as Record<ProblemShape, number>;
   }, [projects, source, terms]);
 
+  // Announce the result count only once the user stops typing; the raw value
+  // changes on every keystroke, which made a screen reader read eight counts
+  // while someone typed "keycloak".
+  const [announced, setAnnounced] = useState('');
+  const summary = t('results_count', { count: visible.length, total: projects.length });
+  useEffect(() => {
+    const id = window.setTimeout(() => setAnnounced(summary), 600);
+    return () => window.clearTimeout(id);
+  }, [summary]);
+
   const filtered = source !== 'all' || shape !== null || terms.length > 0;
 
   const sections = filtered
@@ -218,18 +276,20 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
           <p className="font-mono text-meta uppercase tracking-widest text-text-subtle mb-2.5">
             {t('axis_source')}
           </p>
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('axis_source')}>
+          <fieldset className="flex flex-wrap items-center gap-2">
+            <legend className="sr-only">{t('axis_source')}</legend>
             {SOURCES.map((key) => (
-              <FilterChip
+              <RadioChip
                 key={key}
+                name="work-source"
                 active={source === key}
-                onClick={() => selectSource(key)}
+                onSelect={() => selectSource(key)}
                 count={sourceCounts[key]}
               >
                 {t(`filter_${key}`)}
-              </FilterChip>
+              </RadioChip>
             ))}
-          </div>
+          </fieldset>
         </div>
 
         {/* What kind of problem it solves — the axis that cuts across the one above */}
@@ -239,22 +299,24 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
           </p>
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('axis_shape')}>
             {PROBLEM_SHAPES.map((key) => (
-              <FilterChip
+              <ToggleChip
                 key={key}
                 active={shape === key}
                 onClick={() => selectShape(key)}
                 count={shapeCounts[key]}
               >
                 {t(`shape_${key}`)}
-              </FilterChip>
+              </ToggleChip>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Announce result counts to screen readers as the filters narrow. */}
-      <p className="sr-only" role="status" aria-live="polite">
-        {t('results_count', { count: visible.length, total: projects.length })}
+      {/* role="status" already implies aria-live="polite" and aria-atomic —
+          declaring both was duplication. The count is debounced so typing a
+          word announces once at the end rather than once per keystroke. */}
+      <p className="sr-only" role="status">
+        {announced}
       </p>
 
       {visible.length === 0 && (
