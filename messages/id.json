@@ -192,7 +192,8 @@
     "skip_to_content": "Lewati ke konten",
     "open_menu": "Buka menu",
     "close_menu": "Tutup menu",
-    "main_nav": "Navigasi utama"
+    "main_nav": "Navigasi utama",
+    "print": "Cetak / Simpan PDF"
   },
   "ledger": {
     "title": "Dari mana angka-angka ini berasal",

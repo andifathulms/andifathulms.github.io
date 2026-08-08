@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import StackIcon from '@/components/StackIcon';
 import SocialLinks from '@/components/SocialLinks';
+import PrintButton from '@/components/PrintButton';
 import { getFeaturedProjects, getPortfolioStats, getStackUsage } from '@/lib/content';
 
 export async function generateMetadata({
@@ -30,6 +31,7 @@ export default async function AboutPage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'about' });
   const ts = await getTranslations({ locale, namespace: 'home.stats' });
+  const ta = await getTranslations({ locale, namespace: 'a11y' });
 
   const hasPhoto = existsSync(path.join(process.cwd(), 'public/images/about/photo.jpg'));
   const stats = getPortfolioStats();
@@ -99,6 +101,9 @@ export default async function AboutPage({
                 {t('connect_label')}
               </p>
               <SocialLinks />
+              <div className="mt-4">
+                <PrintButton label={ta('print')} />
+              </div>
             </div>
           </div>
         </div>

@@ -18,6 +18,7 @@ import {
 import { routing } from '@/i18n/routing';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import QuickFactsStrip from '@/components/QuickFactsStrip';
+import PrintButton from '@/components/PrintButton';
 import MetricsStrip from '@/components/MetricsStrip';
 import ReadingProgress from '@/components/ReadingProgress';
 import CaseStudyToc from '@/components/CaseStudyToc';
@@ -99,6 +100,7 @@ export default async function CaseStudyPage({
   if (!content) notFound();
 
   const t = await getTranslations({ locale, namespace: 'case_study' });
+  const ta = await getTranslations({ locale, namespace: 'a11y' });
   const { prev, next } = getAdjacentProjects(slug);
   const screenshots = getProjectScreenshots(slug);
   const toc = extractHeadings(content);
@@ -168,6 +170,11 @@ export default async function CaseStudyPage({
 
         {/* Quick facts */}
         <QuickFactsStrip project={project} />
+
+        {/* For the reader who forwards this case study to a decision-maker */}
+        <div className="mt-6">
+          <PrintButton label={ta('print')} />
+        </div>
 
         {/* Outcomes — only renders when meta.json declares metrics */}
         {project.metrics && project.metrics.length > 0 && (

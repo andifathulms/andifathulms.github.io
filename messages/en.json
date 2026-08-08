@@ -192,7 +192,8 @@
     "skip_to_content": "Skip to content",
     "open_menu": "Open menu",
     "close_menu": "Close menu",
-    "main_nav": "Main navigation"
+    "main_nav": "Main navigation",
+    "print": "Print / Save as PDF"
   },
   "ledger": {
     "title": "Where the numbers come from",

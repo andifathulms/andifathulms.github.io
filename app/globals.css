@@ -168,6 +168,96 @@ body {
   }
 }
 
+/* ------------------------------------------------------------------------
+   Print — for the prospect who likes what they read and forwards it to
+   someone who will never visit the site. Dark-on-paper is unreadable and
+   burns ink, so print inverts to black-on-white; this is a print sheet, not
+   a light theme, and it never applies on screen.
+   ------------------------------------------------------------------------ */
+@media print {
+  :root {
+    --color-text: #000;
+    --color-text-muted: #333;
+    --color-text-subtle: #555;
+    --color-accent: #7a5a1c;
+    --color-accent-2: #8c3d1e;
+    --color-line: #bbb;
+    --color-line-strong: #888;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 11pt;
+  }
+
+  /* Chrome and nav aren't useful on paper. */
+  header,
+  footer,
+  .print-hide {
+    display: none !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+  }
+
+  /* Flatten dark surfaces and brand fills to ink. */
+  [class*='bg-navy'],
+  [class*='bg-gold'],
+  [class*='bg-cream'] {
+    background: transparent !important;
+    color: #000 !important;
+  }
+
+  [class*='text-cream'],
+  [class*='text-gold'],
+  [class*='text-accent'],
+  [class*='text-text-'] {
+    color: #000 !important;
+  }
+
+  [class*='border-'] {
+    border-color: #bbb !important;
+  }
+
+  /* Entrance animations would print mid-fade. */
+  .reveal,
+  .anim-fade-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Spend the paper on content, not on editorial whitespace. */
+  section,
+  [class*='py-section'] {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  section,
+  article,
+  li {
+    break-inside: avoid;
+  }
+
+  /* Links are dead on paper unless the destination is written out. */
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 9pt;
+    color: #555;
+    word-break: break-all;
+  }
+}
+
 /* MDX prose styles for case study content — tokens only, no literals, so
    this block can never drift from the scale defined in @theme. */
 .prose-case-study {
