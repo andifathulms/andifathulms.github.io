@@ -17,12 +17,15 @@ export default function MetricsStrip({ metrics, label }: MetricsStripProps) {
       </p>
       <dl className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8">
         {metrics.map((m) => (
-          <div key={m.label}>
-            <dt className="sr-only">{m.label}</dt>
+          // dt first so the term is announced before its value, and only once:
+          // the label used to be rendered twice (an sr-only dt plus a visible
+          // p), so assistive tech read every figure's label two times. The `p`
+          // was also an invalid direct child of the dl wrapper.
+          <div key={m.label} className="flex flex-col-reverse">
+            <dt className="text-meta text-text-subtle leading-snug">{m.label}</dt>
             <dd className="font-heading text-h2 font-medium text-cream leading-none mb-2">
               {m.value}
             </dd>
-            <p className="text-meta text-text-subtle leading-snug">{m.label}</p>
           </div>
         ))}
       </dl>

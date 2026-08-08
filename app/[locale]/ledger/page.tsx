@@ -76,15 +76,20 @@ export default async function LedgerPage({
 
           <dl className="flex flex-col">
             {derived.map((row) => (
+              // dt before dd so the claim is announced before its number, and
+              // the rule lives inside the dd rather than as a `p` that isn't a
+              // legal child of a dl.
               <div
                 key={row.claim}
-                className="border-t border-line py-4 grid grid-cols-[auto_1fr] gap-x-5 gap-y-1 items-baseline"
+                className="border-t border-line py-4 grid grid-cols-[auto_1fr] gap-x-5 items-baseline"
               >
-                <dd className="font-heading text-h3 text-gold leading-none tabular-nums">
+                <dt className="col-start-2 row-start-1 text-body text-cream">{row.claim}</dt>
+                <dd className="col-start-1 row-start-1 row-span-2 font-heading text-h3 text-gold leading-none tabular-nums">
                   {row.value}
                 </dd>
-                <dt className="text-body text-cream">{row.claim}</dt>
-                <p className="col-start-2 font-mono text-meta text-text-subtle">{row.rule}</p>
+                <dd className="col-start-2 row-start-2 mt-1 font-mono text-meta text-text-subtle">
+                  {row.rule}
+                </dd>
               </div>
             ))}
           </dl>
@@ -149,12 +154,12 @@ export default async function LedgerPage({
                   {project.rows.map((row) => (
                     <div
                       key={`${row.value}-${row.label}`}
-                      className="border-t border-line py-2 flex items-baseline gap-4"
+                      className="border-t border-line py-2 flex flex-row-reverse justify-end items-baseline gap-4"
                     >
+                      <dt className="text-body text-text-muted">{row.label}</dt>
                       <dd className="font-mono text-meta text-accent tabular-nums min-w-24 flex-shrink-0">
                         {row.value}
                       </dd>
-                      <dt className="text-body text-text-muted">{row.label}</dt>
                     </div>
                   ))}
                 </dl>
