@@ -7,6 +7,7 @@
     "Calendar Tool",
     "Web App"
   ],
+  "problemShape": "tool",
   "techStack": [
     "Next.js",
     "React",
@@ -24,10 +25,22 @@
   "order": 24,
   "featured": false,
   "metrics": [
-    { "value": "4", "label": "Interlocking cycles, every number traced to a citation" },
-    { "value": "126", "label": "Tests, cycle-exact over a century of days" },
-    { "value": "1633", "label": "CE lunar epoch — it refuses dates before it" },
-    { "value": "0", "label": "Date libraries — pure integer JDN math" }
+    {
+      "value": "4",
+      "label": "Interlocking cycles, every number traced to a citation"
+    },
+    {
+      "value": "126",
+      "label": "Tests, cycle-exact over a century of days"
+    },
+    {
+      "value": "1633",
+      "label": "CE lunar epoch — it refuses dates before it"
+    },
+    {
+      "value": "0",
+      "label": "Date libraries — pure integer JDN math"
+    }
   ],
   "access": "public"
 }

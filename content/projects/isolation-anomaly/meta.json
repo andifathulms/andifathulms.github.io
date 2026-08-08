@@ -7,6 +7,7 @@
     "Developer Tool",
     "Web App"
   ],
+  "problemShape": "explainer",
   "techStack": [
     "Next.js",
     "React",
@@ -24,10 +25,22 @@
   "order": 29,
   "featured": false,
   "metrics": [
-    { "value": "5", "label": "DB engines modelled from cited docs" },
-    { "value": "220", "label": "Fixtures recorded from real databases" },
-    { "value": "1,551", "label": "Tests — simulator vs the real engines" },
-    { "value": "11", "label": "Scenarios, incl. the write-skew anomaly" }
+    {
+      "value": "5",
+      "label": "DB engines modelled from cited docs"
+    },
+    {
+      "value": "220",
+      "label": "Fixtures recorded from real databases"
+    },
+    {
+      "value": "1,551",
+      "label": "Tests — simulator vs the real engines"
+    },
+    {
+      "value": "11",
+      "label": "Scenarios, incl. the write-skew anomaly"
+    }
   ],
   "access": "public"
 }

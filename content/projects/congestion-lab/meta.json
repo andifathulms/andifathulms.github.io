@@ -7,6 +7,7 @@
     "Networking",
     "Web App"
   ],
+  "problemShape": "explainer",
   "techStack": [
     "Next.js",
     "React",
@@ -24,10 +25,22 @@
   "order": 30,
   "featured": false,
   "metrics": [
-    { "value": "5", "label": "Congestion algorithms from their RFCs" },
-    { "value": "4", "label": "Analytic oracles gating the deploy" },
-    { "value": "288k", "label": "Packets/run simulated, flat heap" },
-    { "value": "0", "label": "Charting libraries — SVG hand-written" }
+    {
+      "value": "5",
+      "label": "Congestion algorithms from their RFCs"
+    },
+    {
+      "value": "4",
+      "label": "Analytic oracles gating the deploy"
+    },
+    {
+      "value": "288k",
+      "label": "Packets/run simulated, flat heap"
+    },
+    {
+      "value": "0",
+      "label": "Charting libraries — SVG hand-written"
+    }
   ],
   "access": "public"
 }

@@ -7,6 +7,7 @@
     "Developer Tool",
     "Web App"
   ],
+  "problemShape": "explainer",
   "techStack": [
     "Next.js",
     "React",
@@ -24,10 +25,22 @@
   "order": 22,
   "featured": false,
   "metrics": [
-    { "value": "10,000", "label": "Fuzz runs green on all 5 safety properties" },
-    { "value": "7", "label": "Ablation toggles that each break a guarantee" },
-    { "value": "161", "label": "Tests, incl. an independent invariant checker" },
-    { "value": "12", "label": "Hand-built teaching scenarios" }
+    {
+      "value": "10,000",
+      "label": "Fuzz runs green on all 5 safety properties"
+    },
+    {
+      "value": "7",
+      "label": "Ablation toggles that each break a guarantee"
+    },
+    {
+      "value": "161",
+      "label": "Tests, incl. an independent invariant checker"
+    },
+    {
+      "value": "12",
+      "label": "Hand-built teaching scenarios"
+    }
   ],
   "access": "public"
 }

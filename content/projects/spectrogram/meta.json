@@ -7,6 +7,7 @@
     "Audio & DSP",
     "Web App"
   ],
+  "problemShape": "explainer",
   "techStack": [
     "Next.js",
     "React",
@@ -25,10 +26,22 @@
   "order": 25,
   "featured": false,
   "metrics": [
-    { "value": "0", "label": "Network requests at runtime — enforced by the build" },
-    { "value": "256", "label": "Tests, incl. a naive-DFT correctness oracle" },
-    { "value": "~101×", "label": "Real-time FFT, hand-written, zero DSP libraries" },
-    { "value": "4", "label": "Independent proofs the transform is correct" }
+    {
+      "value": "0",
+      "label": "Network requests at runtime — enforced by the build"
+    },
+    {
+      "value": "256",
+      "label": "Tests, incl. a naive-DFT correctness oracle"
+    },
+    {
+      "value": "~101×",
+      "label": "Real-time FFT, hand-written, zero DSP libraries"
+    },
+    {
+      "value": "4",
+      "label": "Independent proofs the transform is correct"
+    }
   ],
   "access": "public"
 }

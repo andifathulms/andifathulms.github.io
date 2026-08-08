@@ -7,6 +7,7 @@
     "Developer Tool",
     "Web App"
   ],
+  "problemShape": "explainer",
   "techStack": [
     "Next.js",
     "React",
@@ -24,10 +25,22 @@
   "order": 28,
   "featured": false,
   "metrics": [
-    { "value": "4", "label": "Probabilistic structures, hand-written from papers" },
-    { "value": "328", "label": "Assertions behind a hash-quality gate" },
-    { "value": "Real bytes", "label": "Memory measured, never formula'd" },
-    { "value": "3", "label": "Runtime deps — zero sketch libraries" }
+    {
+      "value": "4",
+      "label": "Probabilistic structures, hand-written from papers"
+    },
+    {
+      "value": "328",
+      "label": "Assertions behind a hash-quality gate"
+    },
+    {
+      "value": "Real bytes",
+      "label": "Memory measured, never formula'd"
+    },
+    {
+      "value": "3",
+      "label": "Runtime deps — zero sketch libraries"
+    }
   ],
   "access": "public"
 }

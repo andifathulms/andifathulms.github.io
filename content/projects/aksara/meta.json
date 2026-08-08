@@ -7,6 +7,7 @@
     "Knowledge Platform",
     "Web App"
   ],
+  "problemShape": "workflow",
   "techStack": [
     "Django",
     "React",
@@ -26,10 +27,22 @@
   "order": 1,
   "featured": true,
   "metrics": [
-    { "value": "~2.5 wks", "label": "Scaffold to deployed staging" },
-    { "value": "66", "label": "API endpoints, OpenAPI-documented" },
-    { "value": "156", "label": "Backend tests on the riskiest logic" },
-    { "value": "43", "label": "OIKN work units modelled" }
+    {
+      "value": "~2.5 wks",
+      "label": "Scaffold to deployed staging"
+    },
+    {
+      "value": "66",
+      "label": "API endpoints, OpenAPI-documented"
+    },
+    {
+      "value": "156",
+      "label": "Backend tests on the riskiest logic"
+    },
+    {
+      "value": "43",
+      "label": "OIKN work units modelled"
+    }
   ],
   "access": "public"
 }

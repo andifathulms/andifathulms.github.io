@@ -7,6 +7,7 @@
     "Finance Tool",
     "Web App"
   ],
+  "problemShape": "tool",
   "techStack": [
     "Next.js",
     "React",
@@ -24,10 +25,22 @@
   "order": 27,
   "featured": false,
   "metrics": [
-    { "value": "1,614", "label": "Test assertions, full run in ~2s" },
-    { "value": "27", "label": "Cited regulatory parameters" },
-    { "value": "7", "label": "Unknowns refused by name, not faked" },
-    { "value": "0", "label": "Runtime network — figures stay in the URL hash" }
+    {
+      "value": "1,614",
+      "label": "Test assertions, full run in ~2s"
+    },
+    {
+      "value": "27",
+      "label": "Cited regulatory parameters"
+    },
+    {
+      "value": "7",
+      "label": "Unknowns refused by name, not faked"
+    },
+    {
+      "value": "0",
+      "label": "Runtime network — figures stay in the URL hash"
+    }
   ],
   "access": "public"
 }

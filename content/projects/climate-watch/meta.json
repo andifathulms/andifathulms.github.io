@@ -7,6 +7,7 @@
     "Data Platform",
     "Web App"
   ],
+  "problemShape": "data",
   "techStack": [
     "Django",
     "Next.js",
@@ -26,10 +27,22 @@
   "order": 14,
   "featured": false,
   "metrics": [
-    { "value": "75", "label": "Indonesian cities covered" },
-    { "value": "15", "label": "REST API endpoints built" },
-    { "value": "38 min → 44 sec", "label": "GitHub Pages deploy time" },
-    { "value": "45", "label": "Commits shipped in 4 weeks" }
+    {
+      "value": "75",
+      "label": "Indonesian cities covered"
+    },
+    {
+      "value": "15",
+      "label": "REST API endpoints built"
+    },
+    {
+      "value": "38 min → 44 sec",
+      "label": "GitHub Pages deploy time"
+    },
+    {
+      "value": "45",
+      "label": "Commits shipped in 4 weeks"
+    }
   ],
   "access": "public"
 }

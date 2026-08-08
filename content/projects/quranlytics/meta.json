@@ -7,6 +7,7 @@
     "Web App",
     "ML / AI"
   ],
+  "problemShape": "data",
   "techStack": [
     "Django",
     "Next.js",

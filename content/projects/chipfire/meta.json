@@ -7,6 +7,7 @@
     "Game",
     "Web App"
   ],
+  "problemShape": "game",
   "techStack": [
     "Next.js",
     "React",
@@ -25,10 +26,22 @@
   "order": 15,
   "featured": false,
   "metrics": [
-    { "value": "0", "label": "Backend servers — P2P over WebRTC" },
-    { "value": "~6,700", "label": "Lines of TypeScript, no game libraries" },
-    { "value": "70", "label": "Tests + a 3,000-game simulation" },
-    { "value": "<24 hrs", "label": "Spec-first, empty repo to deployed" }
+    {
+      "value": "0",
+      "label": "Backend servers — P2P over WebRTC"
+    },
+    {
+      "value": "~6,700",
+      "label": "Lines of TypeScript, no game libraries"
+    },
+    {
+      "value": "70",
+      "label": "Tests + a 3,000-game simulation"
+    },
+    {
+      "value": "<24 hrs",
+      "label": "Spec-first, empty repo to deployed"
+    }
   ],
   "access": "public"
 }

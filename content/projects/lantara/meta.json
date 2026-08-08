@@ -7,6 +7,7 @@
     "Platform",
     "Web App"
   ],
+  "problemShape": "workflow",
   "techStack": [
     "Django",
     "React",

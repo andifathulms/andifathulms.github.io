@@ -97,7 +97,20 @@
     "filter_independent": "Independent",
     "filter_live": "Live",
     "live_badge": "Live",
-    "count_label": "projects"
+    "count_label": "projects",
+    "axis_source": "By source",
+    "axis_shape": "By problem",
+    "shape_workflow": "Workflow systems",
+    "shape_data": "Data platforms",
+    "shape_explainer": "Interactive explainers",
+    "shape_tool": "Calculators & tools",
+    "shape_game": "Games",
+    "search_label": "Search projects",
+    "search_placeholder": "Search by name, stack, or tag…",
+    "search_clear": "Clear search",
+    "no_results": "No projects match that.",
+    "no_results_hint": "Try a technology (Django, Keycloak) or a tag (Government, Data Platform).",
+    "results_count": "{count} of {total} shown"
   },
   "case_study": {
     "role": "Role",

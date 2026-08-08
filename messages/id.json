@@ -97,7 +97,20 @@
     "filter_independent": "Mandiri",
     "filter_live": "Live",
     "live_badge": "Live",
-    "count_label": "proyek"
+    "count_label": "proyek",
+    "axis_source": "Berdasarkan sumber",
+    "axis_shape": "Berdasarkan masalah",
+    "shape_workflow": "Sistem alur kerja",
+    "shape_data": "Platform data",
+    "shape_explainer": "Penjelas interaktif",
+    "shape_tool": "Kalkulator & alat",
+    "shape_game": "Permainan",
+    "search_label": "Cari proyek",
+    "search_placeholder": "Cari nama, teknologi, atau tag…",
+    "search_clear": "Hapus pencarian",
+    "no_results": "Tidak ada proyek yang cocok.",
+    "no_results_hint": "Coba nama teknologi (Django, Keycloak) atau tag (Government, Data Platform).",
+    "results_count": "{count} dari {total} ditampilkan"
   },
   "case_study": {
     "role": "Peran",

@@ -7,6 +7,7 @@
     "Nutrition Tool",
     "Web App"
   ],
+  "problemShape": "tool",
   "techStack": [
     "Next.js",
     "React",
@@ -24,10 +25,22 @@
   "order": 26,
   "featured": false,
   "metrics": [
-    { "value": "40", "label": "Indonesian dishes, recipe shown & editable" },
-    { "value": "282", "label": "Tests — every number is auditable" },
-    { "value": "0", "label": "Runtime network requests" },
-    { "value": "29", "label": "Nutrients from USDA FoodData Central" }
+    {
+      "value": "40",
+      "label": "Indonesian dishes, recipe shown & editable"
+    },
+    {
+      "value": "282",
+      "label": "Tests — every number is auditable"
+    },
+    {
+      "value": "0",
+      "label": "Runtime network requests"
+    },
+    {
+      "value": "29",
+      "label": "Nutrients from USDA FoodData Central"
+    }
   ],
   "access": "public"
 }

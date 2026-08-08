@@ -1,11 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 
+import { PROBLEM_SHAPES, type ProblemShape } from './shapes';
+
+export { PROBLEM_SHAPES, type ProblemShape };
+
 export interface ProjectMeta {
   slug: string;
   title: string;
   tagline: string;
   categoryTags: string[];
+  problemShape?: ProblemShape;
   techStack: string[];
   status: 'active' | 'private' | 'placeholder' | 'archived';
   role?: string;
@@ -51,6 +56,40 @@ export function getPortfolioStats(): PortfolioStats {
     independent: projects.filter((p) => !isGov(p)).length,
     live: projects.filter((p) => p.liveUrl && !p.liveIsStaging).length,
   };
+}
+
+export interface StackUsage {
+  /** Technology name exactly as written in the project manifests. */
+  name: string;
+  /** How many shipped systems use it. */
+  count: number;
+}
+
+/**
+ * How often each technology actually appears across the portfolio. A logo says
+ * "I have heard of Keycloak"; a count says "seven systems depend on it" — and
+ * because it derives from the manifests, it can't drift from the case studies.
+ */
+export function getStackUsage(): StackUsage[] {
+  const counts = new Map<string, number>();
+  for (const p of getAllProjects().filter((p) => p.status !== 'placeholder')) {
+    for (const tech of p.techStack) counts.set(tech, (counts.get(tech) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
+
+/** Shipped-system count per problem shape, for the work index filter row. */
+export function getShapeCounts(): Record<ProblemShape, number> {
+  const counts = Object.fromEntries(PROBLEM_SHAPES.map((s) => [s, 0])) as Record<
+    ProblemShape,
+    number
+  >;
+  for (const p of getAllProjects().filter((p) => p.status !== 'placeholder')) {
+    if (p.problemShape) counts[p.problemShape] += 1;
+  }
+  return counts;
 }
 
 const PROJECTS_DIR = path.join(process.cwd(), 'content', 'projects');

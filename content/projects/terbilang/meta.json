@@ -7,6 +7,7 @@
     "Library",
     "Web App"
   ],
+  "problemShape": "tool",
   "techStack": [
     "TypeScript",
     "BigInt",
@@ -24,10 +25,22 @@
   "order": 23,
   "featured": false,
   "metrics": [
-    { "value": "1,000,001", "label": "Exhaustive round-trips every commit (~5s)" },
-    { "value": "0", "label": "Runtime dependencies in the library" },
-    { "value": "BigInt", "label": "End to end — correct past 2⁵³" },
-    { "value": "6", "label": "Typed refusals — refuse, never guess" }
+    {
+      "value": "1,000,001",
+      "label": "Exhaustive round-trips every commit (~5s)"
+    },
+    {
+      "value": "0",
+      "label": "Runtime dependencies in the library"
+    },
+    {
+      "value": "BigInt",
+      "label": "End to end — correct past 2⁵³"
+    },
+    {
+      "value": "6",
+      "label": "Typed refusals — refuse, never guess"
+    }
   ],
   "access": "public"
 }

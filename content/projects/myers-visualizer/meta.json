@@ -7,6 +7,7 @@
     "Developer Tool",
     "Web App"
   ],
+  "problemShape": "explainer",
   "techStack": [
     "Next.js",
     "React",
@@ -25,10 +26,22 @@
   "order": 19,
   "featured": false,
   "metrics": [
-    { "value": "4", "label": "Diff algorithms hand-written from the paper" },
-    { "value": "59.9 fps", "label": "300×300 lattice, rendered on canvas" },
-    { "value": "152", "label": "Tests, incl. a brute-force minimal-D oracle" },
-    { "value": "0", "label": "Diff libraries — the algorithm is the project" }
+    {
+      "value": "4",
+      "label": "Diff algorithms hand-written from the paper"
+    },
+    {
+      "value": "59.9 fps",
+      "label": "300×300 lattice, rendered on canvas"
+    },
+    {
+      "value": "152",
+      "label": "Tests, incl. a brute-force minimal-D oracle"
+    },
+    {
+      "value": "0",
+      "label": "Diff libraries — the algorithm is the project"
+    }
   ],
   "access": "public"
 }

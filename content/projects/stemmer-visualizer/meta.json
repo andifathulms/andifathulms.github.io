@@ -7,6 +7,7 @@
     "Language Tool",
     "Web App"
   ],
+  "problemShape": "explainer",
   "techStack": [
     "Next.js",
     "React",
@@ -24,10 +25,22 @@
   "order": 21,
   "featured": false,
   "metrics": [
-    { "value": "44", "label": "Stemming rules as cited data" },
-    { "value": "~30,000", "label": "Root-word dictionary, swappable live" },
-    { "value": "315", "label": "Words checked vs Sastrawi, divergences classified" },
-    { "value": "0", "label": "NLP libraries at runtime" }
+    {
+      "value": "44",
+      "label": "Stemming rules as cited data"
+    },
+    {
+      "value": "~30,000",
+      "label": "Root-word dictionary, swappable live"
+    },
+    {
+      "value": "315",
+      "label": "Words checked vs Sastrawi, divergences classified"
+    },
+    {
+      "value": "0",
+      "label": "NLP libraries at runtime"
+    }
   ],
   "access": "public"
 }

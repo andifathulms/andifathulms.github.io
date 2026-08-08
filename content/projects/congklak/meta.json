@@ -7,6 +7,7 @@
     "Game",
     "Web App"
   ],
+  "problemShape": "game",
   "techStack": [
     "Next.js",
     "React",
@@ -25,10 +26,22 @@
   "order": 18,
   "featured": false,
   "metrics": [
-    { "value": "3", "label": "Cited regional rulesets, 5 sources" },
-    { "value": "98", "label": "Seeds conserved after every event" },
-    { "value": "120", "label": "Tests + per-ruleset game simulation" },
-    { "value": "0", "label": "Backend — P2P over WebRTC" }
+    {
+      "value": "3",
+      "label": "Cited regional rulesets, 5 sources"
+    },
+    {
+      "value": "98",
+      "label": "Seeds conserved after every event"
+    },
+    {
+      "value": "120",
+      "label": "Tests + per-ruleset game simulation"
+    },
+    {
+      "value": "0",
+      "label": "Backend — P2P over WebRTC"
+    }
   ],
   "access": "public"
 }

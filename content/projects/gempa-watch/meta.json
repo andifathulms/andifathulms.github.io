@@ -7,6 +7,7 @@
     "Data Platform",
     "Web App"
   ],
+  "problemShape": "data",
   "techStack": [
     "Django",
     "PostGIS",
@@ -27,10 +28,22 @@
   "order": 16,
   "featured": false,
   "metrics": [
-    { "value": "69,641", "label": "Earthquake events, 1970–2026" },
-    { "value": "24", "label": "Regions risk-profiled" },
-    { "value": "39", "label": "Python≡TypeScript parity assertions" },
-    { "value": "51", "label": "Commits, solo over ~5 weeks" }
+    {
+      "value": "69,641",
+      "label": "Earthquake events, 1970–2026"
+    },
+    {
+      "value": "24",
+      "label": "Regions risk-profiled"
+    },
+    {
+      "value": "39",
+      "label": "Python≡TypeScript parity assertions"
+    },
+    {
+      "value": "51",
+      "label": "Commits, solo over ~5 weeks"
+    }
   ],
   "access": "public"
 }

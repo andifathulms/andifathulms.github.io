@@ -7,6 +7,7 @@
     "Language Tool",
     "Web App"
   ],
+  "problemShape": "tool",
   "techStack": [
     "Next.js",
     "React",
@@ -24,10 +25,22 @@
   "order": 17,
   "featured": false,
   "metrics": [
-    { "value": "1,323", "label": "Lexicon entries, each with provenance" },
-    { "value": "94%", "label": "Corpus rule agreement (up from 56%)" },
-    { "value": "281", "label": "Passing tests, no transliteration library" },
-    { "value": "7", "label": "Open questions recorded, not guessed" }
+    {
+      "value": "1,323",
+      "label": "Lexicon entries, each with provenance"
+    },
+    {
+      "value": "94%",
+      "label": "Corpus rule agreement (up from 56%)"
+    },
+    {
+      "value": "281",
+      "label": "Passing tests, no transliteration library"
+    },
+    {
+      "value": "7",
+      "label": "Open questions recorded, not guessed"
+    }
   ],
   "access": "public"
 }

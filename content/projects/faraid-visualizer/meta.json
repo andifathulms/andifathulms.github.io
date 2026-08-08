@@ -7,6 +7,7 @@
     "Web App",
     "Islamic Law"
   ],
+  "problemShape": "explainer",
   "techStack": [
     "Python",
     "Next.js",
@@ -26,10 +27,22 @@
   "order": 15.5,
   "featured": false,
   "metrics": [
-    { "value": "0", "label": "Third-party deps in the rule engine" },
-    { "value": "34", "label": "Rules mapped to cited sources" },
-    { "value": "61", "label": "Worked examples in the validation bank" },
-    { "value": "5", "label": "Rule sets — KHI + 4 classical madhab" }
+    {
+      "value": "0",
+      "label": "Third-party deps in the rule engine"
+    },
+    {
+      "value": "34",
+      "label": "Rules mapped to cited sources"
+    },
+    {
+      "value": "61",
+      "label": "Worked examples in the validation bank"
+    },
+    {
+      "value": "5",
+      "label": "Rule sets — KHI + 4 classical madhab"
+    }
   ],
   "access": "public"
 }

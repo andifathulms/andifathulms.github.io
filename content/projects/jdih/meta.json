@@ -7,6 +7,7 @@
     "Web App",
     "Internal Tool"
   ],
+  "problemShape": "workflow",
   "techStack": [
     "Django",
     "React",
@@ -29,10 +30,22 @@
   "order": 5,
   "featured": true,
   "metrics": [
-    { "value": "95", "label": "REST API endpoints, OpenAPI-documented" },
-    { "value": "37", "label": "Frontend routes, public + admin" },
-    { "value": "29", "label": "Tests guarding the external API" },
-    { "value": "210", "label": "Commits, two repos, solo-authored" }
+    {
+      "value": "95",
+      "label": "REST API endpoints, OpenAPI-documented"
+    },
+    {
+      "value": "37",
+      "label": "Frontend routes, public + admin"
+    },
+    {
+      "value": "29",
+      "label": "Tests guarding the external API"
+    },
+    {
+      "value": "210",
+      "label": "Commits, two repos, solo-authored"
+    }
   ],
   "access": "public"
 }

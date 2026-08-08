@@ -7,6 +7,7 @@
     "Developer Tool",
     "Web App"
   ],
+  "problemShape": "explainer",
   "techStack": [
     "Next.js",
     "React",
@@ -23,10 +24,22 @@
   "order": 20,
   "featured": false,
   "metrics": [
-    { "value": "17", "label": "Git commands, real content-addressed hashes" },
-    { "value": "9", "label": "Scenarios verified against the real git binary" },
-    { "value": "186", "label": "Tests, append-only store invariants" },
-    { "value": "~5 hrs", "label": "Git object model + oracle, one sitting" }
+    {
+      "value": "17",
+      "label": "Git commands, real content-addressed hashes"
+    },
+    {
+      "value": "9",
+      "label": "Scenarios verified against the real git binary"
+    },
+    {
+      "value": "186",
+      "label": "Tests, append-only store invariants"
+    },
+    {
+      "value": "~5 hrs",
+      "label": "Git object model + oracle, one sitting"
+    }
   ],
   "access": "public"
 }
