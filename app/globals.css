@@ -73,6 +73,17 @@
      namespace maps to inline-size, so a token named `block` would generate an
      `inline-block` width utility that overrides Tailwind's display one.
      ------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------
+     Measures. Three, each with a job, so container width is a reading
+     decision rather than a per-page guess:
+       page   — shells and card grids
+       doc    — document-like pages that mix prose with tabular data
+       prose  — running prose; ~80 characters at the body size
+     ------------------------------------------------------------------ */
+  --container-page: 64rem;        /* 1024px */
+  --container-doc: 48rem;         /*  768px */
+  --container-prose: 42rem;       /*  672px */
+
   --spacing-page-top: 7rem;       /* 112px — clears the 64px fixed header  */
   --spacing-hero-top: 8rem;       /* 128px — the home hero gets extra air  */
   --spacing-section: 6rem;        /*  96px */

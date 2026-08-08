@@ -29,7 +29,7 @@ export default async function WorkPage({
 
   return (
     <div className="pt-page-top pb-section px-gutter">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-page mx-auto">
         <div className="mb-16">
           <h1 className="font-heading text-h1 font-medium text-cream mb-4">
             {t('title')}

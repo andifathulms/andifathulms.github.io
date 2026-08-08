@@ -77,7 +77,7 @@ export default function StatBand({
 
   return (
     <section className="border-t border-line py-section-tight px-gutter">
-      <div className="max-w-5xl mx-auto">{grid}</div>
+      <div className="max-w-page mx-auto">{grid}</div>
     </section>
   );
 }

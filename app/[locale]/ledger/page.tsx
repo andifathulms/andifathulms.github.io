@@ -60,7 +60,7 @@ export default async function LedgerPage({
 
   return (
     <div className="pt-page-top pb-section px-gutter">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-doc mx-auto">
         <h1 className="font-heading text-h1 font-medium text-cream mb-4">{t('title')}</h1>
         <p className="text-lead text-text-muted mb-6">{t('subtitle')}</p>
         <p className="text-body text-text-muted">{t('intro')}</p>

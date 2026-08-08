@@ -8,7 +8,7 @@ export default function Hero({ stats }: { stats: PortfolioStats }) {
 
   return (
     <section className="pt-hero-top pb-section px-gutter">
-      <div className="max-w-5xl mx-auto grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 lg:items-start">
+      <div className="max-w-page mx-auto grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-16 lg:items-start">
         <div>
           <p className="anim-fade-up font-mono text-meta uppercase tracking-widest text-accent mb-5">
             {t('eyebrow')}

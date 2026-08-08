@@ -41,7 +41,7 @@ function ServicesSection({ stats }: { stats: PortfolioStats }) {
 
   return (
     <section className="reveal border-t border-line py-section-tight px-gutter">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-page mx-auto">
         <SectionHeading title={t('title')} subtitle={t('subtitle')} className="mb-stack" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
           {items.map((item) => (
@@ -66,7 +66,7 @@ function FeaturedWorkSection({ projects }: { projects: ReturnType<typeof getFeat
 
   return (
     <section className="reveal border-t border-line py-section px-gutter">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-page mx-auto">
         <div className="flex items-end justify-between mb-stack">
           <SectionHeading tone="primary" title={t('title')} subtitle={t('subtitle')} />
           <Link
@@ -104,7 +104,7 @@ function CtaSection() {
 
   return (
     <section className="reveal border-t border-line py-section px-gutter">
-      <div className="max-w-5xl mx-auto text-center">
+      <div className="max-w-page mx-auto text-center">
         <SectionHeading
           tone="primary"
           align="center"

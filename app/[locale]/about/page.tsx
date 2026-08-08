@@ -53,7 +53,7 @@ export default async function AboutPage({
 
   return (
     <div className="pt-page-top pb-section px-gutter">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-page mx-auto">
 
         {/* 1. Photo + name + role strip */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
@@ -123,13 +123,13 @@ export default async function AboutPage({
         </div>
 
         {/* Positioning statement */}
-        <figure className="max-w-3xl mb-16 border-l-2 border-edge-accent pl-6">
+        <figure className="max-w-doc mb-16 border-l-2 border-edge-accent pl-6">
           <blockquote className="font-heading text-h2 font-medium text-text-muted leading-snug">
             {t('pull_quote')}
           </blockquote>
         </figure>
 
-        <div className="max-w-2xl">
+        <div className="max-w-prose">
           {/* 2. Bio paragraphs */}
           <div className="space-y-6 text-text-muted leading-relaxed">
             <p>{t('bio_1')}</p>

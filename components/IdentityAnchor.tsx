@@ -34,7 +34,7 @@ export default function IdentityAnchor() {
 
   return (
     <section className="reveal border-t border-line py-section-tight px-gutter">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-page mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <PhotoOrFallback hasPhoto={hasPhoto} />
 

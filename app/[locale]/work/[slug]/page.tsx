@@ -127,7 +127,7 @@ export default async function CaseStudyPage({
             exactly where the screenshot's own headline sits. */}
         <div className="absolute inset-0 bg-navy/80" />
         <div className="absolute inset-0 flex flex-col justify-end px-gutter pb-10">
-          <div className="max-w-5xl mx-auto w-full">
+          <div className="max-w-page mx-auto w-full">
             {project.icon && (
               <Image
                 src={project.icon}
@@ -157,7 +157,7 @@ export default async function CaseStudyPage({
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-gutter">
+      <div className="max-w-page mx-auto px-gutter">
         {/* Back to work index + reading time */}
         <div className="mt-6 flex items-center justify-between gap-4">
           <Link
@@ -184,7 +184,7 @@ export default async function CaseStudyPage({
 
         {/* Body + sticky table of contents */}
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
-          <div className="prose-case-study max-w-2xl">
+          <div className="prose-case-study max-w-prose">
             <MDXRemote source={content} components={mdxComponents} />
           </div>
           {toc.length > 1 && (

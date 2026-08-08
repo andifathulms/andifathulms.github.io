@@ -9,7 +9,7 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-line mt-24">
-      <div className="max-w-5xl mx-auto px-gutter py-section-tight">
+      <div className="max-w-page mx-auto px-gutter py-section-tight">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
           {/* Left: tagline + copyright */}
           <div>

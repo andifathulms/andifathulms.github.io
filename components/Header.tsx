@@ -74,7 +74,7 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-line bg-navy/95 backdrop-blur-sm">
-      <div className="max-w-5xl mx-auto px-gutter h-16 flex items-center justify-between">
+      <div className="max-w-page mx-auto px-gutter h-16 flex items-center justify-between">
         <Link
           href="/"
           className="group flex items-center gap-2.5 font-heading text-lead font-medium text-cream transition-colors hover:text-gold"
