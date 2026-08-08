@@ -153,14 +153,14 @@
     "stack_title": "Tools I reach for",
     "connect_label": "Find me",
     "pull_quote": "I like systems that work — clearly scoped, well documented, and easy for the next person to extend.",
-    "stack_frontend": "Frontend",
-    "stack_backend": "Backend",
-    "stack_infra": "Data & Infrastructure",
     "selected_work_label": "Selected work",
     "view_all_work": "View all projects",
     "cta_title": "Let's work together",
     "cta_body": "If you have a project that needs clear thinking and solid execution — I'd like to hear about it.",
-    "cta_button": "Get in touch"
+    "cta_button": "Get in touch",
+    "stack_note": "Counted from the {total} shipped systems below, not from memory — every number links to the projects it came from.",
+    "stack_systems": "{count, plural, one {# system} other {# systems}}",
+    "stack_once_label": "Used once"
   },
   "contact": {
     "title": "Contact",

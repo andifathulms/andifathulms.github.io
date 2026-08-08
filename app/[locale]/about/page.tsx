@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import StackIcon from '@/components/StackIcon';
 import SocialLinks from '@/components/SocialLinks';
-import { getFeaturedProjects, getPortfolioStats } from '@/lib/content';
+import { getFeaturedProjects, getPortfolioStats, getStackUsage } from '@/lib/content';
 
 export async function generateMetadata({
   params,
@@ -42,11 +42,12 @@ export default async function AboutPage({
     { value: stats.live, label: ts('live') },
   ];
 
-  const stackGroups = [
-    { label: t('stack_frontend'), items: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS'] },
-    { label: t('stack_backend'), items: ['Django', 'Python', 'Node.js', 'Celery'] },
-    { label: t('stack_infra'), items: ['PostgreSQL', 'Redis', 'Docker'] },
-  ];
+  // Everything used more than once gets a counted row; the long tail of
+  // one-offs is listed plainly rather than dropped, so the section stays a
+  // complete account of the portfolio instead of a flattering excerpt.
+  const stackUsage = getStackUsage();
+  const stackUsed = stackUsage.filter((tech) => tech.count > 1);
+  const stackOnce = stackUsage.filter((tech) => tech.count === 1);
 
   return (
     <div className="pt-28 pb-24 px-6">
@@ -140,28 +141,43 @@ export default async function AboutPage({
             <p className="text-text-muted leading-relaxed">{t('availability')}</p>
           </div>
 
-          {/* 4. Tech stack — grouped by layer */}
+          {/* 4. Tech stack — counted from the manifests, not asserted.
+              A logo says "I have heard of Keycloak"; "7 systems" is a claim
+              you can click. The old hand-maintained list gave Node.js (1
+              project) the same weight as Django (16) and omitted Vitest (16)
+              entirely — exactly the drift counting removes. */}
           <div className="border-t border-line mt-14 pt-10">
-            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-6">
+            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
               {t('stack_title')}
             </p>
-            <div className="space-y-8">
-              {stackGroups.map((group) => (
-                <div key={group.label}>
-                  <p className="font-mono text-meta text-text-subtle mb-4">{group.label}</p>
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-x-4 gap-y-6">
-                    {group.items.map((tech) => (
-                      <div key={tech} className="flex flex-col items-center gap-2">
-                        <StackIcon name={tech} className="w-6 h-6 text-text-subtle" />
-                        <span className="font-mono text-meta text-text-subtle text-center leading-tight">
-                          {tech}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <p className="text-body text-text-muted mb-8 max-w-xl">
+              {t('stack_note', { total: stats.total })}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1">
+              {stackUsed.map((tech) => (
+                <Link
+                  key={tech.name}
+                  href={`/work?q=${encodeURIComponent(tech.name)}`}
+                  className="group flex items-center gap-3 border-b border-line py-2.5 transition-colors hover:border-line-strong"
+                >
+                  <StackIcon name={tech.name} className="w-5 h-5 flex-shrink-0 text-text-subtle transition-colors group-hover:text-gold" />
+                  <span className="font-mono text-meta text-text-muted transition-colors group-hover:text-cream">
+                    {tech.name}
+                  </span>
+                  <span className="ml-auto font-mono text-meta text-accent">
+                    {t('stack_systems', { count: tech.count })}
+                  </span>
+                </Link>
               ))}
             </div>
+
+            {stackOnce.length > 0 && (
+              <p className="mt-6 font-mono text-meta text-text-subtle leading-relaxed">
+                <span className="text-text-muted">{t('stack_once_label')}:</span>{' '}
+                {stackOnce.map((tech) => tech.name).join(' · ')}
+              </p>
+            )}
           </div>
 
           {/* 5. Selected work — connect the narrative to real projects */}

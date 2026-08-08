@@ -91,13 +91,16 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
     if (f && (SOURCES as string[]).includes(f)) setSource(f as Source);
     const s = params.get('shape');
     if (s && isProblemShape(s)) setShape(s);
+    const q = params.get('q');
+    if (q) setQuery(q);
   }, []);
 
   // Keep the URL shareable without a full navigation.
-  const syncUrl = (nextSource: Source, nextShape: ProblemShape | null) => {
+  const syncUrl = (nextSource: Source, nextShape: ProblemShape | null, nextQuery = query) => {
     const params = new URLSearchParams();
     if (nextSource !== 'all') params.set('filter', nextSource);
     if (nextShape) params.set('shape', nextShape);
+    if (nextQuery.trim()) params.set('q', nextQuery.trim());
     const qs = params.toString();
     window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''));
   };
@@ -113,6 +116,13 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
     const value = shape === next ? null : next;
     setShape(value);
     syncUrl(source, value);
+  };
+
+  // The About page's stack counts link straight into a search, so the query
+  // has to survive in the URL for "Keycloak — 7 systems" to be checkable.
+  const updateQuery = (next: string) => {
+    setQuery(next);
+    syncUrl(source, shape, next);
   };
 
   const visible = useMemo(
@@ -185,7 +195,7 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
               id="work-search"
               type="search"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => updateQuery(e.target.value)}
               placeholder={t('search_placeholder')}
               autoComplete="off"
               className="w-full rounded border border-cream/15 bg-navy px-3.5 py-2.5 pr-10 text-body text-cream placeholder:text-text-subtle transition-colors hover:border-cream/25 focus:border-gold/50 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
@@ -193,7 +203,7 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
             {query && (
               <button
                 type="button"
-                onClick={() => setQuery('')}
+                onClick={() => updateQuery('')}
                 aria-label={t('search_clear')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 font-mono text-meta text-text-subtle transition-colors hover:text-cream"
               >
