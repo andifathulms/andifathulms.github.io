@@ -1,0 +1,34 @@
+{
+  "slug": "tanggal-merah",
+  "title": "Tanggal Merah",
+  "tagline": "An Indonesian holiday planner that shows the year's public holidays and works out exactly where to spend annual leave for the longest stretches off — while making explicit the rule most people get wrong: whether cuti bersama is charged against your leave",
+  "categoryTags": [
+    "Personal Project",
+    "Calendar Tool",
+    "Web App"
+  ],
+  "problemShape": "tool",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Zod",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/tanggal-merah/id/",
+  "githubUrl": "https://github.com/andifathulms/tanggal-merah",
+  "heroImage": "/images/projects/tanggal-merah/hero.webp",
+  "order": 32,
+  "featured": false,
+  "metrics": [
+    { "value": "12 → 4", "label": "Leave left if your employer deducts cuti bersama" },
+    { "value": "Exact", "label": "Bridge optimiser, verified vs brute force" },
+    { "value": "134", "label": "Tests; refuses years with no published decree" },
+    { "value": "0", "label": "Date libraries — pure integer day math" }
+  ],
+  "access": "public"
+}

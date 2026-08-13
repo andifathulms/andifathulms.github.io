@@ -1,0 +1,31 @@
+# Tanggal Merah
+
+## The problem
+
+Indonesia publishes its public holidays each year via an SKB — a joint decree of three ministers — that sets two different kinds of day off: **libur nasional** (national holidays, free) and **cuti bersama** (collective leave days that are **charged against your 12-day annual leave entitlement** — but only for some people).
+
+The rule branches by employment status, and published reporting on it is contradictory: at least one outlet reversed the assignment entirely. For 2026 there are **8 cuti bersama days** against a 12-day entitlement, so a private-sector worker at a company that closes and deducts is left with **4 days**, while a colleague at a company that doesn't close keeps all 12. Most people discover this in November when they try to book a trip — and every other holiday calendar treats these as one undifferentiated "holiday" and never tells you what the days cost you. The second problem it solves: given a leave budget, which specific days do you buy? A single workday between a holiday and a weekend converts one leave day into a four-day stretch, and working that out by eye across twelve months is tedious and error-prone.
+
+## The approach
+
+### Holidays are decreed, not computed
+
+Idul Fitri, Nyepi, Waisak, and Imlek all have astronomical or calendrical determinations — but the *official* holiday is whatever the government's decree says, and the decree itself defers the Islamic dates to a separate Ministry of Religion ruling. So the app ships **transcribed decree data per year and computes no religious date anywhere.** A year with no published decree returns a *structured refusal* naming the gap, never an extrapolated calendar — because being confidently wrong about whether someone has a day off is the only failure mode that really matters here. Every holiday carries its citation (date, type, decree number, signing date) and the build rejects an uncited entry, a duplicate date, or a leftover placeholder.
+
+### Contradictions are recorded and priced, not silently resolved
+
+Where sources disagree on the cuti bersama rule, the app holds the competing readings with their sources — and a ledger page *prices* the rejected reading, stating what it would do to your entitlement if it were true. Employment status is a first-class input (ASN, private-with-deduction, private-without are three outcomes with each branch citing its instrument, not a boolean), and the sheet marks *which* cuti bersama days a deducting employer charged, with a test asserting the per-day marks sum to the ledger's total across every year, pattern, and status.
+
+### The optimiser is exact, not greedy
+
+The problem is small enough to solve properly: enumerate the gaps between fixed off-blocks, cost each in workdays, and select under budget with a DP — and a twenty-line **brute-force oracle** (never imported outside tests) was written *first*, so "optimal" is a claim rather than a hope. That oracle caught a real bug: the *longest single stretch* objective can't reuse the DP with `max` swapped in — that returns the right number and the wrong plan — so it needed a completely different algorithm, and each objective has its own oracle. There are no `Date` objects in the engine: days are integer day numbers, week position is arithmetic, and the year is always an explicit argument.
+
+### From "correct" to "comprehensible"
+
+The engine was finished and verified, then a long run of `pedagogy`/`design`/`a11y` work rebuilt the front end for a reader who has never heard of cuti bersama: a worked example with real dates before any control, citations moved onto the card that applies the rule, and each objective shown by what it *produces*. The honest lesson recorded for a client: the arithmetic being provably right did nothing for a reader who didn't know the rule existed. And the one thing blocking a fully "verified" claim is documented rather than papered over — the 2026 data pack is flagged `perluVerifikasi` (dates transcribed from the widely-circulated calendar but decree numbers not yet checked against source documents), so the site carries a banner rather than presenting a plausible fabrication as fact.
+
+## Outcome
+
+Live and public, bilingual, fully static, offline after first load. It ships the **year sheet** — twelve months laid out as an Indonesian wall calendar, national holidays in red and cuti bersama in amber (a different thing at a different cost), with runs of consecutive days off drawn as continuous bars, so toggling a leave day and watching two blocks snap into one stretch is the app's central moment; the four status cards on the landing page (three leave you 12 days, one leaves you 4); exact bridge suggestions with the leverage arithmetic exposed ("1 day → 4 days off"); a non-monotone marginal curve showing what the *n*th leave day actually buys; "holidays the weekend ate" for both five- and six-day weeks; and ICS + PNG export with full state in the URL hash.
+
+Built solo in a concentrated build — ~9,150 lines across engine, UI, and data, 134 tests, on **three runtime dependencies** and no date, calendar, or holiday library (Zod is build-time only — a commit explicitly moved it out of the browser bundle). It states plainly that it is a personal project, not employment-law advice, and that company policy governs cuti bersama in the private sector.
