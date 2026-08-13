@@ -1,0 +1,31 @@
+# Angklung Simulator
+
+## Masalahnya
+
+Setiap aplikasi angklung di internet adalah soundboard: ketuk gambar bambu, dengar nada. Itu mereproduksi suaranya dan melewatkan instrumennya. Angklung sungguhan bersifat **terdistribusi** — tiap pemain memegang satu atau dua nada dan menghabiskan sebagian besar pertunjukan *menunggu* momennya, mengamati konduktor memberi isyarat angka dengan tangan. Koordinasi itulah instrumennya, dan tak ada di web yang menyimulasikannya.
+
+Dua celah sekunder: tekniknya diajarkan sebagai tiga suara — *kurulung* (goyang), *centok* (tarik tajam), *tengkep* (goyang dengan satu tabung ditahan) — padahal sebenarnya tiga cara menggetarkan resonator yang sama, dan tiga berkas audio tak akan mengajarkan apa pun soal mengapa mereka berbeda. Dan **tengkep pada angklung akompanimen adalah sakelar kualitas akor**: empat tabung membunyikan dominan septim; jari kelingking pemain menahan satu dan ia menjadi trinada mayor. Itu fakta paling menarik tentang desain instrumen, dan tak ada simulator yang memodelkannya.
+
+## Pendekatannya
+
+### Tabung bambu adalah bank mode resonansi, bukan rekaman
+
+Tiap mode adalah resonator dua-kutub yang respons impulsnya adalah sinusoid meluruh — yang secara fisik dilakukan mode yang dipukul. Tabung tertutup di simpul dan terbuka di sayatan, jadi ia berperilaku sebagai pipa terhenti: partial ganjil dominan dan tak ada yang kuat pada dua kali fundamental. **Ketiadaan itulah yang membuat tengkep bisa dibuktikan** — fundamental tabung oktaf adalah satu-satunya hal pada 2f, jadi menghilangkan tabung menghilangkan partial itu sepenuhnya. Teknik hidup seluruhnya di eksitasi, tak pernah di resonator: centok satu impuls keras; kurulung adalah untai pukulan (goyang 2–3 Hz dengan sedikit jitter berbenih agar terdengar hidup, bukan seperti tremolo mesin); tengkep memakai untai yang *sama* dan hanya berbeda pada resonator mana yang dijumlahkan. Menambah teknik berarti menambah pola, bukan cabang.
+
+### Suaranya diukur, bukan dinilai dengan telinga
+
+Inti sintesis adalah fungsi murni — `(params) → Float32Array`, tanpa Web Audio, tanpa DOM, tanpa clock — yang me-render **offline di Node**, keputusan yang menjadi tumpuan seluruh proyek: pitch ditegaskan oleh FFT dalam toleransi sen, tengkep ditegaskan dua arah (partial absen saat ditahan, hadir saat tidak), centok ditegaskan sebagai tepat satu onset, dan benih yang sama me-render identik byte-per-byte. Dan yang Anda *dengar* adalah buffer yang diukur tes — lapisan Web Audio memutar array yang di-render alih-alih mengimplementasikan ulang model di node osilator, jadi tak ada dua instrumen dengan hanya satu yang teruji. Penjadwalan absolut terhadap clock audio (`startTime + eventTime`, tak pernah diakumulasi), jadi tak ada yang melenceng seberapa lama pun karya berjalan.
+
+### Ensemble itulah produknya, dan ketidaklayakan diberi nama
+
+Distribusi adalah masalah kendala kecil yang melaporkan kegagalan alih-alih menyembunyikannya: tiap nada butuh pemain yang memegang angklung itu dan bebas pada saat itu, dan ketidaklayakan kembali sebagai union terdiskriminasi bernama — *nada di luar set*, *satu pemain dibutuhkan dua kali sekaligus*, *pemain kurang* — dengan indeks nada yang melanggar terlampir, plus *saat puncak* karya sehingga ukuran ensemble minimum menjadi angka yang bisa diperiksa. Ia tak pernah memotong aransemen agar muat, dan diverifikasi terhadap oracle brute-force.
+
+### Materi budaya ditangani dengan caveat yang dinyatakan
+
+Padaeng (tuning diatonik-kromatik 1938), salendro, dan pelog degung dikirim sebagai set interval JSON yang bisa disunting, masing-masing dengan sumber dan **field caveat yang wajib** yang menyatakan di mana angkanya berhenti terverifikasi — angka salendro dan pelog adalah model struktural, bukan pengukuran — dan validator data menolak membangun jika sebuah caveat hilang. Daeng Soetigna dan Udjo Ngalagena dikreditkan di halaman, bukan di catatan kaki.
+
+## Hasil
+
+Live dan publik, dwibahasa, sepenuhnya statis dengan **nol berkas audio** (penjaga postbuild menggagalkan build jika satu muncul). Ia menyajikan rak (angklung bertingkat menurut pitch, mengayun pada laju goyang yang *sama* yang menggerakkan audio, pemilih teknik plus tekan-tahan); **tampilan ensemble** — muat melodi, pilih set dan jumlah pemain, lihat siapa memegang apa dan kapan mereka masuk, dengan istirahat digambar sebagai ruang karena bagi pemain angklung menunggu itulah tugasnya; pemecah distribusi dengan ketidaklayakan bernama; **laboratorium teknik** yang memaparkan untai pukulan yang memberi makan bank resonator; sakelar akor akompanimen ditampilkan sebagai tabung; perbandingan laras dengan sen yang bisa disunting dan kutipan di layar; jalur konduktor; dan halaman diagnostik di perangkat.
+
+Dibangun sendiri dalam satu build ~37 jam — ~13.100 baris TS/TSX/JSON, 132 tes, di atas **tiga dependensi runtime** dan tanpa pustaka audio, sintesis, atau DSP. Ia jujur tentang dua celah terbuka: startup audio belum diuji di iPhone sungguhan, dan timbre — yang terbukti *benar* dalam pitch, partial, dan identitas akor — belum dinilai terhadap angklung sungguhan dengan telinga.

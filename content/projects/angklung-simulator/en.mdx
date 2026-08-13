@@ -1,0 +1,31 @@
+# Angklung Simulator
+
+## The problem
+
+Every angklung app online is a soundboard: tap a picture of bamboo, hear a note. That reproduces the sound and misses the instrument. A real angklung is **distributed** — each player holds one or two notes and spends most of a performance *waiting* for their moment, watching a conductor signal numbers by hand. The coordination *is* the instrument, and nothing on the web simulates it.
+
+Two secondary gaps: the techniques are taught as three sounds — *kurulung* (shake), *centok* (sharp pull), *tengkep* (shake with one tube held) — when they're actually three ways of exciting the same resonator, and three audio files would teach nothing about why they differ. And **tengkep on an accompaniment angklung is a chord-quality switch**: four tubes sound a dominant seventh; the player's little finger holds one and it becomes a major triad. It's the most interesting fact about the instrument's design, and no simulator models it.
+
+## The approach
+
+### A bamboo tube is a bank of resonant modes, not a recording
+
+Each mode is a two-pole resonator whose impulse response is a decaying sinusoid — what a struck mode physically does. A tube is closed at the node and open at the cut, so it behaves as a stopped pipe: odd partials dominate and there's nothing strong at twice the fundamental. **That absence is what makes tengkep provable** — the octave tube's fundamental is the only thing at 2f, so removing the tube removes the partial outright. Technique lives entirely in the excitation, never in the resonator: centok is one hard impulse; kurulung is a strike train (a 2–3 Hz shake with small seeded jitter so it sounds alive, not like a machine tremolo); tengkep uses the *same* train and differs only in which resonators get summed. Adding a technique means adding a pattern, not a branch.
+
+### The sound is measured, not judged by ear
+
+The synthesis core is a pure function — `(params) → Float32Array`, no Web Audio, no DOM, no clock — that renders **offline in Node**, which is the decision the rest of the project rests on: pitch is asserted by FFT within a cents tolerance, tengkep is asserted in both directions (partial absent when held, present when not), centok is asserted as exactly one onset, and the same seed renders byte-identically. And what you *hear* is the buffer the tests measured — the Web Audio layer plays back the rendered array rather than re-implementing the model in oscillator nodes, so there aren't two instruments with only one of them tested. Scheduling is absolute against the audio clock (`startTime + eventTime`, never accumulated), so nothing drifts however long the piece runs.
+
+### The ensemble is the product, and infeasibility is named
+
+Distribution is a small constraint problem that reports failure instead of hiding it: every note needs a player who holds that angklung and is free at that instant, and infeasibility comes back as a named discriminated union — *note outside the set*, *one player needed twice at once*, *not enough players* — with the offending note indexes attached, plus the piece's *peak instant* so the minimum ensemble size is a checkable number. It never truncates an arrangement to make it fit, and it's verified against a brute-force oracle.
+
+### Cultural material handled with declared caveats
+
+Padaeng (the 1938 diatonic-chromatic tuning), salendro, and pelog degung ship as editable JSON interval sets, each with a source and a **required caveat field** stating where the figure stops being verified — the salendro and pelog numbers are structural models, not measurements — and the data validator refuses to build if a caveat is missing. Daeng Soetigna and Udjo Ngalagena are credited on the page, not in a footnote.
+
+## Outcome
+
+Live and public, bilingual, fully static with **zero audio files** (a postbuild guard fails the build if one appears). It ships the rack (angklung graduated by pitch, swaying at the *same* shake rate that drives the audio, technique selector plus press-and-hold); the **ensemble view** — load a melody, choose a set and a player count, see who holds what and when they come in, with rests drawn as space because for an angklung player the waiting is the job; the distribution solver with named infeasibility; a **technique lab** exposing the strike train feeding the resonator bank; the accompaniment chord switch shown as tubes; a laras comparison with editable cents and citations on screen; a conductor lane; and an on-device diagnostics page.
+
+Built solo in one ~37-hour build — ~13,100 lines of TS/TSX/JSON, 132 tests, on **three runtime dependencies** and no audio, synthesis, or DSP library. It's honest about two open gaps: audio startup hasn't been tested on a real iPhone, and the timbre — provably *correct* in pitch, partials, and chord identity — hasn't yet been judged against a real angklung by ear.

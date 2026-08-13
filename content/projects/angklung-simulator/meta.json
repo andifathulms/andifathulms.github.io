@@ -1,0 +1,34 @@
+{
+  "slug": "angklung-simulator",
+  "title": "Angklung Simulator",
+  "tagline": "A browser angklung that models the instrument's real constraint — one angklung plays exactly one note, so a song has to be shared across a room of people — with every sound computed from a physical model of a bamboo tube, not played back from a recording",
+  "categoryTags": [
+    "Personal Project",
+    "Music & Audio",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Web Audio API",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/angklung-simulator/id/",
+  "githubUrl": "https://github.com/andifathulms/angklung-simulator",
+  "heroImage": "/images/projects/angklung-simulator/hero.webp",
+  "order": 31,
+  "featured": false,
+  "metrics": [
+    { "value": "0", "label": "Sampled audio — every note synthesised" },
+    { "value": "3", "label": "Techniques from one resonator model" },
+    { "value": "132", "label": "Tests — pitch/partials/onsets measured" },
+    { "value": "3", "label": "Runtime deps, no audio or DSP library" }
+  ],
+  "access": "public"
+}
