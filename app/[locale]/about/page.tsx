@@ -173,7 +173,7 @@ export default async function AboutPage({
                   <span className="font-mono text-meta text-text-muted transition-colors group-hover:text-cream">
                     {tech.name}
                   </span>
-                  <span className="ml-auto font-mono text-meta text-accent">
+                  <span className="ml-auto font-mono text-meta text-text-subtle">
                     {t('stack_systems', { count: tech.count })}
                   </span>
                 </Link>

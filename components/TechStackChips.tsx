@@ -25,10 +25,13 @@ export default function TechStackChips({
   const visible = stack.slice(0, maxVisible);
   const overflow = stack.length - maxVisible;
 
+  // Gold is reserved for the one thing that's actively primary on a screen
+  // (DESIGN.md's One Voice Rule) — a tech-stack chip is metadata, not a call
+  // to action, so it rests at the muted tone and only brightens on hover.
   const chipClass =
     size === 'sm'
-      ? 'font-mono text-meta px-2 py-0.5 border border-line text-accent rounded'
-      : 'font-mono text-sm px-2.5 py-1 border border-line text-accent rounded';
+      ? 'font-mono text-meta px-2 py-0.5 border border-line text-text-muted rounded'
+      : 'font-mono text-sm px-2.5 py-1 border border-line text-text-muted rounded';
 
   return (
     <div className="flex flex-wrap gap-1.5">

@@ -39,8 +39,10 @@ export default function StatBand({
           href={item.filter === 'all' ? '/work' : `/work?filter=${item.filter}`}
           className="group block"
         >
+          {/* Cream, not gold — the number itself is the credibility signal;
+              gold stays reserved for the CTA and the arrow-reveal below. */}
           <span
-            className={`block font-heading font-medium text-gold leading-none ${
+            className={`block font-heading font-medium text-cream leading-none ${
               hero ? 'text-h2 mb-1.5' : 'text-stat mb-2.5'
             }`}
           >
