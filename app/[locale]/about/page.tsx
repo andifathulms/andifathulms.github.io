@@ -54,6 +54,14 @@ export default async function AboutPage({
   const stackUsed = stackUsage.filter((tech) => tech.count > 1);
   const stackOnce = stackUsage.filter((tech) => tech.count === 1);
 
+  // Already sorted by count (getStackUsage), so the first 8 rows carry the
+  // argument on their own; the rest stays available, just not first-paint
+  // weight, in front of "Selected work" — the section that should be the
+  // emotional high point before the CTA.
+  const STACK_VISIBLE = 8;
+  const stackTop = stackUsed.slice(0, STACK_VISIBLE);
+  const stackRest = stackUsed.slice(STACK_VISIBLE);
+
   return (
     <div className="pt-page-top pb-section px-gutter">
       <div className="max-w-page mx-auto">
@@ -116,7 +124,7 @@ export default async function AboutPage({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {statItems.map((s) => (
               <div key={s.label}>
-                <p className="font-heading text-stat font-medium text-gold leading-none mb-1.5">
+                <p className="font-heading text-stat font-medium text-cream leading-none mb-1.5">
                   {s.value}
                 </p>
                 <p className="text-meta text-text-subtle leading-snug">{s.label}</p>
@@ -163,7 +171,7 @@ export default async function AboutPage({
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1">
-              {stackUsed.map((tech) => (
+              {stackTop.map((tech) => (
                 <Link
                   key={tech.name}
                   href={`/work?q=${encodeURIComponent(tech.name)}`}
@@ -179,6 +187,31 @@ export default async function AboutPage({
                 </Link>
               ))}
             </div>
+
+            {stackRest.length > 0 && (
+              <details className="mt-1 group/details">
+                <summary className="cursor-pointer list-none font-mono text-meta text-accent uppercase tracking-wider pt-3 pb-1 [&::-webkit-details-marker]:hidden">
+                  {t('stack_show_more', { count: stackRest.length })}
+                </summary>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1 mt-2">
+                  {stackRest.map((tech) => (
+                    <Link
+                      key={tech.name}
+                      href={`/work?q=${encodeURIComponent(tech.name)}`}
+                      className="group flex items-center gap-3 border-b border-line py-2.5 transition-colors hover:border-line-strong"
+                    >
+                      <StackIcon name={tech.name} className="w-5 h-5 flex-shrink-0 text-text-subtle transition-colors group-hover:text-gold" />
+                      <span className="font-mono text-meta text-text-muted transition-colors group-hover:text-cream">
+                        {tech.name}
+                      </span>
+                      <span className="ml-auto font-mono text-meta text-text-subtle">
+                        {t('stack_systems', { count: tech.count })}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </details>
+            )}
 
             {stackOnce.length > 0 && (
               <p className="mt-6 font-mono text-meta text-text-subtle leading-relaxed">
@@ -202,9 +235,13 @@ export default async function AboutPage({
                     className="group min-h-touch inline-flex items-center gap-1.5 rounded border border-edge px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
                   >
                     {project.title}
+                    {/* The canonical arrow-reveal: hidden and offset at rest,
+                        sliding in on hover — the same gesture used on
+                        project/service cards and stat labels, not a variant
+                        of it. */}
                     <span
                       aria-hidden="true"
-                      className="text-gold opacity-50 transition-opacity group-hover:opacity-100"
+                      className="text-gold opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 motion-reduce:transition-none motion-reduce:translate-x-0"
                     >
                       →
                     </span>

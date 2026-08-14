@@ -163,7 +163,7 @@
     "location_label": "Lokasi",
     "location_value": "Nusantara, Indonesia",
     "availability_label": "Ketersediaan",
-    "availability": "Di luar pekerjaan pemerintahan, sesekali saya mengerjakan proyek freelance — aplikasi web dan tools internal untuk tim yang membutuhkan pemikiran jernih dan eksekusi solid.",
+    "availability": "Terbuka untuk proyek freelance tertentu di luar pekerjaan pemerintahan saya.",
     "stack_title": "Tools yang saya gunakan",
     "connect_label": "Temukan saya",
     "pull_quote": "Saya suka sistem yang berfungsi — scope jelas, terdokumentasi, dan mudah dikembangkan orang berikutnya.",
@@ -174,6 +174,7 @@
     "cta_button": "Mulai proyek",
     "stack_note": "Dihitung dari {total} sistem yang sudah dikirim, bukan dari ingatan — setiap angka tertaut ke proyek asalnya.",
     "stack_systems": "{count, plural, other {# sistem}}",
+    "stack_show_more": "Tampilkan {count} tools lainnya",
     "stack_once_label": "Dipakai sekali"
   },
   "contact": {

@@ -157,13 +157,13 @@
     "bio_3": "Outside work, I build web applications and tools as independent projects — driven by curiosity and the desire to ship things end-to-end. These projects let me explore different problem spaces and keep my skills sharp across the full stack.",
     "bio_4": "The throughline: I like systems that work. Clear scope, solid documentation, and code that someone else (or future-me) can understand and extend.",
     "role_label": "Role",
-    "role_value": "ASN — Otorita IKN",
+    "role_value": "Civil Servant (ASN), Otorita IKN",
     "directorate_label": "Directorate",
     "directorate_value": "Data and Artificial Intelligence",
     "location_label": "Location",
     "location_value": "Nusantara, Indonesia",
     "availability_label": "Availability",
-    "availability": "Outside my government work, I occasionally take on freelance projects — web applications and internal tools for teams that need clear thinking and solid execution.",
+    "availability": "Open to select freelance projects outside my government work.",
     "stack_title": "Tools I reach for",
     "connect_label": "Find me",
     "pull_quote": "I like systems that work — clearly scoped, well documented, and easy for the next person to extend.",
@@ -174,6 +174,7 @@
     "cta_button": "Start a project",
     "stack_note": "Counted from the {total} shipped systems below, not from memory — every number links to the projects it came from.",
     "stack_systems": "{count, plural, one {# system} other {# systems}}",
+    "stack_show_more": "Show {count, plural, one {# more tool} other {# more tools}}",
     "stack_once_label": "Used once"
   },
   "contact": {
