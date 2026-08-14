@@ -1,0 +1,35 @@
+{
+  "slug": "nusantara-languages",
+  "title": "Nusantara Languages",
+  "tagline": "An interactive map of Indonesia's 726 languages, coloured by family, with a genealogical tree wired to the map — hover a branch and every territory in that group lights up, and the other way around",
+  "categoryTags": [
+    "Personal Project",
+    "Data Platform",
+    "Web App"
+  ],
+  "problemShape": "data",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Zod",
+    "SVG",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/nusantara-languages/en/",
+  "githubUrl": "https://github.com/andifathulms/nusantara-languages",
+  "heroImage": "/images/projects/nusantara-languages/hero.webp",
+  "order": 33,
+  "featured": false,
+  "metrics": [
+    { "value": "726", "label": "Languages across 56 families, map ↔ tree bound" },
+    { "value": "58%", "label": "Real speaker polygons — the rest shown honestly as points" },
+    { "value": "0", "label": "Mapping/Newick libraries — hand-built" },
+    { "value": "Refused", "label": "A CC-BY-NC source, rather than misuse it" }
+  ],
+  "access": "public"
+}

@@ -1,0 +1,31 @@
+# Nusantara Languages
+
+## Masalahnya
+
+Indonesia punya salah satu wilayah terpadat secara linguistik di Bumi — lebih dari 700 bahasa — tetapi *struktur* keberagaman itu pada dasarnya tak terlihat bagi audiens umum: bahasa mana berkerabat, dan bagaimana rumpun-rumpunnya menyebar di nusantara. Peta bahasa ada; pohon keluarga ada; tak ada yang menautkan keduanya menjadi satu objek yang bisa dijelajahi. Itulah celahnya — dan itu nyata serta kasatmata, seperti jahitan tempat rumpun Austronesia dan Papua bertemu, membentang lurus melewati Halmahera.
+
+Ini proyek pribadi sumber-terbuka, secara eksplisit *bukan* produk resmi pemerintah "Peta Bahasa" — kemiripannya akan menyesatkan, jadi ia tak memakai nama atau brand itu.
+
+## Pendekatannya
+
+### Tautan itulah produknya
+
+Peta dan pohon genealogis terikat *dua arah* di atas satu model data: hover sebuah cabang pohon dan setiap wilayah yang cocok menjadi jenuh di peta; klik sebuah wilayah dan pohon menggulir ke sana dan membuka leluhurnya. Ini bukan dua fitur yang disinkronkan dengan tangan — melainkan dua arah baca atas struktur yang sama. Segala hal genealogis (`lib/tree`) dan geometris (`lib/geo`) adalah fungsi murni sehingga logika tersulit — penelusuran pohon, penyederhanaan poligon, hit-testing hover — bisa diuji unit di Node biasa.
+
+### Dibangun dari nol, statis, dan diukur lebih dulu
+
+Tanpa pustaka pemetaan dengan dependensi tile dan tanpa parser Newick — parser pohon dan plate SVG itulah proyeknya. Seluruh dataset dikirim sebagai bundle JSON yang sudah dibangun (pipeline saat build mengambil sumber sedunia, menyaring ke Indonesia, menyederhanakan poligon, dan memancarkan bundle beserta laporan cakupan; dump mentah tak pernah di-commit), jadi ada **nol permintaan jaringan saat runtime.** Anggaran render diukur di M0, sebelum penataan apa pun — 19.570 titik terhadap anggaran 60.000, latensi hover ~0,01 ms terhadap 2 ms — jadi jalur SVG yang lebih sederhana dipertahankan alih-alih turun ke canvas.
+
+### Gerbang lisensi yang memblokir build — dan mengubah era peta
+
+Rencananya memakai poligon atlas 1980-an Wurm & Hattori — dibingkai di spek sebagai "hal yang membuatnya indah." Di tahap gerbang lisensi, dataset itu ternyata CC-BY-NC (non-komersial), secara hukum tak kompatibel dengan CC-BY-SA yang menjadi lisensi bundle turunan. Alih-alih diam-diam memakainya, proyek **menolak sumber itu sepenuhnya** (dicatat di manifes sebagai `decision: 'refused'`, dengan alasannya diterbitkan di halaman metode) dan menggantinya dengan dua dataset CC-BY — menggeser premis peta dari "atlas awal-1980-an" menjadi "sumber 1990–2020." Ethnologue dilarang kategoris, termasuk untuk hal menggoda seperti jumlah penutur, dan sebuah *tes* lisensi menegaskan tak ada field turunan-Ethnologue di bundle yang dikirim: di mana sebuah angka hanya tersedia di sana, field-nya dihilangkan dan penghilangannya dinyatakan.
+
+### Titik tetap titik, dan warna membawa makna
+
+Dari 726 bahasa, 421 (58%) punya poligon wilayah penutur yang terpetakan; sisanya 305 di-render sebagai titik berlabel, dibedakan secara visual alih-alih ditutupi dengan convex hull — dan angka 58% itu *dihasilkan pipeline dari bundle aktual*, jadi tak bisa melenceng. Garis pantai bersumber dari Natural Earth, tak pernah dijiplak dari wilayah bahasa (yang akan mengulang kesalahan "titik digelembungkan menjadi wilayah" yang sama). Warna rumpun diberikan stabil dari set OKLCH terkurasi yang diskor terhadap tiga defisiensi penglihatan-warna — pasangan yang membingungkan turun dari 15 ke 0 pada penglihatan normal — dengan saturasi dicadangkan untuk pilihan saat ini dan tingkat keterancaman ditampilkan sebagai arsiran, tak pernah hue yang bersaing.
+
+## Hasil
+
+Live dan publik, dwibahasa, sepenuhnya statis dan offline. Di luar tautan inti peta↔pohon, ia membaca tautan itu *terbalik* dengan tiga cara — kerabat genealogis terdekat di peta, seberapa jauh wilayah sebuah rumpun sebenarnya membentang (Austronesia ~5.010 km; Timor-Alor-Pantar ~350 km), dan bahasa mana dari rumpun berbeda yang saling bersentuhan fisik (67 pasangan bersentuhan lewat pemeriksaan adjacency segmen-ke-segmen) — dan setiap satunya mencetak aturan dan batasnya *di samping* angkanya alih-alih menyembunyikannya di tooltip. Ditambah pembacaan warna dua-tingkat (rumpun vs subgrup), tampilan terpandu untuk jahitan seperti kontak Austronesia–Papua, ekspor PNG dengan atribusi tertanam di gambar (diwajibkan CC-BY-SA), dan lolosan aksesibilitas yang membawa pohon dari 1.716 tab stop menjadi satu lewat `role="tree"` roving-tabindex yang benar.
+
+Dibangun sendiri dalam build tiga hari yang padat — ~15.100 baris TS/TSX, 25 berkas tes, di atas daftar dependensi yang sengaja minimal dan tanpa pustaka pemetaan, Newick, atau topologi. Ia menyatakan dengan lugas bahwa batas antar bahasa adalah gradien bukan garis, dan berapa banyak bahasa yang punya wilayah versus titik.
