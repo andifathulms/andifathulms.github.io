@@ -1,6 +1,5 @@
 import { useTranslations } from 'next-intl';
 import type { ProjectMeta } from '@/lib/content';
-import TechStackChips from './TechStackChips';
 
 interface QuickFactsStripProps {
   project: ProjectMeta;
@@ -17,7 +16,12 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
 
   return (
     <div className="border-y border-line py-6 my-10">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {/* Role + timeframe only — the stack used to repeat here and again,
+          linked, in the full tech-stack section near the Outcome. Same
+          information twice with no connection to the project's own claims
+          about its dependencies; the linked listing near Outcome is the one
+          that survives. */}
+      <div className="grid grid-cols-2 gap-6">
         {/* Role */}
         {project.role && (
           <div>
@@ -37,14 +41,6 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
             <p className="font-mono text-sm text-cream">{project.timeframe}</p>
           </div>
         )}
-
-        {/* Stack */}
-        <div className="col-span-2">
-          <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
-            {t('stack')}
-          </p>
-          <TechStackChips stack={project.techStack} maxVisible={6} size="md" />
-        </div>
       </div>
 
       {/* Action links or private badge */}

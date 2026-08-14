@@ -134,7 +134,7 @@ export default async function CaseStudyPage({
                 aria-hidden="true"
                 width={56}
                 height={56}
-                className="mb-4 h-12 w-12 md:h-14 md:w-14 rounded-xl border border-edge object-cover"
+                className="mb-4 h-12 w-12 md:h-14 md:w-14 rounded-lg border border-edge object-cover"
               />
             )}
             {/* Category tags */}
@@ -176,9 +176,32 @@ export default async function CaseStudyPage({
             forwards this case study to a decision-maker. */}
         <QuickFactsStrip project={project} action={<PrintButton label={ta('print')} />} />
 
-        {/* Outcomes — only renders when meta.json declares metrics */}
-        {project.metrics && project.metrics.length > 0 && (
-          <MetricsStrip metrics={project.metrics} label={t('results_label')} />
+        {/* Collapsed table of contents below the desktop breakpoint — the
+            sticky sidebar version disappears entirely under lg:, leaving a
+            multi-heading read with zero wayfinding on exactly the viewport
+            most likely to receive this page (forwarded via the print/share
+            action above). No scroll-spy needed here: it's a one-time jump
+            list, not a persistent sidebar. */}
+        {toc.length > 1 && (
+          <details className="lg:hidden mb-8 border border-edge rounded px-4 py-3">
+            <summary className="font-mono text-meta text-accent uppercase tracking-wider cursor-pointer">
+              {t('on_this_page')}
+            </summary>
+            <ul className="mt-3 border-l border-line">
+              {toc.map((item) => (
+                <li key={item.slug}>
+                  <a
+                    href={`#${item.slug}`}
+                    className={`-ml-px block border-l border-transparent py-1 text-sm text-text-muted hover:text-cream transition-colors ${
+                      item.level === 3 ? 'pl-6' : 'pl-3'
+                    }`}
+                  >
+                    {item.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
 
         {/* Body + sticky table of contents */}
@@ -194,6 +217,14 @@ export default async function CaseStudyPage({
             </aside>
           )}
         </div>
+
+        {/* Outcomes — only renders when meta.json declares metrics. Placed
+            after the prose rather than before it: the numbers ("12 → 4")
+            were unreadable without the vocabulary the write-up itself
+            establishes, so the payoff now lands once the reader has it. */}
+        {project.metrics && project.metrics.length > 0 && (
+          <MetricsStrip metrics={project.metrics} label={t('results_label')} />
+        )}
 
         {/* Screenshots gallery */}
         {screenshots.length > 0 && (
@@ -240,7 +271,7 @@ export default async function CaseStudyPage({
                       aria-hidden="true"
                       width={24}
                       height={24}
-                      className="h-6 w-6 rounded-md border border-edge object-cover"
+                      className="h-6 w-6 rounded-lg border border-edge object-cover"
                     />
                   )}
                   {prev.title}
@@ -263,7 +294,7 @@ export default async function CaseStudyPage({
                       aria-hidden="true"
                       width={24}
                       height={24}
-                      className="h-6 w-6 rounded-md border border-edge object-cover"
+                      className="h-6 w-6 rounded-lg border border-edge object-cover"
                     />
                   )}
                   {next.title}
