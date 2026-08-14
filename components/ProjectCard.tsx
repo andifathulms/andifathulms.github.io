@@ -36,7 +36,9 @@ export default function ProjectCard({
         {/* Live indicator — signals a reachable deployed site (matches the Live
             filter: production only, not staging). */}
         {project.liveUrl && !project.liveIsStaging && (
-          <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 rounded-full border border-line bg-navy/80 px-2.5 py-1 font-mono text-meta text-gold backdrop-blur-sm">
+          // Opaque, not translucent — a blurred glass badge is the exact
+          // generic-SaaS pattern DESIGN.md names as an anti-reference.
+          <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1.5 rounded-full border border-line bg-navy px-2.5 py-1 font-mono text-meta text-gold">
             <span className="h-1.5 w-1.5 rounded-full bg-gold" />
             {liveBadgeLabel}
           </span>

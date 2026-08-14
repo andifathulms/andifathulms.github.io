@@ -53,7 +53,7 @@
           "description": "Setiap proyek dimulai dengan Product Requirements Document. Bukan file Figma, bukan thread Slack — dokumen terstruktur yang mencakup untuk siapa, apa yang dilakukan, dan seperti apa keberhasilannya."
         },
         {
-          "label": "02 CLAUDE.md",
+          "label": "02 Spesifikasi teknis",
           "title": "Spesifikasi teknis untuk build",
           "description": "PRD menjadi spesifikasi teknis: keputusan stack, arsitektur, desain komponen, dan urutan build — ditulis sebelum satu baris kode pun."
         },

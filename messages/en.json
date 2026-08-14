@@ -23,7 +23,7 @@
         },
         {
           "title": "Dashboards that survive real data",
-          "description": "Budget monitoring that pulls Kemenkeu expenditure on a schedule, construction progress across every IKN project, 75 years of climate records made legible. Scheduled pipelines, not manual exports.",
+          "description": "Budget monitoring that pulls Kemenkeu (Indonesia's Ministry of Finance) expenditure on a schedule, construction progress across every IKN project, 75 years of climate records made legible. Scheduled pipelines, not manual exports.",
           "href": "/work"
         },
         {
@@ -53,7 +53,7 @@
           "description": "Every project starts with a Product Requirements Document. Not a Figma file, not a Slack thread — a structured document covering who this is for, what it does, and what success looks like."
         },
         {
-          "label": "02 CLAUDE.md",
+          "label": "02 Technical spec",
           "title": "Technical spec for the build",
           "description": "The PRD becomes a technical specification: stack decisions, architecture, component design, and build sequence — written before a single line of code."
         },
