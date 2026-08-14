@@ -18,11 +18,14 @@ export default function StatBand({
   const t = useTranslations('home.stats');
   const hero = variant === 'hero';
 
+  // "Live" is a status, not a source — the work index filters it as its own
+  // toggle (?live=1) rather than a `?filter=` value, so it can combine with
+  // Government/Independent instead of competing with them.
   const items = [
-    { value: stats.total, label: t('systems_shipped'), filter: 'all' },
-    { value: stats.government, label: t('government'), filter: 'government' },
-    { value: stats.independent, label: t('independent'), filter: 'independent' },
-    { value: stats.live, label: t('live'), filter: 'live' },
+    { value: stats.total, label: t('systems_shipped'), href: '/work' },
+    { value: stats.government, label: t('government'), href: '/work?filter=government' },
+    { value: stats.independent, label: t('independent'), href: '/work?filter=independent' },
+    { value: stats.live, label: t('live'), href: '/work?live=1' },
   ];
 
   const grid = (
@@ -34,11 +37,7 @@ export default function StatBand({
       }
     >
       {items.map((item) => (
-        <Link
-          key={item.label}
-          href={item.filter === 'all' ? '/work' : `/work?filter=${item.filter}`}
-          className="group block"
-        >
+        <Link key={item.label} href={item.href} className="group block">
           {/* Cream, not gold — the number itself is the credibility signal;
               gold stays reserved for the CTA and the arrow-reveal below. */}
           <span

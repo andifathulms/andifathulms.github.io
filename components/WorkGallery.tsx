@@ -6,8 +6,13 @@ import { PROBLEM_SHAPES, isProblemShape, type ProblemShape } from '@/lib/shapes'
 import type { ProjectMeta } from '@/lib/content';
 import ProjectCard from './ProjectCard';
 
-type Source = 'all' | 'government' | 'independent' | 'live';
-const SOURCES: Source[] = ['all', 'government', 'independent', 'live'];
+// "Live" used to sit inside this same enum, as if it were a fourth category
+// alongside Government/Independent — but it's an orthogonal status, not a
+// source, and treating it as a peer made "live government work" (arguably
+// the single most persuasive filter combination a client could ask for)
+// impossible to select. It's now its own toggle (see `liveOnly` below).
+type Source = 'all' | 'government' | 'independent';
+const SOURCES: Source[] = ['all', 'government', 'independent'];
 
 function groupOf(project: ProjectMeta): 'government' | 'independent' {
   return project.categoryTags.includes('Government') ? 'government' : 'independent';
@@ -19,7 +24,6 @@ function isLive(project: ProjectMeta): boolean {
 
 function matchesSource(project: ProjectMeta, source: Source): boolean {
   if (source === 'all') return true;
-  if (source === 'live') return isLive(project);
   return groupOf(project) === source;
 }
 
@@ -54,9 +58,9 @@ const chipClass = (active: boolean, empty: boolean) =>
 
 /**
  * The source axis is single-select, so it's a native radio group: the browser
- * conveys "3 of 4" and arrow-key navigation for free, which aria-pressed on
- * four independent buttons never could. The input is visually hidden rather
- * than removed, so it stays focusable and the label stays clickable.
+ * conveys "3 of 3" and arrow-key navigation for free, which aria-pressed on
+ * independent buttons never could. The input is visually hidden rather than
+ * removed, so it stays focusable and the label stays clickable.
  */
 function RadioChip({
   name,
@@ -89,10 +93,12 @@ function RadioChip({
 }
 
 /**
- * The shape axis toggles (clicking the active chip clears it), so a button
- * with aria-pressed is the right shape here. Empty chips use aria-disabled
- * rather than disabled so they stay reachable and their count is still
- * announced — a keyboard user shouldn't lose information a mouse user keeps.
+ * The shape axis and the live-status toggle both allow more than one active
+ * value at once (OR-combined within the axis, AND-combined across axes), so
+ * a button with aria-pressed is the right shape here. Empty chips use
+ * aria-disabled rather than disabled so they stay reachable and their count
+ * is still announced — a keyboard user shouldn't lose information a mouse
+ * user keeps.
  */
 function ToggleChip({
   active,
@@ -123,7 +129,8 @@ function ToggleChip({
 export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
   const t = useTranslations('work');
   const [source, setSource] = useState<Source>('all');
-  const [shape, setShape] = useState<ProblemShape | null>(null);
+  const [liveOnly, setLiveOnly] = useState(false);
+  const [shapes, setShapes] = useState<Set<ProblemShape>>(new Set());
   const [query, setQuery] = useState('');
 
   const terms = useMemo(
@@ -131,23 +138,34 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
     [query]
   );
 
-  // Deep-link support: /work?filter=government&shape=explainer — the stat band
-  // and the service cards both land here.
+  // Deep-link support: /work?filter=government&live=1&shape=explainer,tool —
+  // the stat band, the service cards, and the About page's stack counts all
+  // land here.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const f = params.get('filter');
     if (f && (SOURCES as string[]).includes(f)) setSource(f as Source);
+    if (params.get('live') === '1') setLiveOnly(true);
     const s = params.get('shape');
-    if (s && isProblemShape(s)) setShape(s);
+    if (s) {
+      const valid = s.split(',').filter(isProblemShape);
+      if (valid.length > 0) setShapes(new Set(valid));
+    }
     const q = params.get('q');
     if (q) setQuery(q);
   }, []);
 
   // Keep the URL shareable without a full navigation.
-  const syncUrl = (nextSource: Source, nextShape: ProblemShape | null, nextQuery = query) => {
+  const syncUrl = (
+    nextSource: Source,
+    nextLive: boolean,
+    nextShapes: Set<ProblemShape>,
+    nextQuery = query
+  ) => {
     const params = new URLSearchParams();
     if (nextSource !== 'all') params.set('filter', nextSource);
-    if (nextShape) params.set('shape', nextShape);
+    if (nextLive) params.set('live', '1');
+    if (nextShapes.size > 0) params.set('shape', [...nextShapes].join(','));
     if (nextQuery.trim()) params.set('q', nextQuery.trim());
     const qs = params.toString();
     window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''));
@@ -155,22 +173,30 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
 
   const selectSource = (next: Source) => {
     setSource(next);
-    syncUrl(next, shape);
+    syncUrl(next, liveOnly, shapes);
   };
 
-  // Clicking the active shape clears it — the axes combine, so there has to be
-  // a way back to "all problems" without touching the source row.
-  const selectShape = (next: ProblemShape) => {
-    const value = shape === next ? null : next;
-    setShape(value);
-    syncUrl(source, value);
+  const toggleLive = () => {
+    const next = !liveOnly;
+    setLiveOnly(next);
+    syncUrl(source, next, shapes);
+  };
+
+  // Shape is OR-combined within itself (checking "Data platforms" and "Tool"
+  // shows either), then AND-combined with source/live/query.
+  const toggleShape = (key: ProblemShape) => {
+    const next = new Set(shapes);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    setShapes(next);
+    syncUrl(source, liveOnly, next);
   };
 
   // The About page's stack counts link straight into a search, so the query
   // has to survive in the URL for "Keycloak — 7 systems" to be checkable.
   const updateQuery = (next: string) => {
     setQuery(next);
-    syncUrl(source, shape, next);
+    syncUrl(source, liveOnly, shapes, next);
   };
 
   const visible = useMemo(
@@ -178,53 +204,79 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
       projects.filter(
         (p) =>
           matchesSource(p, source) &&
-          (shape === null || p.problemShape === shape) &&
+          (!liveOnly || isLive(p)) &&
+          (shapes.size === 0 || (p.problemShape !== undefined && shapes.has(p.problemShape))) &&
           matchesQuery(p, terms)
       ),
-    [projects, source, shape, terms]
+    [projects, source, liveOnly, shapes, terms]
   );
 
-  // Each axis counts against the *other* axis's current selection, so a chip
+  // Each axis counts against the *other* axes' current selection, so a chip
   // never advertises results that clicking it wouldn't produce.
   const sourceCounts = useMemo(() => {
     const pool = projects.filter(
-      (p) => (shape === null || p.problemShape === shape) && matchesQuery(p, terms)
+      (p) =>
+        (!liveOnly || isLive(p)) &&
+        (shapes.size === 0 || (p.problemShape !== undefined && shapes.has(p.problemShape))) &&
+        matchesQuery(p, terms)
     );
     return {
       all: pool.length,
       government: pool.filter((p) => groupOf(p) === 'government').length,
       independent: pool.filter((p) => groupOf(p) === 'independent').length,
-      live: pool.filter(isLive).length,
     } as Record<Source, number>;
-  }, [projects, shape, terms]);
+  }, [projects, liveOnly, shapes, terms]);
+
+  const liveCount = useMemo(() => {
+    return projects.filter(
+      (p) =>
+        matchesSource(p, source) &&
+        (shapes.size === 0 || (p.problemShape !== undefined && shapes.has(p.problemShape))) &&
+        matchesQuery(p, terms) &&
+        isLive(p)
+    ).length;
+  }, [projects, source, shapes, terms]);
 
   const shapeCounts = useMemo(() => {
-    const pool = projects.filter((p) => matchesSource(p, source) && matchesQuery(p, terms));
+    const pool = projects.filter(
+      (p) => matchesSource(p, source) && (!liveOnly || isLive(p)) && matchesQuery(p, terms)
+    );
     return Object.fromEntries(
       PROBLEM_SHAPES.map((s) => [s, pool.filter((p) => p.problemShape === s).length])
     ) as Record<ProblemShape, number>;
-  }, [projects, source, terms]);
+  }, [projects, source, liveOnly, terms]);
 
-  // Announce the result count only once the user stops typing; the raw value
-  // changes on every keystroke, which made a screen reader read eight counts
-  // while someone typed "keycloak".
-  const [announced, setAnnounced] = useState('');
+  // The visible count is always current; the sr-only announcement below is
+  // debounced separately so a screen reader doesn't read eight counts while
+  // someone is still typing "keycloak".
   const summary = t('results_count', { count: visible.length, total: projects.length });
+  const [announced, setAnnounced] = useState('');
   useEffect(() => {
     const id = window.setTimeout(() => setAnnounced(summary), 600);
     return () => window.clearTimeout(id);
   }, [summary]);
 
-  const filtered = source !== 'all' || shape !== null || terms.length > 0;
+  const filtered = source !== 'all' || liveOnly || shapes.size > 0 || terms.length > 0;
+
+  // A single active shape (or source, or "live only") gets its own precise
+  // label; a query with nothing else active used to fall through to
+  // t('filter_all') — literally "All" over a set of search results, which
+  // reads as if the search hadn't applied.
+  const primaryLabel = (() => {
+    if (shapes.size === 1) return t(`shape_${[...shapes][0]}`);
+    if (shapes.size > 1) return [...shapes].map((s) => t(`shape_${s}`)).join(' + ');
+    if (source !== 'all') return t(`filter_${source}`);
+    if (liveOnly) return t('filter_live');
+    if (terms.length > 0) return t('search_results');
+    return t('filter_all');
+  })();
+  const label =
+    liveOnly && primaryLabel !== t('filter_live')
+      ? `${primaryLabel} · ${t('filter_live')}`
+      : primaryLabel;
 
   const sections = filtered
-    ? [
-        {
-          key: 'filtered',
-          label: shape ? t(`shape_${shape}`) : t(`filter_${source}`),
-          items: visible,
-        },
-      ]
+    ? [{ key: 'filtered', label, items: visible }]
     : [
         {
           key: 'government',
@@ -269,6 +321,11 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
               </button>
             )}
           </div>
+          {/* Visible, not just announced — a sighted user narrowing a query
+              had no numeric feedback until they recounted cards themselves. */}
+          <p className="mt-2 font-mono text-meta text-text-subtle" aria-hidden="true">
+            {summary}
+          </p>
         </div>
 
         {/* Who paid for it */}
@@ -292,7 +349,23 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
           </fieldset>
         </div>
 
-        {/* What kind of problem it solves — the axis that cuts across the one above */}
+        {/* Whether it's actually reachable right now — a status, not a
+            source, so it toggles independently instead of competing with
+            Government/Independent for the same radio group. */}
+        <div>
+          <p className="font-mono text-meta uppercase tracking-widest text-text-subtle mb-2.5">
+            {t('axis_status')}
+          </p>
+          <div role="group" aria-label={t('axis_status')}>
+            <ToggleChip active={liveOnly} onClick={toggleLive} count={liveCount}>
+              {t('filter_live')}
+            </ToggleChip>
+          </div>
+        </div>
+
+        {/* What kind of problem it solves — the axis that cuts across the one
+            above. Multi-select: checking two shapes shows either, not both
+            required, since a visitor comparing categories wants the union. */}
         <div>
           <p className="font-mono text-meta uppercase tracking-widest text-text-subtle mb-2.5">
             {t('axis_shape')}
@@ -301,8 +374,8 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
             {PROBLEM_SHAPES.map((key) => (
               <ToggleChip
                 key={key}
-                active={shape === key}
-                onClick={() => selectShape(key)}
+                active={shapes.has(key)}
+                onClick={() => toggleShape(key)}
                 count={shapeCounts[key]}
               >
                 {t(`shape_${key}`)}

@@ -99,6 +99,7 @@
     "live_badge": "Live",
     "count_label": "projects",
     "axis_source": "By source",
+    "axis_status": "Status",
     "axis_shape": "By problem",
     "shape_workflow": "Workflow systems",
     "shape_data": "Data platforms",
@@ -111,6 +112,7 @@
     "no_results": "No projects match that.",
     "no_results_hint": "Try a technology (Django, Keycloak) or a tag (Government, Data Platform).",
     "results_count": "{count} of {total} shown",
+    "search_results": "Search results",
     "no_image": "no image"
   },
   "case_study": {

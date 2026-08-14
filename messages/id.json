@@ -99,6 +99,7 @@
     "live_badge": "Live",
     "count_label": "proyek",
     "axis_source": "Berdasarkan sumber",
+    "axis_status": "Status",
     "axis_shape": "Berdasarkan masalah",
     "shape_workflow": "Sistem alur kerja",
     "shape_data": "Platform data",
@@ -111,6 +112,7 @@
     "no_results": "Tidak ada proyek yang cocok.",
     "no_results_hint": "Coba nama teknologi (Django, Keycloak) atau tag (Government, Data Platform).",
     "results_count": "{count} dari {total} ditampilkan",
+    "search_results": "Hasil pencarian",
     "no_image": "tidak ada gambar"
   },
   "case_study": {
