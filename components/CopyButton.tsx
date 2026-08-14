@@ -8,6 +8,8 @@ interface CopyButtonProps {
   copiedLabel: string;
   /** Announced when the copy succeeds; the visible label change is silent. */
   announcement: string;
+  /** Shown briefly when the clipboard write throws — previously silent. */
+  failedLabel?: string;
 }
 
 export default function CopyButton({
@@ -15,18 +17,22 @@ export default function CopyButton({
   copyLabel,
   copiedLabel,
   announcement,
+  failedLabel,
 }: CopyButtonProps) {
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle');
 
   const onCopy = async () => {
     try {
       await navigator.clipboard.writeText(value);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
+      setState('copied');
     } catch {
-      /* clipboard unavailable — the mailto link still works */
+      setState('failed');
     }
+    setTimeout(() => setState('idle'), 1800);
   };
+
+  const label =
+    state === 'copied' ? `${copiedLabel} ✓` : state === 'failed' ? failedLabel ?? copyLabel : copyLabel;
 
   return (
     <>
@@ -36,12 +42,13 @@ export default function CopyButton({
         className="min-h-touch inline-flex items-center font-mono text-meta text-text-subtle hover:text-gold border border-edge hover:border-edge-accent px-2.5 py-1 rounded transition-colors"
         aria-label={`${copyLabel} ${value}`}
       >
-        {copied ? `${copiedLabel} ✓` : copyLabel}
+        {label}
       </button>
       {/* The label flip is visual only — a screen reader got no confirmation
-          that the address had been copied. */}
+          that the address had been copied, or that the copy failed. */}
       <span className="sr-only" role="status">
-        {copied ? announcement : ''}
+        {state === 'copied' ? announcement : ''}
+        {state === 'failed' ? failedLabel : ''}
       </span>
     </>
   );

@@ -101,94 +101,84 @@ export default async function ContactPage({
 
           {/* Right: channels */}
           <div>
-            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-6">
+            <p className="font-mono text-meta text-text-subtle uppercase tracking-wider mb-6">
               {t('channels_label')}
             </p>
-            <div className="flex flex-col">
-              {/* Email */}
-              <div className="flex items-start gap-4 border-t border-line pt-5 pb-5">
-                <span className="mt-0.5 text-accent">
-                  <ChannelIcon name="email" />
-                </span>
-                <div className="min-w-0">
-                  <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
-                    {t('email_label')}
-                  </p>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <a href={mailto} className="text-cream hover:text-gold transition-colors break-all">
-                      {CONTACT.email}
-                    </a>
-                    <CopyButton
-                      value={CONTACT.email}
-                      copyLabel={t('copy')}
-                      copiedLabel={t('copied')}
-                      announcement={t('copied_announcement')}
-                    />
-                  </div>
-                </div>
+
+            {/* Primary — the one clear CTA the page is built around. WhatsApp
+                carries a pre-filled message, so it's the lowest-friction path
+                to an actual reply; it gets the site's real primary-button
+                treatment instead of sharing weight with three other links. */}
+            <a
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-4 rounded bg-gold px-5 py-4 text-navy transition-colors hover:bg-gold/90 mb-4"
+            >
+              <ChannelIcon name="whatsapp" />
+              <div>
+                <p className="font-mono text-meta uppercase tracking-wider text-navy/70 mb-1">
+                  {t('whatsapp_label')}
+                </p>
+                <span className="font-medium">{t('whatsapp_cta')}</span>
               </div>
+            </a>
 
-              {/* WhatsApp */}
-              <a
-                href={whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-start gap-4 border-t border-line pt-5 pb-5"
-              >
-                <span className="mt-0.5 text-accent transition-colors group-hover:text-gold">
-                  <ChannelIcon name="whatsapp" />
-                </span>
-                <div>
-                  <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
-                    {t('whatsapp_label')}
-                  </p>
-                  <span className="text-cream transition-colors group-hover:text-gold">
-                    {t('whatsapp_cta')}
-                  </span>
-                </div>
-              </a>
+            {/* Secondary — the whole row is the mailto link now; Copy sits
+                below as its own smaller affordance instead of a sibling
+                control fighting the row for the same click. */}
+            <a
+              href={mailto}
+              className="group flex items-center gap-4 rounded border border-edge px-5 py-4 transition-colors hover:border-edge-strong mb-2"
+            >
+              <span className="text-text-subtle transition-colors group-hover:text-cream">
+                <ChannelIcon name="email" />
+              </span>
+              <div className="min-w-0">
+                <p className="font-mono text-meta uppercase tracking-wider text-text-subtle mb-1">
+                  {t('email_label')}
+                </p>
+                <span className="text-cream break-all">{CONTACT.email}</span>
+              </div>
+            </a>
+            <div className="flex justify-end mb-8">
+              <CopyButton
+                value={CONTACT.email}
+                copyLabel={t('copy')}
+                copiedLabel={t('copied')}
+                announcement={t('copied_announcement')}
+                failedLabel={t('copy_failed')}
+              />
+            </div>
 
-              {/* LinkedIn */}
-              <a
-                href={CONTACT.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-start gap-4 border-t border-line pt-5 pb-5"
-              >
-                <span className="mt-0.5 text-accent transition-colors group-hover:text-gold">
-                  <ChannelIcon name="linkedin" />
-                </span>
-                <div>
-                  <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
-                    {t('linkedin_label')}
-                  </p>
-                  <span className="text-cream transition-colors group-hover:text-gold">
-                    {t('linkedin_cta')}
-                  </span>
-                </div>
-              </a>
-
-              {/* Résumé — only when the PDF exists */}
-              {hasResume && (
+            {/* Tertiary — browsed, not acted on; a quieter list below a
+                break instead of two more rows sharing the channels' weight. */}
+            <div className="border-t border-line pt-6">
+              <p className="font-mono text-meta text-text-subtle uppercase tracking-wider mb-3">
+                {t('also_label')}
+              </p>
+              <div className="flex flex-col gap-3">
                 <a
-                  href={CONTACT.resumePath}
+                  href={CONTACT.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-start gap-4 border-t border-line pt-5 pb-5"
+                  className="group inline-flex items-center gap-2.5 text-sm text-text-muted transition-colors hover:text-gold"
                 >
-                  <span className="mt-0.5 text-accent transition-colors group-hover:text-gold">
-                    <ChannelIcon name="resume" />
-                  </span>
-                  <div>
-                    <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
-                      {t('resume_label')}
-                    </p>
-                    <span className="text-cream transition-colors group-hover:text-gold">
-                      {t('resume_download')} ↓
-                    </span>
-                  </div>
+                  <ChannelIcon name="linkedin" />
+                  {t('linkedin_cta')}
                 </a>
-              )}
+                {hasResume && (
+                  <a
+                    href={CONTACT.resumePath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-2.5 text-sm text-text-muted transition-colors hover:text-gold"
+                  >
+                    <ChannelIcon name="resume" />
+                    {t('resume_download')}
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
