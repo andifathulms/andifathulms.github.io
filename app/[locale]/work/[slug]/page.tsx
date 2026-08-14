@@ -184,7 +184,7 @@ export default async function CaseStudyPage({
             list, not a persistent sidebar. */}
         {toc.length > 1 && (
           <details className="lg:hidden mb-8 border border-edge rounded px-4 py-3">
-            <summary className="font-mono text-meta text-accent uppercase tracking-wider cursor-pointer">
+            <summary className="font-mono text-meta text-accent uppercase tracking-wider cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
               {t('on_this_page')}
             </summary>
             <ul className="mt-3 border-l border-line">

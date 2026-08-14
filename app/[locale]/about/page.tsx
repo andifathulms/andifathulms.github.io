@@ -175,7 +175,7 @@ export default async function AboutPage({
                 <Link
                   key={tech.name}
                   href={`/work?q=${encodeURIComponent(tech.name)}`}
-                  className="group flex items-center gap-3 border-b border-line py-2.5 transition-colors hover:border-line-strong"
+                  className="group min-h-touch flex items-center gap-3 border-b border-line py-2.5 transition-colors hover:border-line-strong"
                 >
                   <StackIcon name={tech.name} className="w-5 h-5 flex-shrink-0 text-text-subtle transition-colors group-hover:text-gold" />
                   <span className="font-mono text-meta text-text-muted transition-colors group-hover:text-cream">
@@ -190,7 +190,7 @@ export default async function AboutPage({
 
             {stackRest.length > 0 && (
               <details className="mt-1 group/details">
-                <summary className="cursor-pointer list-none font-mono text-meta text-accent uppercase tracking-wider pt-3 pb-1 [&::-webkit-details-marker]:hidden">
+                <summary className="cursor-pointer list-none font-mono text-meta text-accent uppercase tracking-wider pt-3 pb-1 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold [&::-webkit-details-marker]:hidden">
                   {t('stack_show_more', { count: stackRest.length })}
                 </summary>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1 mt-2">
@@ -198,7 +198,7 @@ export default async function AboutPage({
                     <Link
                       key={tech.name}
                       href={`/work?q=${encodeURIComponent(tech.name)}`}
-                      className="group flex items-center gap-3 border-b border-line py-2.5 transition-colors hover:border-line-strong"
+                      className="group min-h-touch flex items-center gap-3 border-b border-line py-2.5 transition-colors hover:border-line-strong"
                     >
                       <StackIcon name={tech.name} className="w-5 h-5 flex-shrink-0 text-text-subtle transition-colors group-hover:text-gold" />
                       <span className="font-mono text-meta text-text-muted transition-colors group-hover:text-cream">

@@ -40,6 +40,7 @@ export default function CaseStudyToc({ items, label }: { items: TocItem[]; label
             <li key={item.slug}>
               <a
                 href={`#${item.slug}`}
+                aria-current={isActive ? 'location' : undefined}
                 className={`-ml-px block border-l py-1 text-sm transition-colors ${
                   item.level === 3 ? 'pl-6' : 'pl-3'
                 } ${

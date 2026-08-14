@@ -162,7 +162,7 @@ export default async function ContactPage({
                   href={CONTACT.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2.5 text-sm text-text-muted transition-colors hover:text-gold"
+                  className="group min-h-touch inline-flex items-center gap-2.5 text-sm text-text-muted transition-colors hover:text-gold"
                 >
                   <ChannelIcon name="linkedin" />
                   {t('linkedin_cta')}
@@ -172,7 +172,7 @@ export default async function ContactPage({
                     href={CONTACT.resumePath}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex items-center gap-2.5 text-sm text-text-muted transition-colors hover:text-gold"
+                    className="group min-h-touch inline-flex items-center gap-2.5 text-sm text-text-muted transition-colors hover:text-gold"
                   >
                     <ChannelIcon name="resume" />
                     {t('resume_download')}
