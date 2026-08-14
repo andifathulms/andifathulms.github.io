@@ -1,0 +1,34 @@
+{
+  "slug": "tide-analysis",
+  "title": "Tide Analysis",
+  "tagline": "A site that watches the tide, does the math itself from raw sea-level readings, and tells you honestly when it doesn't have enough data to trust its own answer — instead of quoting numbers someone else calculated",
+  "categoryTags": [
+    "Personal Project",
+    "Science & Data",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "SVG",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/tide-analysis/en/",
+  "githubUrl": "https://github.com/andifathulms/tide-analysis",
+  "heroImage": "/images/projects/tide-analysis/hero.webp",
+  "order": 34,
+  "featured": false,
+  "metrics": [
+    { "value": "377", "label": "Tests — constants recovered from synthetic records" },
+    { "value": "Refuses", "label": "To fit what a record can't resolve (Rayleigh)" },
+    { "value": "8", "label": "Real Indonesian ports, all 4 tide regimes" },
+    { "value": "0", "label": "Tide / linear-algebra / charting libraries" }
+  ],
+  "access": "public"
+}

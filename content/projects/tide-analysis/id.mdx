@@ -1,0 +1,31 @@
+# Tide Analysis
+
+## Masalahnya
+
+Kebanyakan alat prediksi pasang surut bekerja dengan mencari konstanta harmonik terbitan — angka yang sudah dihitung sebelumnya yang menggambarkan bagaimana Bulan dan Matahari menarik air di suatu garis pantai — dan menjumlahkannya menjadi kurva. Itu cepat, tetapi ia *pencarian*: ia tak membuktikan apa pun soal apakah alat itu benar-benar memahami fisikanya, dan tak bisa diadaptasi ke lokasi baru yang belum diterbitkan.
+
+Proyek ini justru mulai dari **pengamatan permukaan laut mentah** (bacaan per jam sungguhan dari alat pengukur pasut) dan menurunkan konstanta itu sendiri, di browser, memakai pencocokan kurva kuadrat-terkecil yang sama yang dipakai oseanografer. Dan itu membuat kasatmata sebuah masalah yang disembunyikan sepenuhnya oleh alat pencarian: **Anda butuh cukup waktu pengamatan untuk membedakan sebagian pola pasut.** Dua siklus lunar/solar yang nyaris identik (K1 dan P1, atau S2 dan K2) hanya bisa dipisahkan dengan sekitar enam bulan data — minta rekaman dua minggu memisahkannya dan alat yang jujur harus berkata *"Saya tak bisa,"* bukan menebak. Ia secara eksplisit **bukan** untuk navigasi maritim; kantor hidrografi resmi Indonesia disebut berulang kali sebagai sumber otoritatif.
+
+## Pendekatannya
+
+### Inti komputasi murni, agar klaim numeriknya bisa diuji
+
+Astronomi (`lib/astro`, kalkulator argumen Doodson dan koreksi nodal) dan pemecah (`lib/tide`, pencocokan kuadrat-terkecil, prediksi, metode Admiralty klasik) adalah fungsi biasa atas typed array — tanpa React, tanpa DOM, tanpa clock, tanpa jaringan — yang membuat mungkin menguji-unit angka aktualnya. Tulang punggungnya adalah **generator sintetis yang ditulis sebelum pemecah**: hasilkan rekaman dari konstanta yang Anda pilih, tambahkan derau yang Anda pilih, lalu cocokkan dan tegaskan amplitudo yang dipulihkan cocok. Ketika uji sintetis gagal, pemecah atau astronominya yang salah — tak pernah toleransinya.
+
+### Menolak alih-alih overfit, dan selalu melaporkan pengkondisian
+
+Sebelum menjalankan pencocokan, kode memeriksa apakah konstituen yang diminta benar-benar terpisahkan mengingat panjang rekaman (kriteria Rayleigh). Jika tidak, ia mengembalikan **penolakan terstruktur** yang menyebut mana dua yang berkonflik dan berapa hari yang akan menyelesaikannya — alih-alih mencocokkan saja dan menampilkan angka tak stabil tanpa makna, ditegakkan tes dua arah. Setiap pemecahan mengembalikan **condition number**-nya sebagai bagian dari tipe hasilnya, jadi tak ada jalur kode yang bisa diam-diam menjatuhkan satu sinyal yang mengatakan apakah angkanya berarti. Residual — celah antara prediksi dan pengamatan, tempat cuaca dan badai muncul — selalu digambar dan tak pernah dirata-ratakan.
+
+### Pemilihan data yang jujur, dipelajari dengan susah payah
+
+Pemilihan sensor ternyata tak sepele. Sebuah stasiun bisa melaporkan beberapa sensor terhadap titik nol berbeda, dan yang paling "lengkap" bisa jadi alat pengukur yang *macet* — satu sensor radar di Benoa datar di −0,281 m selama tujuh bulan sementara alat pengukur yang berfungsi di sebelahnya merekam pasut 2,3 m sungguhan. Pemilihan varians sederhana pun tertipu: lonjakan 9 meter sensor Semarang memberinya varians tinggi palsu. Aturannya menjadi "skala *robust* terbesar, tolak lonjakan menjadi celah yang dinyatakan," dan tiap temuan kini menjadi tes yang ditegaskan. Gerbang lisensi berjalan sebelum build — dua dari tiga sumber data (UHSLC, BIG) sudah dirangkai tetapi dikirim **nonaktif**, karena syarat atribusi stasiun Indonesia mereka tak pernah dikonfirmasi, dan build menegakkannya alih-alih komentar.
+
+### Hasil yang disimpan karena mengejutkan, bukan dihaluskan
+
+Celah dalam rekaman tak sekadar "buruk": kehilangan 70% rekaman *tersebar* di sepanjang waktu nyaris tak menyakiti pencocokan, sementara kehilangan 70% yang sama sebagai satu *pemadaman kontinu* menghancurkannya — disimpan sebagai tes eksplisit alih-alih anekdot. Dan panel stabilitas-jendela memotong tiap rekaman menjadi empat bentang yang dicocokkan terpisah untuk menjawab pertanyaan yang tak bisa dijawab aplikasi: apakah sebuah konstanta milik pelabuhan atau hanya bulan-bulan ini (di Benoa, M2 bergerak 9% antar bentang; S2 bergerak 56%). Penjelajah konstituen sengaja *menjumlahkan-ulang* konstanta yang sudah dicocokkan alih-alih mencocokkan ulang langsung — pencocokan ulang dipertimbangkan dan ditolak karena satu konstituen kuat akan diam-diam menyerap tetangganya dan menghancurkan pelajaran pasang purnama-perbani.
+
+## Hasil
+
+Live dan publik, dwibahasa, sepenuhnya statis — semua pencocokan dan prediksi berjalan di sisi klien terhadap rekaman JSON terbundel, dengan **dua dependensi runtime** dan tanpa pustaka pasut, aljabar linear, atau charting (astronomi, pemecah, dan grafik "marégraphe" bikinan tangan itulah proyeknya). Ia menyajikan pencocokan harmonik langsung di browser dengan kurva tercocok di atas jejak teramati dan pita residual di bawahnya; **slider Rayleigh** — seret panjang rekaman dari 15 hari ke ~6 bulan dan saksikan konstituen berpindah dari terselesaikan ke tak-terselesaikan saat condition number menanjak; perbandingan kuadrat-terkecil-vs-Admiralty; penjelajah konstituen di mana mengaktifkan M2 dan S2 kasatmata menghasilkan denyut purnama/perbani dua-mingguan; derivasi satu-konstituen yang dijalankan dari timestamp ke konstanta; dan klasifikasi tipe pasut Formzahl di 8 pelabuhan Indonesia sungguhan yang mencakup keempat rezim — dihitung dari pencocokan tiap stasiun sendiri, bukan dikutip dari makalah.
+
+Dibangun sendiri dalam build tiga hari — ~12.500 baris TypeScript, **377 tes** di 24 berkas, 8 rekaman stasiun IOC terbundel (212 hari data per jam masing-masing). Ia menyatakan dengan menonjol dan berulang bahwa ini edukatif, bukan untuk navigasi, dan menampilkan sumber, lisensi, periode rekaman, dan datum tiap stasiun.
