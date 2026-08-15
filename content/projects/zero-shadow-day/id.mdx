@@ -1,0 +1,31 @@
+# Zero Shadow Day
+
+## Masalahnya
+
+Indonesia membentang di khatulistiwa, jadi setiap lokasi di negeri ini mengalami dua hari dalam setahun — "hari tanpa bayangan"-nya — ketika matahari melintas tepat di atas kepala pada tengah hari matahari dan benda tegak (nyaris) tak berbayang. Ini fenomena nyata yang bisa diamati secara fisik, yang tanggal resminya diterbitkan badan meteorologi Indonesia (BMKG) tiap tahun, kota per kota — tetapi hampir tak ada orang di luar spesialis yang tahu ia terjadi, mengapa, atau bagaimana mendemonstrasikannya.
+
+Ia dibangun untuk tiga audiens: warga penasaran yang ingin tahu dua tanggal kotanya sendiri dan memahami mekanismenya; guru dan siswa, yang bagi mereka fenomena ini menjadi aktivitas langsung — pada hari tanpa bayangan, satu kelas bisa berpasangan dengan lokasi lain beberapa ratus kilometer jauhnya dan mereproduksi pengukuran keliling Bumi asli Eratosthenes; dan siapa pun yang ingin fakta posisi-matahari cepat. Ia sengaja *tidak* mencoba menjadi kalkulator waktu salat atau aplikasi cuaca — masalah berbeda dengan syarat berbeda.
+
+## Pendekatannya
+
+### Hitung segalanya, jangan bergantung pada apa pun
+
+Seluruh aplikasi diturunkan dari tiga angka — lintang, bujur, tanggal — dengan **tanpa umpan data eksternal, tanpa kunci API, tanpa basis data, tanpa backend.** Ini reaksi sadar terhadap proyek-proyek sebelumnya yang tergelincir masalah lisensi data: proyek dengan nol ketergantungan data tak punya apa pun untuk dilisensikan dan tak punya apa pun yang bisa basi. Engine astronomi (`lib/solar`), geometri bayangan, pencarian hari-tanpa-bayangan, modul Eratosthenes, bahkan adegan 3D-nya semua ditulis tangan — tanpa pustaka astronomi, tanggal, atau zona waktu, dan tanpa engine 3D.
+
+### Akurasi diverifikasi sebelum produknya ada
+
+Milestone 0 sama sekali *tanpa antarmuka* — hanya matematika posisi-matahari, diperiksa terhadap tabel referensi astronomi terbitan. Alasannya: rumus pintas umum untuk deklinasi matahari meleset hingga setengah derajat, yang di dekat tropis diam-diam menjadi tanggal yang meleset beberapa hari *sambil tetap tampak masuk akal di layar*. Membuat bagian tak terlihat benar didahulukan sebelum apa pun yang terlihat. Dan kode geometri bayangan berbagi **nol kode** dengan engine matahari — ditegakkan tes yang menegaskan ketiadaan impor itu — jadi sebuah kesalahan hanya bisa muncul sebagai *ketidaksepakatan* antara dua perhitungan independen, tak pernah sebagai dua jawaban salah yang sepakat.
+
+### "Nol" adalah jendela, dan tanggal ditemukan lewat pencarian
+
+Cakram matahari lebarnya sekitar setengah derajat, jadi bayangan nyata menyusut ke *minimum*, bukan ke tiada. Aplikasi selalu melaporkan jendela waktu yang diturunkan dari ukuran tampak matahari sesungguhnya hari itu — bukan satu instan presisi-palsu — karena pengguna penasaran yang berdiri di luar dengan tongkat sungguhan bisa mematahkan klaim yang terlalu presisi. Dan alih-alih memecahkan momen persis deklinasi matahari menyamai lintang lokasi (yang bisa jatuh kapan saja, termasuk tengah malam), aplikasi **meminimalkan bayangan tengah hari di sepanjang hari-kandidat tiap tahun**. Itu menangani dengan benar batas di dekat tropis, tempat kedua tanggal tahunan menyatu menjadi satu di titik balik matahari, tanpa kasus khusus. Semua komputasi internal memakai bilangan Hari Julian; `Date` dan zona waktu dibatasi ke satu modul batas-tampilan, karena Indonesia punya tiga zona dan tanpa DST.
+
+### Jujur soal ketidaksepakatannya sendiri
+
+Di mana tanggal aplikasi berbeda dari tabel terbitan BMKG, perbedaannya *didokumentasikan dan diuji* alih-alih disembunyikan. Pekanbaru 2026: aplikasi menyebut 22 Maret melawan 21 versi BMKG — kota itu 0,53° dari khatulistiwa, jadi lintasannya jatuh di antara dua tengah hari matahari dan aturan residu-terkecil aplikasi memilih tanggal 22 (keduanya dalam toleransi satu-hari yang dinyatakan). Dan empat baris tabel 2025 BMKG tampak hanya membawa waktu kulminasi *pertama*-nya — tes *menurunkan* ini dari Perata Waktu alih-alih mengasumsikannya, mempercayai fisika di atas sumber terbitan begitu fisika bisa membuktikan ketimpangannya. Mode Eratosthenes menampilkan galat halaman-sekolahnya dengan jujur terhadap keliling sejati, karena celah itulah pelajarannya, bukan aib untuk disembunyikan.
+
+## Hasil
+
+Live dan publik, dwibahasa, sepenuhnya statis — koordinat dipakai dan dibuang sepenuhnya di sisi klien, dengan nol permintaan jaringan runtime. Ia menyajikan **gnomon** 3D beranimasi tempat bayangan *itulah* pembacaan datanya (panjang dan arahnya adalah angkanya, bukan hiasan di sebelahnya); dua tanggal Anda dengan waktu kulminasi hingga detik, diuraikan menjadi dua penyebabnya; kurva ujung-bayangan dan analema angka-delapan; **pengukuran Eratosthenes** dengan pencari-pasangan dan uraian galat yang jujur; dan sapuan yang menganimasikan titik atas-kepala matahari melintasi nusantara sepanjang tahun.
+
+Dibangun sendiri dalam sprint dua hari — ~9.600 baris TS/TSX, 189 tes ditulis sebelum UI-nya ada, diverifikasi terhadap 76 titik fikstur BMKG (75 cocok persis, semua dalam satu hari, waktu di bawah lima detik). Adegan 3D-nya adalah kamera dan proyeksi bikinan tangan (~450 baris) alih-alih Three.js — tradeoff sengaja untuk menjaga seluruh aplikasi di ~110 KB gzip, di bawah anggaran 150 KB-nya, karena engine 3D serba-guna akan meledakkan anggaran itu sendirian. Engine matahari-nya murni, bebas-framework, dan bisa diangkat keluar — dibagi dengan proyek saudara, [Falak](/work/falak-visualizer), dan sebuah tes menjaganya tetap begitu.

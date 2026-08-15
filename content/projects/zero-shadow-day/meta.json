@@ -1,0 +1,34 @@
+{
+  "slug": "zero-shadow-day",
+  "title": "Zero Shadow Day",
+  "tagline": "A free tool that tells anyone in Indonesia the exact two days a year the sun stands directly overhead where they live — and lets them re-run Eratosthenes' 2,200-year-old measurement of the Earth's circumference with a partner elsewhere in the country",
+  "categoryTags": [
+    "Personal Project",
+    "Astronomy",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "WebGL",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/zero-shadow-day/en/",
+  "githubUrl": "https://github.com/andifathulms/zero-shadow-day",
+  "heroImage": "/images/projects/zero-shadow-day/hero.webp",
+  "order": 36,
+  "featured": false,
+  "metrics": [
+    { "value": "75/76", "label": "Exact matches vs BMKG's official tables; all 76 within a day" },
+    { "value": "0", "label": "Astronomy / date / timezone libraries — the engine is hand-written" },
+    { "value": "~110KB", "label": "Gzipped JS, with a hand-rolled 3D scene, under a 150KB budget" },
+    { "value": "2", "label": "Zero-shadow dates a year, found by search rather than formula" }
+  ],
+  "access": "public"
+}
