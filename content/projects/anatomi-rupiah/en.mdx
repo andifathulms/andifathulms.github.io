@@ -1,0 +1,31 @@
+# Anatomi Rupiah
+
+## The problem
+
+Bank Indonesia runs an ongoing campaign teaching citizens the "3D method" — *Dilihat, Diraba, Diterawang* (Look, Touch, Hold-to-light) — for checking whether a banknote is genuine. Almost everyone can recite the three words; far fewer can explain what a watermark physically *is*, why intaglio ink feels raised, or what's inside a security thread. Existing public materials show *what* to look for but rarely *why* it works — a photo of a watermark is just a grey patch on paper. There's also a fourth, almost entirely untaught check: *kode tuna netra*, the raised tactile marks that let blind users identify a denomination by touch.
+
+The catch makes this two problems at once. Indonesian law (UU 7/2011 Pasal 24) makes reproducing banknote imagery a criminal offence — up to a year and a Rp200 million fine — unless it's for education, marked "SPESIMEN," and follows conditions the project treats as binding engineering constraints. So: **teach the mechanism, while never producing anything that could pass as a real or counterfeit-adjacent note.**
+
+## The approach
+
+### The legal mark is baked into the artwork, not layered on top
+
+The required "SPESIMEN" mark isn't a CSS overlay or a positioned `<div>` — it's authored directly into the SVG path geometry of every schematic, in the same coordinate space as the note outline. It survives screenshots, printing, and any attempt to hide it via CSS, because **there is no code path that can produce an unmarked note-like image at all.** The compliance layer was deliberately built *first*, before any real content — retrofitting legal-safety guarantees after building visual content would have been far riskier than building them in as build-time gates from day one.
+
+### A build-time compliance gate, not a policy document
+
+`pnpm compliance:check` runs eight automated checks against real rendered output before every build: no raster (photo) images of banknotes anywhere in the repo, the SPESIMEN mark present in every rendered schematic, every schematic capped below actual banknote size, no export path capable of emitting a full note, and more. If any fail, the build fails — there is no way to ship non-compliant content by accident. Photography was initially excluded entirely, then *narrowly* reopened by a carefully-scoped exception: photos of the heroes and reverse-side motifs (26 licensed Wikimedia Commons images, each with recorded credit) are allowed, because a person or a flower is not currency — and the asset check keeps those two cases distinct rather than loosening the rule.
+
+### Illustration over photography — and physics computed live
+
+Every security-feature explainer is a hand-authored SVG cross-section (watermark, security thread, intaglio, colour-shift ink, rectoverso, microtext, UV ink, tactile code), which sidesteps the photography restriction *and* teaches the mechanism better than a photo could. The colour-shift tilt demo and UV toggle are driven by custom **GLSL fragment shaders computing actual thin-film interference and transmission physics** on a plain quad — no 3D engine, and no texture of a note uploaded to the GPU (which would require rasterising the SVG, breaking the "no raster note imagery" rule). Every WebGL panel has an SVG fallback. A late pedagogy pass even surfaces the real physics numbers behind the visualisation rather than leaving it an unexplained animation.
+
+### Cited, honest, and check-oriented
+
+Every factual claim — feature descriptions, denomination data, hero biographies, motifs — is Zod-validated structured data that must carry a citation to a Bank Indonesia publication, enforced by a separate `content:validate` build step. The content invariant is strict: explain how to *check* a feature, never how to *make* one; and the site never renders an authenticity verdict — no camera, no "is this real" path — because that authority rests with Bank Indonesia. The 3D walkthrough ends with an explicit admission that *touch* cannot be conveyed through a screen and the reader should go handle a real note. Each of BI's checking methods maps to one fixed hue sitewide, so a reader absorbs the taxonomy just by seeing the colour.
+
+## Outcome
+
+Live and public, bilingual, fully static with zero runtime network calls (which also means no server-side surface where a "check my note" feature could later be bolted on). It ships the interactive **loupe** — numbered feature markers on each note that open a magnified detail *beside* the mechanism diagram — eight cited mechanism explainers, the live WebGL optics demos, the *kode tuna netra* section, cited hero biographies and reverse-side motifs, and a diagram-sharing export gate that can never emit a full note.
+
+Built solo in a focused two-day sprint — ~11,000 lines of TS/TSX, of which the largest single subsystem is the compliance/schematic/WebGL/content infrastructure (~3,900 lines), not the UI. It states plainly that it is a personal educational project relying on the Pasal 24 exemption, that all depictions are schematic and marked SPESIMEN, and that it cannot and does not determine whether any particular note is genuine. The hardest tradeoff runs against every instinct: the schematics must look intentionally *unfinished* — never photorealistic, capped below real size — because realism itself would defeat the legal exemption.

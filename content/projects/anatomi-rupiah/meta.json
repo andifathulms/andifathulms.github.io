@@ -1,0 +1,36 @@
+{
+  "slug": "anatomi-rupiah",
+  "title": "Anatomi Rupiah",
+  "tagline": "A bilingual explainer that teaches how to spot the genuine security features on Indonesian banknotes — using original illustrated diagrams instead of photos of money, because photographing currency for this is legally restricted",
+  "categoryTags": [
+    "Personal Project",
+    "Education",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "WebGL",
+    "GLSL",
+    "Zod",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/anatomi-rupiah/id/",
+  "githubUrl": "https://github.com/andifathulms/anatomi-rupiah",
+  "heroImage": "/images/projects/anatomi-rupiah/hero.webp",
+  "order": 35,
+  "featured": false,
+  "metrics": [
+    { "value": "10", "label": "Denominations, each schematic marked SPESIMEN in its own geometry" },
+    { "value": "8", "label": "Mechanism explainers — hand-drawn SVG cross-sections, all cited" },
+    { "value": "0", "label": "Photos of banknotes — a build gate blocks raster note imagery" },
+    { "value": "WebGL", "label": "Tilt & UV optics computed from real thin-film physics, no 3D lib" }
+  ],
+  "access": "public"
+}
