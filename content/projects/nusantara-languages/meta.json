@@ -24,12 +24,24 @@
   "githubUrl": "https://github.com/andifathulms/nusantara-languages",
   "heroImage": "/images/projects/nusantara-languages/hero.webp",
   "order": 33,
-  "featured": false,
+  "featured": true,
   "metrics": [
-    { "value": "726", "label": "Languages across 56 families, map ↔ tree bound" },
-    { "value": "58%", "label": "Real speaker polygons — the rest shown honestly as points" },
-    { "value": "0", "label": "Mapping/Newick libraries — hand-built" },
-    { "value": "Refused", "label": "A CC-BY-NC source, rather than misuse it" }
+    {
+      "value": "726",
+      "label": "Languages across 56 families, map ↔ tree bound"
+    },
+    {
+      "value": "58%",
+      "label": "Real speaker polygons — the rest shown honestly as points"
+    },
+    {
+      "value": "0",
+      "label": "Mapping/Newick libraries — hand-built"
+    },
+    {
+      "value": "Refused",
+      "label": "A CC-BY-NC source, rather than misuse it"
+    }
   ],
   "access": "public"
 }

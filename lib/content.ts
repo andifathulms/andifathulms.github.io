@@ -117,9 +117,32 @@ export function getAllProjects(): ProjectMeta[] {
   return projects.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 }
 
+// Curated display sequence for the featured strip — independent of the global
+// `order` field that drives the work grid. Without this the strip renders in
+// `order`, which front-loads the three government workflows and buries the
+// most visual independent builds (orders 33/35/36) at the very end. This
+// alternates employer and problem-shape so the set opens strong. Any featured
+// project not named here falls back to after the listed ones, by `order`.
+const FEATURED_ORDER = [
+  'lantara', // gov · workflow — flagship
+  'nusantara-languages', // indep · data — striking atlas
+  'cubiq', // indep · tool
+  'zero-shadow-day', // indep · explainer — 3D
+  'jdih', // gov · workflow
+  'anatomi-rupiah', // indep · explainer — WebGL
+  'aksara', // gov · workflow
+  'scimotion', // indep · explainer
+  'quranlytics', // indep · data
+];
+
 export function getFeaturedProjects(limit = 3): ProjectMeta[] {
+  const rank = (slug: string) => {
+    const i = FEATURED_ORDER.indexOf(slug);
+    return i === -1 ? FEATURED_ORDER.length : i;
+  };
   return getAllProjects()
     .filter((p) => p.featured && p.status !== 'placeholder')
+    .sort((a, b) => rank(a.slug) - rank(b.slug) || (a.order ?? 99) - (b.order ?? 99))
     .slice(0, limit);
 }
 

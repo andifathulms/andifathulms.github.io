@@ -133,7 +133,7 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const featuredProjects = getFeaturedProjects(6);
+  const featuredProjects = getFeaturedProjects(9);
   const stats = getPortfolioStats();
 
   return (

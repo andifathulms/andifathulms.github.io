@@ -23,12 +23,24 @@
   "githubUrl": "https://github.com/andifathulms/zero-shadow-day",
   "heroImage": "/images/projects/zero-shadow-day/hero.webp",
   "order": 36,
-  "featured": false,
+  "featured": true,
   "metrics": [
-    { "value": "75/76", "label": "Exact matches vs BMKG's official tables; all 76 within a day" },
-    { "value": "0", "label": "Astronomy / date / timezone libraries — the engine is hand-written" },
-    { "value": "~110KB", "label": "Gzipped JS, with a hand-rolled 3D scene, under a 150KB budget" },
-    { "value": "2", "label": "Zero-shadow dates a year, found by search rather than formula" }
+    {
+      "value": "75/76",
+      "label": "Exact matches vs BMKG's official tables; all 76 within a day"
+    },
+    {
+      "value": "0",
+      "label": "Astronomy / date / timezone libraries — the engine is hand-written"
+    },
+    {
+      "value": "~110KB",
+      "label": "Gzipped JS, with a hand-rolled 3D scene, under a 150KB budget"
+    },
+    {
+      "value": "2",
+      "label": "Zero-shadow dates a year, found by search rather than formula"
+    }
   ],
   "access": "public"
 }
