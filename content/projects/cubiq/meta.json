@@ -24,7 +24,7 @@
   "githubUrl": null,
   "heroImage": "/images/projects/cubiq/hero.webp",
   "order": 9,
-  "featured": true,
+  "featured": false,
   "metrics": [
     {
       "value": "8",

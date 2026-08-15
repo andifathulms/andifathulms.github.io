@@ -25,7 +25,7 @@
   "githubUrl": "https://github.com/andifathulms/climatewatch",
   "heroImage": "/images/projects/climate-watch/hero.webp",
   "order": 14,
-  "featured": false,
+  "featured": true,
   "metrics": [
     {
       "value": "75",

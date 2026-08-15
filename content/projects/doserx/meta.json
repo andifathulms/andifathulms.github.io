@@ -22,7 +22,7 @@
   "githubUrl": null,
   "heroImage": "/images/projects/doserx/hero.webp",
   "order": 8,
-  "featured": false,
+  "featured": true,
   "metrics": [
     {
       "value": "92",

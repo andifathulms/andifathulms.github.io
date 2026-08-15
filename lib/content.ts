@@ -124,14 +124,14 @@ export function getAllProjects(): ProjectMeta[] {
 // alternates employer and problem-shape so the set opens strong. Any featured
 // project not named here falls back to after the listed ones, by `order`.
 const FEATURED_ORDER = [
-  'lantara', // gov · workflow — flagship
-  'nusantara-languages', // indep · data — striking atlas
-  'cubiq', // indep · tool
-  'zero-shadow-day', // indep · explainer — 3D
-  'jdih', // gov · workflow
-  'anatomi-rupiah', // indep · explainer — WebGL
   'aksara', // gov · workflow
+  'jdih', // gov · workflow
+  'lantara', // gov · workflow
+  'nusantara-languages', // indep · data
   'scimotion', // indep · explainer
+  'doserx', // indep · tool
+  'anatomi-rupiah', // indep · explainer
+  'climate-watch', // indep · data
   'quranlytics', // indep · data
 ];
 

@@ -23,7 +23,7 @@
   "githubUrl": "https://github.com/andifathulms/zero-shadow-day",
   "heroImage": "/images/projects/zero-shadow-day/hero.webp",
   "order": 36,
-  "featured": true,
+  "featured": false,
   "metrics": [
     {
       "value": "75/76",
