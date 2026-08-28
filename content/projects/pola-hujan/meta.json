@@ -1,0 +1,48 @@
+{
+  "slug": "pola-hujan",
+  "title": "Pola Hujan",
+  "tagline": "Indonesia doesn't have one rainy season — it has three rainfall patterns, and this atlas derives them from satellite data instead of copying the official map",
+  "categoryTags": [
+    "Personal Project",
+    "Data Platform",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Zod",
+    "Vitest",
+    "GitHub Actions",
+    "GitHub Pages"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/pola-hujan/",
+  "githubUrl": "https://github.com/andifathulms/pola-hujan",
+  "heroImage": "/images/projects/pola-hujan/hero.webp",
+  "order": 37,
+  "featured": false,
+  "metrics": [
+    {
+      "value": "34",
+      "label": "Locations classified from raw satellite rainfall"
+    },
+    {
+      "value": "14/34",
+      "label": "BMKG labels verified against its own published bulletin"
+    },
+    {
+      "value": "0",
+      "label": "GIS, charting or statistics libraries — decoders are hand-written"
+    },
+    {
+      "value": "54",
+      "label": "Tests, including synthetic ground truth for the classifier"
+    }
+  ],
+  "access": "public"
+}

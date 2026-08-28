@@ -1,0 +1,35 @@
+# Pola Hujan
+
+## Masalahnya
+
+Orang Indonesia diajari negeri ini punya dua musim — musim hujan dan musim kemarau. Itu benar untuk Jawa, dan keliru di hampir semua tempat lain. Musim hujan Ambon jatuh persis berlawanan dengan Jawa. Sebagian sabuk ekuatorial punya dua puncak basah dan dua puncak kering setahun, bukan satu-satu. BMKG sudah lama tahu ini dan menerbitkan 699 Zona Musim resmi yang dikelompokkan ke dalam tiga keluarga — Monsunal, Ekuatorial, Lokal — tetapi pengetahuan itu mengendap di buletin PDF dan penilaian ahli atas jaringan stasiun, bukan dalam sesuatu yang bisa dibuka dan ditelusuri orang awam.
+
+Pola Hujan dibuat untuk pembaca umum Indonesia yang ingin paham *mengapa* "musim hujan" berarti hal berbeda di tempat berbeda. Ia sengaja bukan kalender tanam dan bukan prakiraan: ia menggambarkan klimatologi jangka panjang, dan menyatakannya terang-terangan di mukanya sendiri.
+
+## Pendekatannya
+
+### Klasifikasinya diturunkan, bukan dijiplak
+
+Cara paling gampang adalah mendigitalkan peta zona BMKG lalu mewarnainya. Proyek ini melakukan kebalikannya: ia menghitung klasifikasinya sendiri dari curah hujan satelit mentah memakai analisis harmonik — matematika yang sama untuk memerikan pasang surut. Siklus hujan dua belas bulan sebuah lokasi diperlakukan sebagai gelombang, lalu diurai menjadi komponen tahunan dan komponen setengah-tahunan. Mana yang lebih kuat, dan di mana puncaknya jatuh dalam setahun, menentukan keluarganya. Hasilnya bisa diperiksa ulang secara independen, bukan sekadar poligon orang lain yang diganti kulitnya.
+
+### Ambangnya disitasi, dan tak pernah disetel agar sepakat
+
+Ambang yang memutuskan seberapa kuat sinyal setengah-tahunan sebelum sebuah tempat dihitung dua-musim-hujan berada dalam satu berkas, masing-masing menyitasi makalah Aldrian & Susanto 2003 yang melahirkan kerangka tiga keluarga ini. Aturan proyek ini: ketidaksepakatan dengan BMKG *dilaporkan, tak pernah disetel hilang* — menggeser satu angka sampai petanya cocok akan mengubah analisis menjadi tiruan. Dua ketidaksepakatan terverifikasi (Medan, Palu) dibiarkan berdiri sebagai temuan, dan satu lapisan khusus menunjukkan persis di mana peta turunan ini berbeda dari peta resmi, lengkap dengan sitasi.
+
+### Kebenaran dibuktikan pada data sintetis sebelum data asli
+
+Sebuah generator membangun siklus hujan palsu dari parameter gelombang yang sudah diketahui; klasifikatornya dijalankan atasnya dan wajib memulihkan parameter itu persis. Termasuk kasus regresi permanen untuk siklus yang puncaknya enam bulan dari Jawa, yang harus keluar sebagai keluarga terbalik. Kebenaran dibuktikan secara matematis, bukan dikira-kira dari peta — sebelum klasifikatornya pernah diarahkan ke CHIRPS.
+
+### Arsip satelit sungguhan, didekode sendiri
+
+Pipeline-nya mengunduh arsip presipitasi CHIRPS asli dan mendekode format raster BIL serta tar dengan dekoder tulisan tangan, alih-alih menarik GDAL. Anggaran dependensinya disengaja dan ditegakkan: tanpa pustaka grafik, tanpa pustaka peta atau GIS, tanpa pustaka statistik, tanpa ML. Semuanya — unduh, fit harmonik, klasifikasi — berjalan sekali saat build, jadi situs yang dikirim adalah ekspor statis tanpa panggilan jaringan saat runtime dan tanpa tagihan hosting.
+
+### Lapisan kejujuran adalah bagian dari produknya
+
+Halaman metode menerbitkan sitasi dataset, ambang persisnya, angka tingkat kesepakatan dengan BMKG yang dihitung pipeline alih-alih diklaim dalam prosa, unduhan CSV dataset penuh, dan batasannya. Yang terbesar: arsip CHIRPS regional yang dipakai berhenti diperbarui Oktober 2016, jadi ini klimatologi sepuluh tahun (2006–2015), bukan periode normal tiga puluh tahun standar WMO yang akan dipakai alat produksi. Itu dinyatakan terbuka, bukan disembunyikan.
+
+## Hasilnya
+
+64 commit dalam build tiga hari, sekitar 3.140 baris TypeScript di aplikasi, pipeline, dan pustaka analisisnya, dengan 54 tes di 7 berkas yang menjaga CI. Empat rute: atlas rezim, pembanding dua tempat yang dibangun di sekitar temuan Jakarta-lawan-Ambon, halaman metode dan transparansi, serta penjelas harmonik langsung yang slider-nya membiarkan pengunjung memorf siklus hujan sintetis di antara tiga keluarga dan melihat klasifikasinya berubah — menjadikan metodenya sesuatu yang bisa dimainkan, bukan sekadar dijelaskan.
+
+Cakupan tumbuh dari 15 ke 34 lokasi nyaris cuma-cuma, karena biaya unduh CHIRPS didominasi 120 raster bulanan yang diambil, bukan berapa titik yang dicuplik darinya. Verifikasi naik dari 0 ke 14 dari 34 label pembanding BMKG yang dicek terhadap buletin 139 halaman terbitan lembaga itu sendiri, dengan nomor halaman disitasi — yang menangkap dan memperbaiki satu lokasi salah label (Ternate) di data awal yang dimasukkan manual. Sisa 20 masih perkiraan usaha-terbaik, dan situsnya mengatakan begitu. Satu lintasan aksesibilitas dan bahasa sederhana — kontras, deskripsi ARIA menggantikan atribut title, pengumuman pemilihan untuk pembaca layar, lantai teks isi 16px — dikirim sebagai milestone tersendiri setelah build-nya lengkap fitur. Rute bahasa Inggris masih ditunda; situs live-nya baru bahasa Indonesia.
