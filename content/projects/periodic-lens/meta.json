@@ -1,0 +1,48 @@
+{
+  "slug": "periodic-lens",
+  "title": "Periodic Lens",
+  "tagline": "An interactive periodic table that explains why the table has its famous shape — by animating the physics rule that builds it — and shows which elements Indonesia digs out of the ground as a share of world production",
+  "categoryTags": [
+    "Personal Project",
+    "Education",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Zod",
+    "Vitest",
+    "GitHub Actions",
+    "GitHub Pages"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/periodic-lens/en/table/?lens=category&layout=standard&view=grid",
+  "githubUrl": "https://github.com/andifathulms/periodic-lens",
+  "heroImage": "/images/projects/periodic-lens/hero.webp",
+  "order": 39,
+  "featured": false,
+  "metrics": [
+    {
+      "value": "11",
+      "label": "Lenses over 118 elements — exactly one active at a time"
+    },
+    {
+      "value": "~20",
+      "label": "Elements where the rule predicts the wrong configuration"
+    },
+    {
+      "value": "157",
+      "label": "Tests, incl. both directions of the aufbau exception list"
+    },
+    {
+      "value": "4",
+      "label": "Runtime deps — no charting or chemistry library"
+    }
+  ],
+  "access": "public"
+}

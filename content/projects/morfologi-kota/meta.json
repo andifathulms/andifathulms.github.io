@@ -1,0 +1,48 @@
+{
+  "slug": "morfologi-kota",
+  "title": "Bentuk Kota",
+  "tagline": "Measures the street layouts of 33 Indonesian neighbourhoods twice — once by car, once on foot — because the standard academic metric only sees the driving network and misreads a kampung completely",
+  "categoryTags": [
+    "Personal Project",
+    "Data Platform",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Zod",
+    "Vitest",
+    "GitHub Actions",
+    "GitHub Pages"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug 2026",
+  "liveUrl": "https://andifathulms.github.io/morfologi-kota/id/lempeng/",
+  "githubUrl": "https://github.com/andifathulms/morfologi-kota",
+  "heroImage": "/images/projects/morfologi-kota/hero.webp",
+  "order": 38,
+  "featured": false,
+  "metrics": [
+    {
+      "value": "33",
+      "label": "Sites, each measured as two networks: drive and walk"
+    },
+    {
+      "value": "126",
+      "label": "Candidate centres surveyed across 56 cities to pick them"
+    },
+    {
+      "value": "577",
+      "label": "Tests, incl. synthetic networks with known answers"
+    },
+    {
+      "value": "4",
+      "label": "Runtime deps — graph maths and SVG are hand-written"
+    }
+  ],
+  "access": "public"
+}

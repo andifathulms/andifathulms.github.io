@@ -1,0 +1,39 @@
+# Periodic Lens
+
+## Masalahnya
+
+"Tabel periodik yang bisa diklik dengan detail unsur" sudah dibuat seribu kali, dan ptable.com sudah melakukannya dengan sangat baik. Membuat satu lagi hanya layak bila ada yang belum dikerjakan siapa pun — dan ada dua.
+
+Yang pertama: bentuknya. Nyaris tak ada tabel periodik yang menjelaskan *mengapa* periode 1 berisi dua unsur, mengapa lantanida duduk di catatan kaki, atau mengapa bloknya selebar 2, 6, 10, dan 14 kolom. Jawabannya pengisian orbital — maka fitur utama situs ini adalah tabelnya merakit dirinya sendiri dari aturan itu di layar, lalu dengan jujur menyalakan sekitar dua puluh unsur yang prediksi aturannya justru meleset.
+
+Yang kedua: mineral Indonesia. Tak ada tabel periodik di mana pun yang menunjukkan unsur apa saja yang diproduksi Indonesia dan berapa pangsanya terhadap keluaran dunia. Nikel, timah, tembaga, dan emas adalah cerita nasional yang nyata — nikel berada di jantung rantai pasok baterai kendaraan listrik — dan itu menyambungkan kimia dengan hal yang sudah didengar siswa di berita. Berbahasa Inggris lebih dulu dengan terjemahan Indonesia lengkap, sengaja dibalik dari proyek-proyek lain di portofolio ini, karena kosakata kimia bersifat internasional.
+
+## Pendekatannya
+
+### Tak diketahui bukan berarti nol
+
+Banyak properti memang belum diketahui untuk unsur superberat. Sistem tipenya membuat mustahil merepresentasikan properti sebagai angka telanjang: setiap nilai berupa `{known, value, unit, source}` atau `{unknown}`. Nilai yang hilang karena itu tak mungkin diam-diam tampil sebagai ujung bawah skala warna. "Tak diketahui" punya persis satu penampakan — pola arsir — yang didefinisikan di satu berkas dan dipakai di mana-mana, dan satu lensa khusus memetakan tak lain daripada di mana pengetahuan manusia berhenti.
+
+### Aturannya menggerakkan animasi, sekaligus menguji datanya
+
+Konfigurasi elektron adalah data terbitan, tak pernah diturunkan. Aturan aufbau diimplementasikan semata untuk menjalankan animasi pengisian dan untuk *memeriksa dataset*: suite-nya menegaskan bahwa prediksi aturan itu berbeda dari nilai terbitan yang tersimpan persis pada daftar pengecualian terdokumentasi — tak lebih, tak kurang, di kedua arah. Penegasan dua arah itulah seluruh pengaman terhadap mode gagal paling berisiko, yaitu konfigurasi yang diam-diam dibangkitkan dari aturan yang justru gagal pada unsur-unsur yang menarik. Itu hal pertama yang diuji, sebelum fiturnya ada.
+
+### Satu lensa dalam satu waktu, ditegakkan arsitektur
+
+Mode gagal kebanyakan tabel periodik mentereng adalah 118 sel yang memikul lima pengkodean yang saling bersaing. Di sini warna adalah kanal yang bisa ditukar dan tak pernah ditumpuk. Berganti lensa mewarnai ulang seluruh 118 sel dalam satu morf, dan tak ada cara menumpuk dua.
+
+### Warnanya dipecahkan, bukan dipilih
+
+Palet lensa ditulis sebagai target luminans, bukan dipilih dengan mata. Tesnya lalu menegaskan bahwa ramp kontinu monoton secara luminans, bahwa nilai kategoris berjarak setidaknya 0,03 luminans agar selamat di grayscale dan pada defisiensi penglihatan warna, dan bahwa setiap nilai tetap memenuhi kontras AA terhadap teks di atasnya.
+
+### Properti tanpa sumber tidak dikirim
+
+Pipeline-nya menjalankan berkas sumber TSV bersitasi per-kolom melalui validator yang memeriksa lisensi, sitasi, tahun edisi USGS, dan kelengkapan, lalu menggabungkan dan menandai yang tak diketahui menjadi satu JSON terbangkit. Validator dan keempat suite tesnya menjaga setiap deploy. Angka produksi Indonesia masing-masing membawa tahun edisi USGS dan tahap pelaporannya — ditambang atau dimurnikan — dengan "tidak diproduksi" dibedakan tegas dari "sedikit diproduksi", dan tanpa komentar kebijakan ke arah mana pun.
+
+## Hasilnya
+
+82 commit dalam tujuh hari, sekitar 8.000 baris di aplikasi, komponen, pustaka, skrip, dan tes, dengan 157 tes di 6 suite yang mencakup seluruh 118 konfigurasi, kedua arah aturan aufbau, invarian struktural, kelengkapan layout, integritas skala lensa, kontras, dan penanganan nilai tak diketahui. Empat dependensi runtime. Nol permintaan jaringan setelah halaman dimuat.
+
+Di luar halaman build, produknya menumbuhkan tombol kontrafaktual — ganti urutan pengisian ke urutan kulit naif lalu lihat panjang barisnya berubah dari 2, 8, 8, 18, 18, 32, 32 menjadi bentuk yang salah, dan itulah seluruh alasan aturannya penting — ditambah tiga layout tabel dengan sel yang berpindah posisi, serta tiga tampilan atas kisi yang sama termasuk relief topografi yang merender properti kontinu sebagai gelombang ketinggian yang kasatmata.
+
+Enam belas commit aksesibilitas berturut-turut membentuk lintasan perbaikan yang disengaja, bukan tambalan yang ditaburkan: ARIA grid yang tak sah diganti semantik list bawaan, kisinya diciutkan ke satu perhentian tab dengan navigasi tombol panah, cincin fokus dua nada, metrik tipografi berbasis rem, nama landmark sadar-lokal, dan padanan tabel teks kisi yang bisa diurutkan. Kisinya tak pernah dialirkan ulang menjadi daftar di ponsel — bentuknya *adalah* subjeknya — jadi ia menggulir mendatar pada ukuran sel penuh. Spektrum emisi, satu lensa peregangan yang direncanakan, dipangkas, dan celahnya didokumentasikan di halaman metode alih-alih dihilangkan diam-diam.

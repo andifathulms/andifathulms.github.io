@@ -1,0 +1,39 @@
+# Periodic Lens
+
+## The problem
+
+"Clickable periodic table with element details" has been built a thousand times, and ptable.com already does it excellently. Building another one is only worth doing for something nobody else does, and there were two.
+
+The first is the shape. Almost no periodic table explains *why* period 1 has two elements, why the lanthanides sit in a footnote, or why the blocks are 2, 6, 10 and 14 columns wide. The answer is orbital filling — so the site's hero feature is the table assembling itself from that rule on screen, and then honestly lighting up the roughly twenty elements where the rule predicts the wrong answer.
+
+The second is Indonesian minerals. No periodic table anywhere shows which elements Indonesia produces and at what share of world output. Nickel, tin, copper and gold are a genuine national story — nickel sits at the centre of the EV battery supply chain — and it connects chemistry to something students already hear on the news. English-first with a full Indonesian translation, deliberately reversed from the rest of this portfolio, because chemistry vocabulary is international.
+
+## The approach
+
+### Unknown is not zero
+
+Many properties are simply not known for the superheavy elements. The type system makes it impossible to represent a property as a bare number: every value is either `{known, value, unit, source}` or `{unknown}`. A missing value therefore cannot silently render as the bottom of a colour scale. Unknown has exactly one appearance — a hatch pattern — defined in one file and used everywhere, and one lens maps nothing but where human knowledge runs out.
+
+### The rule drives the animation, and tests the data
+
+Electron configurations are published data, never derived. The aufbau rule is implemented only to power the filling animation and to *check the dataset*: the suite asserts that the rule's predictions disagree with the stored published values on exactly the documented exception list — no more, no fewer, in both directions. That bidirectional assertion is the whole safeguard against the riskiest failure mode, which is configurations quietly generated from a rule that fails on precisely the interesting elements. It was the first thing tested, before the features existed.
+
+### One lens at a time, enforced by architecture
+
+The failure mode of most flashy periodic tables is 118 cells carrying five competing encodings. Here colour is a swappable channel that is never accumulated. Switching lens re-colours all 118 cells in a single morph, and there is no way to stack two.
+
+### Colour is solved, not picked
+
+Lens palettes are authored as luminance targets rather than chosen by eye. Tests then assert that continuous ramps are luminance-monotonic, that categorical values sit at least 0.03 luminance apart so they survive greyscale and colour-vision deficiency, and that every value keeps AA contrast against the text on it.
+
+### A property without a source does not ship
+
+The pipeline runs TSV source files with per-field citations through a validator that checks licences, citations, USGS edition years and completeness, then merges and marks unknowns into one generated JSON. The validator and all four test suites gate every deploy. The Indonesian production figures each carry their USGS edition year and reporting stage — mined versus refined — with not-produced explicitly distinguished from low-produced, and no policy commentary in either direction.
+
+## Outcome
+
+82 commits over seven days, roughly 8,000 lines across app, components, library, scripts and tests, with 157 tests in 6 suites covering all 118 configurations, both directions of the aufbau rule, structural invariants, layout completeness, lens scale integrity, contrast and unknown handling. Four runtime dependencies. Zero network requests after page load.
+
+Beyond the build page, the product grew a counterfactual toggle — switch the filling order to naive shell order and watch the row lengths change from 2, 8, 8, 18, 18, 32, 32 into a wrong shape, which is the entire reason the rule matters — plus three table layouts with cells travelling between positions, and three views of the same grid including a topography relief that renders continuous properties as visible height waves.
+
+Sixteen consecutive accessibility commits form a deliberate remediation pass rather than sprinkled-in fixes: invalid grid ARIA replaced with native list semantics, the grid collapsed to one tab stop with arrow-key navigation, two-tone focus rings, rem-based type metrics, locale-aware landmark names, and a sortable text-table equivalent of the grid. The grid is never reflowed into a list on mobile — the shape *is* the subject — so it scrolls horizontally at full cell size instead. Emission spectra, a planned stretch lens, was cut, and the gap is documented on the method page rather than quietly dropped.

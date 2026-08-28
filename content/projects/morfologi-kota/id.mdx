@@ -1,0 +1,39 @@
+# Bentuk Kota
+
+## Masalahnya
+
+Metode akademik baku untuk mengukur pola jalan — entropi orientasi Boeing 2019 — dihitung di atas jaringan *kendaraan*. Akibatnya bentuk kota Indonesia nyaris tak terlihat olehnya. Sebuah kampung dijalin *gang*, lorong pejalan kaki yang sama sekali tak muncul di jaringan mobil. Perumahan berpagar bisa dilalui mobil, tetapi pintunya satu atau dua dan buntunya di mana-mana. Diukur dengan mobil saja, keduanya keluar salah, ke arah yang berlawanan pula.
+
+Proyek ini menghitung dua jaringan sekaligus — kendaraan dan pejalan kaki — untuk cakram yang sama di kota yang sama, lalu menyandingkannya. Selisih keduanya itulah temuannya. Ia sekaligus pengukuran sungguhan atas kota-kota Indonesia dan kritik atas penerapan metrik berpusat-mobil pada kota yang tidak bekerja seperti itu.
+
+Satu batasan etis disengaja membentuk seluruh produknya: kampung-lawan-perumahan bermuatan kelas di Indonesia, jadi aplikasi ini **memerikan, tak pernah menilai**. Tak ada peringkat, tak ada nilai walkability, tak ada indeks layak-huni di mana pun — dan ada tes khusus yang menjaga agar penggaris distribusinya tak bisa dibaca sebagai peringkat.
+
+## Pendekatannya
+
+### Matematikanya adalah produknya, jadi tak ada yang diimpor
+
+Tanpa pustaka graf, tanpa pustaka grafik, tanpa pustaka peta. Konstruksi graf, perhitungan bearing, entropi orientasi ter-bin, indikator keteraturan orientasi φ, pencuplikan circuity, statistik derajat, dan pengukuran cakupan footway semuanya TypeScript murni tulisan tangan, diimplementasikan langsung dari makalahnya dengan bagian-bagiannya disitasi di komentar. Inti pengukurannya menerima angka dan mengembalikan angka — tanpa DOM, tanpa React, tanpa jam, tanpa jaringan — dan itulah yang membuatnya bisa dibuktikan benar sekaligus bisa dijalankan di pipeline maupun di tes.
+
+### Kebenaran lewat konstruksi, bukan lewat pengamatan
+
+Tak ada oracle untuk "berapa entropi sebenarnya Bendungan Hilir", jadi tesnya tak mencarinya. Tesnya membangun jaringan yang jawabannya sudah diketahui lebih dulu — kisi sempurna, kisi yang sama diputar 29°, graf acak, pohon murni — lalu memastikan nilai terukurnya kembali benar. Invarian matematis kemudian ditegakkan pada setiap histogram, sintetis maupun nyata: setiap mawar wajib simetris 180°, circuity ≥ 1 menurut definisinya, proporsi derajat berjumlah 1.
+
+### Asumsi adalah kendali, bukan konstanta
+
+Tag OSM mana yang dihitung "bisa dikendarai" atau "bisa dijalani" mengubah setiap angka di situs ini. Alih-alih menguburnya, pemetaan tag itu tinggal di satu modul terdokumentasi, ditampilkan di antarmuka sebagai kendali yang bisa diganti antar tiga pemetaan, dan sensitivitasnya dilaporkan di halamannya sendiri. Pembaca bisa melihat seberapa besar kesimpulannya bergantung pada keputusan pemodelan itu.
+
+### Lokasi ditemukan dengan diukur, bukan diingat
+
+Rencana awalnya daftar lokasi pilihan tangan. Memilih dengan tangan menghasilkan 10 lokasi terpakai dari 49 tebakan — dan yang meleset tak membuktikan apa pun, sebab lingkungan yang tak terpikirkan bukanlah lingkungan yang ditolak. Pivotnya: sapuan kerapatan atas 56 kota yang membin setiap footway terpetakan ke dalam sel seukuran cakram lalu memeringkat kandidat berdasarkan cakupan terukur. Sapuan itu menyumbang 14 dari 33 lokasi final, termasuk cakram pertama di Papua, Lombok, dan Kalimantan.
+
+### Mode gagal proksinya, ditemukan dengan cara sulit
+
+Cakupan footway tak bisa membedakan gang dari jalan setapak taman. Kandidat dengan cakupan terbaik di Bogor — tertinggi yang pernah disurvei, 40,9% — ternyata kebun raya; yang terbaik di Jakarta 78%-nya di dalam satu taman. Dari situ lahir aturan terkode (pangsa taman >25% bukan fabrik kota; `landuse=grass` diambil lalu diabaikan, karena pemeta memakainya untuk bahu jalan) dan satu pemeriksaan validasi yang mengharuskan survei memprediksi pipeline dalam selisih satu poin persen — yang menangkap dua lokasi yang termasuk dengan koordinat basi.
+
+## Hasilnya
+
+93 commit dalam delapan hari, sekitar 11.000 baris TypeScript yang terdiri dari inti pengukuran 2.100 baris, pipeline 2.600 baris, komponen, halaman, dan 1.500 baris tes. 577 tes di 14 berkas, dengan tiga suite bergerbang — sintetis, invarian, validasi data — plus audit aksesibilitas yang berdiri antara sebuah commit dan produksi.
+
+Setiap lokasi menerbitkan seberapa baik gang-gangnya benar-benar terpetakan, dan lokasi bercakupan tipis ditandai alih-alih diam-diam dibandingkan, karena data peta yang hilang akan memalsukan temuan utamanya. Temuan itu sendiri dibatasi dengan jujur: setiap kandidat perumahan berpagar yang dicari langsung kembali tipis, di 0,9–4,4% cakupan, jadi perbandingan kampung-lawan-perumahan bertumpu pada dua lokasi berpagar yang terbaca dari tiga — dinyatakan sebagai angka di halamannya, bukan dihilangkan. Satu commit ada semata untuk mengoreksi satu kalimat terbit yang sudah dilampaui datanya.
+
+Situsnya mengirim JavaScript sisi klien nyaris nol: kartu, pengurutan, mode kerapatan, dan sorotan antar-kartu semuanya HTML dan CSS yang dirender server, dengan state di URL, sehingga seribu path SVG per lokasi tak pernah melintasi batas hidrasi. Rasio kontras dan skala tipografinya dihitung ulang oleh unit test dari nilai heks di sebelahnya, jadi sistem desainnya diperiksa, bukan diingat.
