@@ -1,0 +1,34 @@
+{
+  "slug": "rumah-adat-nusantara",
+  "title": "Rumah Adat Nusantara",
+  "tagline": "An interactive collection of 35 traditional Indonesian buildings, each computed from the cultural rules that govern it — a household's rank, a family count, a body measurement — so changing one number rebuilds the structure in front of you",
+  "categoryTags": [
+    "Personal Project",
+    "3D & Architecture",
+    "Education"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "three.js",
+    "Tailwind CSS",
+    "Vitest"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Aug–Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/rumah-adat-nusantara/id/",
+  "githubUrl": "https://github.com/andifathulms/rumah-adat-nusantara",
+  "heroImage": "/images/projects/rumah-adat-nusantara/hero.webp",
+  "order": 40,
+  "featured": false,
+  "metrics": [
+    { "value": "35", "label": "Buildings, each generated from its own cultural rule pack" },
+    { "value": "1,770", "label": "Tests across 58 files — a structural suite per building" },
+    { "value": "0", "label": "Runtime network calls — the site works with the wifi off" },
+    { "value": "0%", "label": "Measured dimensions — the honesty bar the site displays, not hides" }
+  ],
+  "access": "public"
+}

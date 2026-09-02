@@ -1,0 +1,31 @@
+# Rumah Adat Nusantara
+
+## The problem
+
+Most Indonesians meet "rumah adat" — traditional houses — as a list to memorize for a school exam: a name, a province, a photo of a roof. Nothing in that explains *why* the roof is that shape. The information exists, in ethnographies and provincial survey volumes, but it's scattered, mostly untranslated, and written for specialists. At the same time, the usual digital answer — a photorealistic 3D model — quietly makes things worse: a smooth render states every dimension with total confidence, including the ones nobody has ever measured.
+
+This project answers both. It generates each building from the cultural rules that govern it — a household's rank, a family count, a body measurement — so changing one of those socially meaningful numbers visibly rebuilds the structure. And on every screen, it states plainly how much of what you're looking at is documented versus the author's own informed guess.
+
+## The approach
+
+### The building is downstream of the rules
+
+`buildHouse(rules)` is a pure, deterministic function: rules in, a list of parts and joints out. There is no "roof curvature" slider anywhere in the product, because a roof shape is a consequence, not an input — the controls only offer things a household would actually say about itself: a rank, a room count, a tally of ceremonies held, the number of families under one ridge. Every post, rafter, and joint across all 35 buildings is emitted by hand-written arithmetic — no CAD import, no mesh library, no CSG, no lofting library.
+
+### A tradition-neutral core, grown only by extraction
+
+`lib/core/` holds what is mechanically true of any built thing — parts, joints, build order, symmetry, provenance — generic over what each tradition calls things, so a Minangkabau part can't claim a Toraja construction stage and still type-check. Nothing moves into the core until at least two building packs have written it independently; an abstraction designed from one example comes out shaped like that example while looking validated. A test fails the build if the core so much as names a tradition, or if one tradition imports another.
+
+### Provenance is a type, not metadata
+
+Every dimension is wrapped with a class — measured, canon, or interpolated — and a source key. The UI reads it, a dedicated route lists every dimension with its citation, and figures from two buildings are never averaged, because an averaged number would let an unsurveyed building hide behind a surveyed one. Today nothing in any of the 35 buildings is `measured`, and the site says so loudly: one invariant — model versus a real measured drawing — permanently reports **skipped**, and moving it is the project's stated progress metric, not something a new building can substitute for.
+
+### Every picture is a projection of the model
+
+Landing-page silhouettes, catalogue plates, the favicon, exported orthographic drawings, and all 70 social share cards are computed from the same parts the invariant suite runs over, and pixel-compared against the generator in CI. An illustration that disagreed with the model isn't a bug here — it's structurally impossible to produce. Lighting works the same way: each building has a real site (35 of them, spanning three time zones), and the sun in the scene is the actual sun over that site on the chosen date, including the computed zero-shadow day where it passes directly overhead.
+
+## Outcome
+
+Live and public: 35 buildings — 26 houses, two granaries, three halls, a palace, a houseboat, a stone tomb, a cremation tower, a nine-building compound, and a pair of ancestor shrines — each with its own generator, rule pack, source table, and structural invariant suite run over at least five rule combinations, plus a deliberate counterexample built specifically to break it. Sole author, 210 commits, ~96,600 lines of code, 1,770 tests across 58 files, all gating the deploy: a failing structural check stops the release before it ships.
+
+No backend, no database, and no runtime network call anywhere — every texture draws on a canvas at load, and the site works with the wifi off. The one deliberate exception to "hand-written arithmetic" is three.js, used only to rasterize meshes the project already generated itself. The honest number the project is proudest of is also its least flattering: every dimension in every building is currently `interpolated`, because no measured survey has been wired in yet — and the site displays that gap on every screen rather than hiding it, naming the first real measured drawing as the highest-value work still ahead of it.

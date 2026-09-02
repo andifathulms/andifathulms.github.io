@@ -1,0 +1,31 @@
+# Rumah Adat Nusantara
+
+## Masalahnya
+
+Kebanyakan orang Indonesia mengenal "rumah adat" sebagai daftar hafalan ujian sekolah: sebuah nama, sebuah provinsi, foto sebuah atap. Tak ada yang menjelaskan *mengapa* atapnya berbentuk begitu. Informasinya ada — di etnografi, volume survei provinsi — tetapi tersebar, kebanyakan tak diterjemahkan, dan ditulis untuk spesialis. Di sisi lain, jawaban digital yang biasa — model 3D fotorealistik — diam-diam justru memperburuk keadaan: render yang mulus menyatakan setiap dimensi dengan percaya diri penuh, termasuk yang tak pernah diukur siapa pun.
+
+Proyek ini menjawab keduanya. Ia menghasilkan tiap bangunan dari aturan budaya yang mengaturnya — pangkat sebuah rumah tangga, jumlah keluarga, ukuran tubuh — sehingga mengubah salah satu angka bermakna sosial itu secara nyata membangun ulang strukturnya. Dan di setiap layar, ia menyatakan dengan lugas seberapa banyak dari yang Anda lihat itu terdokumentasi versus tebakan berdasar milik penulisnya sendiri.
+
+## Pendekatannya
+
+### Bangunannya adalah turunan dari aturan
+
+`buildHouse(rules)` adalah fungsi murni dan deterministik: aturan masuk, daftar bagian dan sambungan keluar. Tak ada slider "kelengkungan atap" di mana pun dalam produk ini, karena bentuk atap adalah konsekuensi, bukan masukan — kontrolnya hanya menawarkan hal yang benar-benar akan dikatakan sebuah rumah tangga tentang dirinya sendiri: sebuah pangkat, jumlah ruang, hitungan upacara yang pernah digelar, jumlah keluarga di bawah satu bubungan. Setiap tiang, kasau, dan sambungan di seluruh 35 bangunan dihasilkan oleh aritmetika tulisan tangan — tanpa impor CAD, tanpa pustaka mesh, tanpa CSG, tanpa pustaka lofting.
+
+### Inti netral-tradisi, tumbuh hanya lewat ekstraksi
+
+`lib/core/` menyimpan apa yang secara mekanis benar untuk bangunan apa pun — bagian, sambungan, urutan bangun, simetri, provenans — generik terhadap apa yang disebut tiap tradisi untuk hal-halnya, sehingga sebuah bagian Minangkabau tak bisa mengaku sebagai tahap konstruksi Toraja dan tetap lolos type-check. Tak ada yang pindah ke inti sampai setidaknya dua paket bangunan menulisnya secara independen; abstraksi yang dirancang dari satu contoh akan keluar berbentuk seperti contoh itu sambil tampak tervalidasi. Sebuah tes menggagalkan build jika inti bahkan menyebut nama satu tradisi, atau jika satu tradisi mengimpor tradisi lain.
+
+### Provenans adalah tipe, bukan metadata
+
+Setiap dimensi dibungkus dengan kelasnya — measured, canon, atau interpolated — dan kunci sumbernya. Antarmuka membacanya, sebuah rute khusus mendaftar tiap dimensi dengan kutipannya, dan angka dari dua bangunan tak pernah dirata-ratakan, karena angka rata-rata akan membiarkan bangunan yang tak disurvei bersembunyi di balik bangunan yang disurvei. Hari ini tak satu pun dari 35 bangunan yang `measured`, dan situs ini menyatakannya dengan lantang: satu invarian — model versus gambar terukur nyata — secara permanen melaporkan **skipped**, dan menggerakkannya adalah metrik kemajuan yang dinyatakan proyek ini, bukan sesuatu yang bisa digantikan oleh bangunan baru.
+
+### Setiap gambar adalah proyeksi dari model
+
+Siluet halaman muka, plat katalog, favicon, gambar ortografis yang diekspor, dan ke-70 kartu berbagi sosial semuanya dihitung dari bagian yang sama yang dijalankan suite invarian di atasnya, dan dibandingkan piksel-demi-piksel dengan generator di CI. Ilustrasi yang tak sesuai dengan model bukan bug di sini — itu mustahil secara struktural untuk dihasilkan. Pencahayaan bekerja dengan cara yang sama: setiap bangunan punya lokasi nyata (35 di antaranya, meliputi tiga zona waktu), dan matahari dalam adegan adalah matahari sungguhan di atas lokasi itu pada tanggal yang dipilih, termasuk hari tanpa-bayangan yang dihitung ketika mataharinya tepat di atas kepala.
+
+## Hasil
+
+Live dan publik: 35 bangunan — 26 rumah, dua lumbung, tiga balai, sebuah istana, sebuah rumah perahu, sebuah makam batu, sebuah menara kremasi, sebuah kompleks sembilan bangunan, dan sepasang pusaka leluhur — masing-masing dengan generator, paket aturan, tabel sumber, dan suite invarian struktural sendiri yang dijalankan atas setidaknya lima kombinasi aturan, ditambah sebuah kontraconto yang sengaja dibangun untuk mematahkannya. Penulis tunggal, 210 commit, ~96.600 baris kode, 1.770 tes di 58 berkas, semuanya menjaga gerbang deploy: satu pemeriksaan struktural yang gagal menghentikan rilis sebelum ia dikirim.
+
+Tanpa backend, tanpa basis data, dan tanpa satu pun panggilan jaringan saat runtime — setiap tekstur digambar di canvas saat dimuat, dan situs ini bekerja dengan wifi mati. Satu-satunya pengecualian yang disengaja dari "aritmetika tulisan tangan" adalah three.js, dipakai hanya untuk merasterisasi mesh yang telah dihasilkan sendiri oleh proyek ini. Angka jujur yang paling dibanggakan proyek ini justru yang paling tak menyanjung: setiap dimensi di setiap bangunan saat ini `interpolated`, karena belum ada survei terukur yang terpasang — dan situs ini menampilkan celah itu di setiap layar alih-alih menyembunyikannya, menyebut gambar terukur nyata pertama sebagai pekerjaan bernilai tertinggi yang masih menanti.
