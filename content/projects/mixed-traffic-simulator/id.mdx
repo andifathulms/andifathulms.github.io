@@ -1,0 +1,31 @@
+# Mixed Traffic Simulator
+
+## Masalahnya
+
+Analisis kapasitas jalan di Indonesia berjalan di atas MKJI 1997, yang mengonversi tiap kendaraan menjadi "satuan mobil penumpang" memakai faktor ekuivalensi tetap. Sepeda motor diberi angka 0,25 atau 0,5 tergantung jenis jalannya. Dua dekade studi lapangan Indonesia telah mengukur "konstanta" yang seharusnya tetap itu di angka 0,198, 0,32, 0,35, 0,4, 0,84 — dan, dalam satu studi regresi di Denpasar, **−0,11 pada agregasi satu jam**, yang secara fisik tak bermakna.
+
+Konsekuensinya operasional, bukan akademis: bundaran yang sama pada jam sibuk yang sama bisa dinilai level of service C oleh satu metode dan level of service F oleh metode lain. Bisa diterima, atau gagal, tergantung metode mana yang kebetulan dipilih seseorang — dan perbedaan itu yang mendanai atau tidak mendanai sebuah intervensi. Studi lapangan tak bisa menyelesaikan ini, karena Anda tak bisa menjalankan ulang jam lalu lintas yang sama dengan sepeda motornya dihilangkan. Sebuah simulator bisa: mensimulasikan aliran dengan pangsa sepeda motor yang diketahui, memperoleh kebenaran dasar lewat substitusi terkendali — menjalankan ulang skenario yang identik dengan sepeda motor diganti mobil — lalu menerapkan tiap metode estimasi yang diterbitkan pada aliran yang sama hanya memakai apa yang bisa dilihat pengamat di pinggir jalan, dan menunjukkan metode-metode itu tak sepakat satu sama lain dan dengan kebenaran yang sudah di tangan.
+
+## Pendekatannya
+
+### Firewall estimator — keputusan yang menopang semuanya
+
+Seluruh argumennya runtuh jika metode estimasi bisa curang. `src/estimators/` secara struktural dilarang mengimpor `src/sim/` — sebuah aturan ESLint menggagalkan build jika ia mencoba, diperiksa di CI sebelum tiap deploy. Estimator-estimatornya hanya memakai satu tipe bersama: waktu lintas, kelas kendaraan yang dinilai dengan mata, kecepatan sesaat, waktu okupansi, posisi lateral — pandangan terbatas yang sama yang dimiliki insinyur lapangan sungguhan. Metode yang bisa melihat kecepatan sebenarnya dan identitas kendaraan sebenarnya bukanlah metode yang dipakai insinyur lapangan, dan membandingkannya dengan itu akan tidak jujur. Satu-satunya pengecualian yang terdokumentasi adalah substitusi kebenaran dasar itu sendiri, karena kebenaran dasar menurut definisinya adalah hal yang tak bisa diperoleh seorang pengamat.
+
+### Determinisme sebagai fitur produk
+
+Timestep fisika tetap 0,05 detik, terpisah dari loop render dan diakumulasi per frame, sehingga hasilnya tak pernah bergantung pada perangkat keras pengguna. Satu generator acak berbenih tunggal berjalan di seluruh simulasi — `Math.random` dilarang di seluruh repo lewat aturan lint. Karena itu, seluruh keadaan aplikasi (skenario, tiap parameter, aturan pergerakan lateral, benih, kecepatan, interval agregasi) terserialisasi ke URL: hasil yang mengejutkan bisa dibagikan sebagai tautan yang mereproduksinya persis, dan sapuan parameter batch bisa dihasilkan ulang hanya dari benihnya.
+
+### Menamai pilihan pemodelan alih-alih menyembunyikannya
+
+Tak ada model baku untuk lalu lintas tanpa jalur, jadi alih-alih memilih satu dan menyiratkannya sebagai fisika, aplikasi ini menyediakan tiga aturan pergerakan lateral yang bisa dipilih — jalur ketat dengan MOBIL, sublane yang mencari celah, dan potensi social-force — dan menamai yang sedang aktif di antarmuka setiap saat. Aturan social-force tak punya rujukan literatur transportasi, jadi kolom rujukannya secara harfiah `null`, dan antarmuka menampilkan itu sebagai peringatan yang dinyatakan alih-alih kolom kosong.
+
+### Hasil negatif dilaporkan, bukan dipangkas
+
+Ketika sebuah estimator mengembalikan faktor ekuivalensi negatif yang secara fisik tak bermakna, ia digambar di bawah sumbu dengan peringatan spesifik alih-alih disembunyikan atau dipangkas ke nol. Angka itu adalah data paling meyakinkan yang dimiliki aplikasi ini, dan menyembunyikannya akan mengalahkan tujuan seluruh aplikasi ini dibuat.
+
+## Hasil
+
+Live dan publik: 22 kendaraan di ring sepanjang 230 meter, tanpa bottleneck dan tanpa insiden, dan kemacetan tetap terbentuk hanya dari dinamika reaksi lalu merambat mundur selamanya — mereproduksi hasil fisika-arus-lalu-lintas yang telah diterbitkan, terukur dalam aplikasi pada kecepatan gelombang −8,6 km/jam, dan ditegakkan sebagai gerbang build alih-alih sekadar demo. Bangku ekuivalensi memplot lima metode estimasi terhadap pangsa sepeda motor, dengan kebenaran dasar nyaris datar sementara metode regresi dan kecepatan berayun dari +16 ke −30, berulang kali melewati nol dan mereproduksi angka −0,11 yang diterbitkan pada agregasi lebar. Inspektur kendaraan menunjukkan aritmetika model mengemudi langsung dari mobil atau motor mana pun yang dipilih — suku free-flow, suku interaksi, celah saat ini dan yang diinginkan, percepatan yang dihasilkan — tampilan "tunjukkan cara kerjanya" bagi siapa pun yang tak percaya pada simulasinya.
+
+Penulis tunggal, 38 commit dalam dua hari yang terkonsentrasi, ~11.700 baris TypeScript. Empat dependensi runtime, dua di antaranya font — tanpa pustaka fisika, tanpa pustaka charting, tanpa framework simulasi, tanpa pustaka state-management. Setiap grafik, setiap sumbu, dan seluruh mesin fisikanya ditulis tangan. Aplikasi ini menyatakan dengan lugas bahwa ia bukan model terkalibrasi dari jalan tertentu mana pun dan bukan pengganti perangkat lunak simulasi lalu lintas profesional — tugasnya adalah mendemonstrasikan sebuah asumsi yang gagal, bukan merencanakan sebuah persimpangan sungguhan.

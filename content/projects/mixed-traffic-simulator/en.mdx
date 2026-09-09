@@ -1,0 +1,31 @@
+# Mixed Traffic Simulator
+
+## The problem
+
+Indonesian road capacity analysis runs on MKJI 1997, which converts every vehicle into a "passenger car unit" using a fixed equivalence factor. Motorcycles are assigned 0.25 or 0.5 depending on road type. Two decades of Indonesian field studies have measured that supposedly fixed constant at 0.198, 0.32, 0.35, 0.4, 0.84 — and, in one Denpasar regression study, **−0.11 at one-hour aggregation**, which is physically meaningless.
+
+The consequence is operational, not academic: the same roundabout in the same peak hour can rate level of service C by one method and level of service F by another. Acceptable, or failed, depending on which method someone happened to choose — and that difference funds or doesn't fund an intervention. A field study can't settle this, because you can't re-run the same hour of traffic with the motorcycles removed. A simulator can: simulate a stream with a known motorcycle share, obtain ground truth by controlled substitution — re-running the identical scenario with motorcycles replaced by cars — then apply each published estimation method to the same stream using only what a roadside observer could have seen, and show the methods disagreeing with each other and with the truth already in hand.
+
+## The approach
+
+### The estimator firewall — the load-bearing decision
+
+The whole argument collapses if the estimation methods can cheat. `src/estimators/` is structurally forbidden from importing `src/sim/` — an ESLint rule fails the build if it tries, checked in CI before every deploy. The estimators consume exactly one shared type: a crossing time, a vehicle class judged by eye, a spot speed, an occupancy time, a lateral position — the same limited view a real field engineer has. A method that can see true speeds and true vehicle identities isn't the method a field engineer used, and comparing it to one would be dishonest. The one documented exception is the ground-truth substitution itself, because ground truth is by definition the thing an observer can't obtain.
+
+### Determinism as a product feature
+
+A fixed 0.05-second physics timestep, decoupled from the render loop and accumulated per frame, so results never depend on the user's hardware. A single seeded generator runs through the entire simulation — `Math.random` is banned repo-wide by a lint rule. Because of that, the full application state (scenario, every parameter, the lateral movement rule, seed, speed, aggregation interval) serializes to the URL: a surprising result is shareable as a link that reproduces it exactly, and a batch parameter sweep is regenerable from its seed alone.
+
+### Naming the modelling choice instead of hiding it
+
+There's no canonical model for lane-free traffic, so rather than pick one and imply it's physics, the app ships three selectable lateral-movement rules — strict lanes with MOBIL, gap-seeking sublane, and social-force potentials — and names the active one in the interface at all times. The social-force rule has no traffic-literature citation, so its citation field is literally `null`, and the interface renders that as a stated caveat rather than an empty field.
+
+### Negative results are reported, not clamped
+
+When an estimator returns a physically meaningless negative equivalence factor, it's plotted below the axis with a specific warning rather than hidden or clamped to zero. That number is the app's single most persuasive data point, and hiding it would defeat the purpose the whole app exists for.
+
+## Outcome
+
+Live and public: 22 vehicles on a 230-meter ring, no bottleneck and no incident, and a traffic jam still forms from reaction dynamics alone and propagates backward forever — reproducing a published physical-traffic-flow result, measured in the app at −8.6 km/h wave speed, and enforced as a build gate rather than left as a demo. The equivalence bench plots five estimation methods against motorcycle share, with ground truth nearly flat and the regression and speed methods swinging from +16 to −30, crossing zero repeatedly and reproducing the published −0.11 at wide aggregation. A vehicle inspector shows any selected car or motorcycle's live driving-model arithmetic — free-flow term, interaction term, current and desired gap, resulting acceleration — the "show your work" view for anyone who doesn't believe the simulation.
+
+Sole author, 38 commits over two concentrated days, ~11,700 lines of TypeScript. Four runtime dependencies, two of them fonts — no physics library, no charting library, no simulation framework, no state-management library. Every chart, every axis, and the entire physics engine are hand-written. The app states plainly that it is not a calibrated model of any specific road and not a replacement for professional traffic-simulation software — its job is to demonstrate an assumption failing, not to plan a real intersection.

@@ -1,0 +1,33 @@
+{
+  "slug": "query-planner",
+  "title": "Query Planner",
+  "tagline": "A browser-based SQL query planner and executor that shows every plan a database considered — not just the one it picked — and puts its estimate next to the truth at every step, so you can see exactly where and why it guessed wrong",
+  "categoryTags": [
+    "Personal Project",
+    "Developer Tool",
+    "Data Visualization"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "Vitest",
+    "SVG"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/query-planner/",
+  "githubUrl": "https://github.com/andifathulms/query-planner",
+  "heroImage": "/images/projects/query-planner/hero.webp",
+  "order": 41,
+  "featured": false,
+  "metrics": [
+    { "value": "294", "label": "Tests, including 33 checked against real Postgres" },
+    { "value": "255", "label": "DP cells for an 8-table join — every losing plan kept, not discarded" },
+    { "value": "3", "label": "Runtime dependencies — no SQL, charting, or graph-layout library" },
+    { "value": "98KB", "label": "Gzipped bundle, well under its own 350KB budget" }
+  ],
+  "access": "public"
+}

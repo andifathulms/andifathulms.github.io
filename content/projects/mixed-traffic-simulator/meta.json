@@ -1,0 +1,34 @@
+{
+  "slug": "mixed-traffic-simulator",
+  "title": "Mixed Traffic Simulator",
+  "tagline": "A browser simulator of Indonesian motorcycle-dominated traffic that runs the controlled experiment no field study can — proving the standard \"one motorcycle equals 0.25 cars\" planning constant is an artefact of how it was measured, not a fact about traffic",
+  "categoryTags": [
+    "Personal Project",
+    "Smart City",
+    "Data Visualization"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "Vitest",
+    "Canvas",
+    "SVG"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/mixed-traffic-simulator/?s=phantom-jam&x=4&tab=inspector",
+  "githubUrl": "https://github.com/andifathulms/mixed-traffic-simulator",
+  "heroImage": "/images/projects/mixed-traffic-simulator/hero.webp",
+  "order": 42,
+  "featured": false,
+  "metrics": [
+    { "value": "−0.11", "label": "Reproduced published equivalence factor — physically meaningless, reported anyway" },
+    { "value": "5", "label": "Estimation methods compared against one controlled ground truth" },
+    { "value": "129", "label": "Tests across 11 suites, engine kept pure and headless" },
+    { "value": "0", "label": "External libraries — physics, charts, and rendering all hand-written" }
+  ],
+  "access": "public"
+}
