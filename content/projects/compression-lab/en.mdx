@@ -1,0 +1,35 @@
+# Compression Lab
+
+## The problem
+
+Almost every explanation of data compression teaches a handful of algorithms and implies there's a single "entropy floor" they all approach. That's wrong, and the wrongness is the interesting part: entropy isn't a property of a text, it's a property of a text *under a model*. Condition on the previous character and the cost drops; condition on two and it drops again — but each step down costs something to describe, and that description has to ship with the data. Total size is code stream plus model description, and that total has a minimum at some model order that moves depending on how long the text is.
+
+Existing explainers hide this because they never count the model's own cost. This app makes the trade-off visible: paste a longer piece of text and the optimal model order visibly moves. That single moment is the entire argument, delivered without a paragraph of explanation.
+
+## The approach
+
+### A pure engine, separated hard from the UI
+
+The compression engine imports nothing — no React, no DOM, no randomness, no clock — and runs unmodified under a plain Node test runner. That separation is what makes the numbers testable independently of anything that draws them, which is the whole basis for trusting what the interface claims.
+
+### Every coder has a working decoder, and it's tested
+
+Decompression isn't a user-facing feature, but a coder without a decoder is unverified, and this app's entire claim is that its numbers are real. Round-trip tests cover the empty string, a single character, a repeated character, an all-distinct-characters string, text outside the standard Unicode range, and every bundled sample text.
+
+### Model cost is measured, never estimated
+
+A real byte-level serializer writes the statistical model to bytes, and a matching deserializer reads it back; the test suite asserts that a decoder given only the compressed stream and those model bytes reproduces the original text exactly, for every coder at every model order. The number shown in the interface for "model cost" is literally the length of that serialized byte array — if this were a formula or an approximation, the minimum on the app's central chart would be fiction rather than a measurement.
+
+### Traces, not re-simulation
+
+Each coder emits a trace record alongside its compressed output — the Huffman merge sequence, the LZ77 window search steps, the arithmetic coder's interval state at every symbol. The views render that trace directly and never re-run the algorithm to produce a picture, so the visualization and the computation can't drift apart from each other over time.
+
+### An honest idealization on top of real integer arithmetic
+
+A textbook floating-point implementation of arithmetic coding breaks after roughly fifteen symbols, so the engine runs on integer registers with proper renormalization and underflow handling. The zooming interval a user watches on screen is a real-number idealization of that integer state — the trace carries both representations, and the interface states plainly which one is being shown where.
+
+## Outcome
+
+Live: the central chart plots conditional entropy at six model orders as descending steps, each coder's actually-achieved rate against them, the model's own description cost as a rising curve, and total size as a third curve with a visible, moving minimum. A parallel-corpus comparison runs the same measurement across four languages of one source text and reports a result that partly contradicts its own hypothesis — Indonesian shows the widest advantage from pattern-matching compression over a naive model, but the most grammatically complex of the four languages does not — and the interface states both findings rather than picking the one that tells a cleaner story.
+
+Sole author, 41 commits over a two-day concentrated build, ~9,800 lines of code, 64 tests. Two runtime dependencies — React and React DOM — with the frequency models, Huffman coding, an integer arithmetic range coder, and LZ77 with a hash-chain match finder all written from scratch; no compression, entropy, or charting library anywhere in the dependency tree, because importing one would defeat the point of the project. A full recompute across all six model orders and three coders lands under 16 milliseconds so typing needs no debounce, and nothing typed into it ever leaves the browser.

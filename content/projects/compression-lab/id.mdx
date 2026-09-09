@@ -1,0 +1,35 @@
+# Compression Lab
+
+## Masalahnya
+
+Nyaris setiap penjelasan tentang kompresi data mengajarkan segelintir algoritma dan menyiratkan ada satu "batas entropi" tunggal yang didekati semuanya. Itu salah, dan kesalahannya adalah bagian yang menarik: entropi bukan properti dari sebuah teks, ia properti dari sebuah teks *di bawah sebuah model*. Kondisikan pada karakter sebelumnya dan biayanya turun; kondisikan pada dua karakter dan turun lagi — tetapi tiap langkah turun itu berbiaya untuk dideskripsikan, dan deskripsi itu harus dikirim bersama datanya. Ukuran total adalah aliran kode ditambah deskripsi model, dan totalnya punya minimum pada suatu orde model yang bergerak tergantung seberapa panjang teksnya.
+
+Penjelas yang ada menyembunyikan ini karena mereka tak pernah menghitung biaya model itu sendiri. Aplikasi ini membuat trade-off itu terlihat: tempel teks yang lebih panjang dan orde model optimalnya terlihat bergeser. Momen tunggal itu adalah seluruh argumennya, disampaikan tanpa satu paragraf pun penjelasan.
+
+## Pendekatannya
+
+### Mesin murni, terpisah keras dari antarmuka
+
+Mesin kompresinya tak mengimpor apa pun — tanpa React, tanpa DOM, tanpa keacakan, tanpa jam — dan berjalan tanpa perubahan di bawah plain Node test runner. Pemisahan itulah yang membuat angka-angkanya bisa diuji secara independen dari apa pun yang menggambarnya, yang menjadi dasar seluruhnya untuk mempercayai apa yang diklaim antarmuka.
+
+### Setiap coder punya decoder yang bekerja, dan itu diuji
+
+Dekompresi bukan fitur yang dihadapkan ke pengguna, tetapi coder tanpa decoder tak terverifikasi, dan seluruh klaim aplikasi ini adalah angka-angkanya nyata. Tes round-trip mencakup string kosong, satu karakter, karakter berulang, string dengan semua karakter berbeda, teks di luar rentang Unicode standar, dan setiap teks sampel yang disertakan.
+
+### Biaya model diukur, tak pernah diperkirakan
+
+Serialiser byte sungguhan menulis model statistik ke byte, dan deserialiser yang cocok membacanya kembali; suite tes menegaskan bahwa decoder yang hanya diberi aliran terkompresi dan byte model itu bisa mereproduksi teks asli persis, untuk setiap coder di setiap orde model. Angka yang ditampilkan di antarmuka untuk "biaya model" secara harfiah adalah panjang array byte yang diserialisasi itu — jika ini formula atau perkiraan, minimum pada grafik utama aplikasi ini akan jadi fiksi, bukan pengukuran.
+
+### Jejak, bukan simulasi ulang
+
+Tiap coder menghasilkan rekaman jejak beserta keluaran terkompresinya — urutan penggabungan Huffman, langkah pencarian jendela LZ77, keadaan interval arithmetic coder di tiap simbol. Tampilan-tampilannya menggambar jejak itu langsung dan tak pernah menjalankan ulang algoritmanya untuk menghasilkan gambar, sehingga visualisasi dan komputasinya tak bisa melenceng satu sama lain seiring waktu.
+
+### Idealisasi jujur di atas aritmetika integer sungguhan
+
+Implementasi arithmetic coding floating-point khas buku teks rusak setelah sekitar lima belas simbol, jadi mesinnya berjalan di atas register integer dengan renormalisasi dan penanganan underflow yang benar. Interval yang di-zoom yang dilihat pengguna di layar adalah idealisasi bilangan-real dari keadaan integer itu — jejaknya membawa kedua representasi, dan antarmuka menyatakan dengan lugas mana yang sedang ditampilkan di mana.
+
+## Hasil
+
+Live dan publik: grafik utamanya memplot entropi kondisional pada enam orde model sebagai anak tangga menurun, laju yang benar-benar dicapai tiap coder terhadapnya, biaya deskripsi model itu sendiri sebagai kurva menanjak, dan ukuran total sebagai kurva ketiga dengan minimum yang terlihat dan bergerak. Sebuah perbandingan korpus paralel menjalankan pengukuran yang sama di empat bahasa dari satu teks sumber dan melaporkan hasil yang sebagian bertentangan dengan hipotesisnya sendiri — bahasa Indonesia menunjukkan keunggulan terlebar dari kompresi pencocokan-pola dibanding model naif, tetapi bahasa paling kompleks secara gramatikal dari keempatnya tidak — dan antarmukanya menyatakan kedua temuan itu alih-alih memilih yang menceritakan kisah lebih rapi.
+
+Penulis tunggal, 41 commit dalam build terkonsentrasi dua hari, ~9.800 baris kode, 64 tes. Dua dependensi runtime — React dan React DOM — dengan model frekuensi, Huffman coding, integer arithmetic range coder, dan LZ77 dengan hash-chain match finder semuanya ditulis dari nol; tanpa pustaka kompresi, entropi, atau charting di mana pun dalam pohon dependensinya, karena mengimpor satu saja akan mengalahkan tujuan proyek ini. Penghitungan ulang penuh di seluruh enam orde model dan tiga coder mendarat di bawah 16 milidetik sehingga mengetik tak butuh debounce, dan tak ada yang diketikkan ke dalamnya yang pernah meninggalkan browser.

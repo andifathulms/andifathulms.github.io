@@ -1,0 +1,31 @@
+# Suara ke Kursi
+
+## Masalahnya
+
+Indonesia memilih parlemen nasionalnya lewat dua aturan yang nyaris tak bisa dilakukan siapa pun dengan tangan: ambang batas nasional 4% — partai di bawahnya tak mengonversi satu pun suaranya menjadi kursi di mana pun, termasuk di dapil tempat ia menang — dan metode pembagi tertinggi Sainte-Laguë, di mana tiap 84 daerah pemilihan membagikan kursinya dengan berulang kali membagi suara partai dengan 1, 3, 5, 7 dan seterusnya. Pada pemilu 2024, 18 partai berkontestasi, 8 lolos ambang batas, dan lebih dari 17,3 juta suara sah tak menghasilkan satu kursi pun. Satu partai petahana di parlemen kehilangan ambang batas hanya sekitar 0,13 poin persentase dan tak mendapat kursi sama sekali.
+
+Ini bukan sekadar akademis: Mahkamah Konstitusi Indonesia menyatakan angka 4% itu konstitusional hanya untuk 2024, dan memerintahkan legislatif merumuskan ulang sebelum pemilu berikutnya dengan syarat yang mencakup meminimalkan suara yang terkonversi menjadi nihil. Mahkamah, pada dasarnya, memerintahkan sebuah perhitungan — dan belum ada yang mengirim instrumen publik yang menjalankannya.
+
+## Pendekatannya
+
+### Mesin murni, terisolasi dari segala hal
+
+Mesin alokasinya tak mengimpor apa pun — tanpa React, tanpa DOM, tanpa tanggal, tanpa keacakan. Satu fungsi sinkron dan deterministik menerima data partai, data dapil, dan seperangkat aturan, lalu mengembalikan alokasi lengkapnya. Ia berjalan tanpa perubahan dalam skrip Node biasa, yang membuat hasilnya bisa diperiksa secara independen alih-alih sekadar klaim yang dibuat antarmuka tentang dirinya sendiri.
+
+### Komputasi dan tampilannya adalah objek yang sama
+
+Setiap perolehan kursi mencatat tabel pembagi lengkap pada saat kursi itu diklaim. Tampilan "tunjukkan cara kerjanya" menggambar array itu langsung — ia tak pernah menghitung ulang, sehingga gambarnya tak bisa perlahan berhenti menggambarkan aritmetika di baliknya, sebuah mode kegagalan umum pada visualisasi penjelas.
+
+### Cukup cepat sehingga tak butuh mekanisme asinkron
+
+Penghitungan ulang penuh di seluruh 84 dapil berjalan pada median 0,23 milidetik, terhadap anggaran 16 milidetik. Itu artinya slider ambang batas bisa menghitung ulang seluruh parlemen di tiap frame animasi saat digeser — tanpa debounce, tanpa idle callback, tanpa web worker — dan satu loop animasi menginterpolasi posisi dan warna ke-580 kursi dalam satu proses alih-alih memasang ratusan komponen yang dianimasikan sendiri-sendiri, yang menjadi beda antara gerakan mulus dengan frame yang jatuh di ponsel.
+
+### Reproduksi adalah izin untuk dipercaya
+
+Aplikasi ini harus mereproduksi hasil pemilu 2024 yang tersertifikasi secara persis sebelum diizinkan menawarkan kontrafaktual apa pun, dan pemeriksaan itu berjalan di CI serta menghalangi build. Ketika data yang mendasarinya belum bisa mendukung itu — tabel suara per dapil per partai hanya ada di dalam dokumen rekapitulasi pemerintah yang dipindai, dan ekstraksinya secara manual belum tuntas saat tulisan ini dibuat — antarmuka menyatakannya dengan lugas di headernya alih-alih menyajikan layar yang tampak berfungsi. Tiga dari empat berkas data yang dibutuhkan memuat angka tersertifikasi yang nyata, sehingga semua yang dihitung dari total nasional adalah nyata, termasuk jumlah suara tak terkonversi, yang cocok dengan hitungan independen masyarakat sipil hingga ke satu suara.
+
+## Hasil
+
+Live dan publik: geser ambang batas nasional dari 4,0% menuju nol dan kursi-kursi individual berpindah sepanjang jalur dari satu blok partai ke blok lain — tak pernah digambar ulang, tak pernah crossfade — dan pada saat slider melewati sekitar 3,87%, partai yang gagal lolos dalam pemilu sungguhan masuk ke ruang sidang. Empat tombol aturan (ambang batas, cakupan ambang batas, metode pembagi, dan geometri dapil) semuanya bisa direproduksi dari URL, sehingga argumen tentang ambang batas hipotetis 2% adalah sebuah tautan yang bisa dikirim seseorang. Setiap aturan mengutip pasal hukumnya yang persis dan setiap angka utama mengutip dokumen sumbernya, lewat popover yang bisa ditutup dan dijangkau keyboard alih-alih tooltip yang menghilang saat mouse dijauhkan.
+
+Penulis tunggal, 42 commit dalam sekitar 28 jam, ~8.000 baris kode, 40 tes dengan setiap nilai yang diharapkan dihitung tangan di atas kertas sebelum ditulis. Lima dependensi runtime, tanpa backend, tanpa analitik — empat berkas JSON statis adalah seluruh lapisan datanya. Nihil pelanggaran aksesibilitas axe-core di tiga lebar viewport dalam kedua skema warna, dan setiap satu dari lima visualisasi buatan tangannya punya padanan tabel yang sepenuhnya bisa dijangkau keyboard, karena ruang sidang setengah lingkaran bukan satu-satunya cara siapa pun seharusnya bisa memperoleh angkanya.

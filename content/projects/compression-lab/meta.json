@@ -1,0 +1,33 @@
+{
+  "slug": "compression-lab",
+  "title": "Compression Lab",
+  "tagline": "Shows what a piece of text actually costs to store, and how that cost changes depending on how much a compressor is allowed to remember about it — with every number, including the cost of the model itself, computed live from code written from scratch",
+  "categoryTags": [
+    "Personal Project",
+    "Developer Tool",
+    "Data Visualization"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "Vitest",
+    "SVG"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/compression-lab/?sample=random&order=0&adaptive=0&coder=huffman",
+  "githubUrl": "https://github.com/andifathulms/compression-lab",
+  "heroImage": "/images/projects/compression-lab/hero.webp",
+  "order": 45,
+  "featured": false,
+  "metrics": [
+    { "value": "6", "label": "Model orders, each measured, not estimated — including the model's own cost" },
+    { "value": "64", "label": "Round-trip tests, including empty, single-char, and non-BMP text" },
+    { "value": "2", "label": "Runtime dependencies — react and react-dom, nothing else" },
+    { "value": "48-bit", "label": "Arithmetic coder registers, widened after 32-bit drifted 1.54 bits high" }
+  ],
+  "access": "public"
+}

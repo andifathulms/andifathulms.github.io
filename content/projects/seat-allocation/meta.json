@@ -1,0 +1,34 @@
+{
+  "slug": "seat-allocation",
+  "title": "Suara ke Kursi",
+  "tagline": "Shows how 151.8 million Indonesian votes became 580 parliamentary seats, and lets anyone drag the election threshold or swap the divisor method and watch the entire parliament recompose seat by seat",
+  "categoryTags": [
+    "Personal Project",
+    "Civic Tech",
+    "Data Visualization"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "D3",
+    "Vitest",
+    "SVG"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/seat-allocation/",
+  "githubUrl": "https://github.com/andifathulms/seat-allocation",
+  "heroImage": "/images/projects/seat-allocation/hero.webp",
+  "order": 44,
+  "featured": false,
+  "metrics": [
+    { "value": "17,304,303", "label": "Valid votes that converted to zero seats in 2024" },
+    { "value": "0.23ms", "label": "Median time to recompute all 84 districts, on a 16ms budget" },
+    { "value": "40", "label": "Tests, every expected value hand-computed on paper first" },
+    { "value": "0", "label": "Axe-core accessibility violations across three viewport widths" }
+  ],
+  "access": "public"
+}

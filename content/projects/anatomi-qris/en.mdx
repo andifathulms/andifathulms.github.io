@@ -1,0 +1,31 @@
+# Anatomi QRIS
+
+## The problem
+
+Two gaps, joined by one object. People scan tens of thousands of QR codes and have never seen one built — existing explainers stop at "here is a bitstream, here is a matrix" and treat Reed-Solomon error correction, mask selection, and interleaving as black boxes even in tutorials aimed at developers. Separately, QRIS — Indonesia's national QR payment standard, stuck to every warung counter — is not an opaque token: it's a plainly structured payload naming the merchant, the acquirer, and a checksum, but every existing QRIS parser dumps that structure as a table and stops there.
+
+The product is the join between them: select "merchant name" in the payload tree and the specific black squares carrying those bytes light up in the matrix. Nobody had connected the two layers, because doing it requires an encoder that remembers where every bit went.
+
+## The approach
+
+### The provenance map is the architecture
+
+The encoder doesn't just return a matrix — it returns a matrix plus a complete record of why every single module is the color it is: which codeword and which bit of that codeword, or which function pattern, plus whether the mask flipped it. Every feature in the app is a read of that one structure. Payload-field highlighting, damage attribution, the animation order, and the mask comparison all come free from it — and it was built and tested before any UI existed, so no view had the chance to recompute the geometry independently and silently drift out of agreement with another.
+
+### The display renders the computation's own record, not a re-enactment
+
+Reed-Solomon encoding emits a full trace of every long-division step — the lead term, the generator multiple, the remainder before and after — and the division view just renders that array. The encoder always scores all eight candidate masks even though seven lose, so the mask gallery can never disagree with the winner. Display and computation are the same object, so they cannot diverge.
+
+### Correctness is gated against a reference implementation, not asserted
+
+An oracle test demands byte-identical matrices against an independent QR library across every version, error-correction level, mode, and mask pattern the app supports, and it blocks deploy in CI. Where the two genuinely disagree — a documented case in one penalty rule, where the reference library's rounding differs from the published specification — the app follows the specification, and the disagreement is tested *for* rather than hidden, so the divergence can't quietly go stale.
+
+### Privacy is architectural, not a policy statement
+
+People paste real payment payloads into this app. There are zero runtime network requests — no analytics, no error reporting, even the favicon inlined as a data URI after a browser test caught a 404 on a separate favicon request, because a 404 is still a request a build-time scanner now fails on. Typed text serializes to the URL for linkability, but a pasted QRIS payload never does, and the copy-link action disappears entirely while a real payment payload is loaded, so a merchant identifier can't ride along in a shared link by accident.
+
+## Outcome
+
+Live and public: a nine-stage scrubbable pipeline where the matrix never moves or resizes — dragging the stage slider halfway between "place" and "mask" shows the bit-placement walk complete and the masking half-applied, because the encoder's own trace drives the animation rather than a hand-timed re-enactment. A damage lab lets you brush the matrix or drag a noise slider and watch error correction locate and repair the damage live, then fail visibly and explain the failure once you push past its correction capacity — reachable in one gesture, and the app's clearest payoff.
+
+Sole author, 44 commits over roughly 28 hours across two days, ~8,600 lines of code, 84 tests. Five runtime dependencies — React and three self-hosted font packages — with the QR encoder, decoder, and EMVCo payload parser all written from scratch; the only QR libraries in the project are dev-only references used to prove the from-scratch engine agrees with them. `encode()` completes in under 8 milliseconds even at the largest supported symbol size, so typing recomputes the whole matrix on every keystroke with no debounce and no worker.

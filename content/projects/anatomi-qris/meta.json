@@ -1,0 +1,33 @@
+{
+  "slug": "anatomi-qris",
+  "title": "Anatomi QRIS",
+  "tagline": "An interactive explainer that takes any text — including a real QRIS payment code — and shows exactly how it turns into a QR matrix, down to selecting a field in the payload and watching the specific black squares carrying those bytes light up",
+  "categoryTags": [
+    "Personal Project",
+    "Finance Tool",
+    "Data Visualization"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "Vitest",
+    "SVG"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/anatomi-qris/",
+  "githubUrl": "https://github.com/andifathulms/anatomi-qris",
+  "heroImage": "/images/projects/anatomi-qris/hero.webp",
+  "order": 43,
+  "featured": false,
+  "metrics": [
+    { "value": "9", "label": "Pipeline stages, scrubbable as one continuous transformation" },
+    { "value": "84", "label": "Tests, including byte-identical agreement with a reference QR library" },
+    { "value": "5,929", "label": "SVG modules rendered at version 15, one shared pointer listener" },
+    { "value": "0", "label": "Runtime network requests, enforced by a build-time scan" }
+  ],
+  "access": "public"
+}
