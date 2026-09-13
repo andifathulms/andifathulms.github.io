@@ -1,0 +1,31 @@
+# Linkage
+
+## The problem
+
+Public bodies and companies routinely publish "anonymised" data by stripping names and ID numbers, and consider the job done. It isn't: the identifier was never the name — it's the *combination* of ordinary attributes like district, date of birth, and gender, none of which looks sensitive on its own. A landmark study found 87% of the US population uniquely identifiable from just ZIP code, gender, and date of birth; a later re-run put that figure at 63%, and the two numbers have never been reconciled.
+
+This is normally taught as a citation, not a demonstration — a data steward reads "87%" and has no way to tell whether it applies to their own release. Linkage replaces the citation with an instrument: perform the attack yourself, see how many targets it actually resolved, apply the standard defense, then watch the next attack defeat that too. Built into the app is an Indonesian national ID dissector, because a 16-digit NIK encodes exactly the quasi-identifier triple the whole demonstration is about, by construction — which means card-style masking that hides the tail is hiding the one part of the number that discloses nothing.
+
+## The approach
+
+### Synthetic data, enforced structurally rather than promised
+
+The app generates its own populations in the browser and retains ground truth — it knows who every record actually is, which is what lets it say "you correctly identified 340 of 500 targets, here are the 160 that failed." There's no file input, no drag-and-drop, no paste path anywhere in the app, and a test greps the *built bundle* for those APIs and fails the build on a hit — so the constraint survives refactors and can't be reintroduced by accident. A separate schema-assessment mode, aimed at someone who wants to check their own dataset's risk, accepts only column metadata — a name, a cardinality, a type — with no field in its input type capable of holding an actual row. A tool that ingests a real dataset and helps re-identify the people in it is a re-identification tool, whatever the surrounding copy says, and the type system makes that impossible rather than just discouraged.
+
+### Every attack returns a score, never a bare claim
+
+The attack interface has no way to say "this record is identifiable" without the counts that justify it: attempted, correct, incorrect, failed, and — critically — a per-target candidate count. That last number matters as much as a correct guess: an attack that narrows 500,000 records down to three candidates has done most of the analytical work even though it didn't fully resolve, and the interface shows that instead of reporting a clean, uninformative failure.
+
+### Sensitivity is derived, not assumed
+
+The differential-privacy module computes the sensitivity of each query type from first principles — a count has sensitivity 1, a sum has sensitivity equal to its clamp range, a mean needs real care — and records the derivation as a string the interface displays. Hardcoding sensitivity to 1 everywhere is the standard way to ship a DP implementation that quietly does not provide the guarantee it claims to.
+
+### Canvas, typed arrays, one draw pass
+
+Rendering 200,000 individual records at 60 frames per second rules out SVG and rules out one component per record. Positions live in parallel typed arrays; hit-testing uses a spatial grid on a single pointer listener rather than testing every mark. The packing of records into equivalence classes is deterministic, so a record never moves when an unrelated class changes elsewhere — which matters because the coalescence animation, where classes visibly merge as generalization increases, is the app's central argument, and it would degenerate into noise if unrelated records jittered on every change.
+
+## Outcome
+
+Live and public: five scripted cases, each an attack followed by the standard defense that closes it followed by the attack that defeats that defense in turn — linkage, then k-anonymity, then homogeneity and l-diversity, then skewness and differencing, then differential privacy and its budget — plus a free-form sandbox with twelve additional instruments, including a lattice search for the minimal generalization achieving a target anonymity level, visualized from the search's own real trace rather than a re-enactment.
+
+Sole author, 80 commits over 8 days, ~13,300 lines of application code, 328 tests across 20 files. Two runtime dependencies total — React and its DOM renderer — with the entire privacy engine, six scored attacks, and the differential-privacy mechanisms written from scratch. A CI-enforced bundle budget currently sits at 113.8 KB gzipped, of which 44.3 KB is React itself. The app never dramatizes what it recovers: no "exposed," no "victim," no congratulating a successful re-identification — it states what an attack found and leaves the reader to feel the weight of that on their own.

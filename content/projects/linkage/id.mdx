@@ -1,0 +1,31 @@
+# Linkage
+
+## Masalahnya
+
+Badan publik dan perusahaan rutin menerbitkan data "teranonimkan" dengan menghapus nama dan nomor identitas, lalu menganggap tugasnya selesai. Padahal tidak: pengidentifikasinya bukan pernah namanya — melainkan *kombinasi* atribut biasa seperti kecamatan, tanggal lahir, dan jenis kelamin, yang tak satu pun terlihat sensitif sendirian. Sebuah studi rujukan menemukan 87% populasi AS bisa diidentifikasi secara unik hanya dari kode pos, jenis kelamin, dan tanggal lahir; sebuah pengulangan kemudian menaruh angka itu di 63%, dan kedua angka itu tak pernah direkonsiliasi.
+
+Ini biasanya diajarkan sebagai kutipan, bukan demonstrasi — seorang pengelola data membaca "87%" dan tak punya cara mengetahui apakah itu berlaku pada rilisan data mereka sendiri. Linkage mengganti kutipan itu dengan instrumen: lakukan sendiri serangannya, lihat berapa target yang benar-benar terselesaikan, terapkan pertahanan standarnya, lalu saksikan serangan berikutnya mengalahkan pertahanan itu juga. Dibangun ke dalam aplikasi ini ada pembedah NIK Indonesia, karena NIK 16 digit mengenkode persis tiga serangkai kuasi-identifier yang menjadi inti seluruh demonstrasi ini, secara konstruksi — yang berarti penyamaran gaya kartu yang menyembunyikan ekornya justru menyembunyikan satu-satunya bagian nomor yang tak membocorkan apa-apa.
+
+## Pendekatannya
+
+### Data sintetis, ditegakkan secara struktural bukan sekadar dijanjikan
+
+Aplikasi ini menghasilkan populasinya sendiri di browser dan menyimpan kebenaran dasarnya — ia tahu siapa sebenarnya setiap catatan itu, yang menjadi dasar ia bisa berkata "Anda berhasil mengidentifikasi 340 dari 500 target, ini 160 yang gagal." Tak ada input berkas, tak ada drag-and-drop, tak ada jalur tempel di mana pun dalam aplikasi ini, dan sebuah tes memeriksa *bundel yang di-build* untuk API-API itu dan menggagalkan build jika ditemukan — sehingga batasan itu bertahan melewati refactor dan tak bisa diperkenalkan kembali secara tak sengaja. Sebuah mode penilaian skema terpisah, ditujukan bagi seseorang yang ingin memeriksa risiko dataset mereka sendiri, hanya menerima metadata kolom — sebuah nama, sebuah kardinalitas, sebuah tipe — dengan tak ada kolom pada tipe masukannya yang mampu menampung baris data sungguhan. Alat yang menelan dataset sungguhan dan membantu mengidentifikasi ulang orang-orang di dalamnya adalah alat identifikasi ulang, apa pun kata-kata di sekelilingnya — dan sistem tipenya membuat itu mustahil, bukan sekadar dilarang.
+
+### Setiap serangan mengembalikan skor, tak pernah klaim kosong
+
+Antarmuka serangannya tak punya cara untuk berkata "catatan ini bisa diidentifikasi" tanpa hitungan yang membenarkannya: dicoba, benar, salah, gagal, dan — yang krusial — jumlah kandidat per target. Angka terakhir itu sama pentingnya dengan tebakan yang benar: sebuah serangan yang mempersempit 500.000 catatan menjadi tiga kandidat telah melakukan sebagian besar pekerjaan analitis meski tak sepenuhnya terselesaikan, dan antarmukanya menunjukkan itu alih-alih melaporkan kegagalan bersih yang tak informatif.
+
+### Sensitivitas diturunkan, bukan diasumsikan
+
+Modul privasi diferensialnya menghitung sensitivitas tiap jenis kueri dari prinsip dasar — hitungan bersensitivitas 1, jumlah bersensitivitas sama dengan rentang clamp-nya, rata-rata butuh kehati-hatian nyata — dan mencatat penurunannya sebagai string yang ditampilkan antarmuka. Menetapkan sensitivitas ke 1 di mana pun adalah cara baku mengirim implementasi DP yang diam-diam tak memberikan jaminan yang diklaimnya.
+
+### Canvas, array bertipe, satu proses gambar
+
+Menggambar 200.000 catatan individual pada 60 frame per detik meniadakan SVG dan meniadakan satu komponen per catatan. Posisi disimpan dalam array bertipe paralel; uji tumbukan memakai grid spasial pada satu pendengar pointer alih-alih menguji tiap tanda. Pengemasan catatan ke dalam kelas ekivalensi bersifat deterministik, sehingga sebuah catatan tak pernah berpindah saat kelas tak terkait berubah di tempat lain — yang penting karena animasi penyatuan, di mana kelas-kelas terlihat melebur saat generalisasi meningkat, adalah argumen inti aplikasi ini, dan itu akan merosot jadi derau jika catatan tak terkait bergetar pada tiap perubahan.
+
+## Hasil
+
+Live dan publik: lima kasus terskenario, masing-masing sebuah serangan diikuti pertahanan standar yang menutupnya diikuti serangan yang mengalahkan pertahanan itu pada gilirannya — linkage, lalu k-anonymity, lalu homogenitas dan l-diversity, lalu skewness dan differencing, lalu privasi diferensial dan anggarannya — plus sandbox bebas dengan dua belas instrumen tambahan, termasuk pencarian lattice untuk generalisasi minimal yang mencapai target anonimitas, divisualisasikan dari jejak sungguhan pencarian itu sendiri alih-alih rekonstruksi ulang.
+
+Penulis tunggal, 80 commit dalam 8 hari, ~13.300 baris kode aplikasi, 328 tes di 20 berkas. Dua dependensi runtime total — React dan renderer DOM-nya — dengan seluruh mesin privasi, enam serangan berskor, dan mekanisme privasi diferensial semuanya ditulis dari nol. Anggaran bundel yang ditegakkan CI saat ini duduk di 113,8 KB terkompresi, di mana 44,3 KB di antaranya adalah React sendiri. Aplikasi ini tak pernah mendramatisasi apa yang ditemukannya: tanpa "terekspos", tanpa "korban", tanpa mengucapkan selamat atas identifikasi ulang yang berhasil — ia menyatakan apa yang ditemukan sebuah serangan dan membiarkan pembaca merasakan sendiri bobotnya.

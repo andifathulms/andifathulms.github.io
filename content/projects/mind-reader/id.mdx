@@ -1,0 +1,31 @@
+# Mind Reader
+
+## Masalahnya
+
+Matching pennies punya strategi optimal yang terbukti: lempar koin yang adil. Lakukan itu dan Anda seri di 50% melawan lawan mana pun, selamanya. Strategi lawannya sudah diterbitkan, sederhana, dan diketahui pemainnya — dan mereka tetap tak bisa menjalankannya. Celah antara "gerakan yang benar sudah diketahui" dengan "Anda benar-benar tak bisa melakukannya" adalah seluruh produk ini.
+
+Ini adalah artefak portofolio dan penjelas, bukan komersial, dibangun di sekitar celah itu. Ia juga rekonstruksi historis: dua mesin prediksi berbasis relay sungguhan dari Bell Labs — SEER milik Hagelbarger (1956) dan MRM Shannon yang lebih sederhana (1953) — punya desain yang diterbitkan tetapi belum ada yang membangunnya sebagai objek interaktif yang benar-benar bisa dilawan bermain siapa pun. Brief pembangunannya secara eksplisit menolak versi mudah dari ide ini, sebuah prediktor n-gram tunggal seperti yang sudah ada di beberapa implementasi publik, sebagai "bukan karya portofolio" — rekonstruksi historis, tanding ulang historis mesin lawan mesin, ansambel lima model, dan potret prediktabilitas personal semuanya harus ada di versi pertama.
+
+## Pendekatannya
+
+### Prediksinya dikunci sebelum masukan dibaca, dan sistem tipe menegakkannya
+
+Ini seluruh kredibilitas aplikasi ini. Fungsi penyegelan menghasilkan objek prediksi yang dibekukan; menyelesaikan segel itu terhadap gerakan sebenarnya pemain mengambil segel itu sebagai argumen alih-alih membacanya dari keadaan internal, sehingga tak ada jalur kode yang bisa menghitung prediksi setelah melihat tekanan tombolnya. Antarmukanya mencerminkan ini secara struktural — penangan masukan untuk gerakan pemain bahkan tak dipasang sampai sebuah segel ada. Lalu ia melangkah satu tahap lebih jauh: sebuah rutin verifikasi terpisah menyegel ulang seluruh sesi pemain dari mesin segar yang hanya diberi tekanan-tekanan historisnya, dan aplikasi menampilkan audit itu di layar, sehingga klaim integritasnya diperiksa di depan pemain alih-alih sekadar diasumsikan.
+
+### Mesinnya hanya melihat riwayat tekanan tombol dan tak ada lagi — ditegakkan oleh tanda tangan fungsinya sendiri
+
+Tipe masukan tiap prediktor adalah daftar polos gerakan-gerakan lalu; tak ada tempat untuk melewatkan waktu, posisi sentuh, atau koordinat bahkan jika seseorang menginginkannya. Brief pembangunannya memperlakukan waktu reaksi sebagai sinyal yang sungguh kuat yang penggunaan diam-diamnya akan mengkhianati seluruh premis, sehingga batasan itu hidup dalam tipenya alih-alih dalam komentar yang meminta baik-baik.
+
+### Mekanisme kejujurannya adalah lantai keyakinan
+
+Ketika ansambel lima prediktor tak yakin, mesinnya menarik gerakannya dari generator acak berbenih alih-alih memainkan tebakan sebenarnya — teknik yang diambil langsung dari mesin-mesin 1950-an sungguhan. Inilah yang membatasi aplikasi ini di 50% melawan lawan yang benar-benar acak, mengubah apa yang seharusnya menjadi mesin deterministik dan karenanya bisa direkayasa-balik menjadi strategi campuran yang jujur. Sebuah gerbang keadilan memainkan 100.000 ronde melawan koin berbenih di CI dan menegaskan konvergensi ke 50% sebelum deploy apa pun — dan aturan buildnya eksplisit: jika tes itu gagal, jangan disetel sampai lolos, karena mesin yang mengalahkan koin adil punya bug yang hampir pasti membocorkan masa depan ke dalam prediksinya, dan bug yang sama itu akan diam-diam menggembungkan skornya melawan orang sungguhan juga.
+
+### Gerbang kesetiaan historis, bukan sekadar gerbang keadilan
+
+Sebuah tes kedua menjalankan rekonstruksi Shannon dan Hagelbarger saling melawan selama ribuan ronde dan menegaskan mesin yang secara historis lebih sederhana menang — mereproduksi hasil 1950-an yang terdokumentasi. Kedua mesin itu dibangun langsung dari memorandum 1953 dan makalah 1956 aslinya, bukan dari ringkasan modernnya, dan setiap detail implementasi yang sungguh tak terselesaikan oleh sumber primer itu ditulis alih-alih ditebak dengan percaya diri.
+
+## Hasil
+
+Live dan publik: lima prediktor berjalan bersamaan melawan tiap pemain, masing-masing terlihat sendiri-sendiri dengan bobot yang diperbarui langsung — ganti strategi Anda di tengah sesi dan Anda bisa menyaksikan model yang berbeda terlihat mengambil alih suara ansambel secara real-time. Sebuah potret prediktabilitas mengukur enam hal tentang bagaimana Anda secara spesifik gagal menjadi acak: tingkat kemenangan dengan interval keyakinan yang tepat, tingkat berganti terhadap 50% yang adil, distribusi panjang-runtutan Anda terhadap apa yang akan dihasilkan koin yang benar-benar adil, entropi kondisional, korelasi serial, dan pola tekanan spesifik mana yang Anda produksi berlebihan. Kedua mesin historisnya bermain tanding ulang yang dipentaskan satu sama lain, mereproduksi hasil terdokumentasi bahwa desain Shannon yang lebih sederhana mengalahkan desain Hagelbarger yang lebih kompleks.
+
+Penulis tunggal, 64 commit dalam 8 hari, sekitar 12.000 baris kode. Dua dependensi runtime — React dan renderer DOM-nya — dengan setiap prediktor, setiap satu dari enam grafik pengukuran, dan kedua rekonstruksi historisnya ditulis dari nol. Latensi dari tekan-ke-tampil tetap di bawah 80 milidetik dengan menyegel prediksi ronde berikutnya segera setelah ronde saat ini tampil, sehingga mesinnya tak pernah terlihat menghitung selagi pemain menunggu. Mesinnya melaporkan apa yang diukurnya dan tak pernah mengejek — tak satu baris pun salinan teksnya menyombong atau mengomentari performa pemain, karena mesin yang berkata "kena kau" adalah mainan, dan mesin yang diam-diam melaporkan 68% menggelisahkan dengan cara yang tepat.

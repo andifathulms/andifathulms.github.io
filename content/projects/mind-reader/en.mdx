@@ -1,0 +1,31 @@
+# Mind Reader
+
+## The problem
+
+Matching pennies has a provably optimal strategy: flip a fair coin. Do that and you tie at 50% against any opponent, forever. The counter-strategy is published, simple, and known to the player — and they still can't execute it. The gap between "the correct move is known" and "you cannot actually make it" is the entire product.
+
+This is a portfolio and explanatory artifact rather than a commercial one, built around that gap. It's also a historical reconstruction: two real relay-based prediction machines from Bell Labs — Hagelbarger's SEER (1956) and Shannon's simpler MRM (1953) — have published designs but neither had been built as an interactive object anyone could actually play against. The build brief explicitly ruled out the easy version of this idea, a single n-gram predictor of the kind that already exists in several public implementations, as "not a portfolio piece" — the historical reconstructions, the historical machine-vs-machine rematch, a five-model ensemble, and a personal predictability portrait all had to exist in the first version.
+
+## The approach
+
+### The prediction is locked before the input is read, and the type system enforces it
+
+This is the app's entire credibility. A sealing function produces a frozen prediction object; resolving that seal against the player's actual move takes the seal as an argument rather than reading it from internal state, so there's no code path that could compute a prediction after seeing the press. The interface mirrors this structurally — the input handler for the player's move isn't even attached until a seal exists. Then it goes one step further: a separate verification routine re-seals the player's entire session from a fresh machine fed only the historical presses, and the app displays that audit on screen, so the integrity claim is checked in front of the player rather than merely asserted.
+
+### The machine sees press history and nothing else — enforced by the function signature itself
+
+Every predictor's input type is a plain list of past moves; there's nowhere to pass timing, tap position, or coordinates even if someone wanted to. The build brief treats reaction time as a genuinely strong signal whose silent use would betray the whole premise, so the constraint lives in the type rather than in a comment asking nicely.
+
+### The honesty mechanism is a confidence floor
+
+When the ensemble of five predictors isn't confident, the machine draws its move from a seeded random generator instead of playing its actual guess — a technique taken directly from the real 1950s machines. This is what caps the app at 50% against a genuinely random opponent, turning what would otherwise be a deterministic and therefore reverse-engineerable machine into an honest mixed strategy. A fairness gate plays 100,000 rounds against a seeded coin in CI and asserts convergence to 50% before any deploy — and the build rule is explicit: if that test fails, don't tune it until it passes, because a machine that beats a fair coin has a bug that is almost certainly leaking the future into its prediction, and the same bug would be silently inflating its score against real people too.
+
+### A historical-fidelity gate, not just a fairness gate
+
+A second test runs the Shannon and Hagelbarger reconstructions against each other for thousands of rounds and asserts the historically simpler machine finishes ahead — reproducing the documented 1950s result. Both machines were built from the original 1953 memorandum and 1956 paper directly, not from a modern summary of them, and every implementation detail those primary sources leave genuinely unresolved is written down rather than guessed at confidently.
+
+## Outcome
+
+Live: five predictors run simultaneously against every player, each individually visible with live-updating weights — switch your strategy mid-session and you can watch a different model visibly take over the ensemble's vote in real time. A predictability portrait measures six things about how you specifically fail to be random: win rate with proper confidence intervals, switch rate against the fair 50%, your run-length distribution against what a truly fair coin would produce, conditional entropy, serial correlation, and which specific press patterns you overproduce. The two historical machines play a staged rematch against each other, reproducing the documented result that Shannon's simpler design beat Hagelbarger's more complex one.
+
+Sole author, 64 commits over 8 days, roughly 12,000 lines of code. Two runtime dependencies — React and its DOM renderer — with every predictor, every one of six measurement charts, and both historical reconstructions written from scratch. Input-to-reveal latency stays under 80 milliseconds by sealing the next round's prediction immediately after the current one reveals, so the machine is never visibly computing while a player waits. The machine reports what it measures and never taunts — not one line of copy gloats or comments on a player's performance, because a machine that says "gotcha" is a toy, and a machine that silently reports 68% is unsettling in the right way.

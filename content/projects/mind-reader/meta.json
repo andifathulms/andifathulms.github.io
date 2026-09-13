@@ -1,0 +1,33 @@
+{
+  "slug": "mind-reader",
+  "title": "Mind Reader",
+  "tagline": "A browser game where you press left or right and a machine tries to guess your next press before you make it — reconstructing two real 1950s Bell Labs machines from their original papers and staging their historical rematch, while measuring exactly how you fail to be random",
+  "categoryTags": [
+    "Personal Project",
+    "Game Theory",
+    "Data Visualization"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "Vitest",
+    "SVG"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/mind-reader/",
+  "githubUrl": "https://github.com/andifathulms/mind-reader",
+  "heroImage": "/images/projects/mind-reader/hero.webp",
+  "order": 47,
+  "featured": false,
+  "metrics": [
+    { "value": "5", "label": "Predictors running live against you, including two 1950s machines rebuilt from primary sources" },
+    { "value": "100,000", "label": "Rounds played against a coin in CI — the machine must converge to 50% or the build fails" },
+    { "value": "<80ms", "label": "Input-to-reveal latency, so the machine is never visibly thinking" },
+    { "value": "2", "label": "Runtime dependencies — react and react-dom, nothing else" }
+  ],
+  "access": "public"
+}

@@ -1,0 +1,33 @@
+{
+  "slug": "oracle",
+  "title": "Oracle",
+  "tagline": "Reads an encrypted message without ever having the key, by asking a server one yes/no question about two thousand times — a real padding-oracle attack against real hand-written AES, with every step animated and the app structurally unable to see the answer it's about to reveal",
+  "categoryTags": [
+    "Personal Project",
+    "Security",
+    "Data Visualization"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "Vitest",
+    "SVG"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/oracle/#seed=oracle&cipher=aes&mac=0&dis=1&speed=0.00&mode=recover",
+  "githubUrl": "https://github.com/andifathulms/oracle",
+  "heroImage": "/images/projects/oracle/hero.webp",
+  "order": 48,
+  "featured": false,
+  "metrics": [
+    { "value": "~2,000", "label": "Oracle calls to recover one block — matching the theoretical average, asserted by test" },
+    { "value": "5", "label": "Cryptographic primitives written from scratch — AES-128, SHA-256, HMAC, CBC, PKCS7" },
+    { "value": "0", "label": "Network APIs present in the built bundle, enforced by a grep that fails CI" },
+    { "value": "2", "label": "Runtime dependencies — react and react-dom, nothing else" }
+  ],
+  "access": "public"
+}

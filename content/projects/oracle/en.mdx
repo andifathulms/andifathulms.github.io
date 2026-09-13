@@ -1,0 +1,31 @@
+# Oracle
+
+## The problem
+
+Most people, including many engineers, believe "we encrypt it with AES" means a message is safe. It doesn't. A real, well-documented attack — the padding oracle — recovers an entire encrypted message without ever breaking the cipher itself, by exploiting the fact that a server will tell you whether a message's padding was valid. That single bit of feedback, repeated roughly two thousand times, is enough to reconstruct the whole plaintext.
+
+The problem this addresses is one of belief rather than information: the attack is written up in dozens of places, and the write-ups don't convince anyone, because a page of algebra doesn't make a reader feel that their AES is beside the point. Existing visualizations of this attack have two recurring problems: many contain a real implementation bug — they skip a subtle false-positive check the attack actually requires — and most quietly hold the answer in a variable and animate it back to the viewer, which makes them a magic trick rather than a demonstration. This app has no network code at all: a test greps the built bundle and fails if any network API appears in it anywhere, so its inability to attack a real server is a property of the build itself, not a promise in a README.
+
+## The approach
+
+### The secret is sealed behind a closure, and the interface genuinely cannot see it
+
+This is the integrity mechanism the whole app rests on. One module generates the key, the plaintext, and the initialization vector, encrypts, and hands upward only the ciphertext, the IV, a one-boolean oracle function, and a call counter — the key and plaintext live entirely inside a closure and are never exported anywhere the interface could reach. So when a recovered character appears on screen, it appears because the attack actually produced it; there's no code path by which the interface could have simply been handed the answer. This is enforced two ways: at the type level, the object handed to every view has no field capable of holding a key or a plaintext, and at runtime, a test holds a known plaintext in its own closure, runs the real attack against it, and asserts the recovered bytes match — proving the app isn't cheating rather than just claiming it.
+
+### The oracle returns exactly one boolean, nothing richer
+
+Its type signature takes a ciphertext and returns a bare boolean — no error detail, no timing information, no indication of which byte failed. A richer return type would let the attack cheat and would misrepresent the actual signal a real-world attacker gets. The attack has to work from one bit because that's the truth of the real attack.
+
+### The false-positive disambiguation is implemented, animated, and provably necessary
+
+When recovering the last byte of a block, a naive attack can hit a false positive: if the real plaintext already happens to end in a specific padding byte, a crafted forgery can also look like valid padding by coincidence, and a naive implementation silently records the wrong byte and corrupts every byte recovered after it. The correct fix is to perturb an earlier byte and re-ask the oracle. This app implements that check, animates it as its own visible beat in the recovery, lets a reader switch it off and watch the recovery visibly break, and a dedicated test asserts the naive path genuinely fails on a plaintext constructed to trigger it — so the fix is proven necessary rather than just assumed to be a good idea.
+
+### Run the attack once, then replay a trace — never animate in real time
+
+The attack engine is pure, synchronous, and imports nothing — no React, no DOM, not even a clock. It runs the entire attack in milliseconds up front and emits a structured trace recording every candidate byte tried, every oracle verdict, every disambiguation probe, and every byte's resolution with its full arithmetic. The interface never re-runs the attack; it only ever renders a position within that trace. This makes scrubbing back and forth through the recovery free, decouples the animation's pacing entirely from computation, and makes any specific moment in the recovery shareable as a URL.
+
+## Outcome
+
+Live and public: a four-row byte stack is the app's hero view — what the attacker sent, what padding the oracle actually judged, the intermediate cipher block, and the plaintext — with the plaintext row starting as genuine emptiness and filling in right to left, one gold byte at a time, as the attack actually recovers each one. A toggle swaps the real hand-written AES-128 for a clearly labeled toy cipher, and the same attack recovers the same plaintext at the same cost either way — demonstrating rather than just asserting that the specific cipher is irrelevant to this attack. Turning on encrypt-then-MAC makes every crafted forgery fail authentication before it's ever decrypted, so the oracle returns an identical verdict to every question and the recovery visibly starves — no gold ever appears — which is what authenticated encryption is actually for, shown rather than described in prose.
+
+Sole author, 65 commits over 7 days, roughly 3,560 lines of TypeScript. Two runtime dependencies — React and its DOM renderer — with AES-128, SHA-256, HMAC, the CBC cipher mode, and PKCS7 padding all implemented from scratch rather than pulled from any cryptography library. A full attack costs about 2,000 oracle calls per block, matching the theoretical average and asserted by test. The app also ships a bit-flipping mode demonstrating the same underlying malleability from the other direction: rewriting `user=guest` into `user=admin` in an encrypted message, without ever holding the key.
