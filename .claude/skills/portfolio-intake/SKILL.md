@@ -66,6 +66,13 @@ Sources:
 
 Then list **conflicts**: every place the current case study disagrees with the
 fact sheet (a number, a status, a date, a name). The fact sheet wins each one.
+The same topic with a different number is a conflict even if the scopes might
+differ (old copy "twelve open items", section 6 "five open decisions": use
+five, drop twelve).
+
+`[old]` facts may stay in the problem, what-I-built and under-the-hood
+sections. They never go into "What I'd do next" (section 6 only) or into
+status, dates or metrics (frontmatter and Step 5 only).
 
 ## Step 4 — Decide new or update
 
@@ -97,6 +104,7 @@ How to choose 3–4:
    favour of a codebase one.
 3. Still fewer than 2: STOP and tell the user the fact sheet has no
    user-facing figures; ask whether to publish without a metrics strip.
+   Exactly 2: continue, and say so in the report.
 4. `value` copied exactly. `label` lowercase, 3–8 words, no final full stop,
    same meaning as the source row, never repeats the value.
 
@@ -199,7 +207,13 @@ Run all of these. Fix what they flag. Don't commit until they pass.
    needs a reason in the report.
 2. `node -e "JSON.parse(require('fs').readFileSync('content/projects/<slug>/meta.json','utf8'))"`
 3. `node scripts/check-assets.mjs`
-4. Ledger audit, by hand, sentence by sentence through `en.mdx`, `meta.json`
+4. `node scripts/check-intake.mjs <slug>` — the machine half of the audit:
+   unsourced numbers, next steps outside section 6, launch dates without
+   `launched`, status words, unknown hostnames, the `source` marker. It must
+   print ✓. Its stack warning means: add the technology to nothing, but say in
+   the report which technology the prose names that the fact sheet doesn't.
+   Do not argue with an error; change the copy.
+5. Ledger audit, by hand, sentence by sentence through `en.mdx`, `meta.json`
    and `id.mdx`: each factual claim maps to a ledger line; no ledger `[ctx §9]`
    item appears; every status phrase matches the table in Step 6; every date
    matches `timeframe` or `launched`. Fix, then audit again.
