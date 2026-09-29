@@ -4,9 +4,10 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link, usePathname } from '@/i18n/navigation';
 import LocaleSwitcher from './LocaleSwitcher';
+import CommandPalette, { type PaletteProject } from './CommandPalette';
 import { useEffect, useRef, useState } from 'react';
 
-export default function Header() {
+export default function Header({ projects }: { projects: PaletteProject[] }) {
   const t = useTranslations('nav');
   const ta = useTranslations('a11y');
   const pathname = usePathname();
@@ -21,6 +22,11 @@ export default function Header() {
     { href: '/cv', label: t('cv') },
   ];
   const contactActive = pathname === '/contact';
+  const palettePages = [
+    { href: '/', label: 'AFM Studio' },
+    ...navLinks,
+    { href: '/contact', label: t('contact') },
+  ];
 
   // While the mobile menu is open it behaves as a modal surface: Escape
   // closes it, Tab cycles inside it, the page underneath doesn't scroll, and
@@ -84,7 +90,7 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-line bg-navy/90 backdrop-blur-sm">
-      <div className="max-w-page mx-auto px-gutter h-16 flex items-center justify-between">
+      <div className="max-w-page mx-auto px-gutter h-16 flex items-center">
         <Link
           href="/"
           className="group flex items-center gap-2.5 font-heading text-lead font-normal text-cream transition-colors hover:text-gold"
@@ -103,7 +109,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-7" aria-label={ta('main_nav')}>
+        <nav className="hidden md:flex items-center gap-7 ml-auto" aria-label={ta('main_nav')}>
           {navLinks.map(({ href, label }) => {
             // Case studies from both tracks live under /work/[slug], so only
             // the index pages mark a nav item current.
@@ -131,7 +137,10 @@ export default function Header() {
           <LocaleSwitcher />
         </nav>
 
-        {/* Mobile menu button */}
+        {/* One palette instance for every width — two would each bind ⌘K.
+            On mobile it sits beside the menu button. */}
+        <div className="ml-auto flex items-center gap-3 md:ml-5">
+          <CommandPalette projects={projects} pages={palettePages} />
         <button
           ref={toggleRef}
           className="md:hidden rounded text-text-muted hover:text-cream transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
@@ -150,6 +159,7 @@ export default function Header() {
             </svg>
           )}
         </button>
+        </div>
       </div>
 
       {/* Mobile nav */}

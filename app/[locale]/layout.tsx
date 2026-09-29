@@ -6,6 +6,7 @@ import { hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { SITE_URL, SITE_NAME, PERSON } from '@/lib/site';
+import { getAllProjects, trackOf } from '@/lib/content';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Analytics from '@/components/Analytics';
@@ -91,12 +92,24 @@ export default async function LocaleLayout({
   //   nav, a11y   Header, LocaleSwitcher      (every page)
   //   work        WorkGallery, CardPreview    (home + work index)
   //   case_study  ScreenshotGallery           (case studies)
-  const CLIENT_NAMESPACES = ['nav', 'a11y', 'work', 'case_study'] as const;
+  //   palette     CommandPalette              (every page)
+  const CLIENT_NAMESPACES = ['nav', 'a11y', 'work', 'case_study', 'palette'] as const;
   const allMessages = await getMessages();
   const messages = Object.fromEntries(
     CLIENT_NAMESPACES.filter((ns) => ns in allMessages).map((ns) => [ns, allMessages[ns]])
   );
   const t = await getTranslations({ locale, namespace: 'a11y' });
+
+  // The search palette's index: just enough to match and label a result.
+  const paletteProjects = getAllProjects(locale)
+    .filter((p) => p.status !== 'placeholder')
+    .map((p) => ({
+      slug: p.slug,
+      title: p.title,
+      tagline: p.tagline,
+      track: trackOf(p),
+      terms: [...p.techStack, ...(p.skills ?? []), ...p.categoryTags].join(' ').toLowerCase(),
+    }));
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -127,7 +140,7 @@ export default async function LocaleLayout({
           >
             {t('skip_to_content')}
           </a>
-          <Header />
+          <Header projects={paletteProjects} />
           {/* The skip link focuses this. It kept outline-none, so nothing
               confirmed the jump had happened. */}
           <main
