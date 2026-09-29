@@ -30,7 +30,7 @@ Versi pertama saya memakai tombol ganti peran. Dua hari kemudian saya menggantin
 
 ## Hasilnya
 
-Saya membangun Aksara sendirian, dari repositori kosong sampai sistem yang ter-deploy, dalam sekitar dua setengah minggu di bulan Juli 2026. Aksara sudah di-deploy untuk OIKN, dan portal publiknya terbuka untuk siapa saja. Sistem ini melayani 66 endpoint API yang terdokumentasi, yang kini juga dipakai aplikasi mobile. Ada 156 tes backend, terfokus pada aturan akses dan logika kode publik. Rekomendasi bacaan didasarkan pada topik dan unit yang sama, jadi siapa pun bisa melihat alasan sebuah dokumen disarankan.
+Saya membangun Aksara sendirian, dan sistem ini sudah live untuk OIKN sejak Juli 2026. Portal publiknya terbuka untuk siapa saja, dan staf di sepuluh unit Eselon-1 memakainya, dengan tiga tingkat akses yang diperiksa di server untuk dokumen publik, internal, dan terbatas. Aplikasi mobile kini memakai backend yang sama. Rekomendasi bacaan didasarkan pada topik dan unit yang sama, jadi siapa pun bisa melihat alasan sebuah dokumen disarankan.
 
 ## Langkah berikutnya
 
@@ -49,4 +49,4 @@ Saya membangun Aksara sendirian, dari repositori kosong sampai sistem yang ter-d
 - Keycloak SSO dan JDIH awalnya dibangun terhadap client tiruan, lalu diganti implementasi sungguhan di balik antarmuka yang sama. Endpoint token-exchange melayani aplikasi mobile.
 - Kontribusi berupa wizard empat langkah dengan draf, hingga 10 lampiran, dan impor massal CSV hingga 200 baris; baris yang tidak valid masuk sebagai draf bertanda.
 - Backend Django + DRF khusus API dan SPA React. Frontend tanpa library komponen, formulir, atau state. Tidak ada ML di V1.
-- 14 Django app, sekitar 30 model, 36 komponen halaman, sekitar 10.700 baris Python dan 12.800 baris TypeScript, 156 tes di 19 modul, 109 commit antara 6 dan 23 Juli 2026.
+- 16 Django app, 45 model konkret, 14 DRF ViewSet, 206 baris data induk (masterdata) yang di-seed, 36 komponen halaman, 53.323 baris Python dan 30.022 baris TypeScript, 1.595 fungsi tes backend di 65 file tes, 429 commit dari 6 Juli sampai 25 September 2026.

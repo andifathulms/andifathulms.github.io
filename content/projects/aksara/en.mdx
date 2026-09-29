@@ -30,7 +30,7 @@ My first version had a role switcher. Two days in, I replaced it with a separate
 
 ## Result
 
-I built Aksara alone, from an empty repository to a deployed system, in about two and a half weeks in July 2026. It is deployed for OIKN, and the public portal is open to any visitor. It serves 66 documented API endpoints, which a native mobile app now shares. There are 156 backend tests, focused on the access rules and the public code logic. Suggested reading is based on shared topics and units, so anyone can see why an item was suggested.
+I built Aksara alone, and it has been live for OIKN since July 2026. The public portal is open to any visitor, and staff across the ten Eselon-1 units use it, with three server-checked access levels for public, internal, and restricted documents. A native mobile app now shares the same backend. Suggested reading is based on shared topics and units, so anyone can see why an item was suggested.
 
 ## What I'd do next
 
@@ -49,4 +49,4 @@ I built Aksara alone, from an empty repository to a deployed system, in about tw
 - Keycloak SSO and JDIH were built against mockable client interfaces first, then real implementations. A token-exchange endpoint serves the mobile app.
 - Contribution is a four-step wizard with drafts, up to 10 attachments, and a CSV bulk import of up to 200 rows where invalid rows land as flagged drafts.
 - Django + DRF API-only backend and a React SPA. No component, form or state library on the frontend. No ML in V1.
-- 14 Django apps, about 30 models, 36 page components, about 10,700 lines of Python and 12,800 lines of TypeScript, 156 tests across 19 modules, 109 commits between 6 and 23 July 2026.
+- 16 Django apps, 45 concrete models, 14 DRF ViewSets, 206 masterdata rows seeded, 36 page components, 53,323 lines of Python and 30,022 lines of TypeScript, 1,595 backend test functions across 65 test files, 429 commits from 6 July to 25 September 2026.
