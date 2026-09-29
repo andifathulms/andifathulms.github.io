@@ -30,10 +30,6 @@ People paste real payment codes into this app. It makes no network requests whil
 
 Anatomi QRIS is live and public, in Indonesian and English. It walks through nine stages, from the typed text to a damaged code, on a slider you can drag. The code never moves or resizes, so halfway between two stages you see both half done. In the damage lab you scratch out squares and watch error correction repair them live. Push past its limit and it fails in front of you, with the reason. I built it in about 28 hours over two days in September 2026.
 
-## What I'd do next
-
-- Close out the finishing pass on copy, keyboard use, mobile and Lighthouse scores, which the project notes list as not fully done.
-
 ## Under the hood
 
 - The encoder returns a provenance map: for each module, codeword index and bit, or function pattern, plus a mask-flip flag. It also carries inverse maps (codeword to module coordinates, payload byte to codewords). A test decodes only the highlighted codewords to prove the mapping.

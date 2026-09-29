@@ -32,12 +32,6 @@ The prototype recalculated notifications every time a screen drew. On the server
 
 Montara is a private system, past its integration milestone and before production launch. It has eight dashboards, each limited by role: summary, map, budget, progress, risk, compliance, portfolio and contractor performance, with CSV and PDF export. Five roles are enforced in the browser and again on the server. The approval workflow follows a rejected request through resubmission. Automated frontend tests check, among other things, that one role can't see another role's data. I built the prototype over about six weeks from late May 2026 and the backend on 5 July. The frontend now talks to the server behind a switch, so it can fall back to prototype mode during the cutover.
 
-## What I'd do next
-
-- Add a test suite to the backend. Today the automated tests cover the frontend only.
-- Finish the cutover so the app runs on the server alone.
-- Build versioned document management, which I left out of this phase.
-
 ## Under the hood
 
 - Frontend: Next.js App Router, React 18, TypeScript, shadcn/Radix UI, Tailwind CSS v4, react-hook-form, Leaflet and Recharts. The prototype ran entirely on `localStorage`.

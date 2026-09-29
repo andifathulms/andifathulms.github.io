@@ -28,11 +28,6 @@ Of the 726 languages, 421 have mapped speaker areas. The other 305 appear as lab
 
 Nusantara Languages is live in English and Indonesian, fully static, and works offline. Beyond the map and tree, it answers three questions from the same data. Which languages are a language's closest relatives? How far does a family spread? Austronesian spans about 5,010 km, Timor-Alor-Pantar about 350 km. Which languages from different families touch? There are 67 such pairs. Each answer prints its rule and its limit next to the number. You can also colour by subgroup, follow guided views of the seams, and export a PNG with attribution built in, as the licence requires. The site states that boundaries between languages are gradual, and how many languages are areas and how many are points. I built it alone over three days in August 2026.
 
-## What I'd do next
-
-- Decide what the speed check should measure. It gates the deploy on the single slowest hover sample, so one garbage-collection pause can fail a fast build at random. I left it unchanged on purpose, because changing what the gate measures is a judgement call.
-- Trim the map page, which is about 440 KB gzipped with the land layer. The biggest win is sending the coastline once instead of twice.
-
 ## Under the hood
 
 - Next.js static export on GitHub Pages; React, strict TypeScript, Tailwind, Zod for the source manifest, Vitest, `tsx` for pipeline scripts, pnpm. Fonts are self-hosted through `next/font`.

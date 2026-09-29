@@ -30,10 +30,6 @@ Orang menempelkan kode pembayaran asli ke aplikasi ini. Selama dipakai, aplikasi
 
 Anatomi QRIS sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris. Aplikasi ini menelusuri sembilan tahap, dari teks yang diketik sampai kode yang rusak, lewat slider yang bisa digeser. Kodenya tidak pernah bergeser atau berubah ukuran, jadi di tengah dua tahap kita melihat keduanya setengah jadi. Di lab kerusakan, kita bisa menghapus kotak-kotak dan melihat koreksi galat memperbaikinya secara langsung. Kalau melewati batasnya, kodenya gagal di depan mata, lengkap dengan alasannya. Saya membangunnya dalam sekitar 28 jam selama dua hari pada September 2026.
 
-## Langkah berikutnya
-
-- Menuntaskan tahap penyempurnaan untuk teks, penggunaan keyboard, tampilan mobile, dan skor Lighthouse, yang menurut catatan proyek belum sepenuhnya selesai.
-
 ## Di balik layar
 
 - Encoder mengembalikan peta provenans: untuk setiap modul, indeks codeword dan bit, atau pola fungsi, ditambah penanda apakah mask membaliknya. Ada juga peta kebalikannya (codeword ke koordinat modul, byte payload ke codeword). Satu tes men-decode hanya codeword yang disorot untuk membuktikan pemetaannya.

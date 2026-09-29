@@ -34,12 +34,6 @@ Halaman perbandingan menaruh dua bangunan di satu garis tanah dengan satu skala.
 
 Rumah Adat Nusantara sudah live dan terbuka untuk umum dalam bahasa Indonesia dan Inggris. Isinya 35 bangunan: 26 rumah, dua lumbung, tiga balai, sebuah istana, sebuah rumah perahu, sebuah makam batu, sebuah menara kremasi, sebuah kompleks sembilan bangunan, dan sepasang rumah leluhur. Lokasinya membentang di tiga zona waktu. Setiap bangunan punya empat halaman, total 280, dan pemeriksaan strukturnya sendiri yang dijalankan pada minimal lima kombinasi aturan. Pemeriksaan yang gagal menghentikan rilis. Situs ini tidak punya backend dan tidak memanggil jaringan, jadi tetap jalan tanpa wifi. Saya membangunnya dalam delapan hari, dari 25 Agustus sampai 1 September 2026.
 
-## Langkah berikutnya
-
-- Memasukkan gambar survei terukur yang pertama. Satu pemeriksaan, model dibandingkan dengan gambar terukur sungguhan, akan terus melaporkan "skipped" sampai saat itu. Menggeser status itu adalah ukuran kemajuan yang dinyatakan proyek ini.
-- Memperluas ekspor gambar dan penurunan langkah demi langkah ke bangunan selain yang pertama.
-- Membuat ukiran menjadi bentuk 3D, yang saat ini masih digambar di canvas.
-
 ## Di balik layar
 
 - `buildHouse(rules)` murni dan deterministik: aturan masuk, bagian dan sambungan keluar. `lib/` tidak boleh menyentuh three.js, DOM, `Math.random`, atau jam; `components/` tidak membangkitkan apa pun; lapisan aplikasi tidak tahu bangunan mana yang dipegangnya.

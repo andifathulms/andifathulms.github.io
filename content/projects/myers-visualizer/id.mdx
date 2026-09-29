@@ -36,11 +36,6 @@ Myers Visualizer sudah live, publik, dan open source. Situs ini bisa dipasang se
 
 Kisi 300×300 berjalan di 59,9 frame per detik. Di batas input, kasus terburuk butuh 135.152 langkah pencarian dan halaman tetap responsif. Tersedia dalam bahasa Inggris dan Indonesia. Saya membangunnya dalam dua hari pada Agustus 2026.
 
-## Langkah berikutnya
-
-- Menguji bagaimana animasinya dipahami orang. Tes sudah mencakup wiring, teks aksesibel, piksel, dan biaya, tapi belum mencakup apakah animasinya mudah diikuti.
-- Menghilangkan jeda sekali sebesar 100–200 ms saat hasil tiba di batas input, dengan mengirim trace sebagai typed array.
-
 ## Di balik layar
 
 - Mesinnya fungsi murni, `(a, b, options) → { script, trace, stats }`, tanpa React, DOM, jam, unsur acak, atau state tingkat modul. Teks diubah dulu menjadi id integer, sehingga granularitas baris atau karakter dan penanganan spasi menjadi pengaturan yang eksplisit.

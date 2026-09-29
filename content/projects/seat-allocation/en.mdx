@@ -32,11 +32,6 @@ Each rule cites its article in Law 7/2017, and each headline figure cites its el
 
 Suara ke Kursi is live, public and in Indonesian. It has four rule controls: threshold, threshold scope, divisor method and district map. Every setting is saved in the link, so an argument about a 2% threshold can be sent to someone. It models 580 seats, 84 districts and 18 parties across five views. Each view has a keyboard-reachable table with the same numbers. An automated audit found zero accessibility violations at three screen widths, in light and dark. I built it in about 28 hours over 2 and 3 September 2026.
 
-## What I'd do next
-
-- Finish extracting the certified district-by-party votes from the scanned recapitulation documents, which turns the reproduction check green with no code change.
-- It covers the 2024 rules only. Candidate-level seats, the 2019 and 2014 rule sets and an English version are outside this build.
-
 ## Under the hood
 
 - The engine is `src/engine/`, 621 lines with zero imports. `allocate(parties, dapil, rules)` is its whole public surface: synchronous and deterministic. It covers the threshold, four divisor rules (Sainte-Laguë, D'Hondt, modified Sainte-Laguë, Hare quota with largest remainder), tie resolution, the trace object and five disproportionality metrics (including Gallagher, Loosemore–Hanby and effective number of parties).

@@ -34,10 +34,6 @@ The simulator is live and public. The phantom-jam scenario puts 22 vehicles on a
 
 The app states plainly that it is not a calibrated model of any specific road and not a replacement for professional traffic software. Its job is to show an assumption failing.
 
-## What I'd do next
-
-- Fix two rare overlap cases the README documents: vehicles squeezed below their own width in a signal queue, and a car left 0.7 m inside a stopped angkot. Both show as numeric warnings for now.
-
 ## Under the hood
 
 - `src/estimators/` can't import `src/sim/`, enforced by an ESLint `no-restricted-imports` rule in CI before deploy. Estimators consume one type, `DetectorRecord`. `src/truth/substitution.ts` is the documented exception.

@@ -34,11 +34,6 @@ About 10 to 20% of connections, on strict office networks and some home routers,
 
 Chipfire is live, in Indonesian and English. You can play hotseat with 2 to 4 people, play an AI opponent at three difficulty levels, or play a friend online with pasted codes. It also has a replay viewer, shareable game codes, a move preview and a five-lesson tutorial. Every deploy first plays 3,000 simulated games to prove the engine agrees with itself. I built it in under 24 hours on 2 and 3 August 2026, from written spec to deployed site.
 
-## What I'd do next
-
-- Add QR codes for the connection codes, so phones can connect by scanning.
-- Add an optional matchmaking service on top of the paste flow, which stays the path that always works.
-
 ## Under the hood
 
 - `applyMove(state, move)` is pure: no `Date`, no `Math.random` (a seeded generator lives in the state), no floats, including in AI scoring.

@@ -28,12 +28,6 @@ Dashboard-nya punya tiga halaman. Halaman ringkasan menampilkan total anggaran, 
 
 Saya membangun platform ini dalam dua hari di bulan Juni 2026, dari repositori kosong. Semuanya berjalan dari ujung ke ujung: job malam, client SAKTI, database, API, dashboard, dan ekspor Excel. Saat ini platform berjalan di atas server SAKTI tiruan dengan data contoh. Setup produksinya sudah siap dan teruji bisa menyala dengan bersih. Data asli menunggu Kementerian Keuangan memberikan kredensial. Di versi pertama ini dashboard belum punya login sendiri, dan ditujukan untuk jaringan internal OIKN.
 
-## Langkah berikutnya
-
-- Menyambungkan ke SAKTI asli begitu kredensial tersedia, lalu deploy ke server internal OIKN.
-- Mengganti estimasi tren anggaran. Data anggaran SAKTI tidak bertanggal, jadi grafiknya membagi setiap total secara merata ke tiap periode. Riwayat bertanggal dari SAKTI akan memperbaikinya.
-- Mengubah placeholder peringatan kegagalan menjadi notifikasi email atau chat.
-
 ## Di balik layar
 
 - DAG Airflow `sakti_daily_sync` membaca tabel `Satker` saat runtime dan memakai `.expand()` untuk dynamic task mapping. Task-nya: `fetch_ref_sts`, `fetch_ref_admin_uraian`, lalu `fetch_data_ang`, `fetch_spp_header`, dan `fetch_capaian_ro` per satker, lalu `normalize_and_load` dan `log_sync_result`.

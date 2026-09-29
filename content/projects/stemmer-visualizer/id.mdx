@@ -32,12 +32,6 @@ Saya membandingkan hasil saya dengan Sastrawi pada 315 kata dan menemukan sembil
 
 Stemmer Visualizer sudah live, terbuka untuk umum, dan open source, dalam bahasa Indonesia dan Inggris, serta bisa dipakai offline. Ada tujuh halaman, termasuk referensi aturan yang dibangkitkan dari data aturannya dan mode dokumen yang menandai kata ambigu dalam paragraf yang ditempel. Aplikasi ini memakai daftar kata dasar Sastrawi yang berisi sekitar 30.000 kata. Perubahan itu memperbaiki dua perbedaan tetapi merusak satu kata, *perusakan*, yang kini menghasilkan *rusa*. Saya menerimanya dan mencatatnya. Situs ini menautkan Sastrawi sebagai library yang sebaiknya dipakai di produksi. Saya membangunnya dalam sekitar sembilan jam pada 5 Agustus 2026.
 
-## Langkah berikutnya
-
-- Memverifikasi 44 aturan terhadap makalah aslinya, dimulai dari akses institusi ke versi jurnal 2007.
-- Menjawab tiga perbedaan yang masih terbuka berdasarkan makalah, bukan intuisi.
-- Menambahkan set aturan 2005, tetapi hanya dari makalah sumbernya.
-
 ## Di balik layar
 
 - Mesin di `lib/engine/` terdiri dari tujuh modul murni. Signature: `(word, variant, ruleSet, dictionary) → StemTrace`. Tanpa React, DOM, jam, atau state modul; masukan yang sama menghasilkan jejak yang identik sampai ke byte.

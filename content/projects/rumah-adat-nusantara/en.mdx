@@ -34,12 +34,6 @@ A comparison page places any two buildings on one ground line at one scale. I do
 
 Rumah Adat Nusantara is live and public in Indonesian and English. It has 35 buildings: 26 houses, two granaries, three halls, a palace, a houseboat, a stone tomb, a cremation tower, a nine-building compound and a pair of ancestor shrines. Their sites span three time zones. Each building has four pages, 280 in total, and its own structural checks run over at least five rule combinations. A failing check stops the release. The site has no backend and makes no network calls, so it works with wifi off. I built it in eight days, from 25 August to 1 September 2026.
 
-## What I'd do next
-
-- Wire in the first measured survey drawing. One check, the model against a surveyed drawing, reports "skipped" until then. Moving it is the project's stated measure of progress.
-- Extend the drawing export and step-by-step derivation beyond the first building.
-- Extrude the carving, which is drawn on a canvas today.
-
 ## Under the hood
 
 - `buildHouse(rules)` is pure and deterministic: rules in, parts and joints out. `lib/` may not touch three.js, the DOM, `Math.random` or the clock; `components/` generates nothing; the app layer doesn't know which building it holds.

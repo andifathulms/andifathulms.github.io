@@ -32,12 +32,6 @@ I compared my results with Sastrawi on 315 words and found nine differences. Thr
 
 Stemmer Visualizer is live, public and open source, in Indonesian and English, and runs offline. It has seven pages, including a rule reference generated from the rule data and a document mode that flags ambiguous words in a pasted paragraph. It ships Sastrawi's root list of about 30,000 words. That fixed two differences but broke one word, *perusakan*, which now returns *rusa* (deer). I accepted that and wrote it up. The site links to Sastrawi as the library to use in production. I built it in about nine hours on 5 August 2026.
 
-## What I'd do next
-
-- Verify the 44 rules against the original papers, starting with institutional access to the 2007 journal version.
-- Settle the three open divergences from the paper, not from intuition.
-- Add the 2005 rule set, but only from its source paper.
-
 ## Under the hood
 
 - The engine in `lib/engine/` is seven pure modules. Signature: `(word, variant, ruleSet, dictionary) → StemTrace`. No React, DOM, clock or module state; identical input gives a byte-identical trace.

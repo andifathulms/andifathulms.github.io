@@ -36,10 +36,6 @@ Query Planner sudah live dan terbuka untuk umum. Geser pengaturan biaya penyimpa
 
 Grafik korelasi menggambar asumsi yang salah sebagai persegi panjang yang terlepas dari data asli. Satu klik menambah statistik multi-kolom, dan taksirannya langsung menempel ke kenyataan. Tidak ada data yang keluar dari browser, dan setiap rencana bisa dibagikan sebagai tautan. Saya membangunnya dalam satu sesi sekitar 16,5 jam pada 3 September 2026.
 
-## Langkah berikutnya
-
-- Menambahkan lapisan bitmap heap scan, yang saya keluarkan dari cakupan. Keempat perbedaan dengan Postgres yang terdokumentasi berasal dari lapisan ini.
-
 ## Di balik layar
 
 - Mesin: parser SQL recursive-descent untuk subset yang sempit, penyimpanan kolumnar, index B+tree yang dimuat sekaligus, reservoir sampling (dengan seed, default 30.000 baris), histogram equi-depth, daftar MCV, dan ketiga jenis statistik multivariat (functional dependency, n-distinct, MCV multivariat).

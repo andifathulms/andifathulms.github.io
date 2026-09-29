@@ -34,11 +34,6 @@ KPR Simulator is live, public and free of ads, in Indonesian first and English s
 
 The app never advises, ranks or names a bank. It states in the interface that it is not financial advice, that the floating rate is unknown and unpublished, that bank fees vary, that loan approval is not modelled, and that figures should be confirmed with the bank.
 
-## What I'd do next
-
-- Fill the empty base-rate reference with an OJK segment-level average. Per-bank rates would break the rule against naming a bank.
-- Record published bank-calculator outputs as a cross-check. The comparison set has its categories but no recordings yet.
-
 ## Under the hood
 
 - The engine is `(inputs, product, rulePacks) => Schedule`, with no React, DOM or `new Date()` in `lib/`. Periods are explicit `{ year, month }` integers.

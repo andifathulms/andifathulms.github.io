@@ -34,11 +34,6 @@ Midway through, I found six analytics endpoints that worked but had no page. I s
 
 Sanad is feature-complete and staged for launch, but not public yet. Its data depends on an ingestion pipeline I run locally. Readers get the Arabic text with vowel marks, English and Indonesian translations side by side, grade badges, a focus mode and resume-reading. Signed-in users get bookmarks, collections and reading history. Any hadith can be exported as an image card to share. The original plan had AI topic search. I shipped a curated topic browser over full counts, with no paid AI service behind it. I built Sanad in five days in June 2026, and it grew well past its original spec.
 
-## What I'd do next
-
-- Launch it publicly. The build and release pipeline is ready.
-- Add semantic search over embeddings, which I deferred.
-
 ## Under the hood
 
 - A Django 5.0 and DRF API owns the data and computation. A separate Next.js 14 App Router frontend talks to it over REST. SimpleJWT handles auth.

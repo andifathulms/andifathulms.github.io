@@ -32,11 +32,6 @@ Rekap Jumat menggabungkan tingkat penyelesaian, rentetan tepat waktu, perbanding
 
 Bot ini berjalan di produksi untuk standup harian tim dan memantau 14 anggota setiap hari kerja. Saya membangunnya dalam 18 hari di bulan Juni 2026. Awalnya hanya mendeteksi laporan dan mengirim pengingat, lalu berkembang menjadi pelacakan tugas, analitik mingguan, dan perintah mandiri. Anggota bisa mengetik !mystats untuk melihat persentase tepat waktu, rentetan, dan tingkat penyelesaiannya sendiri, !rank untuk papan peringkat, dan !help untuk daftar perintah. Data tersimpan di berkas biasa pada volume yang di-mount, jadi restart tidak menghapus progres hari itu. Saya juga membuat dashboard React sebagai demo jadwal dan pesan. Dashboard itu tidak terhubung ke bot yang berjalan.
 
-## Langkah berikutnya
-
-- Memperketat pencocokan tugas. Kemiripan kata bisa melewatkan tugas yang ditulis ulang dengan kata yang jauh berbeda, atau menyatukan dua tugas berbeda yang kata-katanya mirip.
-- Menghubungkan dashboard ke bot yang berjalan, yang saat ini belum punya API data.
-
 ## Di balik layar
 
 - Node.js 18 dengan `whatsapp-web.js` (Puppeteer dan Chromium), `node-cron` untuk penjadwalan, dan `qrcode-terminal` untuk menautkan ponsel. Sesi bergantung pada ponsel tertaut yang tetap online dan bisa rusak saat WhatsApp memperbarui klien web-nya.

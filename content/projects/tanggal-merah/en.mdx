@@ -32,11 +32,6 @@ Once the maths was right, I rebuilt the interface for a reader who doesn't know 
 
 Tanggal Merah is live and public, in Indonesian and English, and works offline after the first load. The year view is laid out like an Indonesian wall calendar, with national holidays in red and collective leave in amber. Toggle a leave day and two blocks join into one bar. It also shows what each extra leave day buys and which holidays the weekend swallows, for five- and six-day weeks. It covers 2026: 17 national holidays and 8 collective leave days, each cited. The site says it is a personal project and not employment-law advice, and that company policy governs collective leave in the private sector. I built it over 12 and 13 August 2026.
 
-## What I'd do next
-
-- Check the 2026 decree numbers against the published documents. The dates come from the widely circulated 2026 calendar, so the site shows a banner until the numbers are verified.
-- Add more years as their decrees are published, and let users add regional holidays.
-
 ## Under the hood
 
 - No `Date` objects in the engine. Days are integer day numbers, week position is arithmetic, and the year is always an explicit argument. The UI converts at the boundary.

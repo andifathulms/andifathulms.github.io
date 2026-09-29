@@ -28,11 +28,6 @@ Dari 726 bahasa, 421 punya peta wilayah penutur. Sisanya, 305 bahasa, tampil seb
 
 Nusantara Languages sudah live dalam bahasa Inggris dan Indonesia, sepenuhnya statis, dan bisa dipakai offline. Selain peta dan pohon, situs ini menjawab tiga pertanyaan dari data yang sama. Bahasa mana kerabat terdekat sebuah bahasa? Seberapa jauh sebuah rumpun menyebar? Austronesia membentang sekitar 5.010 km, Timor-Alor-Pantar sekitar 350 km. Bahasa dari rumpun berbeda mana saja yang bersentuhan? Ada 67 pasang. Setiap jawaban menampilkan aturan dan batasannya di samping angkanya. Pengguna juga bisa mewarnai per subkelompok, mengikuti tur terpandu ke garis-garis pertemuan rumpun, dan mengekspor PNG yang sudah memuat atribusi, sesuai syarat lisensinya. Situs ini menyatakan bahwa batas antarbahasa bersifat bertahap, serta berapa bahasa yang punya wilayah dan berapa yang berupa titik. Saya membangunnya sendiri dalam tiga hari pada Agustus 2026.
 
-## Langkah berikutnya
-
-- Menentukan apa yang seharusnya diukur oleh cek kecepatan. Cek ini menahan deploy berdasarkan satu sampel hover paling lambat, sehingga satu jeda garbage collection bisa menggagalkan build yang sebenarnya cepat. Saya memilih belum mengubahnya, karena mengganti apa yang diukur sebuah gate adalah soal pertimbangan.
-- Merampingkan halaman peta, yang kini sekitar 440 KB gzip bersama lapisan daratan. Penghematan terbesar datang dari mengirim garis pantai sekali, bukan dua kali.
-
 ## Di balik layar
 
 - Static export Next.js di GitHub Pages; React, TypeScript strict, Tailwind, Zod untuk manifest sumber, Vitest, `tsx` untuk skrip pipeline, pnpm. Font di-hosting sendiri lewat `next/font`.

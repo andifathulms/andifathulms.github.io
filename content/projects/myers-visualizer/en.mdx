@@ -36,11 +36,6 @@ Myers Visualizer is live, public and open source. It installs as an app and work
 
 It runs at 59.9 frames per second on a 300×300 grid. At the input cap, the worst case takes 135,152 search steps and the page stays responsive. It comes in English and Indonesian. I built it in two days in August 2026.
 
-## What I'd do next
-
-- Test how the animation reads to people. The tests cover wiring, accessible text, pixels and cost, but not whether it is easy to follow.
-- Remove the one-time 100–200 ms pause when a result arrives at the input cap, by sending the trace as typed arrays.
-
 ## Under the hood
 
 - The engine is a pure function, `(a, b, options) → { script, trace, stats }`, with no React, DOM, clock, randomness or module-level state. Text is tokenized into integer ids first, so line vs. character granularity and whitespace handling are explicit settings.

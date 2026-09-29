@@ -32,12 +32,6 @@ Halaman bukti menjalankan transformasi saya di samping analyser bawaan browser d
 
 Spectrogram sudah live dan terbuka untuk umum, dalam bahasa Inggris dan Indonesia. Ada empat bentuk jendela, tiga skala nada, dan mode sintesis tempat Anda menyusun sinyal dari nada murni lalu melihat spektrumnya mengembalikan persis apa yang dimasukkan. Enam sampel bawaan dibangkitkan lewat kode, jadi situs tetap bisa dipakai walaupun akses mikrofon ditolak. Di desktop, transformasinya berjalan sekitar 101 kali lebih cepat dari waktu nyata. Saya membangunnya dalam satu sesi sekitar empat jam pada 6 Agustus 2026.
 
-## Langkah berikutnya
-
-- Menguji di ponsel kelas menengah. Angka kecepatannya berasal dari desktop, dan audio di ponsel berperilaku berbeda.
-- Mengotomatiskan perbandingan dengan analyser browser di CI. Saat ini perbandingan itu masih dicek manual di halaman bukti.
-- Menyelesaikan sisa pemolesan: galeri harmonik dan offline shell.
-
 ## Di balik layar
 
 - Inti DSP di `lib/dsp/` sekitar 990 baris: FFT radix-2 Cooley-Tukey in-place beserta inversnya, tabel twiddle dan bit-reversal yang di-cache, empat jendela (rectangular, Hann, Hamming, Blackman) dari Harris (1978), konversi dB, pemetaan bin linear/log/mel, framing, dan sintesis aditif.

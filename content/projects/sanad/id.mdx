@@ -34,11 +34,6 @@ Di tengah jalan, saya menemukan enam endpoint analitik yang sudah berfungsi tapi
 
 Fitur Sanad sudah lengkap dan siap diluncurkan, tapi belum dibuka untuk publik. Datanya masih bergantung pada pipeline impor yang saya jalankan secara lokal. Pembaca mendapat teks Arab berharakat, terjemahan Inggris dan Indonesia berdampingan, lencana derajat, mode fokus, dan fitur lanjut membaca. Pengguna yang login mendapat bookmark, koleksi, dan riwayat bacaan. Setiap hadis bisa diekspor sebagai kartu gambar untuk dibagikan. Rencana awalnya memuat pencarian topik berbasis AI. Yang saya rilis adalah penjelajah topik terkurasi dengan hitungan lengkap, tanpa layanan AI berbayar. Saya membangun Sanad dalam lima hari di bulan Juni 2026, dan hasilnya jauh melampaui spesifikasi awal.
 
-## Langkah berikutnya
-
-- Meluncurkannya untuk publik. Pipeline build dan rilisnya sudah siap.
-- Menambah pencarian semantik berbasis embedding, yang saya tunda.
-
 ## Di balik layar
 
 - API Django 5.0 dan DRF memegang data dan komputasi. Frontend Next.js 14 App Router terpisah berbicara dengannya lewat REST. Autentikasi memakai SimpleJWT.

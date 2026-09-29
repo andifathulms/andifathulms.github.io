@@ -32,11 +32,6 @@ Ruang masalahnya terbatas, jadi saya mengujinya secara menyeluruh. Setiap nilai 
 
 Library-nya sudah di-build dan siap diterbitkan, mendukung kedua format modul. Situs publiknya tersedia dalam bahasa Indonesia dan Inggris. Saat Anda mengetik, konverter menggambar kurung di atas setiap kelompok tiga angka dengan label *juta* atau *ribu*, dan kelompok kosong terlihat menghilang. Mode dokumen mencetak jumlah seperti di kuitansi: # seribu lima ratus rupiah #. Lima opsi, misalnya *sejuta*, atau *milyar* dan *miliar*, masing-masing mengutip pemakaian di balik kedua pilihannya. Halaman perbandingan dengan paket lain dirilis kosong, karena belum ada yang saya ukur. Saya membangunnya dalam waktu kurang dari tujuh jam pada 5 Agustus 2026.
 
-## Langkah berikutnya
-
-- Menerbitkan paketnya ke npm dan membuat tag rilis. Rangkaian tes menyeluruh yang menjadi syarat rilis sudah hijau.
-- Menjalankan survei terhadap paket-paket lain dan mengklasifikasikan setiap perbedaan secara tertulis.
-
 ## Di balik layar
 
 - `lib/` sekitar 980 baris di 8 berkas: leksikon, pengelompokan, formatter, parser, opsi, dan error terstruktur. Tanpa React, DOM, `Intl`, `Date`, atau state di tingkat modul.

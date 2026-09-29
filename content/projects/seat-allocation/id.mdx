@@ -32,11 +32,6 @@ Setiap aturan mengutip pasalnya di UU 7/2017, dan setiap angka utama mengutip do
 
 Suara ke Kursi sudah live, terbuka untuk umum, dan berbahasa Indonesia. Ada empat pengaturan aturan: ambang batas, cakupan ambang batas, metode pembagi, dan peta dapil. Setiap pengaturan tersimpan di tautan, jadi perdebatan soal ambang batas 2% bisa dikirim sebagai link. Aplikasi ini memodelkan 580 kursi, 84 dapil, dan 18 partai dalam lima tampilan. Setiap tampilan punya tabel dengan angka yang sama, bisa dijangkau dengan keyboard. Audit otomatis tidak menemukan satu pun pelanggaran aksesibilitas di tiga lebar layar, dalam mode terang dan gelap. Saya membangunnya dalam sekitar 28 jam, pada 2 dan 3 September 2026.
 
-## Langkah berikutnya
-
-- Menyelesaikan ekstraksi suara resmi per dapil per partai dari dokumen rekapitulasi hasil pindaian. Begitu data itu masuk, pemeriksaan reproduksi langsung lolos tanpa perubahan kode.
-- Aplikasi ini hanya mencakup aturan 2024. Alokasi tingkat caleg, aturan Pemilu 2019 dan 2014, serta versi bahasa Inggris berada di luar cakupan build ini.
-
 ## Di balik layar
 
 - Mesinnya ada di `src/engine/`, 621 baris tanpa satu pun import. `allocate(parties, dapil, rules)` adalah seluruh antarmuka publiknya: sinkron dan deterministik. Isinya mencakup ambang batas, empat aturan pembagi (Sainte-Laguë, D'Hondt, Sainte-Laguë modifikasi, kuota Hare dengan sisa terbesar), penyelesaian suara seri, objek trace, dan lima metrik disproporsionalitas (termasuk Gallagher, Loosemore–Hanby, dan jumlah partai efektif).

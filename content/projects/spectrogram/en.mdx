@@ -32,12 +32,6 @@ The proof page runs my transform beside the browser's built-in analyser on the s
 
 Spectrogram is live and public, in English and Indonesian. It offers four window shapes, three pitch scales and a synthesis mode where you build a signal from pure tones and watch the spectrum recover exactly what you put in. Six bundled samples are generated in code, so the site works even if you deny the microphone. On a desktop, the transform runs about 101 times faster than real time. I built it in a single session of about four hours on 6 August 2026.
 
-## What I'd do next
-
-- Test on a mid-range phone. The speed figures are from a desktop, and phone audio behaves differently.
-- Automate the comparison with the browser's analyser in CI. Today it's a manual check on the proof page.
-- Finish the last polish items: the harmonics gallery and the offline shell.
-
 ## Under the hood
 
 - The DSP core in `lib/dsp/` is about 990 lines: an in-place radix-2 Cooley-Tukey FFT and inverse, cached twiddle and bit-reversal tables, four windows (rectangular, Hann, Hamming, Blackman) from Harris (1978), dB conversion, linear/log/mel bin mapping, framing and additive synthesis.

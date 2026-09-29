@@ -32,12 +32,6 @@ Di prototipe, notifikasi dihitung ulang setiap kali layar digambar. Di server, s
 
 Montara adalah sistem privat yang sudah melewati tahap integrasi dan belum diluncurkan ke produksi. Ada delapan dashboard yang dibatasi per peran: ringkasan, peta, anggaran, progres, risiko, kepatuhan, portofolio, dan kinerja kontraktor, lengkap dengan ekspor CSV dan PDF. Lima peran ditegakkan di browser dan sekali lagi di server. Alur persetujuan mengikuti permintaan yang ditolak sampai diajukan ulang. Tes otomatis di frontend memeriksa, antara lain, bahwa satu peran tidak bisa melihat data peran lain. Saya membangun prototipenya selama sekitar enam minggu sejak akhir Mei 2026, lalu backend-nya pada 5 Juli. Kini frontend terhubung ke server lewat sebuah sakelar, jadi masih bisa kembali ke mode prototipe selama masa peralihan.
 
-## Langkah berikutnya
-
-- Menambah rangkaian tes di backend. Saat ini tes otomatis baru mencakup frontend.
-- Menuntaskan peralihan supaya aplikasi berjalan sepenuhnya di server.
-- Membangun manajemen dokumen berversi, yang saya tunda di fase ini.
-
 ## Di balik layar
 
 - Frontend: Next.js App Router, React 18, TypeScript, shadcn/Radix UI, Tailwind CSS v4, react-hook-form, Leaflet, dan Recharts. Prototipenya berjalan sepenuhnya di `localStorage`.

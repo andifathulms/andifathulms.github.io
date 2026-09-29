@@ -28,12 +28,6 @@ Padaeng adalah laras diatonis-kromatis yang diciptakan Daeng Soetigna pada 1938.
 
 Angklung Simulator sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris. Isinya rak angklung yang bergoyang, tampilan ansambel, lab teknik yang memperlihatkan pukulan yang menggerakkan bambu, perubahan akor yang digambar sebagai tabung, perbandingan laras berdampingan, dan jalur dirigen. Ada juga halaman diagnostik yang melaporkan perilaku audio di ponsel kita. Semuanya berjalan dengan tiga dependensi runtime, tanpa pustaka audio atau pengolahan suara. Saya membangunnya dalam sekitar 37 jam pada 12 dan 13 Agustus 2026.
 
-## Langkah berikutnya
-
-- Menjalankan sepuluh pengecekan iPhone yang sudah ditulis untuk memulai audio, yang belum dijalankan di iPhone.
-- Membandingkan warna bunyinya dengan angklung asli lewat telinga. Tinggi nada, parsial, dan akor sudah diukur, tapi apakah bunyinya mirip alat aslinya belum terverifikasi.
-- Menambahkan repertoar Sunda. Melodi bawaan saat ini berlisensi domain publik atau karya saya sendiri, dan repo mencatat apa yang dibutuhkan untuk menambah lagu tradisional.
-
 ## Di balik layar
 
 - Setiap mode adalah resonator dua kutub, `y[n] = g·x[n] + 2r·cos(ω)·y[n-1] − r²·y[n-2]`, yang respons impulsnya berupa sinusoid yang meluruh. Tabungnya berperilaku seperti pipa tertutup, jadi parsial ganjil yang dominan.

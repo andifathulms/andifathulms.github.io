@@ -32,10 +32,6 @@ The central view draws 200,000 synthetic records at 60 frames per second and gro
 
 Linkage is live and public, a finished first version with no backend and no accounts. Beyond the five cases, a free sandbox holds twelve instruments, including a search for the smallest generalisation that meets a target, drawn from the search's own record of what it tested. The whole app downloads as 113.8 KB compressed. It reports what an attack recovered and never dramatises it: no "exposed", no "victim", no congratulations. I built it alone over eight days in September 2026.
 
-## What I'd do next
-
-- Add advanced composition for the differential-privacy budget. The first version leaves it out and says so on screen.
-
 ## Under the hood
 
 - `src/engine/` imports nothing, not React, the DOM or `Date`. Every result is a function of a seed and a configuration, tested against brute-force reference implementations.

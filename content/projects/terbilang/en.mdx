@@ -32,11 +32,6 @@ The problem is bounded, so I test it completely. Every value from 0 to 1,000,000
 
 The library is built and ready to publish, with support for both module formats. The public site is in Indonesian and English. As you type, the converter draws brackets over each group of three digits, labelled *juta* or *ribu*, and empty groups visibly disappear. A document mode prints the amount the way it appears on a receipt: # seribu lima ratus rupiah #. Five options, such as *sejuta* or *milyar* versus *miliar*, each cite the usage behind both choices. A page for comparing other packages ships empty, because I haven't measured any yet. I built it in under seven hours on 5 August 2026.
 
-## What I'd do next
-
-- Publish the package to npm and tag a release. The exhaustive suite that gates publication is already green.
-- Run the survey against real packages and classify every disagreement in writing.
-
 ## Under the hood
 
 - `lib/` is about 980 lines across 8 files: lexicon, grouping, formatter, parser, options and structured errors. No React, DOM, `Intl`, `Date` or module-level state.

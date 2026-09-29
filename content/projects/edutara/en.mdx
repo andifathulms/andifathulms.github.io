@@ -32,11 +32,6 @@ Leadership needs training hours per employee, filtered by institution, office, d
 
 Edutara is a tested build with automated checks on every change: unit tests on both sides, a coverage gate, and a full end-to-end suite that starts the whole system with sample data. The production setup is ready for OIKN's own servers. The switch from the old platform hasn't happened yet. I built it between late June and early July 2026, most of it in the first two days. During the build I redesigned the roles: one Teacher role replaced two, a platform operator tier now sits below Superadmin, and people can ask to join an institution. I also added learner testimonials, which the spec didn't ask for.
 
-## What I'd do next
-
-- Replace the old platform in production. The new stack is ready, but the switch is still pending.
-- Connect the first partner platform to the training-hours report.
-
 ## Under the hood
 
 - Django REST Framework backend and a Next.js App Router frontend over a typed API client. Every endpoint has its own DRF permission class.

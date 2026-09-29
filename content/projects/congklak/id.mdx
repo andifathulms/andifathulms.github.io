@@ -32,11 +32,6 @@ Test suite-nya menjaga mesin permainan dengan baik, tapi tidak bisa melihat bug 
 
 Congklak sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris, dan set aturan tanpa sitasi akan menggagalkan deploy. Kita bisa bermain melawan teman di perangkat yang sama, melawan komputer dengan tiga tingkat kesulitan, atau melawan orang di perangkat lain lewat kode, tanpa server permainan. Biji berpindah dari lubang ke lubang dengan kecepatan yang bisa diatur, dan pratinjau menunjukkan di mana sebuah langkah akan berakhir sebelum dijalankan. Ada juga penampil replay dan mode belajar dengan tiga pelajaran di papan. Istilah tradisional seperti lumbung, biji, menembak, dan dakon tetap dipakai di antarmuka. Saya membangunnya pada 3 dan 4 Agustus 2026.
 
-## Langkah berikutnya
-
-- Mencakup varian yang belum masuk versi ini: langkah pertama serentak, permainan beberapa ronde dengan lubang "terbakar", dan papan dengan lima, sembilan, atau sebelas lubang. Masing-masing sudah dicatat di set aturan sebagai perbedaan yang diketahui, jadi ketiadaannya terlihat.
-- Menambah set aturan keempat hanya jika ada sumber yang memuat aturan yang belum bisa dinyatakan oleh format saat ini.
-
 ## Di balik layar
 
 - `applyMove(state, move, ruleset) → { state, events }` murni: tanpa jam, tanpa keacakan tanpa seed, tanpa float, tanpa API browser. Sebuah permainan adalah daftar langkahnya ditambah id set aturan.

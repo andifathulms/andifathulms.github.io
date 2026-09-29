@@ -32,10 +32,6 @@ Simulator ini menolak pull dengan sadar, karena pull menyembunyikan separuh peke
 
 Git Rebase Simulator sudah live dan open source dengan lisensi MIT, dalam bahasa Inggris dan Indonesia, dan bisa dipakai offline setelah dimuat pertama kali. Simulator ini mendukung 17 perintah Git, termasuk interactive rebase dan remote simulasi untuk push, fetch, dan force-push. Enam skenario siap pakai, misalnya hard reset yang tidak disengaja atau force-push yang berbahaya, bisa dibagikan lewat tautan. Saya membangunnya dalam sekitar lima jam pada 5 Agustus 2026, dari spesifikasi tertulis.
 
-## Langkah berikutnya
-
-- Membangun tampilan konflik berdampingan dari spesifikasi, yang menunjukkan versi dasar, versi kita, dan versi mereka. Saat ini konflik tampil sebagai penanda mentah Git di editor berkas.
-
 ## Di balik layar
 
 - Mesinnya murni: `(state, command) → { state, events }`, tanpa React, DOM, `Date`, atau `Math.random`. Timestamp berasal dari jam virtual di dalam state.

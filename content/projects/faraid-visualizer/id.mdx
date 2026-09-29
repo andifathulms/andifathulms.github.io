@@ -32,11 +32,6 @@ Proses deploy menjalankan bank validasi dan tes API. Proses itu juga memastikan 
 
 Faraid Visualizer sudah live dan gratis di GitHub Pages, tanpa backend dan tanpa akun. Aplikasi ini menunjukkan siapa yang terhalang dan oleh siapa, setiap bagian pasti, bagaimana sisa harta dibagi, dan setiap rujukannya, dalam bentuk teks dan diagram. KHI dan Syafi'i klasik lolos semua 61 contoh soal di bank validasi, ditambah satu set kasus terpisah tempat kedua mazhab berbeda pendapat. Mode Profesional mengekspor PDF lengkap dengan jejak rujukannya, dalam bahasa Indonesia atau Inggris, untuk notaris dan staf pengadilan agama. Saya membangunnya sendiri antara Juli dan Agustus 2026.
 
-## Langkah berikutnya
-
-- Melepas label Beta dari Hanafi, Maliki, dan Hanbali setelah masing-masing punya minimal 30 contoh yang tervalidasi.
-- Tiga area masih menampilkan "belum didukung": sub-kasus kakek bersama saudara (akdariyya, mu'adda), dzawil arham di luar cakupan KHI, dan wasiat wajibah (KHI Pasal 209), yang memang tidak masuk cakupan versi pertama.
-
 ## Di balik layar
 
 - `faraid_engine` berisi sekitar 2.400 baris Python 3.12 murni dengan `Fraction` dan `Decimal` dari stdlib, tanpa import Django dan tanpa dependensi pihak ketiga. Setiap fungsi mengembalikan `{heir, share, rule_applied, source_id}`.

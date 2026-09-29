@@ -32,12 +32,6 @@ Weton feeds *primbon*: character readings, marriage matches and auspicious days.
 
 Selapan is live in Indonesian and English, with seven pages in each language. Beyond conversion, it has cycle wheels that realign every 35 days (the *selapan*) and every 210, a wall-calendar month view and the traditional farming calendar (*pranata mangsa*). It also counts the dates of the mourning ceremonies as plain cited arithmetic, with no interpretation. It checks exact cycles over 36,524 consecutive days. The site presents itself as a personal project, not an authority, and says that practice varies by region. I built it in one day, on 6 August 2026.
 
-## What I'd do next
-
-- Cross-check the *wuku* reference date against published Balinese *pawukon* data. It rests on one source today, and an error of a whole *wuku* would pass every cycle test.
-- Implement the irregular month lengths of the Dal year. Year boundaries are right, but days within a Dal year may be off, so they are marked unverified.
-- Ship the *primbon* layer once a named reviewer is in place.
-
 ## Under the hood
 
 - Julian Day Number is the only internal date representation. There is no `Date` object anywhere in `lib/`; "today" is resolved in the UI and passed in. No date library, because date-fns, Luxon and Temporal all carry time-zone semantics that are wrong for a cycle-modulo calendar.

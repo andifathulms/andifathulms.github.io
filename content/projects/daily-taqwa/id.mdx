@@ -32,11 +32,6 @@ Ada empat papan peringkat: bulanan per jenis kelamin, tahunan, khusus Subuh, dan
 
 Daily Taqwa sudah berjalan di produksi di OIKN. Aplikasi mobile-nya live dan menjadi satu-satunya jalur presensi. Portal web menjalankan peringkat dan administrasi di backend yang sama. Sistem ini melayani sekitar 2.000 pegawai dan dirancang untuk sekitar 500 presensi dalam lima menit saat Zuhur. Saya membangunnya antara April dan Juni 2026. Cakupannya tumbuh melampaui spesifikasi awal: single sign-on menggantikan akun lokal, dan alat-alat SDM di atas lahir dari masukan setelah peluncuran.
 
-## Langkah berikutnya
-
-- Menambahkan pencocokan wajah di server. Untuk fase pertama saya membatasinya pada cek liveness, supaya proses build tidak berat.
-- Menyiapkan migrasi data wajah yang tersimpan saat pencocokan wajah ditambahkan.
-
 ## Di balik layar
 
 - Waktu salat dihitung dengan library Python `praytimes` dan di-cache di Redis. Helper `get_wita_date()` mengubah setiap tanggal presensi ke WITA (UTC+8) sebelum masuk ke constraint berbasis tanggal.

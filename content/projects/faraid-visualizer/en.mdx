@@ -32,11 +32,6 @@ The deploy runs the validation bank and the API tests. It also checks that no AI
 
 Faraid Visualizer is live and free on GitHub Pages, with no backend and no account. It shows who is blocked and by whom, each fixed share, how the remainder splits, and every citation, as text and as a diagram. KHI and classical Syafi'i pass all 61 worked examples in the validation bank, plus a separate set of cases where the two schools disagree. Professional mode exports a PDF with the full citation trail, in Indonesian or English, for notaries and court staff. I built it alone between July and August 2026.
 
-## What I'd do next
-
-- Take Hanafi, Maliki and Hanbali out of Beta after at least 30 validated examples each.
-- Three areas still return an explicit "not supported": the grandfather-and-siblings sub-cases (akdariyya, mu'adda), distant kin beyond KHI's coverage (dzawil arham), and mandatory bequests (wasiat wajibah, KHI Pasal 209), which v1 left out on purpose.
-
 ## Under the hood
 
 - `faraid_engine` is about 2,400 lines of pure Python 3.12 using stdlib `Fraction` and `Decimal`, with no Django imports and zero third-party dependencies. Every function returns `{heir, share, rule_applied, source_id}`.

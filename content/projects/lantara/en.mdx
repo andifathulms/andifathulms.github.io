@@ -34,11 +34,6 @@ Once the permit engine worked, a gap was obvious. It handled online applications
 
 All four planned build phases shipped in about three weeks, followed by a security pass, an accessibility pass and the queue module. The system models about 2,200 KBLI business codes and starts from one command with demo data loaded. Anyone can scan the QR code on an issued permit to confirm it is authentic, without logging in. A public staging site is live, and production will run on Otorita IKN's own servers.
 
-## What I'd do next
-
-- Switch on zoning checks (RDTR) and digital signatures (TTE). Both are built and waiting on data-sharing agreements with partner agencies.
-- Move from staging to production on Otorita IKN's infrastructure.
-
 ## Under the hood
 
 - Five core models hold every permit's configuration: `Sektor`, `PermitType`, `WorkflowStage`, `FormField` and `DocumentRequirement`.

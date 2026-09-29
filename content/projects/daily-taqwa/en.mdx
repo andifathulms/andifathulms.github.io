@@ -32,11 +32,6 @@ There are four leaderboards: monthly by gender, yearly, dawn prayer only, and by
 
 Daily Taqwa is in production at OIKN. The mobile app is live and is the only channel for check-ins. The web portal runs rankings and administration on the same backend. It serves about 2,000 employees and is designed for about 500 check-ins in a five-minute midday window. I built it between April and June 2026. The scope grew past the original spec: single sign-on replaced local accounts, and the HR tools above came from launch feedback.
 
-## What I'd do next
-
-- Add face matching on the server. For the first phase I limited it to a liveness check, to avoid a heavy build.
-- Plan how stored face data migrates when matching arrives.
-
 ## Under the hood
 
 - Prayer windows are computed with the Python `praytimes` library and cached in Redis. A `get_wita_date()` helper converts every attendance date to WITA (UTC+8) before it hits a date-keyed constraint.

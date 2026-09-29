@@ -28,12 +28,6 @@ Padaeng is the diatonic-chromatic tuning Daeng Soetigna created in 1938. It ship
 
 Angklung Simulator is live and public, in Indonesian and English. It has the rack of swaying angklung, the ensemble view, a technique lab that shows the strikes feeding the bamboo, the chord switch drawn as tubes, a side-by-side tuning comparison and a conductor lane. It also has a diagnostics page that reports how audio behaves on your phone. It runs on three runtime libraries and no audio or sound-processing library. I built it in about 37 hours over 12 and 13 August 2026.
 
-## What I'd do next
-
-- Run the ten written iPhone checks for audio startup, which haven't been run on an iPhone yet.
-- Compare the timbre by ear with an angklung played in person. Pitch, partials and chords are measured, but whether it sounds like the instrument is unverified.
-- Add Sundanese repertoire. The bundled melodies are public-domain or my own, and the repo notes what adding traditional songs would take.
-
 ## Under the hood
 
 - Each mode is a two-pole resonator, `y[n] = g·x[n] + 2r·cos(ω)·y[n-1] − r²·y[n-2]`, whose impulse response is a decaying sinusoid. The tube behaves as a stopped pipe, so odd partials dominate.

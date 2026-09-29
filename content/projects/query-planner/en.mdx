@@ -36,10 +36,6 @@ Query Planner is live and public. Drag the storage cost setting from 4.0 toward 
 
 A correlation chart draws the wrong assumption as a rectangle away from the real data. One click adds a multi-column statistic, and the estimate snaps to the truth. Nothing leaves the browser, and any plan can be shared as a link. I built it in one session of about 16.5 hours on 3 September 2026.
 
-## What I'd do next
-
-- Add the bitmap heap scan layer, which I left out of scope. All four documented disagreements with Postgres come from it.
-
 ## Under the hood
 
 - Engine: recursive-descent SQL parser for a narrow subset, columnar storage, bulk-loaded B+tree index, reservoir sampling (seeded, default 30,000 rows), equi-depth histograms, MCV lists, and all three multivariate statistic kinds (functional dependencies, n-distinct, multivariate MCV).

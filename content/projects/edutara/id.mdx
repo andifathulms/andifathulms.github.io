@@ -32,11 +32,6 @@ Pimpinan butuh jam pelatihan per pegawai, bisa difilter per institusi, kedeputia
 
 Edutara adalah build yang teruji, dengan pemeriksaan otomatis di setiap perubahan: unit test di backend dan frontend, ambang coverage, dan rangkaian tes end-to-end yang menyalakan seluruh sistem dengan data contoh. Setup produksinya siap untuk server OIKN sendiri. Peralihan dari platform lama belum terjadi. Saya membangunnya antara akhir Juni dan awal Juli 2026, sebagian besar dalam dua hari pertama. Selama pengerjaan, saya merancang ulang perannya: satu peran Teacher menggantikan dua peran, ada tingkat operator platform di bawah Superadmin, dan pengguna bisa mengajukan diri untuk bergabung ke institusi. Saya juga menambahkan testimoni peserta, yang tidak diminta di spesifikasi.
 
-## Langkah berikutnya
-
-- Menggantikan platform lama di produksi. Stack barunya sudah siap, tapi peralihannya masih tertunda.
-- Menghubungkan platform mitra pertama ke laporan jam pelatihan.
-
 ## Di balik layar
 
 - Backend Django REST Framework dan frontend Next.js App Router lewat typed API client. Setiap endpoint punya permission class DRF sendiri.

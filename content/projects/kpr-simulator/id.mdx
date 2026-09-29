@@ -34,11 +34,6 @@ KPR Simulator sudah live, terbuka untuk umum, dan bebas iklan, dengan bahasa Ind
 
 Aplikasi ini tidak pernah memberi saran, membuat peringkat, atau menyebut nama bank. Di antarmukanya tertulis bahwa ini bukan nasihat keuangan, bahwa bunga mengambang tidak diketahui dan tidak dipublikasikan, bahwa biaya bank berbeda-beda, bahwa persetujuan kredit tidak dimodelkan, dan bahwa angkanya perlu dikonfirmasi ke bank.
 
-## Langkah berikutnya
-
-- Mengisi referensi suku bunga dasar yang masih kosong dengan rata-rata per segmen dari OJK. Angka per bank akan melanggar aturan untuk tidak menyebut nama bank.
-- Merekam hasil kalkulator bank yang dipublikasikan sebagai pembanding. Kategorinya sudah ada, tapi rekamannya belum.
-
 ## Di balik layar
 
 - Mesin hitungnya `(inputs, product, rulePacks) => Schedule`, tanpa React, DOM, atau `new Date()` di `lib/`. Periode selalu berupa bilangan bulat `{ year, month }`.

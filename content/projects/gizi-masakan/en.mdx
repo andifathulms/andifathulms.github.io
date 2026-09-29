@@ -34,11 +34,6 @@ Gizi Masakan is live and public, in Indonesian first and English second. It cove
 
 The site says plainly that ingredient values are US-database approximations for Indonesian ingredients, that dish numbers are estimates from a stated recipe, and that it is not medical advice.
 
-## What I'd do next
-
-- Weigh the 40 recipes on a kitchen scale and fill the household-measure table with measured portions.
-- Resolve the 13 ingredients FoodData Central can't supply. Two of them, gula merah and kecap manis, distort whole dishes, and each affected recipe says so.
-
 ## Under the hood
 
 - The engine is a pure function, `(recipe, portion, ingredientTable, factors) → NutritionTrace`: no DOM, no React, no clock, no randomness, no network. Components only render a trace.

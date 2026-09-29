@@ -32,11 +32,6 @@ The Friday recap combines a completion rate, an on-time streak, a team-health co
 
 The bot runs in production for the team's daily standups and monitors 14 members on working days. I built it in 18 days in June 2026. It started as report detection and reminders, then grew into task tracking, weekly analytics and self-service commands. Members type !mystats for their own on-time rate, streak and completion rate, !rank for the leaderboard, and !help for the list. State lives in plain files on a mounted volume, so a restart keeps the day's progress. I also built a React dashboard as a demo of the schedule and messages. It isn't connected to the live bot.
 
-## What I'd do next
-
-- Tighten task matching. Word overlap can miss a heavily reworded task, or join two different tasks that use similar words.
-- Connect the dashboard to the live bot, which has no data API today.
-
 ## Under the hood
 
 - Node.js 18 with `whatsapp-web.js` (Puppeteer and Chromium), `node-cron` for scheduling and `qrcode-terminal` for linking the phone. The session depends on a linked phone staying online and can break when WhatsApp updates its web client.

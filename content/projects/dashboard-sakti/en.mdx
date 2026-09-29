@@ -28,12 +28,6 @@ The dashboard has three pages. The overview shows total budget, total spending a
 
 I built the platform in two days in June 2026, from an empty repository. It works end to end: nightly job, SAKTI client, database, API, dashboard and Excel export. Today it runs on the simulated SAKTI server with sample data. The production setup is ready and tested to start cleanly. Real data waits on the Ministry of Finance providing credentials. The dashboard has no login of its own in this first version, and is meant for OIKN's internal network.
 
-## What I'd do next
-
-- Connect to the real SAKTI system once credentials arrive, then deploy to OIKN's internal server.
-- Replace the budget trend estimate. SAKTI's budget data has no dates, so the chart spreads each total evenly across periods. A dated history from SAKTI would fix it.
-- Turn the failure-alert placeholder into real email or chat alerts.
-
 ## Under the hood
 
 - The Airflow DAG `sakti_daily_sync` reads the `Satker` table at runtime and uses `.expand()` for dynamic task mapping. Tasks: `fetch_ref_sts`, `fetch_ref_admin_uraian`, then `fetch_data_ang`, `fetch_spp_header` and `fetch_capaian_ro` per satker, then `normalize_and_load` and `log_sync_result`.

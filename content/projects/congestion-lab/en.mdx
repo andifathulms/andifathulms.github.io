@@ -32,11 +32,6 @@ Some behaviours can't be modelled faithfully here. I list them as gaps and show 
 
 Congestion Lab is live and public, in Indonesian and English. It has nine curated scenarios, each showing one named effect, and every run can be shared by link without an account or server. The simulator handles 288,000 packets in about half a second in a background thread. It uses no simulation or chart library. An automated accessibility audit found zero violations on its five pages at the time, in both languages. I built it in about 10 hours on 6 August 2026.
 
-## What I'd do next
-
-- Re-run the automated accessibility audit on the final design pass, which was only checked by hand.
-- Update the stale first entry in the list of model gaps, which still says selective acknowledgement is missing.
-
 ## Under the hood
 
 - Discrete-event engine in `lib/sim/` (~3,600 lines): virtual clock, priority queue, link serialisation, queue disciplines, sender and receiver, packet ledger.

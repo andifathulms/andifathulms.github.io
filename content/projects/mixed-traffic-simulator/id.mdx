@@ -34,10 +34,6 @@ Simulator ini sudah live dan terbuka untuk umum. Skenario phantom jam menempatka
 
 Aplikasi ini menyatakan dengan jelas bahwa ia bukan model terkalibrasi untuk ruas jalan tertentu dan bukan pengganti perangkat lunak lalu lintas profesional. Tugasnya menunjukkan sebuah asumsi yang gagal.
 
-## Langkah berikutnya
-
-- Memperbaiki dua kasus tumpang tindih langka yang dicatat di README: kendaraan terjepit di bawah lebarnya sendiri dalam antrean lampu merah, dan mobil yang tertinggal 0,7 m di dalam angkot yang berhenti. Untuk sementara keduanya muncul sebagai peringatan angka.
-
 ## Di balik layar
 
 - `src/estimators/` tidak bisa meng-import `src/sim/`, ditegakkan oleh aturan ESLint `no-restricted-imports` di CI sebelum deploy. Estimator hanya menerima satu tipe, `DetectorRecord`. `src/truth/substitution.ts` adalah pengecualian yang terdokumentasi.

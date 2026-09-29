@@ -32,12 +32,6 @@ Weton menjadi dasar *primbon*: watak, kecocokan jodoh, dan hari baik. Banyak ora
 
 Selapan sudah live dalam bahasa Indonesia dan Inggris, dengan tujuh halaman di setiap bahasa. Selain konversi, ada roda siklus yang kembali sejajar setiap 35 hari (satu *selapan*) dan setiap 210 hari, tampilan kalender dinding bulanan, dan kalender pertanian tradisional (*pranata mangsa*). Situs ini juga menghitung tanggal selamatan kematian sebagai hitungan biasa yang bersumber, tanpa tafsiran. Siklusnya diuji tepat selama 36.524 hari berturut-turut. Situs ini menyebut dirinya proyek pribadi, bukan otoritas, dan mengakui bahwa praktiknya berbeda di tiap daerah. Saya membangunnya dalam satu hari, 6 Agustus 2026.
 
-## Langkah berikutnya
-
-- Mencocokkan tanggal acuan *wuku* dengan data *pawukon* Bali yang sudah diterbitkan. Saat ini acuannya hanya bersandar pada satu sumber, dan kesalahan sebesar satu *wuku* penuh akan lolos dari semua uji siklus.
-- Menerapkan panjang bulan yang tidak teratur pada tahun Dal. Batas tahunnya sudah benar, tetapi hari-hari di dalam tahun Dal bisa meleset, jadi ditandai belum terverifikasi.
-- Merilis lapisan *primbon* setelah ada peninjau yang disebut namanya.
-
 ## Di balik layar
 
 - Julian Day Number adalah satu-satunya representasi tanggal di dalam mesin. Tidak ada objek `Date` di `lib/`; "hari ini" ditentukan di UI lalu dikirim sebagai parameter. Tidak ada library tanggal, karena date-fns, Luxon, dan Temporal membawa semantik zona waktu yang keliru untuk kalender berbasis modulo siklus.
