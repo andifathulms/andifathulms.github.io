@@ -28,7 +28,7 @@ export default async function WorkPage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'work' });
 
-  const projects = getAllProjects().filter((p) => p.status !== 'placeholder');
+  const projects = getAllProjects(locale).filter((p) => p.status !== 'placeholder');
 
   return (
     <div className="pt-page-top pb-section px-gutter">

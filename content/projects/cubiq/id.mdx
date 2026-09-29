@@ -1,35 +1,47 @@
-## Permasalahan
+# Cubiq
 
-Speedcuber melacak solve mereka di aplikasi seperti csTimer — alat yang berfungsi tetapi tampilannya seperti dirancang pada tahun 2008. Tidak ada alternatif modern yang bagus yang menggabungkan antarmuka pelatihan yang indah dengan analitik nyata, solver per-puzzle, dan integrasi AI apa pun. Cubiq dibangun untuk menggantikan csTimer bagi cuber serius yang menginginkan kesan premium, statistik kaya, dan alat solving yang jauh melampaui cross.
+## Masalahnya
 
-## Pendekatan
+Kebanyakan speedcuber serius masih mencatat waktu solve mereka di csTimer. Aplikasinya jalan, tapi tampilan dan rasanya seperti tahun 2008, dan fungsinya berhenti di pencatat waktu. Belum ada alat modern yang menggabungkan layar latihan yang enak dipakai dengan statistik yang layak dan bantuan untuk menyelesaikan puzzle.
 
-### cubing.js sebagai web component, bukan komponen React
+Saya ingin satu tempat untuk berlatih, memantau perkembangan, dan bertanya "scramble ini seharusnya diselesaikan bagaimana?" untuk puzzle apa pun, dari 2×2 sampai Square-1. Cubiq dibuat untuk cuber tingkat menengah dan mahir yang berlatih di beberapa jenis puzzle dan peduli pada rata-rata waktunya.
 
-Renderer kubus 3D `TwistyPlayer` dari `cubing.js` harus diinstansiasi sebagai elemen DOM. Mengimpornya sebagai komponen React membuat server-side rendering crash karena library mereferensikan `self` (global browser) saat load modul. Solusinya: `dynamic(() => import(...), { ssr: false })` dikombinasikan dengan pola mounting berbasis `useEffect` yang memanggil `document.createElement('twisty-player')` secara langsung. Turbopack juga harus diganti — `cubing.js` menghasilkan Web Workers menggunakan pola URL relatif yang rusak oleh resolver modulnya, sehingga beralih ke bundler Webpack adalah commit yang sebenarnya membuka blokir build, kendala nyata bukan sekadar teoretis.
+## Yang saya bangun
 
-### Delapan keluarga puzzle, delapan strategi solving
+### Timer yang tetap akurat
 
-Alih-alih satu solver generik, setiap puzzle mendapat representasi kubus dan generator move-table sendiri dari nol, dengan strategi yang dipilih sesuai ukuran ruang keadaan puzzle tersebut:
+Jam membaca waktu resolusi tinggi dari browser di setiap frame, jadi solve yang panjang pun tidak melenceng. Menahan tombol selama 300 milidetik menyiapkan timer, sama seperti inspeksi di kompetisi. Rata-rata dihitung mengikuti aturan World Cube Association, dari ao5 sampai ao100.
 
-- **2x2, Pyraminx, Skewb** — cukup kecil (hingga ~3,1 juta posisi) untuk pra-menghitung penuh tabel jarak God's-algorithm; API tinggal mencari jumlah langkah optimal dan jalurnya, terbukti ≤ 11 langkah.
-- **3x3** — CFOP bertahap: solving cross/x-cross/double-x-cross IDA* yang eksak, pencarian pasangan F2L, dan database pengenalan+algoritma OLL/PLL penuh, dengan pembatalan langkah lintas batas tahap sehingga solusi yang digabung tidak dipadatkan dengan putaran redundan.
-- **4x4, 5x5** — tabel gerak yang dihasilkan geometri memberi makan pipeline reduksi (center → pairing edge/wing → penanganan parity → penyelesaian CFOP 3x3), metode standar big-cube, dengan logika reduksi dan perbaikan parity diimplementasikan tangan, bukan dipinjam.
-- **Megaminx** — penempatan layer-by-layer greedy dengan library commutator kurasi untuk last layer.
-- **Square-1** — kasus rekayasa tersulit: solver dua fase (BFS bentuk untuk mengembalikan siluet kubus/persegi, lalu piece descent eksak) dipasangkan dengan tampilan 3D animasi kustom yang merender puzzle sebagai shell dua sisi nyata dan menganimasikan flip ekuator 180° sebagai geometri kaku, bukan pertukaran sprite.
+### Satu solver untuk setiap puzzle
 
-### Akurasi timer tanpa drift
+Saya menulis solver untuk kedelapan puzzle utama dan memilih strateginya berdasarkan seberapa banyak posisi yang dimiliki puzzle itu.
 
-Timer yang terlihat memanggil `performance.now() - startTime` pada setiap tick render. `setInterval` hanya memicu re-render, tidak pernah mengukur waktu, sehingga drift tidak terakumulasi bahkan dalam solve panjang. Pola hold-to-arm 300ms cocok dengan perilaku inspeksi WCA.
+- **2×2, Pyraminx, dan Skewb** cukup kecil untuk dihitung semua posisinya di awal. Solver tinggal mencari solusi terpendek, yang tidak pernah lebih dari 11 langkah.
+- **3×3** diselesaikan dengan cara manusia menyelesaikannya (CFOP). Solver mencari cross yang optimal, memasangkan dua lapisan pertama, lalu mengenali setiap kasus lapisan terakhir dari set algoritma lengkap. Langkah yang terbuang di antara tahap dibatalkan.
+- **4×4 dan 5×5** direduksi menjadi 3×3 dengan menyelesaikan bagian tengah dan memasangkan edge, lengkap dengan perbaikan parity, lalu dituntaskan oleh solver 3×3.
+- **Megaminx** diselesaikan lapis demi lapis, dengan pustaka kecil urutan langkah untuk lapisan terakhir.
+- **Square-1** butuh dua fase: kembalikan bentuknya dulu, baru kepingannya. Saya juga membuat tampilan 3D yang menganimasikan putaran setengahnya sebagai geometri padat.
 
-### AI yang belajar menyelesaikan dirinya sendiri
+### Model yang belajar menyelesaikan kubus sendiri
 
-Service FastAPI `cubiq-ml` mengimplementasikan Autodidactic Iteration, keluarga reinforcement learning yang sama di balik DeepCubeA: model menghasilkan data pelatihannya sendiri dengan mengacak kubus yang sudah terpecahkan ke kedalaman acak dan belajar memperkirakan jarak langkah kembali ke kondisi terpecahkan. ResNet dual-head meregresi nilai (langkah tersisa) dari satu head dan distribusi kebijakan atas 18 langkah dari head lainnya. Dashboard penelitian MDP langsung mem-polling status pelatihan setiap dua detik, membuat grafik histori loss dan solve-rate, dan menampilkan bar probabilitas kebijakan untuk scramble saat ini — pengguna dapat memicu rollout greedy atau MCTS dan membandingkan efisiensi langkah langsung dengan solusi optimal Kociemba, yang hanya digunakan sebagai benchmark ground-truth, tidak pernah menjadi bagian dari jalur solving itu sendiri.
+Sebuah layanan Python terpisah melatih neural network dengan cara yang dipakai DeepCubeA. Model mengacak kubus yang sudah selesai, lalu belajar menebak berapa langkah lagi menuju selesai. Dasbor riset menampilkan proses pelatihan secara langsung. Anda bisa menjalankan model pada sebuah scramble dan membandingkan jawabannya dengan solusi optimal dari solver Kociemba, yang hanya saya pakai sebagai pembanding.
 
-### Satu workspace, dapat di-deep-link
+### Satu ruang kerja untuk semua puzzle
 
-`/solvers` adalah satu workspace scramble-sticky — satu tab per puzzle plus tab Research untuk dashboard MDP — masing-masing didukung slot scramble sendiri dan panel preview 3D bersama, sehingga berpindah puzzle tidak pernah kehilangan posisi. Tombol "Solve this" pada solve timer yang selesai deep-link langsung ke tab solver puzzle yang sesuai via `/solvers?puzzle=<id>&scramble=<alg>`, dengan scramble sudah terisi.
+Halaman solver punya satu tab per puzzle dan menyimpan scramble masing-masing saat Anda berpindah tab. Setelah solve dengan timer, tombol "Solve this" membuka solver yang sesuai dengan scramble Anda sudah terisi.
 
-## Hasil
+## Hasilnya
 
-Enam bulan kerja berkelanjutan, ~70 commit, ~13.700 baris terbagi kurang lebih merata antara TypeScript dan Python. Yang dimulai sebagai cross solver yang ditandai dalam PRD sebagai mungkin terlalu kompleks untuk fase awal dirilis penuh di Phase 3 — dan setiap solver setelahnya melangkah jauh lebih dari yang ditentukan rencana awal, tumbuh menjadi engine dari nol untuk seluruh 8 puzzle twisty utama plus model RL yang melatih dirinya sendiri, tidak ada yang dipinjam dari library cube-solving yang ada di luar `cubing.js` untuk rendering dan `kociemba` sebagai benchmark. Live dan publik, dengan statistik ao5/ao12/ao50/ao100 yang sesuai WCA, store Zustand yang persisten ke localStorage dengan `skipHydration` untuk menghindari ketidakcocokan SSR, dan ekspor/impor JSON penuh untuk setiap solve.
+Cubiq sudah live dan gratis dipakai. Kedelapan puzzle diselesaikan oleh solver yang saya tulis sendiri. Saya memakai cubing.js hanya untuk menggambar dan mengacak kubus, dan solver Kociemba hanya sebagai pembanding. Setiap solve tersimpan di browser dan bisa diekspor. Rencana awalnya hanya berisi solver cross, yang ditandai mungkin terlalu sulit untuk fase awal. Saya membangun Cubiq dalam sekitar 11 minggu, dari Mei sampai Juli 2026.
+
+## Di balik layar
+
+- `TwistyPlayer` dari cubing.js mengakses `self` saat modul dimuat, jadi komponen ini dimuat dengan `dynamic(() => import(...), { ssr: false })` dan dipasang lewat `document.createElement('twisty-player')` di dalam `useEffect`.
+- Turbopack merusak URL yang dipakai cubing.js untuk menjalankan Web Worker. Build dipindah ke Webpack supaya bisa jalan.
+- Timer menampilkan `performance.now() - startTime`. `setInterval` hanya memicu render ulang dan tidak pernah mengukur waktu.
+- 2×2, Pyraminx, dan Skewb memakai tabel jarak God's algorithm lengkap (hingga ~3,1 juta posisi). 3×3 memakai IDA* untuk cross, x-cross, dan double x-cross, pencarian pasangan F2L, serta basis data OLL/PLL, dengan pembatalan langkah di antara tahap.
+- 4×4 dan 5×5 memakai tabel langkah yang dibangkitkan dari geometri. 5×5 butuh macro cross-swap baru yang diturunkan lewat konjugasi untuk satu kasus parity.
+- Square-1 memakai BFS bentuk, lalu penurunan kepingan secara eksak. Tampilan 3D-nya merender puzzle sebagai cangkang dua sisi dan menganimasikan putaran ekuator 180° sebagai geometri kaku.
+- Layanan FastAPI `cubiq-ml` memakai Autodidactic Iteration dan ResNet dua kepala: value head untuk sisa langkah dan policy head untuk 18 langkah. Tersedia rollout greedy dan MCTS. Dasbor mengecek status pelatihan setiap dua detik.
+- State disimpan di Zustand dan dipersist ke localStorage dengan `skipHydration` untuk menghindari mismatch SSR. Solve bisa diekspor dan diimpor sebagai JSON. Deep link memakai `/solvers?puzzle=<id>&scramble=<alg>`.
+- 19 endpoint API solver, sekitar 13.700 baris TypeScript dan Python, 70 commit.

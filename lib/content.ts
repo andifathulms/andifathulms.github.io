@@ -32,8 +32,30 @@ export interface ProjectMeta {
   previewImages?: string[];
   order?: number;
   featured?: boolean;
-  /** Optional headline outcomes shown near the top of the case study. */
+  /** Headline outcomes, impact first (see VOICE.md rule 5). */
   metrics?: { value: string; label: string }[];
+  /** The case study's at-a-glance panel: who it's for and what came of it. */
+  glance?: { for: string; result: string };
+  /** 3–4 skills a recruiter would search for. Not library names. */
+  skills?: string[];
+  /**
+   * Indonesian copy for the fields above. Applied by localizeProject(), so a
+   * component always reads `project.tagline` and gets the page's language.
+   */
+  id?: LocalizedCopy;
+}
+
+type LocalizedCopy = Partial<Pick<ProjectMeta, 'tagline' | 'glance' | 'skills' | 'metrics'>>;
+
+/**
+ * Overlay a locale's copy onto the English manifest. English is the base
+ * language of meta.json; any other locale is a block keyed by its code. A
+ * field the block leaves out falls back to English rather than disappearing.
+ */
+export function localizeProject(project: ProjectMeta, locale?: string): ProjectMeta {
+  const { id, ...base } = project;
+  if (locale !== 'id' || !id) return base;
+  return { ...base, ...id };
 }
 
 export interface PortfolioStats {
@@ -93,7 +115,7 @@ export function getProjectIcon(slug: string): string | null {
   return null;
 }
 
-export function getAllProjects(): ProjectMeta[] {
+export function getAllProjects(locale?: string): ProjectMeta[] {
   if (!fs.existsSync(PROJECTS_DIR)) return [];
 
   const dirs = fs
@@ -105,12 +127,15 @@ export function getAllProjects(): ProjectMeta[] {
       const metaPath = path.join(PROJECTS_DIR, slug, 'meta.json');
       if (!fs.existsSync(metaPath)) return null;
       const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
-      return {
-        ...meta,
-        slug,
-        icon: getProjectIcon(slug),
-        previewImages: getProjectScreenshots(slug).slice(0, 4).map((s) => s.src),
-      } as ProjectMeta;
+      return localizeProject(
+        {
+          ...meta,
+          slug,
+          icon: getProjectIcon(slug),
+          previewImages: getProjectScreenshots(slug).slice(0, 4).map((s) => s.src),
+        } as ProjectMeta,
+        locale
+      );
     })
     .filter((p): p is ProjectMeta => p !== null);
 
@@ -140,22 +165,22 @@ const FEATURED_ORDER = [
   'cubiq', // indep · tool
 ];
 
-export function getFeaturedProjects(limit = 3): ProjectMeta[] {
+export function getFeaturedProjects(limit = 3, locale?: string): ProjectMeta[] {
   const rank = (slug: string) => {
     const i = FEATURED_ORDER.indexOf(slug);
     return i === -1 ? FEATURED_ORDER.length : i;
   };
-  return getAllProjects()
+  return getAllProjects(locale)
     .filter((p) => p.featured && p.status !== 'placeholder')
     .sort((a, b) => rank(a.slug) - rank(b.slug) || (a.order ?? 99) - (b.order ?? 99))
     .slice(0, limit);
 }
 
-export function getProjectMeta(slug: string): ProjectMeta | null {
+export function getProjectMeta(slug: string, locale?: string): ProjectMeta | null {
   const metaPath = path.join(PROJECTS_DIR, slug, 'meta.json');
   if (!fs.existsSync(metaPath)) return null;
   const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
-  return { ...meta, slug, icon: getProjectIcon(slug) };
+  return localizeProject({ ...meta, slug, icon: getProjectIcon(slug) }, locale);
 }
 
 export function getProjectContent(slug: string, locale: string): string | null {
@@ -245,9 +270,10 @@ export function getProjectScreenshots(slug: string): ProjectScreenshot[] {
 }
 
 export function getAdjacentProjects(
-  currentSlug: string
+  currentSlug: string,
+  locale?: string
 ): { prev: ProjectMeta | null; next: ProjectMeta | null } {
-  const all = getAllProjects().filter((p) => p.status !== 'placeholder');
+  const all = getAllProjects(locale).filter((p) => p.status !== 'placeholder');
   const index = all.findIndex((p) => p.slug === currentSlug);
   return {
     prev: index > 0 ? all[index - 1] : null,

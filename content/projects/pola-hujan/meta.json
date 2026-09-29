@@ -1,7 +1,17 @@
 {
   "slug": "pola-hujan",
   "title": "Pola Hujan",
-  "tagline": "Indonesia doesn't have one rainy season — it has three rainfall patterns, and this atlas derives them from satellite data instead of copying the official map",
+  "tagline": "An atlas of Indonesia's three rainfall patterns, computed from raw satellite data so anyone can check it",
+  "glance": {
+    "for": "Indonesians curious why the rainy season differs by region",
+    "result": "Live in Indonesian, 34 locations, every disagreement with BMKG shown"
+  },
+  "skills": [
+    "Climate data analysis",
+    "Signal processing",
+    "Data pipelines",
+    "Science communication"
+  ],
   "categoryTags": [
     "Personal Project",
     "Data Platform",
@@ -22,6 +32,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/pola-hujan/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/pola-hujan",
   "heroImage": "/images/projects/pola-hujan/hero.webp",
   "order": 37,
@@ -29,20 +40,50 @@
   "metrics": [
     {
       "value": "34",
-      "label": "Locations classified from raw satellite rainfall"
+      "label": "locations classified from satellite rainfall"
     },
     {
       "value": "14/34",
-      "label": "BMKG labels verified against its own published bulletin"
+      "label": "BMKG labels checked against its own bulletin"
+    },
+    {
+      "value": "10 yrs",
+      "label": "of rainfall records, 2006 to 2015"
     },
     {
       "value": "0",
-      "label": "GIS, charting or statistics libraries — decoders are hand-written"
-    },
-    {
-      "value": "54",
-      "label": "Tests, including synthetic ground truth for the classifier"
+      "label": "network calls at runtime"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Atlas tiga pola curah hujan Indonesia, dihitung dari data satelit mentah sehingga siapa pun bisa memeriksanya",
+    "glance": {
+      "for": "Warga yang penasaran kenapa musim hujan berbeda di tiap daerah",
+      "result": "Live dalam bahasa Indonesia, 34 lokasi, setiap perbedaan dengan BMKG ditampilkan"
+    },
+    "skills": [
+      "Analisis data iklim",
+      "Pengolahan sinyal",
+      "Pipeline data",
+      "Komunikasi sains"
+    ],
+    "metrics": [
+      {
+        "value": "34",
+        "label": "lokasi diklasifikasi dari curah hujan satelit"
+      },
+      {
+        "value": "14/34",
+        "label": "label BMKG dicocokkan dengan buletinnya"
+      },
+      {
+        "value": "10 thn",
+        "label": "data curah hujan, 2006 sampai 2015"
+      },
+      {
+        "value": "0",
+        "label": "panggilan jaringan saat runtime"
+      }
+    ]
+  }
 }

@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "node node_modules/next/dist/bin/next dev",
-    "prebuild": "node scripts/check-assets.mjs",
+    "prebuild": "node scripts/check-assets.mjs && node scripts/voice-lint.mjs --summary",
     "build": "node node_modules/next/dist/bin/next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "lint:voice": "node scripts/voice-lint.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",

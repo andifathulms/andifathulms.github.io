@@ -38,7 +38,7 @@ export default async function AboutPage({
 
   const hasPhoto = existsSync(path.join(process.cwd(), 'public/images/about/photo.jpg'));
   const stats = getPortfolioStats();
-  const featured = getFeaturedProjects(4);
+  const featured = getFeaturedProjects(4, locale);
 
   const statItems = [
     { value: stats.total, label: ts('systems_shipped') },

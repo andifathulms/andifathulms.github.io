@@ -1,39 +1,52 @@
 # Lantara v2
 
-## Permasalahan
+## Masalahnya
 
-IKN Nusantara adalah ibu kota baru Indonesia yang dibangun dari awal, masih dalam konstruksi aktif. Otorita IKN harus menerbitkan perizinan di 31 sektor yang diatur: layanan sosial, kesehatan, pendidikan, lingkungan, dan lainnya. Di kebanyakan instansi pemerintah, setiap jenis izin memiliki workflow, form, dan persyaratan dokumen yang dikodekan secara keras di codebase. Ketika regulasi berubah — dan di kota baru, perubahan itu terjadi terus-menerus — itu berarti butuh developer, migrasi database, dan deployment.
+Otorita IKN menerbitkan izin di 31 sektor yang diatur, mulai dari kesehatan dan pendidikan sampai lingkungan hidup. Di kebanyakan sistem pemerintah, setiap jenis izin di-*hardcode*: alur, formulir, dan daftar dokumennya ditulis langsung oleh developer. Setiap kali regulasi berubah, kodenya harus diubah dan aplikasinya dirilis ulang. Di kota yang masih dibangun, regulasi berubah terus.
 
-Sistem ini melayani tiga audiens sekaligus: warga dan pelaku usaha yang mengajukan izin, staf pemerintah yang memverifikasi, dan administrator instansi yang menetapkan aturan. Dan aturan itu ditetapkan oleh undang-undang dan keputusan menteri, bukan oleh developer. Maka persyaratan utamanya tegas: administrator non-teknis harus bisa mendefinisikan workflow perizinan, skema form, dan daftar dokumen sepenuhnya melalui UI — tanpa developer, tanpa deployment.
+Ada tiga kelompok pengguna. Warga dan pelaku usaha mengajukan izin, staf pemerintah memeriksanya, dan administrator instansi menetapkan aturannya. Aturan itu datang dari undang-undang dan keputusan menteri, bukan dari engineer. Jadi kebutuhan utamanya mudah dirumuskan: administrator tanpa latar belakang teknis harus bisa membuat jenis izin baru, lengkap dengan alur, formulir, dan daftar dokumennya, cukup dari layar.
 
-## Pendekatan
+## Yang saya bangun
 
-### Engine — konfigurasi, bukan kode
+### Setiap jenis izin adalah data
 
-Alih-alih tabel per jenis izin, semua konfigurasi perizinan tersimpan dalam lima model terkait: `Sektor`, `PermitType`, `WorkflowStage`, `FormField`, dan `DocumentRequirement`. Menambahkan jenis izin baru adalah operasi entri data. Administrator dapat mengkonfigurasi izin kesehatan enam tahap dengan dua belas dokumen yang dipersyaratkan dan form kustom — tanpa migrasi, tanpa deployment, tanpa pull request.
+Saya memodelkan izin sebagai konfigurasi: sektor, jenis izin, tahapan alur, isian formulir, dan persyaratan dokumen. Menambah jenis izin sama dengan mengisi data. Administrator bisa menyusun izin kesehatan enam tahap dengan dua belas dokumen wajib dan formulir khusus, tanpa ada yang menyentuh kode.
 
-Data form pada setiap pengajuan disimpan sebagai JSON field, divalidasi saat runtime terhadap skema field yang aktif. Ketika admin mengubah skema izin, pengajuan yang sedang berjalan terlindungi: pada saat pengajuan, versi skema saat itu disalin secara penuh ke catatan pengajuan. Warga yang sudah mengajukan tidak pernah mengalami perubahan bentuk form di tengah proses, dan audit tetap deterministik — Anda selalu tahu persis apa yang ditanyakan saat seseorang mengajukan.
+Saat seseorang mengajukan izin, sistem menyimpan salinan formulir persis seperti saat itu. Kalau administrator mengubah formulirnya kemudian, pengajuan yang sedang diperiksa tetap memakai pertanyaan yang dulu diisi. Pemeriksaan tetap adil dan audit tetap tepat.
 
-### RBAC tanpa enum
+### Hak akses mengikuti alur
 
-Permission staff adalah string yang dihasilkan seperti `verifikasi_teknis:izin_posyandu`, berasal dari kunci tahapan workflow dan kunci jenis izin. Tidak ada `if role == "verifier"` di mana pun dalam codebase. Kelas permission DRF memeriksa tahap pengajuan saat ini terhadap string role yang ditetapkan ke pengguna. Ketika jenis izin baru ditambahkan melalui UI, slot role yang tepat otomatis tersedia — tanpa perubahan kode.
+Hak akses staf dibentuk dari alurnya sendiri, satu untuk setiap tahap dan jenis izin. Kodenya tidak pernah mengecek peran tetap seperti "verifikator". Begitu administrator menambah jenis izin, slot pemeriksa untuk izin itu langsung tersedia.
 
-### SLA sebagai concern utama
+### Tenggat yang terlihat oleh staf
 
-Setiap tahapan workflow memiliki field `sla_hours`; setiap jenis izin memiliki `sla_days` total. Task Celery Beat menyapu pengajuan secara berkala, menghitung ulang tenggat SLA menggunakan kalender hari kerja yang memperhitungkan hari libur nasional dan akhir pekan, dan mengirimkan notifikasi ketika pengajuan mendekati batas atau sudah melewati batas. Antrian verifikator menampilkan kartu pengajuan yang secara visual menua dari kuning ke merah seiring tenggat mendekati. Pintasan keyboard (`j`/`k` untuk navigasi, `a`/`r`/`d` untuk setujui/revisi/tolak) memungkinkan staf memproses tanpa menyentuh mouse.
+Setiap tahap punya tenggat dalam jam, dan setiap jenis izin punya total dalam hari kerja. Sebuah proses latar menghitung ulang tenggat itu dengan kalender libur nasional dan mengirim peringatan saat berkas mulai terlambat. Di antrean pemeriksa, kartu berubah dari kuning ke merah saat tenggat makin dekat. Staf bisa menyetujui, mengembalikan, atau menolak berkas lewat pintasan keyboard.
 
-### Verifikasi yang akuntabel
+### Pemeriksaan yang tertib di kantor yang sibuk
 
-Proses review dirancang untuk bertahan di kantor pemerintah yang sesungguhnya. Verifikator dapat meng-*claim* sebuah pengajuan untuk dikerjakan secara eksklusif; claim yang usang otomatis dilepas setelah tidak aktif, dan setiap claim serta keputusan mencatat atribusi pelakunya, sehingga dua verifikator tidak akan pernah diam-diam bertabrakan pada berkas yang sama. Revisi bersifat per-field: setiap field yang ditandai membawa catatan dan tenggatnya sendiri, dan pemohon melihat nilai asli di samping diff sebelum→sesudah, bukan sekadar satu komentar generik "mohon direvisi". Dan karena sebagian izin secara hukum membutuhkan tanda tangan dari dua bidang teknis berbeda, penugasan verifikator dilingkup per tahapan workflow — memastikan tidak ada satu verifikator pun yang bisa menyetujui kedua tahap review-nya sendiri.
+Pemeriksa bisa mengklaim sebuah berkas supaya tidak dikerjakan dua orang sekaligus. Klaim yang menganggur lepas sendiri, dan setiap keputusan mencatat siapa yang membuatnya. Permintaan revisi dibuat per isian, jadi pemohon melihat persis apa yang perlu diperbaiki di samping jawaban lamanya. Beberapa izin butuh persetujuan dua dinas teknis. Saya membatasi pemeriksa per tahap, sehingga satu orang tidak bisa menyetujui kedua tahap pemeriksaan yang sama.
 
-### Dua register, satu renderer dinamis
+### Antrean tatap muka untuk Mal Pelayanan Publik
 
-Permukaan publik — halaman landing, katalog izin, dan halaman validasi publik — menggunakan palet biru royal yang imersif dengan hero animasi, scroll-reveal, dan glassmorphism, sesuai sebagai pintu depan digital sebuah ibu kota negara. Permukaan terautentikasi — portal pemohon, workspace verifikator, dan admin engine builder — tenang dan padat; verifikator yang memproses lima puluh izin sehari butuh kejelasan, bukan dekorasi. Keduanya disuplai oleh satu komponen React `<DynamicForm>` yang mengambil skema `FormField[]` izin dari API dan membangun validasi `zod` saat runtime, menangani dua belas jenis field (text, NIK, NPWP, telepon, geolokasi, unggah file, select, dan lainnya). Menambahkan jenis izin tidak memerlukan kode frontend sama sekali.
+Setelah mesin perizinan berjalan, ada celah yang jelas. Sistem ini menangani pengajuan online yang makan waktu berhari-hari, tapi tidak menangani warga yang datang ke Mal Pelayanan Publik dan mengambil nomor antrean. Saya merancang dan membangun MPP Antrean, modul antrean terpisah dengan data dan hak aksesnya sendiri. Modul ini mencakup tiket kios, check-in QR, pemilahan di loket, serta panggil, panggil ulang, dan layani, semuanya diperbarui langsung. Warga yang sudah booking online tapi datang terlambat masuk ke antrean tatap muka sesuai jam kedatangan, tanpa kehilangan tiketnya.
 
-### Melampaui brief — sistem antrean fisik
+## Hasilnya
 
-Begitu permit engine bisa didemonstrasikan, satu celah tampak jelas: engine hanya memodelkan workflow daring yang digerakkan dokumen dan berlangsung berhari-hari. Ia tidak punya konsep warga yang berjalan masuk ke gedung dan mengambil nomor antrean — yang justru dibutuhkan Mal Pelayanan Publik yang menampung OIKN dan instansi mitra seperti BPJS dan kantor pajak. Maka saya melingkup dan merilis **MPP Antrean**, sistem antrean walk-in/daring lengkap, sebagai bounded context yang sengaja diisolasi: aplikasi Django tersendiri, model tersendiri, RBAC tersendiri, dan tanpa foreign key ke domain perizinan. Ia menangani ticketing kiosk, check-in QR, triase petugas loket, serta alur panggil/panggil-ulang/layani, dengan status langsung yang didorong lewat lapisan WebSocket Django Channels yang sudah ada. Satu detail keadilan yang menarik: warga yang memesan daring tetapi datang terlambat diturunkan kembali ke pool walk-in berdasarkan waktu kedatangan aktual alih-alih tiketnya dibatalkan — yang berarti pembagian kuota daring/walk-in harus ditegakkan saat reservasi, bukan saat pelayanan.
+Keempat fase pembangunan yang direncanakan selesai dalam sekitar tiga minggu, disusul pengamanan, perbaikan aksesibilitas, dan modul antrean. Sistem ini memuat sekitar 2.200 kode usaha KBLI dan bisa dijalankan dengan satu perintah, lengkap dengan data contoh. Siapa pun bisa memindai kode QR di izin yang terbit untuk memastikan keasliannya, tanpa login. Situs staging sudah bisa diakses publik, dan versi produksinya akan berjalan di server Otorita IKN sendiri.
 
-## Hasil
+## Langkah berikutnya
 
-Empat fase pembangunan awal (P0 scaffold hingga P4 hardening) telah dirilis, dan pengembangan berlanjut melampaui brief ke sebuah pass khusus security-hardening, sapuan aksesibilitas yang luas, dan modul MPP Antrean yang berdiri sendiri — 241 commit dalam kurang lebih tiga minggu, mencakup 13 aplikasi Django dan ~30.000 baris. Seluruh sistem dapat didemonstrasikan dari `docker compose up` yang baru: migrasi berjalan, ~2.200 data master KBLI dimuat, 46 izin sampel di tiga sektor ter-seed, tenant dan loket antrean demo ter-seed, dan akun superadmin dibuat. Siapa pun dapat memindai QR code izin yang diterbitkan di halaman validasi publik untuk mengkonfirmasi keasliannya tanpa perlu login. Zonasi spasial RDTR dan tanda tangan digital tertanam (TTE) sudah terpasang di balik feature flag, menunggu kemitraan berbagi data dan instansi eksternal sebelum aktivasi produksi. Repositori bersifat privat; target deployment adalah infrastruktur milik Otorita IKN sendiri.
+- Mengaktifkan pengecekan tata ruang (RDTR) dan tanda tangan elektronik (TTE). Keduanya sudah dibangun dan menunggu perjanjian berbagi data dengan instansi mitra.
+- Memindahkan sistem dari staging ke produksi di infrastruktur Otorita IKN.
+
+## Di balik layar
+
+- Lima model inti menyimpan konfigurasi setiap izin: `Sektor`, `PermitType`, `WorkflowStage`, `FormField`, dan `DocumentRequirement`.
+- Jawaban formulir disimpan sebagai JSON field dan divalidasi saat runtime terhadap skema yang aktif. Versi skema disalin ke setiap pengajuan.
+- Hak akses berupa string yang dibentuk otomatis, misalnya `verifikasi_teknis:izin_posyandu`. Kelas permission DRF mencocokkannya dengan tahap pengajuan saat ini. Tidak ada enum peran.
+- SLA: `sla_hours` per tahap, `sla_days` per jenis izin, disapu oleh task Celery Beat dengan kalender hari kerja. Pintasan antrean: `j`/`k` untuk berpindah, `a`/`r`/`d` untuk setujui, revisi, atau tolak.
+- `<DynamicForm>` mengambil `FormField[]` dan membangun skema `zod` saat runtime untuk dua belas tipe isian, termasuk NIK, NPWP, nomor telepon, lokasi peta, dan unggah berkas.
+- Halaman publik memakai tema biru yang imersif; ruang kerja setelah login dibuat tenang dan padat untuk staf yang memproses lima puluh berkas sehari.
+- MPP Antrean adalah Django app tersendiri tanpa foreign key ke domain perizinan. Status live dikirim lewat lapisan WebSocket Django Channels yang sudah ada. Pembagian kuota online dan tatap muka ditegakkan saat reservasi.
+- `docker compose up` menjalankan migrasi, memuat ~2.200 data KBLI, mengisi 46 contoh izin di tiga sektor beserta loket antrean demo, dan membuat superadmin.
+- 13 Django app, 43 model, sekitar 30.000 baris Python dan TypeScript, 241 commit dalam kurang lebih tiga minggu.

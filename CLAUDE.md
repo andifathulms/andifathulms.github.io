@@ -112,6 +112,12 @@ content/
 - `en.mdx` / `id.mdx` follow the Section 6.3 case study template.
 - `PRD.md` / `CLAUDE.md` / `PORTFOLIO_CONTEXT.md` inside a project folder are
   **source material only** — never rendered on the public site.
+- **Copy follows `VOICE.md`.** Read it before writing or editing any case study,
+  tagline or UI string. Case studies use the sections it defines (The problem /
+  What I built / Result / What I'd do next / Under the hood, and their Indonesian
+  equivalents). `meta.json` carries `glance`, `skills`, impact-first `metrics`,
+  and an `id` block with the Indonesian versions of those fields plus the
+  tagline. Run `npm run lint:voice -- <slug>` after editing.
 - Build the case study page component to read whatever projects exist in
   `content/projects/` and generate routes dynamically.
 

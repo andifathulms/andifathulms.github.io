@@ -135,7 +135,7 @@ export default async function HomePage({
   setRequestLocale(locale);
   // Matches the count of projects actually marked featured (see FEATURED_ORDER
   // in lib/content.ts) so the strip never silently drops one off the end.
-  const featuredProjects = getFeaturedProjects(14);
+  const featuredProjects = getFeaturedProjects(14, locale);
   const stats = getPortfolioStats();
 
   return (

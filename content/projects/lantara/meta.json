@@ -1,7 +1,17 @@
 {
   "slug": "lantara",
   "title": "Lantara v2",
-  "tagline": "Dynamic permit engine for IKN Nusantara — add a new permit type as configuration, not code",
+  "tagline": "A permit engine for Otorita IKN where administrators add new permit types from a screen, without a developer",
+  "glance": {
+    "for": "Citizens, reviewers and permit administrators at Otorita IKN",
+    "result": "All four build phases shipped in about three weeks; public staging is live"
+  },
+  "skills": [
+    "Workflow engines",
+    "Role-based access control",
+    "Dynamic forms",
+    "Government services"
+  ],
   "categoryTags": [
     "Government",
     "Platform",
@@ -23,27 +33,58 @@
   "timeframe": "Jun 2026",
   "liveUrl": "https://lantara.kotacerdas.id",
   "liveIsStaging": true,
+  "access": "public",
   "githubUrl": "https://github.com/thdoikn/lantara-v2",
   "heroImage": "/images/projects/lantara/hero.webp",
   "order": 2,
   "featured": true,
   "metrics": [
     {
+      "value": "31",
+      "label": "regulated permit sectors"
+    },
+    {
       "value": "~2,200",
-      "label": "KBLI permit codes modelled"
+      "label": "KBLI business codes modelled"
     },
     {
-      "value": "43",
-      "label": "Models across 13 Django apps"
+      "value": "12",
+      "label": "form field types, no frontend code per permit"
     },
     {
-      "value": "241",
-      "label": "Commits over ~3 weeks"
-    },
-    {
-      "value": "~30.5K",
-      "label": "Lines of Python + TS"
+      "value": "2",
+      "label": "modules: online permits and walk-in queue"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Mesin perizinan Otorita IKN tempat administrator menambah jenis izin baru dari layar, tanpa developer",
+    "glance": {
+      "for": "Warga, pemeriksa, dan administrator perizinan di Otorita IKN",
+      "result": "Keempat fase pembangunan selesai dalam sekitar tiga minggu; staging publik sudah aktif"
+    },
+    "skills": [
+      "Mesin alur kerja",
+      "Kontrol akses berbasis peran",
+      "Formulir dinamis",
+      "Layanan pemerintahan"
+    ],
+    "metrics": [
+      {
+        "value": "31",
+        "label": "sektor perizinan yang diatur"
+      },
+      {
+        "value": "~2.200",
+        "label": "kode usaha KBLI dimodelkan"
+      },
+      {
+        "value": "12",
+        "label": "tipe isian, tanpa kode frontend per izin"
+      },
+      {
+        "value": "2",
+        "label": "modul: izin online dan antrean tatap muka"
+      }
+    ]
+  }
 }

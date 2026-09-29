@@ -1,7 +1,17 @@
 {
   "slug": "cubiq",
   "title": "Cubiq",
-  "tagline": "Dark-themed speedcubing trainer with a precision timer, WCA-standard analytics, and from-scratch solvers for all 8 major twisty puzzles",
+  "tagline": "A speedcubing trainer with competition-grade timing and a solver I wrote for each of the 8 major puzzles",
+  "glance": {
+    "for": "Intermediate and advanced speedcubers who have outgrown csTimer",
+    "result": "Live and free, with its own solver for all 8 puzzles"
+  },
+  "skills": [
+    "Search algorithms",
+    "3D in the browser",
+    "Reinforcement learning",
+    "Client-side state"
+  ],
   "categoryTags": [
     "Personal Project",
     "ML / AI",
@@ -28,19 +38,50 @@
   "metrics": [
     {
       "value": "8",
-      "label": "Twisty puzzles solved from scratch"
+      "label": "puzzles solved by solvers I wrote"
+    },
+    {
+      "value": "≤ 11",
+      "label": "moves, optimal, on 2×2, Pyraminx and Skewb"
     },
     {
       "value": "19",
-      "label": "Solver API endpoints"
+      "label": "solver endpoints in the API"
     },
     {
-      "value": "~13.7K",
-      "label": "Lines across engine + UI"
-    },
-    {
-      "value": "70",
-      "label": "Commits over ~11 weeks"
+      "value": "ao5–ao100",
+      "label": "averages tracked to WCA rules"
     }
-  ]
+  ],
+  "id": {
+    "tagline": "Pelatih speedcubing dengan timer setara kompetisi dan solver buatan sendiri untuk 8 puzzle utama",
+    "glance": {
+      "for": "Speedcuber menengah dan mahir yang sudah tidak cukup dengan csTimer",
+      "result": "Live dan gratis, dengan solver sendiri untuk kedelapan puzzle"
+    },
+    "skills": [
+      "Algoritma pencarian",
+      "3D di browser",
+      "Reinforcement learning",
+      "State di sisi klien"
+    ],
+    "metrics": [
+      {
+        "value": "8",
+        "label": "puzzle diselesaikan solver buatan saya"
+      },
+      {
+        "value": "≤ 11",
+        "label": "langkah optimal di 2×2, Pyraminx, dan Skewb"
+      },
+      {
+        "value": "19",
+        "label": "endpoint solver di API"
+      },
+      {
+        "value": "ao5–ao100",
+        "label": "rata-rata dihitung sesuai aturan WCA"
+      }
+    ]
+  }
 }

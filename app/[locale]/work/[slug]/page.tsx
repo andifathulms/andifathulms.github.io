@@ -57,7 +57,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { slug, locale } = await params;
-  const project = getProjectMeta(slug);
+  const project = getProjectMeta(slug, locale);
   if (!project) return {};
 
   // heroImage is a root-relative path; metadataBase (set in the locale layout)
@@ -85,7 +85,7 @@ export default async function CaseStudyPage({
   const { slug, locale } = await params;
   setRequestLocale(locale);
 
-  const project = getProjectMeta(slug);
+  const project = getProjectMeta(slug, locale);
   if (!project) notFound();
 
   const content = getProjectContent(slug, locale) ?? getProjectContent(slug, 'en');
@@ -93,7 +93,7 @@ export default async function CaseStudyPage({
 
   const t = await getTranslations({ locale, namespace: 'case_study' });
   const ta = await getTranslations({ locale, namespace: 'a11y' });
-  const { prev, next } = getAdjacentProjects(slug);
+  const { prev, next } = getAdjacentProjects(slug, locale);
   const screenshots = getProjectScreenshots(slug);
   const toc = extractHeadings(content);
   const readingMinutes = readingTimeMinutes(content);

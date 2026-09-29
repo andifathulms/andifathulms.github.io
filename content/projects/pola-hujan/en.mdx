@@ -2,34 +2,47 @@
 
 ## The problem
 
-Indonesians are taught the country has two seasons — *musim hujan* and *musim kemarau*, rainy and dry. That is true for Java, and wrong almost everywhere else. Ambon's wet season falls exactly opposite Java's. Parts of the equatorial belt get two wet peaks and two dry peaks a year rather than one of each. BMKG, Indonesia's meteorological agency, already knows this and publishes 699 official season zones grouped into three families — Monsunal, Ekuatorial, Lokal — but that knowledge sits in PDF bulletins and expert judgement over a station network, not in anything a curious person can open and explore.
+Indonesians learn that the country has two seasons, rainy and dry. That's true for Java and wrong in much of the rest of the country. Ambon's wet season falls in Java's dry months, and parts of the equatorial belt get two wet peaks a year. BMKG, the national weather agency, knows this. It maps 699 season zones in three families: Monsunal, Ekuatorial and Lokal. But that knowledge lives in PDF bulletins and expert judgement, not in something a curious person can open and explore.
 
-Pola Hujan is built for a general Indonesian audience who want to understand *why* "rainy season" means different things in different places. It is deliberately not a planting calendar and not a forecast: it describes long-term climatology, and says so on its own face.
+I built Pola Hujan for general Indonesian readers who want to know why "rainy season" means different things in different places. It describes long-term climate. It isn't a forecast or a planting calendar, and the site says so on its first screen.
 
-## The approach
+## What I built
 
-### The classification is derived, not traced
+### I computed the map from raw data
 
-The obvious build is to digitise BMKG's published zone map and colour it in. This does the opposite: it computes its own classification from raw satellite rainfall using harmonic analysis — the same maths used to describe tides. A location's twelve-month rainfall cycle is treated as a wave and decomposed into an annual component and a twice-a-year component. Whichever is stronger, and where its peak falls in the calendar, decides the family. The result is independently checkable rather than a re-skin of someone else's polygons.
+The easy route was to digitise BMKG's zone map and colour it in. I computed my own classification from satellite rainfall instead. Each place's twelve-month rainfall cycle is treated as a wave and split into a yearly part and a twice-a-year part, the same maths used to describe tides. Which part is stronger, and when it peaks, decides the family. Anyone can check the result.
 
-### Thresholds are cited, and never tuned toward agreement
+### Disagreements with BMKG stay on the map
 
-The cutoffs deciding how strong the semi-annual signal must be before a place counts as two-wet-season live in a single file, each citing the 2003 Aldrian & Susanto paper the three-family framework comes from. The project's own rule is that disagreement with BMKG is *reported, never tuned away* — nudging a threshold until the map matched would convert an analysis into an imitation. Two verified disagreements (Medan, Palu) are left standing as findings, and a dedicated layer shows exactly where the derived map departs from the official one, with citations.
+The thresholds live in one file, each cited to Aldrian and Susanto (2003), the paper behind the three-family system. I set a rule never to adjust them until the map matches BMKG. Two places where my result differs, Medan and Palu, are shown as findings. A separate layer marks every place where the two maps disagree, with sources.
 
-### Correctness proven on synthetic data before real data
+### I tested the classifier on made-up data first
 
-A generator builds a fake rainfall cycle from known wave parameters; the classifier runs on it and must recover those exact parameters. That includes a permanent regression case for a cycle peaking six months from Java's, which has to come out as the inverted family. Correctness is demonstrated mathematically rather than eyeballed against a map — before the classifier is ever pointed at CHIRPS.
+A generator builds rainfall cycles from known wave settings, and the classifier has to recover those exact settings. One permanent test covers a cycle that peaks six months after Java's, which must come out as the inverted family. Only after those tests passed did I run it on satellite data.
 
-### Real satellite archives, decoded by hand
+### A static site with no heavy libraries
 
-The pipeline downloads genuine CHIRPS precipitation archives and decodes the BIL raster and tar formats with hand-written decoders rather than pulling in GDAL. The dependency budget is deliberate and enforced: no charting library, no mapping or GIS library, no statistics library, no ML. Everything — fetch, harmonic fit, classification — runs once at build time, so the shipped site is a static export with zero runtime network calls and no hosting bill.
+The pipeline downloads CHIRPS satellite archives and reads the raster files with decoders I wrote by hand. There is no mapping, charting, statistics or machine-learning library. Everything runs once at build time, so the site is static, makes no network calls and costs nothing to host.
 
-### The honesty layer is part of the product
+### The method page shows its work
 
-The method page publishes the dataset citation, the exact thresholds, a computed agreement rate against BMKG generated by the pipeline rather than asserted in prose, a downloadable CSV of the full dataset, and the limitations. Chief among them: the regional CHIRPS archive stops updating in October 2016, so this is a ten-year climatology (2006–2015), not the thirty-year WMO standard a production tool would use. That is stated in the open rather than buried.
+The method page lists the dataset citation, the exact thresholds, an agreement rate with BMKG calculated by the pipeline, a CSV of the full dataset, and the limits. The main limit: the regional CHIRPS archive stopped updating in October 2016, so this is a ten-year climate record (2006 to 2015), shorter than the 30-year standard.
 
-## Outcome
+## Result
 
-64 commits over a three-day build, roughly 3,140 lines of TypeScript across the app, pipeline and analysis library, with 54 tests across 7 files gating CI. Four routes: the regime atlas, a two-place comparison built around the Jakarta-versus-Ambon finding, the method and transparency page, and a live harmonic explainer whose sliders let a visitor morph a synthetic rainfall cycle between the three families and watch the classification change — turning the method itself into something playable rather than something described.
+Pola Hujan is live, in Indonesian. It has four parts: the atlas, a Jakarta and Ambon comparison, the method page, and an explainer where sliders morph a rainfall cycle between the three families. It covers 34 locations. I checked 14 of the 34 BMKG labels against the agency's own 139-page bulletin, with page numbers, and found and fixed one wrong label (Ternate). The other 20 are marked as estimates. After the build I did a separate accessibility and plain-language pass. I built it in three days in August 2026.
 
-Coverage grew from 15 to 34 sampled locations almost for free, because CHIRPS download cost is dominated by the 120 monthly rasters fetched rather than by how many points are sampled from them. Verification went from 0 to 14 of 34 BMKG comparison labels checked against the agency's own 139-page bulletin, page numbers cited — which caught and corrected a mislabelled location (Ternate) in the initial hand-entered data. The remaining 20 are still best-effort estimates, and the site says so. An accessibility and plain-language pass — contrast, ARIA descriptions replacing title attributes, screen-reader selection announcements, a 16px body-text floor — shipped as its own milestone after the build was feature-complete. English routing remains deferred; the live site is Indonesian only.
+## What I'd do next
+
+- Check the remaining 20 BMKG labels against the bulletin.
+- Add the English version of the site.
+- Move to a 30-year climate record if a newer regional archive becomes available.
+
+## Under the hood
+
+- The harmonic fit decomposes each location's monthly climatology into annual and semi-annual components. Amplitude ratio and peak phase decide Monsunal, Ekuatorial or Lokal.
+- Thresholds live in a single cited config file. Agreement with BMKG is computed by the pipeline, never written by hand.
+- A synthetic generator produces cycles from known parameters, with a permanent regression case for the phase-inverted family.
+- Hand-written decoders read CHIRPS BIL rasters and tar archives, so there's no GDAL. Download cost is dominated by the 120 monthly rasters, which is why coverage grew from 15 to 34 points at almost no extra cost.
+- Fetch, fit and classification run at build time. The output is a static export on GitHub Pages.
+- 54 tests across 7 files gate CI. About 3,140 lines of TypeScript, 64 commits over three days.

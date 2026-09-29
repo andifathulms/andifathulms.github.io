@@ -2,38 +2,51 @@
 
 ## The problem
 
-IKN Nusantara is Indonesia's purpose-built new capital, still under active construction. Its public services authority — Otorita IKN — must issue permits across 31 regulated sectors: social services, health, education, environment, and more. At most government agencies, each permit type has its own hardcoded workflow, form fields, and document requirements baked into the codebase. When a regulation changes — and in a new city, they change constantly — that means a developer, a migration, and a deployment.
+Otorita IKN issues permits across 31 regulated sectors, from health and education to the environment. In most government systems, every permit type is hardcoded: its workflow, its form and its document list are written by a developer. When a regulation changes, someone has to change the code and ship a new release. In a city that is still being built, regulations change all the time.
 
-The system serves three audiences at once: citizens and businesses applying for permits, government staff reviewing them, and agency administrators who define the rules. And those rules are set by law and ministerial decree, not by engineers. So the core requirement was blunt: a non-technical administrator must be able to define permit workflows, form schemas, and document checklists entirely through a UI — no developer, no deploy.
+Three groups use the system. Citizens and businesses apply, government staff review, and agency administrators set the rules. Those rules come from laws and ministerial decrees, not from engineers. So the core requirement was simple to state: an administrator with no technical background must be able to create a permit type, with its workflow, form and document checklist, from a screen.
 
-## The approach
+## What I built
 
-### The engine — configuration over code
+### Every permit type is data
 
-Instead of a table per permit type, all permit configuration lives in five related models: `Sektor`, `PermitType`, `WorkflowStage`, `FormField`, and `DocumentRequirement`. Adding a new permit type is a data-entry operation. An administrator can configure a six-stage health permit with twelve required documents and a custom form — no migration, no deploy, no pull request.
+I modelled permits as configuration: sectors, permit types, workflow stages, form fields and document requirements. Adding a permit type is data entry. An administrator can set up a six-stage health permit with twelve required documents and a custom form, and nobody touches the code.
 
-The form data on each submission is stored as a JSON field, validated at runtime against the live field schema. When an admin modifies a permit's schema, in-flight submissions are protected: at the moment of submission, the current schema version is snapshot-copied onto the submission record. A citizen who already applied never has their form shape change mid-review, and auditing stays deterministic — you always know exactly what was asked when someone applied.
+When someone applies, the system stores a copy of the form as it was at that moment. If an administrator edits the form later, applications already under review keep the questions they were asked. Reviews stay fair and audits stay exact.
 
-### RBAC without an enum
+### Permissions follow the workflow
 
-Staff permissions are generated strings like `verifikasi_teknis:izin_posyandu`, derived from workflow stage keys and permit type keys. There is no `if role == "verifier"` anywhere in the codebase. The DRF permission class checks the submission's current stage against the requesting user's assigned role strings. When a new permit type is added through the UI, the correct role slots are automatically available — no code change required.
+Staff permissions are generated from the workflow itself, one per stage and permit type. The code never checks for a fixed role like "verifier". When an administrator adds a permit type, the reviewer slots for it exist straight away.
 
-### SLA as a first-class concern
+### Deadlines staff can see
 
-Every workflow stage carries an `sla_hours` field; every permit type has an `sla_days` total. A Celery Beat task sweeps submissions periodically, recomputes SLA deadlines using a working-days calendar that accounts for government holidays and weekends, and fires notifications when submissions are at-risk or breached. The verifier queue renders submission cards that visually age from amber to red as deadlines approach. Keyboard shortcuts (`j`/`k` to navigate, `a`/`r`/`d` for approve/revise/reject) let staff process without touching the mouse.
+Each stage has a deadline in hours, and each permit type has a total in working days. A background job recalculates them against the government holiday calendar and sends alerts when a file is at risk. In the reviewer queue, cards turn from amber to red as the deadline gets close. Keyboard shortcuts let staff approve, return or reject a file without the mouse.
 
-### Accountable verification
+### Reviews that hold up in a busy office
 
-Review is built to survive a real government office. A verifier can claim a submission to work it exclusively; stale claims auto-release after inactivity, and every claim and decision carries actor attribution, so two verifiers can never silently collide on the same file. Revisions are per-field: each flagged field carries its own note and deadline, and the applicant sees the original value beside a before→after diff instead of a single generic "please revise." And because some permits legally require sign-off from two different technical departments, verifier assignments are scoped per workflow stage — enforcing that no one verifier can approve both stages of their own review.
+A reviewer can claim a file so two people never work on it at once. Idle claims release on their own, and every decision records who made it. Revision requests are per field, so the applicant sees exactly what to fix next to what they wrote before. Some permits need sign-off from two technical departments. I scoped reviewers per stage, so one person can't approve both halves of the same review.
 
-### Two registers, one dynamic renderer
+### A walk-in queue for the public service mall
 
-Public surfaces — the landing page, permit catalog, and public validation page — use an immersive royal-blue palette with an animated hero, scroll-reveal, and glassmorphism, appropriate for the digital front door of a national capital. Authenticated surfaces — the applicant portal, verifier workspace, and admin engine builder — are calm and dense; a verifier processing fifty permits a day needs clarity, not decoration. Both are fed by a single `<DynamicForm>` React component that fetches the permit's `FormField[]` schema from the API and builds a `zod` validation schema at runtime, handling twelve field types (text, NIK, NPWP, phone, geolocation, file upload, select, and more). Adding a permit type requires zero frontend code.
+Once the permit engine worked, a gap was obvious. It handled online applications that take days, but not a citizen who walks into the Public Service Mall and takes a ticket. I scoped and built MPP Antrean, a separate queue module with its own data and permissions. It covers kiosk tickets, QR check-in, counter triage, and calling, recalling and serving, all updated live. A citizen who booked online but arrives late joins the walk-in line by arrival time instead of losing the ticket.
 
-### Beyond the brief — a physical queue system
+## Result
 
-Once the permit engine was demoable, a gap was obvious: it only models online, document-driven, days-long workflows. It has no concept of a citizen walking into a building and taking a numbered ticket — which is exactly what the Mal Pelayanan Publik (Public Service Mall) housing OIKN and partner agencies like BPJS and the tax office needs. So I scoped and shipped **MPP Antrean**, a full walk-in/online queue system, as a deliberately isolated bounded context: its own Django app, its own models, its own RBAC, and no foreign keys into the permit domain. It handles kiosk ticketing, QR check-in, counter-officer triage, and call/recall/serve flows, with live state pushed over the existing Django Channels WebSocket layer. A nice fairness detail: a citizen who reserved online but arrives late is demoted back into the walk-in pool by actual arrival time rather than having their ticket voided — which meant the online/walk-in quota split had to be enforced at reservation time, not at serving time.
+All four planned build phases shipped in about three weeks, followed by a security pass, an accessibility pass and the queue module. The system models about 2,200 KBLI business codes and starts from one command with demo data loaded. Anyone can scan the QR code on an issued permit to confirm it is authentic, without logging in. A public staging site is live, and production will run on Otorita IKN's own servers.
 
-## Outcome
+## What I'd do next
 
-The original four build phases (P0 scaffold through P4 hardening) shipped, and development continued past the brief into a dedicated security-hardening pass, a broad accessibility sweep, and the standalone MPP Antrean module — 241 commits across roughly three weeks, spanning 13 Django apps and ~30,000 lines. The whole system is demo-able from a fresh `docker compose up`: migrations run, ~2,200 KBLI master records load, 46 sample permits across three sectors seed, demo queue tenants and counters seed, and a superadmin is created. Anyone can scan an issued permit's QR code at the public validation page to confirm its authenticity without logging in. RDTR spatial zoning and embedded digital signature (TTE) are fully wired behind feature flags, awaiting external data-sharing and agency partnerships before production activation. The repository is private; deployment targets Otorita IKN's own infrastructure.
+- Switch on zoning checks (RDTR) and digital signatures (TTE). Both are built and waiting on data-sharing agreements with partner agencies.
+- Move from staging to production on Otorita IKN's infrastructure.
+
+## Under the hood
+
+- Five core models hold every permit's configuration: `Sektor`, `PermitType`, `WorkflowStage`, `FormField` and `DocumentRequirement`.
+- Form answers are a JSON field validated at runtime against the live schema. The schema version is snapshot-copied onto each submission.
+- Permissions are generated strings such as `verifikasi_teknis:izin_posyandu`. A DRF permission class checks them against the submission's current stage. There is no role enum.
+- SLA: `sla_hours` per stage, `sla_days` per permit type, swept by a Celery Beat task on a working-days calendar. Queue shortcuts are `j`/`k` to move and `a`/`r`/`d` to approve, revise or reject.
+- `<DynamicForm>` fetches `FormField[]` and builds a `zod` schema at runtime for twelve field types, including NIK, NPWP, phone, geolocation and file upload.
+- Public pages use an immersive royal-blue theme; the signed-in workspaces are calm and dense for staff who process fifty files a day.
+- MPP Antrean is its own Django app with no foreign keys into the permit domain. Live state goes over the existing Django Channels WebSocket layer. The online and walk-in quota split is enforced at reservation time.
+- `docker compose up` runs migrations, loads ~2,200 KBLI records, seeds 46 sample permits across three sectors plus demo queue counters, and creates a superadmin.
+- 13 Django apps, 43 models, about 30,000 lines of Python and TypeScript, 241 commits in roughly three weeks.
