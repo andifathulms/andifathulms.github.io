@@ -2,28 +2,46 @@
 
 ## Masalahnya
 
-Setiap pengembang aplikasi mengonfigurasi *isolation level* basis data — setelan yang menentukan seberapa banyak dua operasi bersamaan boleh saling mengganggu. Hampir semua orang menerima default-nya, dan hampir tak ada yang bisa mengatakan dari apa ia melindungi mereka. Tiga celah nyata:
+Setiap developer aplikasi memilih isolation level database, pengaturan yang menentukan seberapa jauh dua operasi yang berjalan bersamaan boleh saling mengganggu. Hampir semua orang memakai nilai bawaan, dan hampir tidak ada yang bisa menjelaskan dari apa pengaturan itu melindungi mereka. Jenis kegagalannya diajarkan sebagai daftar nama, dirty read, non-repeatable read, phantom, yang dihafal untuk wawancara kerja tapi jarang dipahami.
 
-- **Mode kegagalannya diajarkan sebagai daftar nama** — dirty read, non-repeatable read, phantom — dilafalkan di wawancara dan dipahami segelintir.
-- **Kegagalan paling berbahaya hilang dari daftar itu.** *Write skew*: dua transaksi masing-masing membaca data yang sama, masing-masing memeriksa aturan ("orang lain masih on call, jadi saya boleh off call"), masing-masing menulis baris yang *berbeda*, dan keduanya commit. Tak ada yang bertabrakan — tak ada baris bersama, tak ada perebutan kunci — dan aturannya dilanggar oleh kombinasinya. Ini diam-diam mengosongkan jadwal on-call, memesan-ganda ruangan, dan merusak inventaris. Snapshot isolation tak mencegahnya, dan snapshot isolation adalah yang menjadi arti kebanyakan default.
-- **Nama level berarti hal berbeda di mesin berbeda, dan tak ada yang mengatakannya.** `REPEATABLE READ` PostgreSQL adalah snapshot isolation; `READ UNCOMMITTED`-nya diam-diam berperilaku sebagai `READ COMMITTED`; `SERIALIZABLE` Oracle adalah snapshot isolation, jadi ia mengizinkan write skew *meski namanya begitu.* Pengembang yang belajar "REPEATABLE READ" dari buku teks telah belajar sesuatu yang tak benar bagi basis data di depannya.
+Kegagalan yang paling berbahaya justru tidak ada di daftar itu. Pada write skew, dua transaksi membaca data yang sama, masing-masing mengecek aturan ("masih ada orang lain yang piket, jadi saya boleh berhenti piket"), lalu masing-masing menulis baris yang berbeda. Tidak ada yang bertabrakan, keduanya berhasil disimpan, dan aturannya dilanggar. Begitulah jadwal piket bisa kosong dan ruangan terpesan dua kali. Snapshot isolation tidak mencegahnya, padahal itulah yang sebenarnya dipakai kebanyakan pengaturan bawaan. Lebih parah lagi, nama level yang sama punya arti berbeda di tiap database. "SERIALIZABLE" di Oracle tetap membiarkan write skew.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Basis data sungguhan adalah oracle, dan mereka lebih dulu
+### Database asli dijalankan lebih dulu
 
-Insting untuk proyek seperti ini adalah menulis simulator dari apa yang Anda tahu tentang cara kerja basis data — yang justru mode kegagalannya, karena pengembang akan membuat keputusan produksi dari apa yang ditunjukkannya. Maka *sebelum executor ada*, sebuah harness menjalankan PostgreSQL, MySQL, SQL Server, dan Oracle sungguhan di kontainer, mengeksekusi setiap jadwal terhadapnya, dan merekam apa yang benar-benar terjadi — setiap nilai dibaca, setiap kode error, di mana eksekusi memblokir dan sampai kapan, apakah tiap transaksi commit. Ke-220 rekaman itu di-commit sebagai fixture; simulator dibangun untuk mencocokinya, dan ketika keduanya berselisih, **simulatornya yang salah.** Penantian khususnya dibaca dari instrumentasi tiap mesin (`pg_stat_activity`, `performance_schema.data_lock_waits`, `v$session.blocking_session`) alih-alih disimpulkan dari pernyataan yang lambat.
+Developer bisa saja mengambil keputusan produksi dari apa yang ditampilkan alat ini, jadi simulatornya tidak boleh dibangun dari dugaan saya tentang database. Sebelum simulatornya ada, saya menulis harness yang menjalankan PostgreSQL, MySQL, SQL Server, dan Oracle asli di container, lalu memutar setiap jadwal di sana. Harness mencatat setiap nilai yang dibaca, setiap kode error, di mana transaksi menunggu, dan apakah transaksi itu berhasil. Ke-220 rekaman itu menjadi kunci jawaban. Kalau simulator dan rekaman berbeda, simulatornya yang salah.
 
-### Perbedaan mesin adalah data, bukan kode
+### Satu mesin, lima berkas aturan
 
-Ada satu executor, satu inti MVCC, satu manajer kunci. Sebuah mesin adalah berkas JSON berisi aturan — apa yang sebenarnya dipetakan tiap nama level, kapan kunci diambil, apa yang berkonflik dengan apa, apa yang abort dan dengan kode error mana. **Tak ada `if (engine === 'postgres')` di mana pun.** Dua alasan: perbandingan lintas-mesin hanya bermakna jika mesinnya dibagi (kalau tidak, Anda membandingkan implementasi, bukan semantik), dan sebuah pack bisa ditinjau pakar Postgres yang belum pernah membaca basis kode. Setiap aturan mengutip dokumentasi vendor dan build menegakkannya; detektor anomali tak berbagi kode dengan executor dan mengevaluasi tiap anomali dari definisi terbitannya, ditegaskan *dua* arah (harus muncul di level yang mengizinkannya, harus tidak di level yang mencegahnya).
+Simulatornya hanya satu. Setiap database berupa berkas aturan: arti sebenarnya dari tiap nama level, kapan lock diambil, apa yang bentrok, dan kode error apa yang muncul. Perbandingan antar-database baru adil kalau mesinnya sama, dan pakar database bisa memeriksa berkas aturan tanpa membaca kode saya. Setiap aturan mengutip dokumentasi vendor, dan deploy gagal kalau ada kutipan yang hilang.
 
-### Menolak alih-alih mengaproksimasi
+### Pemeriksa terpisah yang menyebut anomalinya
 
-Contoh terjelas: SQL Server memilih korban deadlock-nya berdasarkan estimasi biaya, jadi jadwal yang sama kehilangan T1 di satu level dan T2 di level lain. Alih-alih menebak, pack-nya mendeklarasikan pemilihan korban `unmodelled` dan executor menolak seluruh run — dengan tes yang menegaskan tiap penolakan dibenarkan oleh deadlock nyata di rekaman. Dan sebuah rekaman menangkap aturan yang penulis salahi (commit *"a deadlock schedule, and the rule it caught me getting wrong"*) — harness melakukan tugasnya, yang merupakan seluruh alasan ia dibangun lebih dulu.
+Kode yang mendeteksi anomali tidak berbagi kode apa pun dengan simulator. Ia membaca hasil eksekusi yang sudah selesai dan mencocokkan setiap anomali dengan definisi yang dipublikasikan. Pemeriksa yang dibangun di atas asumsi simulator akan ikut membenarkan bug simulator. Setiap skenario dites dua arah: anomali wajib muncul di level yang mengizinkannya, dan wajib tidak muncul di level yang mencegahnya.
 
-## Hasil
+### Alat ini menolak kalau tidak tahu jawabannya
 
-Live dan publik, dwibahasa, sepenuhnya statis (driver basis data dan Docker hanya untuk pengembangan). Tampilan khasnya adalah **partitur** — transaksi sebagai staf paralel di atas kertas musik, operasi sebagai tanda, garis birama di tiap langkah, jadi membaca lurus ke bawah sebuah garis birama menunjukkan apa yang terjadi bersamaan; tanda diseret untuk menganyam-ulang dan menjalankan-ulang. Ditambah pelangkahan dengan rantai versi MVCC langsung, kunci yang dipegang (termasuk range dan gap), dan visibilitas snapshot; **tanda sang konduktor** — satu anotasi merah pada langkah persis di mana anomali menjadi tak terhindarkan, penyebab bukan gejala, dengan mekanisme yang dihasilkan dari jejak; **matriks lintas-mesin** — satu jadwal terhadap kelima pack di tiap level (commit / abort dengan kode error / anomali / ditolak), di mana pengembang melihat default-nya mengizinkan hal yang diasumsikannya mustahil; graf konflik yang di-cross-check terhadap serializability brute-force; dan sebelas skenario berbingkai (jadwal on-call untuk write skew, transfer bank untuk read skew).
+SQL Server memilih transaksi yang dikorbankan saat deadlock berdasarkan perkiraan biaya, jadi jadwal yang sama bisa kehilangan transaksi berbeda di level berbeda. Saya tidak menebak. Aturan itu ditandai belum dimodelkan, dan alat ini menolak menjalankannya sambil menjelaskan alasannya. Sebuah tes memastikan setiap penolakan sesuai dengan deadlock nyata di rekaman. Harness itu juga menangkap satu aturan deadlock yang saya tulis keliru, dan itulah alasan saya membangunnya lebih dulu.
 
-Dibangun sendiri selama dua hari — ~9.255 baris kode aplikasi, **1.551 tes** (1.215 di antaranya perbandingan simulator-vs-basis-data-sungguhan), 220 fixture terekam di lima engine pack (PostgreSQL 16, MySQL 8.4 InnoDB, SQL Server 2022, SQL Server 2022 dengan RCSI, Oracle 23ai), 328 kutipan vendor, empat dependensi runtime dan tanpa pustaka basis data, SQL-parser, atau graph-layout. Oracle mendapat tempatnya: mesin yang level-nya harfiah bernama `SERIALIZABLE` namun mengizinkan write skew adalah seluruh argumennya, dibuat tak terbantahkan.
+### Jadwal dibaca seperti partitur
+
+Transaksi digambar di garis paranada yang sejajar, seperti partitur musik, dengan garis birama di setiap langkah. Membaca lurus ke bawah satu garis birama menunjukkan apa yang terjadi pada saat yang sama. Operasi bisa diseret untuk mengubah urutannya, dan hasilnya langsung diperbarui. Satu tanda merah muncul tepat di langkah ketika anomali tidak lagi bisa dihindari, dengan penjelasan satu kalimat yang dibentuk dari hasil eksekusi. Sebuah matriks menjalankan jadwal yang sama di kelima berkas aturan, di setiap level.
+
+## Hasilnya
+
+Isolation Anomaly sudah live dan terbuka untuk umum, dalam bahasa Inggris dan Indonesia, sebagai situs statis penuh. Ada lima mesin yang dimodelkan: PostgreSQL 16, MySQL 8.4, SQL Server 2022, SQL Server 2022 dengan snapshot read aktif, dan Oracle 23ai. Sebelas skenario menunjukkan taruhannya, misalnya jadwal piket untuk write skew dan transfer bank untuk read skew. Anda juga bisa menyusun jadwal sendiri dan membagikannya lewat tautan. Saya membangunnya sendiri dalam dua hari pada Agustus 2026.
+
+## Di balik layar
+
+- Harness oracle berjalan dari `docker-compose.oracle.yml` dengan driver `pg`, `mysql2`, `mssql`, dan `oracledb`. Tidak satu pun masuk ke CI atau bundle browser. Merekam ulang menghasilkan fixture yang identik sampai ke byte.
+- Status menunggu dibaca dari instrumentasi tiap mesin: `pg_stat_activity`, `performance_schema.data_lock_waits`, `sys.dm_exec_requests`, dan `v$session.blocking_session`.
+- Versi yang direkam: PostgreSQL 16.14, MySQL 8.4.11 (InnoDB), SQL Server 16.0.4265.3, Oracle 23.26.2.0.0. SQL Server berjalan lewat emulasi x86 di Apple Silicon.
+- Pack: `postgres-16`, `mysql-8-innodb`, `sqlserver-2022`, `sqlserver-2022-rcsi`, `oracle-23ai`, divalidasi dengan Zod dan memuat 328 kutipan dokumentasi vendor. Tidak ada `if (engine === 'postgres')` di mana pun. RCSI menjadi pack tersendiri, direkam di database terpisah supaya opsinya tidak bocor.
+- Batas yang dinyatakan: pemilihan korban deadlock SQL Server bertanda `unmodelled` (lima rekaman ditolak); PostgreSQL menolak statement setelah rollback dengan `25P02`, sedangkan SQL Server meng-autocommit-nya, sehingga `3960` yang tertelan tetap menulis data; di Oracle, serialization failure hanya membatalkan statement, bukan transaksi; lock wait timeout tidak dimodelkan.
+- Satu inti MVCC dengan version chain dan visibilitas snapshot, serta satu lock manager dengan range lock dan gap lock. Trace identik sampai ke byte untuk input yang sama: tanpa jam, angka acak, atau state di level modul.
+- Deteksi siklus di conflict graph dicek silang dengan enumerasi brute-force semua urutan serial, termasuk jadwal tiga transaksi.
+- 1.551 tes di 11 berkas, sekitar 3,6 detik. Sebanyak 1.215 membandingkan simulator dengan rekaman database asli; 229 adalah asersi anomali dua arah.
+- Empat dependensi runtime: Next.js 14.2.15 (`output: 'export'`), React 18.3.1, React DOM, dan Zod 3.23.8. Tanpa library database, parser SQL, tata letak graf, atau state. Enam halaman per bahasa; jadwal dibagikan lewat hash URL.
+- Di PRD namanya Sekat. Cakupan lima pack melampaui batas tiga pack di PRD.
+- 38 commit pada 6–7 Agustus 2026, 9.255 baris kode aplikasi dan 1.701 baris tes.

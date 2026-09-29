@@ -2,30 +2,51 @@
 
 ## The problem
 
-Public bodies and companies routinely publish "anonymised" data by stripping names and ID numbers, and consider the job done. It isn't: the identifier was never the name — it's the *combination* of ordinary attributes like district, date of birth, and gender, none of which looks sensitive on its own. A landmark study found 87% of the US population uniquely identifiable from just ZIP code, gender, and date of birth; a later re-run put that figure at 63%, and the two numbers have never been reconciled.
+Government bodies and companies publish "anonymised" data by removing names and ID numbers, and treat the job as done. It isn't. What identifies a person is the combination of ordinary details, such as district, date of birth and gender, none of which looks sensitive alone. A landmark study found 87% of the US population unique on ZIP code, gender and date of birth. A later re-run put it at 63%, and nobody has reconciled the two.
 
-This is normally taught as a citation, not a demonstration — a data steward reads "87%" and has no way to tell whether it applies to their own release. Linkage replaces the citation with an instrument: perform the attack yourself, see how many targets it actually resolved, apply the standard defense, then watch the next attack defeat that too. Built into the app is an Indonesian national ID dissector, because a 16-digit NIK encodes exactly the quasi-identifier triple the whole demonstration is about, by construction — which means card-style masking that hides the tail is hiding the one part of the number that discloses nothing.
+Data stewards usually meet this as a citation. They read "87%" and can't tell whether it applies to their own release. I wanted an instrument in its place: run the attack yourself, see how many people it found, apply the standard defence, then watch the next attack beat that too.
 
-## The approach
+## What I built
 
-### Synthetic data, enforced structurally rather than promised
+### The app only works on populations it invents
 
-The app generates its own populations in the browser and retains ground truth — it knows who every record actually is, which is what lets it say "you correctly identified 340 of 500 targets, here are the 160 that failed." There's no file input, no drag-and-drop, no paste path anywhere in the app, and a test greps the *built bundle* for those APIs and fails the build on a hit — so the constraint survives refactors and can't be reintroduced by accident. A separate schema-assessment mode, aimed at someone who wants to check their own dataset's risk, accepts only column metadata — a name, a cardinality, a type — with no field in its input type capable of holding an actual row. A tool that ingests a real dataset and helps re-identify the people in it is a re-identification tool, whatever the surrounding copy says, and the type system makes that impossible rather than just discouraged.
+A tool that takes an actual dataset and helps re-identify the people in it is a re-identification tool, whatever its copy says. So Linkage generates its own synthetic populations in the browser and keeps the truth about who every record is. That lets it tell you, for example, that you identified 340 of 500 targets, and show the 160 that failed. There is no way to load a file or paste data, and a test scans the built site and fails the build if one appears.
 
-### Every attack returns a score, never a bare claim
+### Checking your own data takes column descriptions only
 
-The attack interface has no way to say "this record is identifiable" without the counts that justify it: attempted, correct, incorrect, failed, and — critically — a per-target candidate count. That last number matters as much as a correct guess: an attack that narrows 500,000 records down to three candidates has done most of the analytical work even though it didn't fully resolve, and the interface shows that instead of reporting a clean, uninformative failure.
+Data stewards still need to judge their own releases. The schema assessor takes a description of each column: its name, its type and how many distinct values it holds. The input has no place to put an actual row, and a test checks that. The result is a uniqueness estimate, with its assumption stated: it treats columns as independent, so correlated columns make it look safer than it is.
 
-### Sensitivity is derived, not assumed
+### Every attack reports a score
 
-The differential-privacy module computes the sensitivity of each query type from first principles — a count has sensitivity 1, a sum has sensitivity equal to its clamp range, a mean needs real care — and records the derivation as a string the interface displays. Hardcoding sensitivity to 1 everywhere is the standard way to ship a DP implementation that quietly does not provide the guarantee it claims to.
+The six attacks can't claim a record is identifiable without the counts behind it: attempted, correct, incorrect and failed. For each target they also report how many candidates were left. An attack that narrows 500,000 records to three has done most of the work, even if it didn't finish, and the screen shows that.
 
-### Canvas, typed arrays, one draw pass
+### Each case ends with the next attack
 
-Rendering 200,000 individual records at 60 frames per second rules out SVG and rules out one component per record. Positions live in parallel typed arrays; hit-testing uses a spatial grid on a single pointer listener rather than testing every mark. The packing of records into equivalence classes is deterministic, so a record never moves when an unrelated class changes elsewhere — which matters because the coalescence animation, where classes visibly merge as generalization increases, is the app's central argument, and it would degenerate into noise if unrelated records jittered on every change.
+There are five scripted cases. Each one runs an attack, applies the defence that stops it, then runs the attack that gets past that defence. The chain goes from linkage to k-anonymity, homogeneity, l-diversity, skewness, differencing and finally differential privacy and its budget. For differential privacy, I derive the noise needed for each kind of query and show the working, because assuming one value for every query quietly breaks the guarantee.
 
-## Outcome
+### 200,000 people on one screen
 
-Live and public: five scripted cases, each an attack followed by the standard defense that closes it followed by the attack that defeats that defense in turn — linkage, then k-anonymity, then homogeneity and l-diversity, then skewness and differencing, then differential privacy and its budget — plus a free-form sandbox with twelve additional instruments, including a lattice search for the minimal generalization achieving a target anonymity level, visualized from the search's own real trace rather than a re-enactment.
+The central view draws 200,000 synthetic records at 60 frames per second and groups them into classes of people who look identical in the data. As you generalise the data, classes merge on screen. I keep each record's position fixed unless its own class changes, so the merge reads clearly. A dissector for Indonesia's 16-digit national ID number (NIK) shows it contains that same district, birth date and gender triple, so masking its last digits hides the only harmless part.
 
-Sole author, 80 commits over 8 days, ~13,300 lines of application code, 328 tests across 20 files. Two runtime dependencies total — React and its DOM renderer — with the entire privacy engine, six scored attacks, and the differential-privacy mechanisms written from scratch. A CI-enforced bundle budget currently sits at 113.8 KB gzipped, of which 44.3 KB is React itself. The app never dramatizes what it recovers: no "exposed," no "victim," no congratulating a successful re-identification — it states what an attack found and leaves the reader to feel the weight of that on their own.
+## Result
+
+Linkage is live and public, a finished first version with no backend and no accounts. Beyond the five cases, a free sandbox holds twelve instruments, including a search for the smallest generalisation that meets a target, drawn from the search's own record of what it tested. The whole app downloads as 113.8 KB compressed. It reports what an attack recovered and never dramatises it: no "exposed", no "victim", no congratulations. I built it alone over eight days in September 2026.
+
+## What I'd do next
+
+- Add advanced composition for the differential-privacy budget. The first version leaves it out and says so on screen.
+
+## Under the hood
+
+- `src/engine/` imports nothing, not React, the DOM or `Date`. Every result is a function of a seed and a configuration, tested against brute-force reference implementations.
+- No `FileReader`, file input, drag-and-drop or paste path. `tests/no-file-input.test.ts` greps the built bundle for those APIs; `tests/assessor-purity.test.ts` asserts at type level and runtime that the assessor input has no `values`, `sample` or `rows`.
+- Attacks: linkage, homogeneity, background knowledge, skewness, differencing and an auxiliary-data join. Each returns a per-target `candidateCount`.
+- DP bench: derived per-query sensitivity (count 1, sum equal to its clamp range), Laplace and Gaussian mechanisms, sequential budget meter. `dp.test.ts` checks the Laplace sampler against the analytic density.
+- The lattice search prunes upward by monotonicity and records `prunedBy` and test `order`; `lattice.test.ts` asserts it finds the same minimal set as exhaustive search.
+- The field uses Canvas 2D, three parallel typed arrays, a grid index for hit testing on a single listener, and deterministic packing. `tests/performance.test.ts` asserts the 200,000-record path finishes under 2 s.
+- The Sweeney and Golle methods are both reconstructed against known populations, and the 87% versus 63% gap is shown as unresolved.
+- Seed, generator parameters, generalisation vector, k target and ε live in the URL. Case progress and theme stay local.
+- Two runtime dependencies, React 18.3 and React DOM. Vite 5.4 with an in-repo `linkage-metadata` plugin, plain CSS, hand-rolled `requestAnimationFrame`, no chart or UI library.
+- `scripts/bundle-budget.mjs` fails CI over 250 KB gzipped; the current 113.8 KB includes 44.3 KB of React.
+- 328 tests across 20 files (about 24 s), 18 views plus 6 case screens, 30 engine modules.
+- About 13,300 lines in `src/` and 80 commits from 4 to 11 September 2026, paired with Claude Code.

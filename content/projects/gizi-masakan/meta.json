@@ -1,7 +1,17 @@
 {
   "slug": "gizi-masakan",
   "title": "Gizi Masakan",
-  "tagline": "Tells you the nutrition of Indonesian dishes — and shows the exact recipe it used to get that number, so you can correct it if your kitchen does it differently",
+  "tagline": "Nutrition facts for 40 Indonesian dishes, with the recipe behind every number shown so you can correct it",
+  "glance": {
+    "for": "Indonesian home cooks, students and public-health workers",
+    "result": "Live and free; every total traces back to a recipe you can edit"
+  },
+  "skills": [
+    "Nutrition data",
+    "Data pipelines",
+    "Data licensing",
+    "Accessibility"
+  ],
   "categoryTags": [
     "Personal Project",
     "Nutrition Tool",
@@ -20,6 +30,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/gizi-masakan/id/masakan/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/gizi-masakan",
   "heroImage": "/images/projects/gizi-masakan/hero.webp",
   "order": 26,
@@ -27,20 +38,50 @@
   "metrics": [
     {
       "value": "40",
-      "label": "Indonesian dishes, recipe shown & editable"
-    },
-    {
-      "value": "282",
-      "label": "Tests — every number is auditable"
-    },
-    {
-      "value": "0",
-      "label": "Runtime network requests"
+      "label": "Indonesian dishes with editable recipes"
     },
     {
       "value": "29",
-      "label": "Nutrients from USDA FoodData Central"
+      "label": "nutrients from USDA FoodData Central"
+    },
+    {
+      "value": "70",
+      "label": "ingredients mapped to Indonesian names"
+    },
+    {
+      "value": "0",
+      "label": "network requests after the page loads"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Kandungan gizi 40 masakan Indonesia, dengan resep di balik setiap angka yang bisa Anda koreksi",
+    "glance": {
+      "for": "Juru masak rumahan, pelajar, dan pegiat kesehatan masyarakat di Indonesia",
+      "result": "Live dan gratis; setiap total bisa ditelusuri ke resep yang bisa diubah"
+    },
+    "skills": [
+      "Data gizi",
+      "Pipeline data",
+      "Lisensi data",
+      "Aksesibilitas"
+    ],
+    "metrics": [
+      {
+        "value": "40",
+        "label": "masakan Indonesia dengan resep yang bisa diubah"
+      },
+      {
+        "value": "29",
+        "label": "zat gizi dari USDA FoodData Central"
+      },
+      {
+        "value": "70",
+        "label": "bahan dipetakan ke nama Indonesia"
+      },
+      {
+        "value": "0",
+        "label": "request jaringan setelah halaman dimuat"
+      }
+    ]
+  }
 }

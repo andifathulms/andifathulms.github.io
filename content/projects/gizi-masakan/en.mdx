@@ -2,30 +2,53 @@
 
 ## The problem
 
-Nutrition apps used in Indonesia run on foreign food databases. Search *nasi padang*, *gado-gado*, or *soto betawi* and you get nothing, or a US approximation of a dish that shares almost nothing with the thing on the plate. The apps that *do* carry Indonesian dishes have the opposite failure: one confident number, no working shown. *"550 kcal for gado-gado."* Whose gado-gado? How much peanut sauce? The number can't be checked, so it can't be corrected.
+People in Indonesia who want to know what is in their food mostly use apps built on foreign food databases. Search for nasi padang, gado-gado or soto betawi and you get nothing, or a US dish that looks little like the one on the plate. The apps that do list Indonesian dishes give one confident number with no working. "550 kcal for gado-gado." Whose gado-gado, with how much peanut sauce? Nobody can check that number, so nobody can correct it.
 
-And nearly all of them are framed as **trackers** — daily budgets, calories remaining, streaks. That framing suits weight loss and little else. Indonesia's actual nutrition burden is stunting and micronutrient deficiency far more than overconsumption, so the useful question is *am I getting enough iron and protein*, not *have I stayed under my ceiling* — and calorie-budget framing is actively harmful to people with disordered eating.
+Most of these apps are also calorie trackers. That suits weight loss. Indonesia's bigger nutrition problems are stunting and missing micronutrients, so the useful question is "am I getting enough iron and protein". A calorie budget can also harm people with disordered eating.
 
-## The approach
+## What I built
 
-### The recipe is the product, not a footnote
+### The recipe sits under every number
 
-Every dish page shows the ingredient list and gram weights directly beneath the numbers. The weights are editable inline and the cooking method is switchable (fried → boiled), and everything — totals, contribution bars, adequacy fills — recomputes as you type. This isn't a power feature; it's how the tool tells the truth, because the variance between two warungs' gado-gado is larger than any precision the app could claim.
+Each dish page shows its ingredients and their gram weights right below the nutrition figures. You can edit any weight or switch a cooking method, say from fried to boiled, and the totals, contribution bars and adequacy fills update as you type. Two food stalls make gado-gado differently, and that difference is bigger than any precision the app could claim. Showing the recipe lets you fix the number for your own kitchen.
 
-### Never silently drop a missing value
+### A missing value is always named
 
-The single most dangerous failure mode in a nutrition calculator is quietly omitting an ingredient it has no data for: the total still looks plausible but understates the dish. So missing ingredients, values, and factors each produce a **named gap** in the output — the total still shows, labelled incomplete — and tests assert this in both directions (an incomplete recipe must name its gap; a complete one must name none). Retention has exactly two states: factor-adjusted with the factor cited, or explicitly marked unadjusted. There is no implicit "assume full retention" — that's a silent assumption wearing a number's clothes.
+The most dangerous thing a nutrition calculator can do is quietly skip an ingredient it has no data for. The total still looks plausible, but it is too low. I made every missing ingredient, nutrient value or cooking factor show up as a named gap, and the total is labelled incomplete. Tests check both directions: an incomplete recipe must name its gap, and a complete one must name none. A cooking-loss adjustment is either applied with its source cited or marked as not applied.
 
-### A licence gate that fails the build
+### The better data source ships switched off
 
-The obviously better ingredient source is TKPI (Kemenkes' Indonesian food composition table) — but it's a copyrighted book with an all-rights-reserved notice, outside the UU 28/2014 exemption for regulations. So a TKPI adapter exists in the codebase and **ships disabled behind a licence gate**, with the exclusion and its legal reason recorded in the manifest; the build fails if a source's licence is absent. Both adapters emit the same `IngredientTable` and nothing downstream branches on provenance, so if permission ever arrives, accuracy improves without touching anything else.
+The better source for Indonesian ingredients is TKPI, the Ministry of Health's food composition table. It is a copyrighted book with all rights reserved, and Indonesia's copyright law only exempts regulations. So I built a TKPI adapter and shipped it disabled, with the legal reason written into the data manifest. The build fails if any source has no licence recorded. If permission ever comes, accuracy improves and nothing else needs to change.
 
-### Honest about its own gaps — applied to itself
+### The site is open about its own guesses
 
-The project's own thesis is turned on its own data. All 40 recipes' gram weights are currently *estimates*, every row marked `perkiraan` and rendered in terracotta so a reader can see it — and the docs record, against the PRD's own advice, that reaching forty guessed dishes was the wrong trade and weighing is the highest-value work left. The household-measure (URT) table ships **deliberately empty** rather than populated from a guess, because an invariant forbids unmeasured entries. Choosing an empty table over a plausible one is the whole thesis applied to itself.
+All 40 recipes use estimated gram weights, not kitchen-scale readings. Every estimated row is marked "perkiraan" and shown in terracotta. My own notes record that reaching forty guessed dishes was the wrong trade, and that weighing them is the most valuable work left. The household-measure table (centong, mangkuk) ships empty, because a rule in the project forbids entries nobody measured.
 
-## Outcome
+### Adequacy, never a budget
 
-Live and public, bilingual (Indonesian default), fully static with **zero runtime network requests** — a build-time pipeline downloads the USDA FoodData Central bulk CSV, filters to a 70-ingredient curated list, projects to 29 nutrients, and ships a 28.9 KB table; raw CSVs are never committed. It shows the plate with the recipe strip and re-ranking contribution bars beneath it, inline recipe editing including cooking method, a named-gaps panel, a per-nutrient computation trace (which ingredient contributed what, at which gram weight, from which FDC entry, with which retention factor, and the arithmetic stated), and AKG adequacy by age/sex group from Permenkes 28/2019 — rendered as *how much of the requirement this contributes*, never a consumed-from-budget bar. No trackers anywhere: enforced by a test that drops a stray timestamp from the saved-recipe store.
+Nutrient adequacy uses the Indonesian recommended intakes (AKG) from Permenkes 28/2019, by age and sex group. The page shows how much of a day's requirement a dish contributes, with the requirement figure printed beside it. There are no daily totals, no running sums and no food log. A test drops any stray timestamp from the saved-recipe store, so tracking can't creep in.
 
-Built solo in one ~8-hour day — ~7,700 lines of TypeScript, 282 tests, four runtime dependencies. It states plainly that ingredient values are US-database approximations for Indonesian ingredients, that dish numbers are estimates from a stated recipe, and that it is not medical advice.
+## Result
+
+Gizi Masakan is live and public, in Indonesian first and English second. It covers 40 Indonesian dishes and 70 ingredients, with 29 nutrients each, taken from USDA FoodData Central. The site is fully static and makes no network requests once it has loaded. Tap any total to see which ingredient contributed what, from which database entry, with which cooking factor, and the arithmetic written out. I built it alone in one day of about eight hours in August 2026.
+
+The site says plainly that ingredient values are US-database approximations for Indonesian ingredients, that dish numbers are estimates from a stated recipe, and that it is not medical advice.
+
+## What I'd do next
+
+- Weigh the 40 recipes on a kitchen scale and fill the household-measure table with measured portions.
+- Resolve the 13 ingredients FoodData Central can't supply. Two of them, gula merah and kecap manis, distort whole dishes, and each affected recipe says so.
+
+## Under the hood
+
+- The engine is a pure function, `(recipe, portion, ingredientTable, factors) → NutritionTrace`: no DOM, no React, no clock, no randomness, no network. Components only render a trace.
+- 282 tests pass across 9 suites: conservation, gaps, retention, determinism, AKG, cooking method, URL state, saved recipes and search.
+- A build-time pipeline downloads the FDC SR Legacy bulk CSV, filters it to the 70-ingredient curated list, projects it to 29 nutrients keyed by FDC nutrient number, and writes a 28.9 KB `table.json` against a 200 KB budget. Raw CSVs are never committed.
+- Yield and retention factors come from the FAO/INFOODS and USDA tables, cited per operation. The trace states the arithmetic: `berat ÷ 100 × nilai per 100 g × faktor retensi`.
+- TKPI is excluded under UU 28/2014 Pasal 42. Both adapters emit the same `IngredientTable`, and nothing downstream branches on provenance.
+- The 13 unmatched ingredients live in `unmatched.json` and appear as gaps in every trace. Without `gula-merah`, wedang jahe shows 16 kcal a glass; without `kecap-manis`, four dishes lose their sugar.
+- Selected nutrient, per-portion toggle, AKG group, edited weights, cooking method and search are all query parameters. Untrusted input from the URL or localStorage is validated with Zod and never coerced.
+- Saved-recipe keys are exactly `{id, dishId, nama, beratOverrideG}`.
+- Every ink colour clears WCAG AA 4.5:1 on both backgrounds; four hues set by eye failed and were darkened. A third font family kept for tabular numerals was dropped for `font-variant-numeric`.
+- Four runtime dependencies: Next.js 14.2.15 (`output: 'export'`), React 18.3.1, React DOM and Zod 3.23.8. Deployed to GitHub Pages by two GitHub Actions workflows, `deploy.yml` (gated by `data:validate`) and a scheduled `refresh-fdc.yml`.
+- About 87 prerendered pages across two locales. About 7,700 lines of TypeScript and 60 commits between 09:21 and 17:35 on 7 August 2026.

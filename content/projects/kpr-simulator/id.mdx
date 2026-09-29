@@ -2,35 +2,55 @@
 
 ## Masalahnya
 
-KPR adalah komitmen finansial terbesar yang akan dibuat kebanyakan rumah tangga Indonesia, dan setiap kalkulator salah soal risiko utamanya dalam empat hal:
+KPR adalah komitmen keuangan terbesar yang akan diambil kebanyakan keluarga Indonesia. Bank menawarkan bunga tetap selama dua atau tiga tahun, setelah itu bunganya mengambang. Keluarga yang menganggarkan sekitar Rp3,2 juta sebulan bisa mendapati cicilannya menjadi Rp4,8 juta di tahun keempat. Semua kalkulator yang saya temukan menganggap bunganya sama selama dua puluh tahun, sehingga risiko terbesar dalam pinjaman itu tidak terlihat.
 
-- **Mereka mengasumsikan satu suku bunga untuk seluruh 20 tahun.** Bank Indonesia mengutip bunga tetap selama 2–3 tahun lalu pinjaman mengambang. Keluarga yang menganggarkan sekitar Rp3,2 juta sebulan mendapati Rp4,8 juta di tahun keempat — ketidakpastian finansial terbesar dalam produk ini, dan tak ada kalkulator yang menampilkannya sama sekali.
-- **"Flat" dan "efektif" rutin dikacaukan.** Keduanya tak sebanding, keduanya diiklankan, dan kebanyakan peminjam tak bisa tahu mana yang dikutipkan.
-- **Mereka menampilkan angka, bukan derivasi** — tanpa rincian berapa dari pembayaran yang murni bunga, tanpa membedakan parameter hukum dari pilihan diskresi bank.
-- **Mereka iklan** — hampir setiap kalkulator KPR di hasil pencarian Indonesia ada untuk menghasilkan prospek bagi bank atau portal properti.
+Masalahnya tidak berhenti di situ. Bunga "flat" dan "efektif" sama-sama diiklankan, keduanya tidak bisa dibandingkan langsung, dan kebanyakan peminjam tidak tahu mana yang sedang ditawarkan. Kalkulator hanya menampilkan angka tanpa cara hitungnya. Hampir semua kalkulator KPR di hasil pencarian juga dibuat untuk menjaring calon nasabah bagi bank atau portal properti.
 
-Maka proyek ini membingkai ulang pertanyaannya. Bukan *"apakah saya mampu Rp3,2 juta?"* melainkan *"pinjaman saya jebol di 13,4%, dan margin bank saya di atas suku bunga dasar tak dipublikasikan — berapa?"* — pertanyaan yang bisa dibawa peminjam ke pertemuan bank dan ditanyakan langsung.
+## Yang saya bangun
 
-## Pendekatannya
+### Pertanyaan yang bisa dibawa ke bank
 
-### Mesin murni yang tak tahu hari ini tanggal berapa
+Saya mengubah pertanyaan yang dijawab kalkulator. "Sanggupkah saya membayar Rp3,2 juta?" menjadi "Pinjaman saya jebol di bunga, misalnya, 13,4%. Bank saya tidak memublikasikan marginnya di atas suku bunga dasar, jadi berapa?" Halaman ambang mencari bunga mengambang yang tepat saat cicilan melewati porsi penghasilan yang Anda pilih. Dua kasus tepi punya jawaban tersendiri: sudah melewati batas walau bunganya nol, dan masih terjangkau di atas bunga tertinggi yang dicari.
 
-Intinya adalah `(inputs, product, rulePacks) => Schedule`, tanpa `new Date()` di mana pun — periode waktu selalu argumen `{ year, month }` eksplisit, jadi perhitungan bisa direproduksi selamanya dan bisa dicek terhadap rekening koran enam bulan kemudian. **Uang selalu integer** — rupiah tak pernah menyentuh bilangan floating-point, dan pembulatan adalah langkah bernama eksplisit dalam derivasi yang menyatakan konvensi yang diikutinya. Justru di situlah kalkulator melenceng beberapa rupiah dari rekening koran; bisa menunjuk langkah tempat itu terjadi diperlakukan sebagai fitur.
+### Setiap rupiah bisa ditelusuri
 
-### Pemecah ambang, dan dua rute independen ke sebuah angka
+Uang selalu disimpan sebagai bilangan bulat rupiah. Pembulatan menjadi langkah tersendiri di cara hitung, lengkap dengan konvensi yang dipakai. Di langkah itulah kalkulator biasanya meleset beberapa rupiah dari rekening koran bank, jadi saya membuatnya terlihat. Mesin hitungnya tidak pernah membaca tanggal hari ini; bulan selalu diberikan dari luar. Input yang sama memberi hasil yang sama selamanya, dan itu penting saat seseorang mencocokkannya dengan tagihan bank enam bulan kemudian.
 
-Biseksi atas mesin amortisasi menemukan suku bunga mengambang persis di mana angsuran melampaui porsi pendapatan yang dipilih — menangani kasus tepi yang jujur (*sudah jebol di suku bunga nol*, *masih terjangkau di atas plafon*) sebagai keluaran bernama yang berbeda alih-alih tebakan. Dan angka bunga efektif diperiksa oleh **pemecah IRR independen yang tak berbagi kode** dengan derivasi bunga efektif, jadi masing-masing adalah pemeriksa sejati bagi yang lain alih-alih helper yang memvalidasi bug-nya sendiri.
+### Dua perhitungan terpisah saling memeriksa
 
-### Fakta hidup di data; yang tak diketahui ditolak dengan namanya
+Bunga efektif dihitung dua kali, oleh dua rutin yang tidak berbagi kode. Kalau keduanya memakai fungsi bantu yang sama, bug-nya pun bisa sama. Pemeriksaan ini juga mengoreksi brief saya sendiri. PRD menyebut bunga flat 5% kira-kira setara efektif 9%. Itu berlaku untuk tenor satu sampai lima tahun, tapi untuk dua puluh tahun hasil hitungnya 7,95%. Aplikasi menampilkan angka hasil hitungan, dan brief-nya yang saya perbaiki.
 
-Setiap angka teregulasi — suku subsidi, plafon harga, plafon pendapatan, tarif pajak — hidup di rule pack dengan dasar hukum, URL sumber, dan tanggal berlaku/verifikasinya; build *gagal* pada parameter tak terkutip. Ketika riset tak bisa memverifikasi rasio LTV, uang muka minimum, atau tenor FLPP terhadap peraturan yang masih berlaku, mereka menjadi **tujuh celah yang dideklarasikan yang ditolak aplikasi dengan namanya** dan dijelaskan dalam dua bahasa, alih-alih angka yang masuk akal. *Kalkulator yang menunjukkan tujuh hal yang tak diketahuinya lebih sulit dijual daripada yang menunjukkan angka — trade itu diambil dengan sengaja.* Warna membawa kejujuran: amber menandai pita suku-mengambang dan setiap nilai yang diasumsikan, merah menandai batas keterjangkauan; tak ada lagi yang memakai keduanya, jadi antarmuka memisahkan yang dihitung dari yang diasumsikan tanpa satu paragraf peringatan.
+### Angka yang tidak diketahui ditolak dengan menyebut namanya
 
-### Koreksi yang dibuatnya atas brief-nya sendiri
+Setiap angka yang diatur regulasi, seperti bunga subsidi, batas harga, batas penghasilan, dan tarif pajak, disimpan bersama dasar hukumnya, tautan sumber, dan tanggal verifikasinya. Build gagal kalau ada angka tanpa kutipan. Ketika rasio LTV, uang muka minimum, dan tenor KPR subsidi tidak bisa saya telusuri ke peraturan yang masih berlaku, saya tidak menebak. Ketiganya masuk ke tujuh celah yang dinyatakan, yang disebut dan dijelaskan aplikasi dalam dua bahasa. Warna kuning tua menandai rentang bunga mengambang dan setiap nilai asumsi, dan merah menandai batas keterjangkauan. Tidak ada elemen lain yang memakai kedua warna itu.
 
-PRD menyatakan "flat 5% kira-kira setara 9% efektif." Itu berlaku pada tenor 1–5 tahun tetapi tidak pada tenor KPR — angka terhitung adalah 7,95% pada 20 tahun. Tes menegaskan bentuk terhitung dan aplikasi menyatakan angka terhitung; brief-nya dikoreksi alih-alih kodenya dibengkokkan agar cocok.
+### Angka Anda tidak pernah keluar dari browser
 
-## Hasil
+Penghasilan dan jumlah pinjaman disimpan di bagian tautan setelah tanda pagar, yang tidak pernah dikirim browser ke server. Situs ini tidak membuat request jaringan dan tidak memakai analitik atau iklan. Sebuah pengecekan saat build memastikan situs hasil ekspor tidak memanggil apa pun dari luar.
 
-Live dan publik, tanpa iklan, dwibahasa, dengan **nol permintaan jaringan saat runtime** dan input di-encode ke *hash* URL — bukan query string — sehingga angka pendapatan dan pinjaman secara fisik tak bisa mencapai log server. Ia menyajikan elevasi jadwal (pokok dan bunga bertumpuk sepanjang seluruh tenor, dengan garis dimensi juru gambar di batas periode tetap dan pita ketidakpastian amber yang membuka di luarnya), halaman ambang, flat-versus-efektif berdampingan, jalur bersubsidi (FLPP) dengan pemeriksaan kelayakan per-kriteria, total biaya kepemilikan dengan item teregulasi dikutip dan item diskresi bank dilabeli *tipikal*, simulator pembayaran ekstra, dan penjelajah parameter yang memaparkan setiap angka beserta kutipannya.
+## Hasilnya
 
-Dibangun sendiri selama dua hari — ~9.500 baris sumber, **1.614 asersi tes** (1.186 di sapuan konservasi saja) dalam ~2 detik, 27 parameter terkutip, empat dependensi produksi, dan tanpa pustaka keuangan, mata uang, tanggal, atau charting. Ia tak pernah menasihati, memeringkat, atau menyebut bank; ia menyatakan dengan lugas bahwa suku mengambang tak diketahui dan tak dipublikasikan dan bahwa angka sebaiknya dikonfirmasi ke bank.
+KPR Simulator sudah live, terbuka untuk umum, dan bebas iklan, dengan bahasa Indonesia sebagai bahasa utama dan Inggris sebagai kedua. Aplikasi ini menampilkan jadwal cicilan lengkap dengan pita kuning tua di bagian yang bunganya belum diketahui. Isinya mencakup bunga ambang, perbandingan flat dan efektif, serta jalur KPR subsidi FLPP dengan pengecekan yang menyebut kriteria mana yang tidak terpenuhi. Ada juga total biaya kepemilikan dan simulasi pelunasan sebagian. Halaman parameter memuat ke-27 angka beserta kutipannya. Saya membangunnya sendiri dalam dua hari pada Agustus 2026.
+
+Aplikasi ini tidak pernah memberi saran, membuat peringkat, atau menyebut nama bank. Di antarmukanya tertulis bahwa ini bukan nasihat keuangan, bahwa bunga mengambang tidak diketahui dan tidak dipublikasikan, bahwa biaya bank berbeda-beda, bahwa persetujuan kredit tidak dimodelkan, dan bahwa angkanya perlu dikonfirmasi ke bank.
+
+## Langkah berikutnya
+
+- Mengisi referensi suku bunga dasar yang masih kosong dengan rata-rata per segmen dari OJK. Angka per bank akan melanggar aturan untuk tidak menyebut nama bank.
+- Merekam hasil kalkulator bank yang dipublikasikan sebagai pembanding. Kategorinya sudah ada, tapi rekamannya belum.
+
+## Di balik layar
+
+- Mesin hitungnya `(inputs, product, rulePacks) => Schedule`, tanpa React, DOM, atau `new Date()` di `lib/`. Periode selalu berupa bilangan bulat `{ year, month }`.
+- Amortisasi anuitas dan flat, pelunasan dipercepat dengan penalti, penurunan bunga efektif, dan bisection untuk ambang (`lib/rate/threshold.ts`) semuanya ditulis tangan. `lib/rate/irr.ts` dan `lib/rate/effective.ts` tidak berbagi kode; solver IRR dipakai di tes dan di angka yang ditampilkan.
+- Flat 5% setara efektif 9,11%–9,32% untuk tenor satu sampai lima tahun, dan 7,95% untuk dua puluh tahun.
+- Rule pack ada di `data/rules/` (batas FLPP, tarif BPHTB dan PPh, ditelusuri ke Kepmen PUPR, Permen PKP, dan UU pajak), divalidasi dengan Zod. Ketujuh celah ada di `data/gaps.json`: rasio LTV, tenor FLPP, uang muka minimum, SBUM, NPOPTKP per kabupaten, biaya bank, dan snapshot suku bunga dasar. `data/sbdk/snapshots.json` dikirim kosong karena aturan tidak menyebut nama bank.
+- Bunga FLPP 5% bersandar pada pernyataan kementerian, belum pada pasal yang ditelusuri sampai ayatnya, dan halaman parameter menyebutkannya.
+- Riset membalik isi PRD: Bank Indonesia sudah melonggarkan LTV sampai 100% dan, untuk rumah pertama, menyerahkan batas maksimumnya ke kebijakan bank.
+- Asersi konservasi dan tipe trace di-commit sebelum loop amortisasi, dan validator aturan sebelum data aturan apa pun.
+- 1.614 asersi di 14 berkas tes berjalan sekitar dua detik; 1.186 di antaranya sweep konservasi atas berbagai tenor, bunga, dan pokok pinjaman.
+- Empat dependensi produksi: Next.js 14.2.15 (`output: 'export'`), React 18.3.1, React DOM, dan Zod 3.23.8. Tanpa library keuangan, mata uang, tanggal, atau grafik; elevasi jadwal berupa SVG buatan tangan dan `Intl.NumberFormat` menangani tampilan. `check:offline` memastikan tidak ada request eksternal.
+- Enam rute (`hitung`, `ambang`, `subsidi`, `banding`, `biaya`, `parameter`) di dua bahasa, plus beranda. JS yang dikirim sekitar 964 KB mentah, di atas target 200 KB gzip.
+- `actions/deploy-pages` macet di `deployment_in_progress` selama sekitar sepuluh jam tanpa perubahan apa pun dari sisi saya, lalu berhasil deploy dalam empat belas detik pada 7 Agustus 2026. Diagnosisnya dicatat di `CLAUDE.md`.
+- Satu putaran UX di akhir memadatkan formulir sebelas kontrol menjadi tiga langkah bernama.
+- Sekitar 9.500 baris kode dan 37 commit pada 6–7 Agustus 2026.

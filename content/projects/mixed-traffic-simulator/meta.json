@@ -1,7 +1,17 @@
 {
   "slug": "mixed-traffic-simulator",
   "title": "Mixed Traffic Simulator",
-  "tagline": "A browser simulator of Indonesian motorcycle-dominated traffic that runs the controlled experiment no field study can — proving the standard \"one motorcycle equals 0.25 cars\" planning constant is an artefact of how it was measured, not a fact about traffic",
+  "tagline": "A traffic simulator showing that Indonesia's rule of one motorcycle as 0.25 cars depends on how it's measured",
+  "glance": {
+    "for": "Indonesian transport engineers, planners and traffic engineering students",
+    "result": "Live and free; five estimation methods disagree against one known answer"
+  },
+  "skills": [
+    "Traffic simulation",
+    "Transport planning",
+    "Scientific computing",
+    "Data visualisation"
+  ],
   "categoryTags": [
     "Personal Project",
     "Smart City",
@@ -20,15 +30,58 @@
   "role": "Solo Developer",
   "timeframe": "Sep 2026",
   "liveUrl": "https://andifathulms.github.io/mixed-traffic-simulator/?s=phantom-jam&x=4&tab=inspector",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/mixed-traffic-simulator",
   "heroImage": "/images/projects/mixed-traffic-simulator/hero.webp",
   "order": 42,
   "featured": false,
   "metrics": [
-    { "value": "−0.11", "label": "Reproduced published equivalence factor — physically meaningless, reported anyway" },
-    { "value": "5", "label": "Estimation methods compared against one controlled ground truth" },
-    { "value": "129", "label": "Tests across 11 suites, engine kept pure and headless" },
-    { "value": "0", "label": "External libraries — physics, charts, and rendering all hand-written" }
+    {
+      "value": "5",
+      "label": "estimation methods tested against one ground truth"
+    },
+    {
+      "value": "−0.11",
+      "label": "published motorcycle factor reproduced, and shown"
+    },
+    {
+      "value": "−8.6 km/h",
+      "label": "measured speed of a phantom traffic jam"
+    },
+    {
+      "value": "3",
+      "label": "lateral movement models, always named on screen"
+    }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Simulator lalu lintas yang menunjukkan aturan satu motor setara 0,25 mobil bergantung pada cara mengukurnya",
+    "glance": {
+      "for": "Insinyur transportasi, perencana, dan mahasiswa teknik lalu lintas Indonesia",
+      "result": "Live dan gratis; lima metode estimasi berselisih terhadap satu jawaban pasti"
+    },
+    "skills": [
+      "Simulasi lalu lintas",
+      "Perencanaan transportasi",
+      "Komputasi ilmiah",
+      "Visualisasi data"
+    ],
+    "metrics": [
+      {
+        "value": "5",
+        "label": "metode estimasi diuji terhadap satu kebenaran"
+      },
+      {
+        "value": "−0,11",
+        "label": "faktor sepeda motor terpublikasi, direproduksi dan ditampilkan"
+      },
+      {
+        "value": "−8,6 km/jam",
+        "label": "kecepatan terukur kemacetan hantu"
+      },
+      {
+        "value": "3",
+        "label": "model gerak menyamping, selalu disebut di layar"
+      }
+    ]
+  }
 }

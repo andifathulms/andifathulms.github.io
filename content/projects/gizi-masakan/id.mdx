@@ -2,30 +2,53 @@
 
 ## Masalahnya
 
-Aplikasi gizi yang dipakai di Indonesia berjalan di atas basis data makanan asing. Cari *nasi padang*, *gado-gado*, atau *soto betawi* dan Anda tak dapat apa-apa, atau sebuah aproksimasi AS untuk hidangan yang nyaris tak punya kesamaan dengan yang ada di piring. Aplikasi yang *memang* memuat hidangan Indonesia punya kegagalan sebaliknya: satu angka percaya diri, tanpa perhitungan ditampilkan. *"550 kkal untuk gado-gado."* Gado-gado siapa? Berapa banyak bumbu kacang? Angkanya tak bisa diperiksa, jadi tak bisa dikoreksi.
+Orang Indonesia yang ingin tahu kandungan gizi makanannya kebanyakan memakai aplikasi yang berbasis database makanan luar negeri. Cari nasi padang, gado-gado, atau soto betawi, hasilnya kosong, atau muncul hidangan Amerika yang hampir tidak mirip dengan yang ada di piring. Aplikasi yang memuat masakan Indonesia memberi satu angka yakin tanpa cara hitungnya. "Gado-gado 550 kkal." Gado-gado siapa, dengan bumbu kacang sebanyak apa? Angka itu tidak bisa dicek, jadi tidak bisa dikoreksi.
 
-Dan hampir semuanya dibingkai sebagai **tracker** — anggaran harian, kalori tersisa, streak. Bingkai itu cocok untuk penurunan berat badan dan sedikit hal lain. Beban gizi Indonesia sebenarnya adalah stunting dan defisiensi mikronutrien jauh lebih daripada kelebihan konsumsi, jadi pertanyaan yang berguna adalah *apakah saya cukup zat besi dan protein*, bukan *apakah saya di bawah batas* — dan bingkai anggaran-kalori aktif merugikan orang dengan gangguan makan.
+Sebagian besar aplikasi ini juga berbentuk pencatat kalori. Itu cocok untuk menurunkan berat badan. Masalah gizi terbesar Indonesia adalah stunting dan kekurangan zat gizi mikro, jadi pertanyaan yang lebih berguna adalah "apakah zat besi dan protein saya cukup". Anggaran kalori juga bisa merugikan orang dengan gangguan makan.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Resep itulah produknya, bukan catatan kaki
+### Resepnya ada di bawah setiap angka
 
-Setiap halaman hidangan menampilkan daftar bahan dan berat gram tepat di bawah angka-angkanya. Beratnya bisa disunting langsung dan metode masak bisa ditukar (goreng → rebus), dan segalanya — total, batang kontribusi, isian kecukupan — dihitung ulang saat Anda mengetik. Ini bukan fitur canggih; inilah cara alat itu mengatakan kebenaran, karena selisih antara gado-gado dua warung lebih besar daripada presisi apa pun yang bisa diklaim aplikasi.
+Setiap halaman masakan menampilkan daftar bahan dan beratnya dalam gram tepat di bawah angka gizinya. Berat bahan bisa diubah, cara masak bisa diganti, misalnya dari goreng ke rebus, dan total, batang kontribusi, serta isian kecukupan ikut berubah saat Anda mengetik. Gado-gado di dua warung berbeda resepnya, dan selisihnya lebih besar dari presisi yang bisa diklaim aplikasi mana pun. Dengan resep yang terlihat, Anda bisa menyesuaikan angkanya dengan dapur sendiri.
 
-### Jangan pernah diam-diam menjatuhkan nilai yang hilang
+### Data yang hilang selalu disebut
 
-Mode kegagalan paling berbahaya di kalkulator gizi adalah diam-diam menghilangkan bahan yang tak punya data: totalnya tetap tampak masuk akal tetapi meremehkan hidangan. Maka bahan, nilai, dan faktor yang hilang masing-masing menghasilkan **celah bernama** di keluaran — totalnya tetap tampil, dilabeli tak lengkap — dan tes menegaskannya dua arah (resep tak lengkap harus menyebut celahnya; resep lengkap harus tak menyebut satu pun). Retensi punya tepat dua keadaan: disesuaikan-faktor dengan faktornya dikutip, atau eksplisit ditandai tak disesuaikan. Tak ada "asumsi retensi penuh" implisit — itu asumsi senyap berbaju angka.
+Kesalahan paling berbahaya dari kalkulator gizi adalah diam-diam melewatkan bahan yang datanya tidak ada. Totalnya masih tampak wajar, padahal terlalu rendah. Saya membuat setiap bahan, nilai gizi, atau faktor masak yang hilang muncul sebagai celah yang disebut namanya, dan totalnya diberi label belum lengkap. Tes memeriksa dua arah: resep yang belum lengkap wajib menyebut celahnya, resep yang lengkap tidak boleh menyebut celah apa pun. Penyesuaian susut saat dimasak hanya punya dua keadaan: diterapkan dengan sumbernya, atau ditandai tidak diterapkan.
 
-### Gerbang lisensi yang menggagalkan build
+### Sumber data yang lebih baik dikirim dalam keadaan mati
 
-Sumber bahan yang jelas lebih baik adalah TKPI (tabel komposisi pangan Indonesia Kemenkes) — tetapi ia buku berhak cipta dengan pemberitahuan hak-dilindungi, di luar pengecualian UU 28/2014 untuk peraturan. Maka adaptor TKPI ada di kode dan **dikirim nonaktif di balik gerbang lisensi**, dengan pengecualian dan alasan hukumnya dicatat di manifes; build gagal jika lisensi sebuah sumber tak ada. Kedua adaptor memancarkan `IngredientTable` yang sama dan tak ada yang bercabang atas provenance, jadi jika izin datang, akurasi membaik tanpa menyentuh apa pun.
+Sumber terbaik untuk bahan Indonesia adalah TKPI, Tabel Komposisi Pangan Indonesia dari Kemenkes. Masalahnya, TKPI adalah buku berhak cipta dengan semua hak dilindungi, dan pengecualian di UU Hak Cipta hanya berlaku untuk peraturan. Jadi saya membangun adapter TKPI dan merilisnya dalam keadaan nonaktif, dengan alasan hukumnya dicatat di manifes data. Build akan gagal kalau ada sumber yang lisensinya tidak tercatat. Kalau suatu hari izin didapat, akurasinya naik tanpa perlu mengubah bagian lain.
 
-### Jujur tentang celahnya sendiri — diterapkan pada dirinya
+### Situsnya terbuka soal tebakannya sendiri
 
-Tesis proyek ini diarahkan ke datanya sendiri. Seluruh 40 resep beratnya kini *perkiraan*, tiap baris ditandai `perkiraan` dan ditampilkan terakota agar pembaca melihatnya — dan dokumen mencatat, melawan saran PRD-nya sendiri, bahwa mencapai empat puluh hidangan tebakan adalah trade yang salah dan penimbangan adalah kerja paling berharga yang tersisa. Tabel takaran rumah tangga (URT) dikirim **sengaja kosong** alih-alih diisi dari tebakan, karena sebuah invarian melarang entri tak-terukur. Memilih tabel kosong ketimbang yang masuk akal adalah seluruh tesis diterapkan pada dirinya.
+Berat bahan di ke-40 resep masih perkiraan, belum hasil timbangan dapur. Setiap baris perkiraan diberi tanda "perkiraan" dan diwarnai terakota. Catatan saya sendiri mengakui bahwa mengejar empat puluh masakan hasil tebakan adalah pilihan yang keliru, dan menimbang resep adalah pekerjaan paling berharga yang tersisa. Tabel ukuran rumah tangga (centong, mangkuk) dirilis kosong, karena aturan proyek melarang isian yang belum pernah ditimbang.
 
-## Hasil
+### Kecukupan gizi, tanpa anggaran
 
-Live dan publik, dwibahasa (Indonesia default), sepenuhnya statis dengan **nol permintaan jaringan saat runtime** — pipeline saat build mengunduh CSV massal USDA FoodData Central, menyaring ke daftar terkurasi 70 bahan, memproyeksikan ke 29 nutrien, dan mengirim tabel 28,9 KB; CSV mentah tak pernah di-commit. Ia menampilkan piring dengan strip resep dan batang kontribusi yang me-ranking-ulang di bawahnya, penyuntingan resep langsung termasuk metode masak, panel celah bernama, jejak komputasi per-nutrien (bahan mana menyumbang apa, di berat gram berapa, dari entri FDC mana, dengan faktor retensi mana, dan aritmetikanya dinyatakan), dan kecukupan AKG per kelompok usia/jenis kelamin dari Permenkes 28/2019 — ditampilkan sebagai *seberapa banyak dari kebutuhan yang disumbang ini*, tak pernah batang terkonsumsi-dari-anggaran. Tanpa tracker di mana pun: ditegakkan oleh tes yang menjatuhkan timestamp liar dari penyimpanan resep tersimpan.
+Kecukupan gizi memakai Angka Kecukupan Gizi (AKG) dari Permenkes 28/2019, per kelompok umur dan jenis kelamin. Halaman menampilkan seberapa besar satu masakan menyumbang kebutuhan harian, lengkap dengan angka kebutuhannya. Tidak ada total harian, jumlah berjalan, atau catatan makan. Sebuah tes membuang timestamp yang nyasar ke penyimpanan resep, supaya fitur pencatatan tidak menyusup masuk.
 
-Dibangun sendiri dalam satu hari ~8 jam — ~7.700 baris TypeScript, 282 tes, empat dependensi runtime. Ia menyatakan dengan lugas bahwa nilai bahan adalah aproksimasi basis-data AS untuk bahan Indonesia, bahwa angka hidangan adalah perkiraan dari resep yang dinyatakan, dan bahwa ini bukan nasihat medis.
+## Hasilnya
+
+Gizi Masakan sudah live dan terbuka untuk umum, dengan bahasa Indonesia sebagai bahasa utama dan Inggris sebagai kedua. Isinya 40 masakan Indonesia dan 70 bahan, masing-masing dengan 29 zat gizi dari USDA FoodData Central. Situsnya statis penuh dan tidak membuat request jaringan sama sekali setelah dimuat. Ketuk total mana pun untuk melihat sumbangan tiap bahan, entri database asalnya, faktor masak yang dipakai, dan hitungannya yang ditulis lengkap. Saya membangunnya sendiri dalam satu hari, sekitar delapan jam, pada Agustus 2026.
+
+Situs ini menyatakan dengan jelas bahwa nilai bahan adalah pendekatan dari database Amerika untuk bahan Indonesia, bahwa angka masakan adalah perkiraan dari resep yang dicantumkan, dan bahwa isinya bukan nasihat medis.
+
+## Langkah berikutnya
+
+- Menimbang ke-40 resep dengan timbangan dapur dan mengisi tabel ukuran rumah tangga dengan porsi hasil timbangan.
+- Menuntaskan 13 bahan yang tidak tersedia di FoodData Central. Dua di antaranya, gula merah dan kecap manis, membuat angka seluruh masakan meleset, dan setiap resep yang terdampak menyebutkannya.
+
+## Di balik layar
+
+- Engine-nya fungsi murni, `(recipe, portion, ingredientTable, factors) → NutritionTrace`: tanpa DOM, React, jam, angka acak, atau jaringan. Komponen hanya menampilkan hasil trace.
+- 282 tes lulus di 9 suite: konservasi, celah, retensi, determinisme, AKG, cara masak, state URL, resep tersimpan, dan pencarian.
+- Pipeline saat build mengunduh CSV massal FDC SR Legacy, menyaringnya ke 70 bahan pilihan, memproyeksikannya ke 29 zat gizi berdasarkan nomor nutrien FDC, lalu menulis `table.json` berukuran 28,9 KB dari anggaran 200 KB. CSV mentah tidak pernah di-commit.
+- Faktor susut dan retensi diambil dari tabel FAO/INFOODS dan USDA, dengan sumber per operasi masak. Trace menuliskan hitungannya: `berat ÷ 100 × nilai per 100 g × faktor retensi`.
+- TKPI dikecualikan berdasarkan UU 28/2014 Pasal 42. Kedua adapter menghasilkan `IngredientTable` yang sama, dan tidak ada kode hilir yang bercabang berdasarkan asal data.
+- Ke-13 bahan yang tidak cocok dicatat di `unmatched.json` dan muncul sebagai celah di setiap trace. Tanpa `gula-merah`, wedang jahe hanya 16 kkal per gelas; tanpa `kecap-manis`, empat masakan kehilangan gulanya.
+- Zat gizi terpilih, toggle per porsi, kelompok AKG, berat yang diubah, cara masak, dan pencarian semuanya disimpan di query parameter. Input dari URL atau localStorage divalidasi dengan Zod dan tidak pernah dipaksa menjadi angka.
+- Kunci resep tersimpan persis `{id, dishId, nama, beratOverrideG}`.
+- Setiap warna teks lolos WCAG AA 4,5:1 di kedua latar; empat warna yang dipilih dengan mata gagal dan digelapkan. Font ketiga untuk angka tabular dibuang dan diganti `font-variant-numeric`.
+- Empat dependensi runtime: Next.js 14.2.15 (`output: 'export'`), React 18.3.1, React DOM, dan Zod 3.23.8. Deploy ke GitHub Pages lewat dua workflow GitHub Actions, `deploy.yml` (dijaga `data:validate`) dan `refresh-fdc.yml` yang terjadwal.
+- Sekitar 87 halaman prerender di dua bahasa. Sekitar 7.700 baris TypeScript dan 60 commit antara pukul 09.21 dan 17.35 pada 7 Agustus 2026.

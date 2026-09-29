@@ -1,7 +1,17 @@
 {
   "slug": "isolation-anomaly",
   "title": "Isolation Anomaly",
-  "tagline": "Hand-build two overlapping database transactions, watch exactly where they corrupt each other's data, then re-run the identical scenario against PostgreSQL, MySQL, SQL Server and Oracle to see the same code produce four different outcomes",
+  "tagline": "An interactive score of two clashing database transactions, checked against 220 recordings from four real databases",
+  "glance": {
+    "for": "Backend developers, database students and interview candidates",
+    "result": "Live and free; five engines modelled, each rule cited to vendor docs"
+  },
+  "skills": [
+    "Database concurrency",
+    "Simulation",
+    "Test oracles",
+    "Interactive explainers"
+  ],
   "categoryTags": [
     "Personal Project",
     "Developer Tool",
@@ -20,6 +30,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/isolation-anomaly/en/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/isolation-anomaly",
   "heroImage": "/images/projects/isolation-anomaly/hero.webp",
   "order": 29,
@@ -27,20 +38,50 @@
   "metrics": [
     {
       "value": "5",
-      "label": "DB engines modelled from cited docs"
+      "label": "database engines modelled from cited docs"
     },
     {
       "value": "220",
-      "label": "Fixtures recorded from real databases"
-    },
-    {
-      "value": "1,551",
-      "label": "Tests — simulator vs the real engines"
+      "label": "runs recorded on real databases"
     },
     {
       "value": "11",
-      "label": "Scenarios, incl. the write-skew anomaly"
+      "label": "scenarios, including write skew"
+    },
+    {
+      "value": "328",
+      "label": "vendor documentation citations behind the rules"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Partitur interaktif dua transaksi database yang saling bentrok, dicek terhadap 220 rekaman dari empat database asli",
+    "glance": {
+      "for": "Developer backend, mahasiswa basis data, dan peserta wawancara kerja",
+      "result": "Live dan gratis; lima mesin dimodelkan, setiap aturan mengutip dokumentasi vendor"
+    },
+    "skills": [
+      "Konkurensi database",
+      "Simulasi",
+      "Test oracle",
+      "Penjelas interaktif"
+    ],
+    "metrics": [
+      {
+        "value": "5",
+        "label": "mesin database dimodelkan dari dokumentasi"
+      },
+      {
+        "value": "220",
+        "label": "eksekusi direkam di database asli"
+      },
+      {
+        "value": "11",
+        "label": "skenario, termasuk write skew"
+      },
+      {
+        "value": "328",
+        "label": "kutipan dokumentasi vendor di balik aturan"
+      }
+    ]
+  }
 }

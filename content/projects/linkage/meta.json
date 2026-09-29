@@ -1,7 +1,17 @@
 {
   "slug": "linkage",
   "title": "Linkage",
-  "tagline": "Proves, with numbers instead of a citation, that stripping names from a dataset does not make it anonymous — by generating synthetic populations, running six real re-identification attacks against them, and scoring every attack against the ground truth it already knows",
+  "tagline": "An interactive lab that re-identifies people in synthetic data, showing that removing names doesn't make a dataset anonymous",
+  "glance": {
+    "for": "Data stewards, open-data teams and privacy policy people",
+    "result": "Live and free; six attacks, each scored against known ground truth"
+  },
+  "skills": [
+    "Data privacy",
+    "Differential privacy",
+    "Data visualisation",
+    "Performance engineering"
+  ],
   "categoryTags": [
     "Personal Project",
     "Data Privacy",
@@ -20,15 +30,58 @@
   "role": "Solo Developer",
   "timeframe": "Sep 2026",
   "liveUrl": "https://andifathulms.github.io/linkage/?seed=20260101&size=5000&provinsiCount=8&meanAge=38&ageSpread=16&correlation=0.35&targetK=5&epsilon=1&rollCoverage=0.7&rollError=0.1&releaseFraction=0.05&sensitiveSkew=0.5&v=0%2C0%2C0%2C0&v2=1%2C0%2C0%2C0",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/linkage",
   "heroImage": "/images/projects/linkage/hero.webp",
   "order": 46,
   "featured": false,
   "metrics": [
-    { "value": "6", "label": "Re-identification attacks, every one scored against retained ground truth" },
-    { "value": "200,000", "label": "Synthetic records rendered as one canvas field at 60fps" },
-    { "value": "328", "label": "Tests across 20 files, including k/l/t checked against brute force" },
-    { "value": "0", "label": "Ways to load a real dataset — no file input, no paste, grepped out of the build" }
+    {
+      "value": "6",
+      "label": "re-identification attacks, each scored against ground truth"
+    },
+    {
+      "value": "5",
+      "label": "cases pairing each defence with its attack"
+    },
+    {
+      "value": "200,000",
+      "label": "synthetic records drawn at 60 fps"
+    },
+    {
+      "value": "0",
+      "label": "ways to load a real dataset"
+    }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Laboratorium interaktif yang mengenali ulang orang di data sintetis, bukti bahwa menghapus nama tidak membuat data anonim",
+    "glance": {
+      "for": "Pengelola data, tim data terbuka, dan pegiat kebijakan privasi",
+      "result": "Live dan gratis; enam serangan, masing-masing diskor terhadap kebenaran yang diketahui"
+    },
+    "skills": [
+      "Privasi data",
+      "Differential privacy",
+      "Visualisasi data",
+      "Rekayasa performa"
+    ],
+    "metrics": [
+      {
+        "value": "6",
+        "label": "serangan re-identifikasi, diskor terhadap kebenaran"
+      },
+      {
+        "value": "5",
+        "label": "kasus memasangkan pertahanan dengan serangannya"
+      },
+      {
+        "value": "200.000",
+        "label": "record sintetis digambar pada 60 fps"
+      },
+      {
+        "value": "0",
+        "label": "cara memuat dataset asli"
+      }
+    ]
+  }
 }

@@ -2,36 +2,56 @@
 
 ## Masalahnya
 
-Lontara, aksara bahasa Bugis, bersifat **defektif**: blok Buginese di Unicode punya 23 konsonan dan lima tanda vokal tetapi *tanpa virama* — tidak ada cara menulis konsonan tunggal. Maka aksara ini tidak pernah mencatat konsonan akhir suku kata, konsonan ganda, prenasalisasi, atau hentian glotal. `mata`, `matta`, dan `manta` ditulis identik; pembaca manusia memulihkan kata yang dimaksud dari kosakata dan konteks.
+Lontara adalah aksara bahasa Bugis dari Sulawesi Selatan. Aksara ini punya 23 konsonan dan lima tanda vokal, tapi tidak punya cara untuk menulis konsonan mati. Akibatnya, konsonan di akhir suku kata, konsonan rangkap, bunyi sengau sebelum konsonan, dan hamzah tidak pernah tertulis. Kata mata, matta, dan manta ditulis persis sama. Pembaca manusia menentukan kata yang dimaksud dari kosakata dan konteks.
 
-Konverter yang ada menyembunyikan hal ini. Mereka menerima Lontara dan mengeluarkan satu string Latin yang percaya diri — sebuah tebakan yang disajikan sebagai jawaban. Konsekuensinya spesifik dan nyata: pembuat papan nama menaruh nama yang salah eja pada papan permanen; pelajar diajari aturan yang tidak ada; seseorang yang membaca manuskrip keluarga mendapat satu bacaan padahal enam bacaan valid, tanpa tanda bahwa sebuah pilihan bahkan dibuat.
+Konverter yang ada menyembunyikan hal ini. Mereka menerima Lontara dan mengeluarkan satu ejaan Latin yang yakin, padahal itu tebakan yang disajikan sebagai jawaban. Pembuat papan nama bisa memasang nama yang salah eja di papan permanen. Pelajar bisa diajari aturan yang tidak ada. Orang yang membaca naskah keluarga hanya mendapat satu bacaan padahal ada enam yang sah, tanpa tanda bahwa sebuah pilihan sudah dibuat.
 
-Jadi produknya bukan konversi. Produknya adalah **enumerasi** — menyebutkan apa yang tidak ditentukan oleh aksara, dan mengutip sebuah aturan untuk setiap langkah yang memang diambilnya.
+## Yang saya bangun
 
-## Pendekatannya
+### Alat ini mendaftar semua bacaan yang dimungkinkan aksara
 
-### Aturan ortografi adalah data, bukan kode
+Tempelkan Lontara ke pembaca, dan hasilnya berupa pohon bacaan Latin yang mungkin. Setiap titik cabang diberi label jenis ambiguitas penyebabnya: konsonan akhir, konsonan rangkap, bunyi sengau, atau hamzah. Setiap pilihan yang dibuat alat ini wajib membawa alasan, jadi tidak ada bacaan yang dipilih diam-diam. Penulis bekerja ke arah sebaliknya. Ia menata huruf Latin menjadi aksara di atas pita daun lontar dan menandai informasi yang hilang tepat di garis penghubung tempat informasi itu jatuh.
 
-Kesebelas aturan berada di sebuah berkas JSON, masing-masing dengan id, status (`cited` / `provisional` / `derived`), dan kutipan sumber. Mesinnya adalah interpreter kecil atas berkas itu. Alasannya bukan keanggunan — melainkan agar peninjau yang melek Bugis tetapi tidak memprogram bisa mengaudit ortografinya. Satu perintah mencetak seluruh set aturan beserta kutipannya; sebuah halaman menampilkan data yang sama di browser.
+### Aturan ejaan bisa dibaca oleh peninjau
 
-### Ambiguitas adalah tipe, bukan peringatan
+Kesebelas aturan ejaan disimpan di berkas data, masing-masing bertanda dikutip, sementara, atau diturunkan, lengkap dengan kutipannya. Kodenya hanya menafsirkan berkas itu. Penutur Bugis yang tidak bisa memprogram harus tetap bisa mengaudit ejaannya, dan satu halaman di aplikasi menampilkan setiap aturan beserta sumbernya.
 
-Ambiguitas yang diselesaikan membawa `{ class, candidates, chosen, reason, spans }` di mana `reason` *wajib* — sehingga sebuah pilihan yang dibuat tanpa justifikasi benar-benar tidak dapat dikonstruksi. Keempat kelasnya (konsonan akhir, geminasi, prenasalisasi, hentian glotal) adalah himpunan tertutup; menambah satu adalah perubahan skema yang disengaja, bukan suntingan diam-diam.
+### Bacaan diambil dari daftar kata, tidak pernah dari aturan tebakan
 
-### Pembaca membalik penulis atas sebuah leksikon
+Cara yang paling jelas adalah mencoba setiap konsonan yang mungkin menutup tiap suku kata. Itu butuh daftar konsonan akhir dalam bahasa Bugis, dan saya tidak menemukan sumber yang bisa dikutip. Menebaknya akan menghasilkan bacaan yang tampak meyakinkan padahal bukan bahasa Bugis. Jadi sebuah bacaan hanya dihitung kalau ia kata yang dikenal dan, saat ditulis ulang, menghasilkan Lontara yang persis sama. Akibatnya, kelengkapan hasil bergantung pada daftar kata, dan setiap hasil menyebutkannya.
 
-Pembaca yang jelas akan bercabang di tiap suku kata atas setiap konsonan yang bisa menutupnya — tetapi itu butuh inventaris konsonan akhir Bugis yang tidak bisa dikutip proyek ini, dan menebaknya akan menghasilkan pohon bacaan yang tampak percaya diri padahal bukan bahasa Bugis. Alih-alih, enumerasi *membalik penulis atas leksikon*: sebuah bacaan valid adalah entri leksikon yang, dijalankan maju lewat penulis, mereproduksi persis string Lontara ini. Tidak diperlukan aturan tak-terkutip tentang konsonan akhir, dan setiap bacaan membawa jejak yang membuktikannya. Biayanya — kelengkapan bersifat relatif terhadap leksikon, bukan absolut — dinyatakan pada setiap hasil alih-alih disembunyikan.
+### Tulisan Bugis asli menemukan tingkat kesalahan 56%
 
-### Set aturan itu 56% salah, dan pengukuran menangkapnya
+Wikipedia bahasa Bugis memuat pasangan Lontara dan Latin yang ditulis oleh para penggunanya. Saya mengambil 97 pasangan dan mengukur aturan saya terhadapnya. Kecocokannya hanya 56%. Pengujian itu menemukan tiga kesalahan. Dua huruf vokal ternyata kebalikan dari yang tersirat di nama Unicode-nya, é sama sekali belum ada, dan hamzah dalam praktiknya ditulis q. Setelah diperbaiki, kecocokannya naik ke 94%. Dua kejanggalan lain, masing-masing dengan dua kasus, mungkin kesalahan di artikelnya, jadi saya menyimpannya untuk peninjau.
 
-Wikipedia Bugis memuat pasangan Lontara–Latin karya komunitas. Mengekstrak 97 di antaranya dan menilai aturan terhadapnya menunjukkan **kesesuaian 56%** — dan memunculkan tiga cacat nyata (satu pemetaan vokal Unicode ternyata *terbalik* dari yang tersirat oleh nama karakternya; `é` sama sekali tidak ada sebagai vokal; hentian glotal ditulis `q` dalam praktik). Memperbaikinya menaikkan kesesuaian ke **94%**, dan sebuah tes kini memaku angka itu dan mewajibkan setiap ketidaksesuaian tersisa disebutkan dan dijelaskan. Dua temuan mencurigakan dicatat dan *sengaja tidak ditindaklanjuti* — alasan untuk bertanya kepada peninjau, bukan untuk menebak.
+### Daftar kata hanya mengklaim yang bisa dibuktikan
 
-### Jujur tentang apa yang belum selesai
+Daftar katanya berisi 1.323 entri, dan setiap entri mencatat asalnya. Ternyata 85% isi dump sumbernya adalah artikel rintisan buatan bot, jadi daftar ini tidak mengklaim seberapa sering sebuah kata dipakai, dan build gagal kalau ada entri yang mengklaimnya. Sebagian entri adalah nama tempat berbahasa Indonesia, Inggris, atau Vietnam yang tidak bisa dibedakan dari kata Bugis, jadi pembaca memberi lencana pada bacaan itu dan menaruhnya di peringkat bawah.
 
-Leksikon berisi 1.323 entri, semuanya berbasis korpus dan ditandai demikian — dan build *gagal* jika ada entri yang mengklaim frekuensi yang tidak dapat didukungnya, karena 85% dump sumber ternyata stub buatan bot. Disiplin Unicode adalah aturan keras di seluruh proyek: normalisasi NFC dan segmentasi kluster grafem, tidak pernah mengindeks string per unit kode untuk logika glif — cacat paling umum dalam perkakas aksara.
+## Hasilnya
 
-## Hasil
+Lontara sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris, dan tetap berjalan offline setelah kunjungan pertama. Ada papan ketik Lontara di layar, karena kebanyakan ponsel tidak punya. Menurut aturannya sendiri, aplikasi ini sudah di-deploy tapi belum diluncurkan. Belum ada peninjau Bugis yang menyetujuinya, kodenya menegakkan syarat itu, dan setiap halaman menyebutkannya. Halaman ejaan memuat tujuh pertanyaan terbuka yang saya catat alih-alih ditebak. Aplikasi ini menyatakan dengan jelas bahwa ia proyek pribadi, bukan otoritas, dan bisa keliru. Ia mengalihaksarakan, tidak menerjemahkan. Saya membangunnya sendiri dalam enam hari, dari akhir Juli sampai awal Agustus 2026.
 
-Live dan publik di GitHub Pages: pembaca yang mengembalikan *pohon* bacaan Latin yang masuk akal dengan tiap cabang dilabeli ambiguitas penyebabnya, penulis yang menata Latin Bugis ke atas pita daun lontar dan menandai informasi yang hilang *pada penghubung yang menjatuhkannya*, papan ketik Lontara di layar (kebanyakan ponsel tidak punya), referensi aksara lengkap dengan halaman konformansi rendering, dan halaman pengungkapan ortografi yang mendaftar ketujuh pertanyaan terbuka langsung dari data aturan. Dwibahasa, offline setelah muat pertama, empat dependensi runtime, dan tanpa pustaka transliterasi — interpreter aturan itu *adalah* proyeknya.
+## Langkah berikutnya
 
-Dibangun sendiri dalam enam hari: 35 commit, ~9.300 baris sumber, 281 tes lolos. Dan menurut aturannya sendiri ia **ter-deploy tetapi belum diluncurkan** — pembaca baru rilis setelah seorang peninjau Bugis menyetujui, sebuah gerbang yang belum terpenuhi yang ditegakkan oleh kode dan diungkapkan setiap halaman. Untuk perkakas yang kegagalan utamanya adalah kesalahan yang percaya diri, menyatakan apa yang belum diketahuinya adalah intinya, bukan sekadar catatan kaki.
+- Mencari peninjau yang menguasai aksara Bugis untuk menyetujui aturan, tujuh pertanyaan terbuka, dan dua temuan korpus yang belum diputuskan.
+- Mengecek halaman uji tampilan dengan mata di ponsel asli. Belum satu pun dari 60 barisnya yang dicek.
+- Membangun daftar kata yang lebih kuat. Kamus-kamus yang disebut PRD masih berupa PDF yang belum diekstrak dan hak ciptanya belum jelas.
+
+## Di balik layar
+
+- Karakter diambil dari blok Unicode Buginese (U+1A00–U+1A1F), yang tidak punya virama. Huruf Latin e memakai U+1A1B dan é memakai U+1A19, kebalikan dari yang tersirat di nama karakternya.
+- Aturan ada di `data/rules/rules.json`: rule set v0.2.0, 11 aturan dalam 4 tahap (5 `cited`, 2 `provisional`, 4 `derived`). `pnpm rules:report` mencetaknya; `/ejaan` menampilkannya.
+- Engine-nya murni: `(input, direction, options, ruleSet, lexicon) => TransliterationTrace`, ditegakkan oleh override ESLint dan `tests/invariants.test.ts`. `interpret.ts` menulis; `enumerate.ts` membaca dengan membalik penulis terhadap leksikon.
+- Ambiguitas berbentuk `{ class, candidates, chosen, reason, spans }` dengan `reason` wajib. Kelasnya himpunan tertutup `final`, `gemination`, `prenasal`, `glottal`.
+- Setiap langkah trace membawa span input dan output serta menyebut array cluster mana yang diindeksnya. Mencampur keduanya pernah membuat garis penghubung menunjuk glif yang salah.
+- Normalisasi NFC dan `Intl.Segmenter` untuk grapheme cluster; tidak pernah `str[i]` atau `.split('')` untuk logika glif.
+- Korpus diambil dari template `{{multiscript|…}}` di dump Wikipedia bahasa Bugis (CC BY-SA 4.0). `tests/corpus.test.ts` mengunci angka 94% dan mewajibkan setiap ketidakcocokan yang tersisa dijelaskan. Temuan yang belum ditindaklanjuti adalah `ngp` → MPA dan `nc` → NYCA.
+- Semua 1.323 entri leksikon bertanda `attestation: "corpus"` dan `band: "unknown"`. Sebelum konten bot dibuang, sembilan kata "umum" masing-masing muncul di 617–620 artikel karena mereka keterangan warna di satu keterangan peta yang berulang.
+- `data/rules/reviewers.json` kosong dan `pnpm gate:check` keluar dengan kode 1; CI menjalankannya dengan `continue-on-error` supaya penulis dan halaman konformansi tetap ter-build.
+- CI menegakkan anggaran JS 200 KB gzip dan mencocokkan daftar precache service worker dengan berkas di disk, lalu mengambil setiap URL-nya. Service worker tidak memakai `skipWaiting` dan `clients.claim` agar build tidak tercampur di tengah sesi.
+- Teks yang dibagikan disimpan setelah `#` di URL, jadi tidak pernah sampai ke log server.
+- Empat dependensi runtime: Next.js 14.2.15, React 18.3.1, React DOM, dan Zod 3.23.8. Tanpa library transliterasi. Font (Noto Sans Buginese, Gentium Plus, Space Mono) di-subset menjadi 76 KB woff2.
+- 281 tes di 6 berkas; 6 rute di dua bahasa, termasuk rujukan aksara lengkap di `/aksara`; 12 string sulit di halaman konformansi.
+- Spesifikasi awal juga mencakup aksara Jawa dan Bali. Saya memangkasnya ke Bugis karena Noto Sans Buginese hanya punya 41 glif dan 2 fitur OpenType. Nulisa ditautkan untuk aksara lain. Urupu, nama asli aksara ini, menjadi nama cadangan.
+- Sekitar 9.300 baris kode dan 35 commit dari 30 Juli sampai 4 Agustus 2026, dalam tiga hari aktif.

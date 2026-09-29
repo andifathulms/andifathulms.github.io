@@ -2,30 +2,46 @@
 
 ## The problem
 
-Matching pennies has a provably optimal strategy: flip a fair coin. Do that and you tie at 50% against any opponent, forever. The counter-strategy is published, simple, and known to the player — and they still can't execute it. The gap between "the correct move is known" and "you cannot actually make it" is the entire product.
+Matching pennies is a game with a known best strategy: flip a fair coin. Do that and you tie at 50% against any opponent, forever. The strategy is simple, published and known to every player, and people still can't carry it out. That gap between knowing the right move and being able to make it is what this game is about.
 
-This is a portfolio and explanatory artifact rather than a commercial one, built around that gap. It's also a historical reconstruction: two real relay-based prediction machines from Bell Labs — Hagelbarger's SEER (1956) and Shannon's simpler MRM (1953) — have published designs but neither had been built as an interactive object anyone could actually play against. The build brief explicitly ruled out the easy version of this idea, a single n-gram predictor of the kind that already exists in several public implementations, as "not a portfolio piece" — the historical reconstructions, the historical machine-vs-machine rematch, a five-model ensemble, and a personal predictability portrait all had to exist in the first version.
+It is also a piece of computing history. In the 1950s, Bell Labs built two relay machines that predicted a player's next move: Shannon's MRM in 1953 and Hagelbarger's SEER in 1956. Their designs were published, but nobody had rebuilt them as something you could play. Single-model versions of this game already exist online, so I set a higher bar for the first version: both historical machines, their rematch, five models at once, and a portrait of how you play.
 
-## The approach
+## What I built
 
-### The prediction is locked before the input is read, and the type system enforces it
+### The guess is locked before you press
 
-This is the app's entire credibility. A sealing function produces a frozen prediction object; resolving that seal against the player's actual move takes the seal as an argument rather than reading it from internal state, so there's no code path that could compute a prediction after seeing the press. The interface mirrors this structurally — the input handler for the player's move isn't even attached until a seal exists. Then it goes one step further: a separate verification routine re-seals the player's entire session from a fresh machine fed only the historical presses, and the app displays that audit on screen, so the integrity claim is checked in front of the player rather than merely asserted.
+The whole game depends on trust. If the machine could see your press before guessing, its score would mean nothing. I built it so each prediction is sealed first, and the code that scores a round receives that sealed guess from outside. There is no path that lets it guess after reading your input. The press buttons don't even respond until a seal exists. At the end, the app replays your session through a fresh machine and shows a round-by-round audit on screen.
 
-### The machine sees press history and nothing else — enforced by the function signature itself
+### The machine only sees which way you pressed
 
-Every predictor's input type is a plain list of past moves; there's nowhere to pass timing, tap position, or coordinates even if someone wanted to. The build brief treats reaction time as a genuinely strong signal whose silent use would betray the whole premise, so the constraint lives in the type rather than in a comment asking nicely.
+Your reaction time and where you tap would be strong clues. Using them quietly would betray the premise. Each predictor receives only the list of your past presses, with no place to pass timing or position. The limit is part of how the code is shaped, so it can't slip in later.
 
-### The honesty mechanism is a confidence floor
+### When unsure, the machine flips a coin
 
-When the ensemble of five predictors isn't confident, the machine draws its move from a seeded random generator instead of playing its actual guess — a technique taken directly from the real 1950s machines. This is what caps the app at 50% against a genuinely random opponent, turning what would otherwise be a deterministic and therefore reverse-engineerable machine into an honest mixed strategy. A fairness gate plays 100,000 rounds against a seeded coin in CI and asserts convergence to 50% before any deploy — and the build rule is explicit: if that test fails, don't tune it until it passes, because a machine that beats a fair coin has a bug that is almost certainly leaking the future into its prediction, and the same bug would be silently inflating its score against real people too.
+If the five models aren't confident, the machine plays a random move, as the original 1950s machines did. That keeps it at 50% against a player who really is random, and stops anyone from reverse-engineering it. Before every deploy, a test plays 100,000 rounds against a simulated coin and requires the result to settle at 50%. If it ever fails, I don't tune it. A machine that beats a coin is seeing the future somehow, and the same bug would inflate its score against people.
 
-### A historical-fidelity gate, not just a fairness gate
+### The historical machines have to replay history
 
-A second test runs the Shannon and Hagelbarger reconstructions against each other for thousands of rounds and asserts the historically simpler machine finishes ahead — reproducing the documented 1950s result. Both machines were built from the original 1953 memorandum and 1956 paper directly, not from a modern summary of them, and every implementation detail those primary sources leave genuinely unresolved is written down rather than guessed at confidently.
+I rebuilt both machines from the original 1953 memorandum and 1956 paper, not from modern summaries. Where the sources leave a detail open, I wrote down my assumption, and those notes ship inside the app. A second test pits the two machines against each other for thousands of rounds and requires Shannon's simpler machine to win, as it did in the 1950s. If it doesn't, one of my reconstructions is wrong.
 
-## Outcome
+### Five models of you, competing in public
 
-Live: five predictors run simultaneously against every player, each individually visible with live-updating weights — switch your strategy mid-session and you can watch a different model visibly take over the ensemble's vote in real time. A predictability portrait measures six things about how you specifically fail to be random: win rate with proper confidence intervals, switch rate against the fair 50%, your run-length distribution against what a truly fair coin would produce, conditional entropy, serial correlation, and which specific press patterns you overproduce. The two historical machines play a staged rematch against each other, reproducing the documented result that Shannon's simpler design beat Hagelbarger's more complex one.
+Five predictors play against you at once, and you can watch their weights change as the game goes on. Switch your strategy halfway and a different model takes over the vote. After a session, a portrait measures six things about how you fail to be random, including how often you switch sides, how long your streaks run, and which patterns you repeat too often.
 
-Sole author, 64 commits over 8 days, roughly 12,000 lines of code. Two runtime dependencies — React and its DOM renderer — with every predictor, every one of six measurement charts, and both historical reconstructions written from scratch. Input-to-reveal latency stays under 80 milliseconds by sealing the next round's prediction immediately after the current one reveals, so the machine is never visibly computing while a player waits. The machine reports what it measures and never taunts — not one line of copy gloats or comments on a player's performance, because a machine that says "gotcha" is a toy, and a machine that silently reports 68% is unsettling in the right way.
+## Result
+
+Mind Reader is live and public. It runs the five predictors, the historical rematch, the portrait and a strategy lab where you can try tactics such as reciting digits of pi. Only an actual coin works. The machine answers within 80 milliseconds, so you never see it thinking. It reports its score and never gloats. I built it alone over eight days in September 2026.
+
+## Under the hood
+
+- `Referee.seal()` returns a frozen `SealedPrediction`; `resolve(seal, actual)` takes it as an argument. `src/engine/verify.ts` re-seals the session from a fresh machine fed only earlier presses.
+- Predictors implement `predict(history: readonly Move[])`. Only the mixer sees all five; predictors can't read each other.
+- The five: SEER (Hagelbarger 1956), MRM (Shannon 1953), fixed-order n-gram, variable-order backoff, and a level-k cognitive-hierarchy model for players who second-guess themselves.
+- The confidence floor is a user control. `tests/fairness.test.ts` runs 100,000 rounds against a seeded PRNG in about 8 s and blocks deploy; `tests/historical.test.ts` runs MRM against SEER through the umpire.
+- Unresolved source details (tie behaviour, counter bounds, update-rule edges) are in `src/engine/predictors/NOTES.md`, printed in full in the Archive view.
+- Portrait statistics: Wilson score intervals on win rate, switch rate versus 50%, run lengths against the geometric expectation, conditional entropy at orders 1–5, serial correlation at lags 1–10, chi-square on n-gram frequencies.
+- `derive.ts`, `counterfactual.ts` and `verify.ts` came from an explainability pass on 5–7 September that the original spec didn't include. About 20 commits in the same window cover contrast, focus, tab order, table equivalents for every chart and reduced motion.
+- To stay under 80 ms, the next round's prediction is sealed right after each reveal. The arena and the analysis panels are separate render trees; charts update on a throttle.
+- The engine is pure and replayable from a seed, with an injected clock. Seed and config go in the URL; press history does not. Sessions export as JSON and CSV.
+- Two runtime dependencies, React 18.3 and React DOM. Vite 6, TypeScript 5.7, plain CSS, hand-written SVG for all six chart families, two in-repo Vite plugins for per-route metadata. The bundle is 93,672 bytes gzipped against a 150 KB CI budget.
+- 72 tests in 11 files. About 12,000 lines across 77 files and 64 commits from 4 to 11 September 2026.

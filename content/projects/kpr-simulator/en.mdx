@@ -2,35 +2,55 @@
 
 ## The problem
 
-A KPR — a mortgage — is the largest financial commitment most Indonesian households will ever make, and every calculator gets the central risk wrong in four ways:
+A KPR, an Indonesian home mortgage, is the largest financial commitment most households will ever make. Banks quote a fixed rate for two or three years, and then the loan floats. A family that budgets around Rp3.2 juta a month can face Rp4.8 juta in year four. Every calculator I found assumed one rate for the whole twenty years, so it hid the biggest risk in the loan.
 
-- **They assume one interest rate for the whole 20 years.** Indonesian banks quote a fixed rate for 2–3 years and then the loan floats. A family budgeting around Rp3.2 juta a month discovers Rp4.8 juta in year four — the single largest financial uncertainty in the product, and no calculator represents it at all.
-- **"Flat" and "efektif" interest are routinely conflated.** They aren't comparable, both are advertised, and most borrowers can't tell which they're being quoted.
-- **They show a number, not a derivation** — no breakdown of how much of a payment is pure interest, no distinction between a legal parameter and a bank's discretionary choice.
-- **They are advertising** — nearly every KPR calculator in Indonesian search results exists to generate leads for a bank or property portal.
+The calculators had other gaps too. "Flat" and "efektif" interest are both advertised, they can't be compared directly, and most borrowers can't tell which one they are being quoted. The calculators show a number with no working. And nearly every one in Indonesian search results exists to collect leads for a bank or a property portal.
 
-So the project reframes the question. Not *"can I afford Rp3.2 juta?"* but *"my loan breaks at 13.4%, and my bank's margin over the base rate is unpublished — what is it?"* — a question a borrower can carry into a bank meeting and ask directly.
+## What I built
 
-## The approach
+### The page answers the question a borrower can take to the bank
 
-### A pure engine that has no idea what day it is
+I changed what the calculator asks. "Can I afford Rp3.2 juta?" becomes "My loan breaks at, say, 13.4%. My bank doesn't publish its margin over the base rate, so what is it?" The threshold page finds the exact floating rate at which the instalment passes a share of income you choose. Two edge cases get their own plain answers: already over the limit at a zero rate, and still affordable above the highest rate searched.
 
-The core is `(inputs, product, rulePacks) => Schedule`, with no `new Date()` anywhere — the time period is always an explicit `{ year, month }` argument, so a calculation is reproducible forever and can be checked against a bank statement six months later. **Money is an integer, always** — rupiah never touches a floating-point number, and rounding is an explicit named step in the derivation that states which convention it follows. That's exactly where calculators drift a few rupiah from bank statements; being able to point at the step where it happened is treated as a feature.
+### Every rupiah can be traced
 
-### The threshold solver, and two independent routes to a number
+Money is always a whole number of rupiah. Rounding is its own labelled step in the working, and it names the convention it follows. That step is where calculators drift a few rupiah from bank statements, so I made it visible. The engine never reads today's date; the month is always passed in. The same inputs give the same result forever, which matters when someone checks it against a bank statement six months later.
 
-Bisection over the amortisation engine finds the exact floating rate at which the instalment crosses a chosen share of income — handling the honest edge cases (*already breached at zero rate*, *still affordable above the ceiling*) as distinct named outcomes rather than a fudge. And the effective-rate figure is checked by an **independent IRR solver that shares no code** with the effective-rate derivation, so each is a genuine check on the other rather than a helper validating its own bugs.
+### Two separate calculations check each other
 
-### Facts live in data; unknowns are refused by name
+The effective rate is worked out twice, by two routines that share no code. If they shared a helper, they could share a bug. This check also corrected my own brief. The PRD said a flat 5% is roughly a 9% effective rate. That holds over one to five years, but over twenty years the computed figure is 7.95%. The app states the computed number, and I fixed the brief.
 
-Every regulated figure — subsidy rate, price ceiling, income ceiling, tax rate — lives in a rule pack with its legal basis, source URL, and effective/verification dates; the build *fails* on an uncited parameter. When research couldn't verify LTV ratios, minimum down payment, or FLPP tenor against a regulation still in force, they became **seven declared gaps the app refuses by name** and explains in both languages, rather than plausible numbers. *A calculator that shows you seven things it doesn't know is a harder sell than one that shows a number — that tradeoff was taken on purpose.* Colour carries the honesty: amber marks the floating-rate band and every assumed value, red marks the affordability limit; nothing else uses either, so the interface separates computed from assumed without a paragraph of caveats.
+### Unknown figures are refused by name
 
-### Corrections it made to its own brief
+Every regulated figure, such as the subsidy rate, price ceilings, income ceilings and tax rates, is stored with its legal basis, source link and verification date. The build fails if one has no citation. When I couldn't trace loan-to-value ratios, the minimum down payment or the subsidised loan tenor to a regulation still in force, I didn't guess. They became seven declared gaps the app names and explains in both languages. Amber marks the floating-rate band and every assumed value, and red marks the affordability limit. Nothing else uses those colours.
 
-The PRD asserted "a flat 5% is roughly a 9% effective rate." That holds over 1–5 year tenors but not over a mortgage term — the computed figure is 7.95% at 20 years. The tests assert the computed shape and the app states the computed number; the brief was corrected rather than the code bent to match it.
+### Your figures never leave the browser
 
-## Outcome
+Income and loan amounts are stored in the part of the link after the hash sign, which browsers never send to a server. The site makes no network requests and has no analytics or ads. A build check confirms the exported site calls nothing external.
 
-Live and public, ad-free, bilingual, with **zero runtime network requests** and inputs encoded into the URL *hash* — never the query string — so income and loan figures physically cannot reach a server log. It ships the schedule elevation (stacked principal and interest across the whole term, with a draughtsman's dimension line at the fixed-period boundary and an amber uncertainty band fanning out beyond it), the threshold page, flat-versus-efektif side by side, the subsidised (FLPP) path with a per-criterion eligibility check, total cost of ownership with regulated items cited and bank-discretionary items labelled *typical*, an extra-payment simulator, and a parameter browser exposing every figure with its citation.
+## Result
 
-Built solo over two days — ~9,500 lines of source, **1,614 test assertions** (1,186 in the conservation sweep alone) in ~2 seconds, 27 cited parameters, four production dependencies, and no finance, currency, date, or charting library. It never advises, ranks, or names a bank; it states plainly that the floating rate is unknown and unpublished and that figures should be confirmed with the bank.
+KPR Simulator is live, public and free of ads, in Indonesian first and English second. It shows the full payment schedule with an amber band where the rate becomes unknown. It covers the threshold rate, flat and efektif side by side, and the subsidised FLPP path with a check that names which criterion fails. It adds total cost of ownership and an extra-payment simulator. A parameter page lists all 27 cited figures. I built it alone over two days in August 2026.
+
+The app never advises, ranks or names a bank. It states in the interface that it is not financial advice, that the floating rate is unknown and unpublished, that bank fees vary, that loan approval is not modelled, and that figures should be confirmed with the bank.
+
+## What I'd do next
+
+- Fill the empty base-rate reference with an OJK segment-level average. Per-bank rates would break the rule against naming a bank.
+- Record published bank-calculator outputs as a cross-check. The comparison set has its categories but no recordings yet.
+
+## Under the hood
+
+- The engine is `(inputs, product, rulePacks) => Schedule`, with no React, DOM or `new Date()` in `lib/`. Periods are explicit `{ year, month }` integers.
+- Hand-written annuity and flat amortisation, prepayment with an early-settlement penalty, effective-rate derivation, and bisection for the threshold (`lib/rate/threshold.ts`). `lib/rate/irr.ts` and `lib/rate/effective.ts` share no code; the IRR solver feeds both the tests and the displayed figure.
+- Flat 5% converts to 9.11%–9.32% effective over one to five years, and 7.95% at twenty years.
+- Rule packs live in `data/rules/` (FLPP ceilings, BPHTB and PPh rates, traced to Kepmen PUPR, Permen PKP and tax law), validated with Zod. The seven gaps are in `data/gaps.json`: LTV ratios, FLPP tenor, minimum down payment, SBUM, per-kabupaten NPOPTKP, bank fees and base-rate snapshots. `data/sbdk/snapshots.json` ships empty on purpose.
+- The FLPP 5% rate rests on a ministry statement, not an article traced to its clause, and the parameter page says so.
+- Research overturned the PRD: Bank Indonesia had relaxed LTV to 100% and, for a first home, left the maximum to bank discretion.
+- The conservation assertion and trace types were committed before the amortisation loop, and the rule validator before any rule data.
+- 1,614 assertions across 14 test files run in about two seconds; 1,186 are the conservation sweep over tenors, rates and principals.
+- Four production dependencies: Next.js 14.2.15 (`output: 'export'`), React 18.3.1, React DOM and Zod 3.23.8. No finance, currency, date or charting library; the schedule elevation is hand-built SVG and `Intl.NumberFormat` handles display. `check:offline` asserts zero external requests.
+- Six routes (`hitung`, `ambang`, `subsidi`, `banding`, `biaya`, `parameter`) in two locales, plus home. Shipped JS is about 964 KB raw, above the 200 KB gzipped target.
+- `actions/deploy-pages` hung at `deployment_in_progress` for about ten hours with no change on my side, then deployed in fourteen seconds on 7 August 2026. The diagnosis is written into `CLAUDE.md`.
+- A late UX pass collapsed an eleven-control form into three named steps.
+- About 9,500 source lines and 37 commits on 6–7 August 2026.

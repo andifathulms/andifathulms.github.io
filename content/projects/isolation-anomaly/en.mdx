@@ -2,28 +2,46 @@
 
 ## The problem
 
-Every application developer configures a database *isolation level* — the setting that decides how much two simultaneous operations are allowed to interfere. Almost everyone accepts the default, and almost nobody can say what it protects them from. Three concrete gaps:
+Every application developer picks a database isolation level, the setting that decides how much two simultaneous operations may interfere. Almost everyone keeps the default, and almost nobody can say what it protects them from. The failure modes are taught as a list of names, dirty read, non-repeatable read, phantom, that people recite in interviews and rarely understand.
 
-- **The failure modes are taught as a list of names** — dirty read, non-repeatable read, phantom — recited in interviews and understood by few.
-- **The most dangerous failure is missing from that list.** *Write skew*: two transactions each read the same data, each check a rule ("someone else is still on call, so I can go off call"), each write a *different* row, and both commit. Nothing collides — no shared row, no lock contention — and the rule is broken by the combination. This silently empties on-call rosters, double-books rooms, and corrupts inventory. Snapshot isolation does not prevent it, and snapshot isolation is what most defaults amount to.
-- **The level names mean different things in different engines, and no one says so.** PostgreSQL's `REPEATABLE READ` is snapshot isolation; its `READ UNCOMMITTED` silently behaves as `READ COMMITTED`; Oracle's `SERIALIZABLE` is snapshot isolation, so it permits write skew *despite the name.* A developer who learns "REPEATABLE READ" from a textbook has learned something untrue of the database in front of them.
+The most dangerous failure isn't on that list. In write skew, two transactions read the same data, each checks a rule ("someone else is still on call, so I can go off call"), and each writes a different row. Nothing collides, both go through, and the rule is broken. This is how on-call rosters empty and rooms get double-booked. Snapshot isolation doesn't prevent it, and it is what most defaults amount to. Worse, the level names mean different things in different databases. Oracle's "SERIALIZABLE" still allows write skew.
 
-## The approach
+## What I built
 
-### Real databases are the oracle, and they came first
+### Real databases came first
 
-The instinct with a project like this is to write the simulator from what you know about how databases work — which is exactly the failure mode, because a developer will make a production decision from what it shows. So *before the executor existed*, a harness started real PostgreSQL, MySQL, SQL Server, and Oracle in containers, executed every schedule against them, and recorded what actually happened — every value read, every error code, where execution blocked and until when, whether each transaction committed. Those 220 recordings are committed as fixtures; the simulator is built to match them, and when the two disagree, **the simulator is wrong.** Waits in particular are read from each engine's own instrumentation (`pg_stat_activity`, `performance_schema.data_lock_waits`, `v$session.blocking_session`) rather than inferred from a slow statement.
+A developer might make a production decision from what this tool shows, so I couldn't build the simulator from what I believed about databases. Before the simulator existed, I wrote a harness that starts real PostgreSQL, MySQL, SQL Server and Oracle in containers and runs every schedule against them. It records every value read, every error code, where each transaction waited and whether it finished. Those 220 recordings are the answer key. When the simulator and a recording disagree, the simulator is wrong.
 
-### Engine differences are data, not code
+### One engine, five rule files
 
-There is one executor, one MVCC core, one lock manager. An engine is a JSON file of rules — what each level name actually maps to, when a lock is taken, what conflicts with what, what aborts and with which error code. There is **no `if (engine === 'postgres')` anywhere.** Two reasons: the cross-engine comparison is only meaningful if the machinery is shared (otherwise you're comparing implementations, not semantics), and a pack is reviewable by a Postgres expert who's never read the codebase. Every rule cites the vendor documentation and the build enforces it; the anomaly detector shares no code with the executor and evaluates each anomaly from its published definition, asserted in *both* directions (must appear at levels that permit it, must not at levels that prevent it).
+There is one simulator. Each database is a file of rules: what each level name really means, when locks are taken, what conflicts and which error code comes back. The comparison between databases is only fair if the machinery is shared, and a database expert can review a rule file without reading my code. Every rule cites the vendor's documentation, and the deploy fails if a citation is missing.
 
-### Refuse rather than approximate
+### A separate checker names the anomaly
 
-The clearest example: SQL Server picks its deadlock victim by cost estimate, so the same schedule loses T1 at one level and T2 at another. Rather than guess, its pack declares victim selection `unmodelled` and the executor refuses the whole run — with a test asserting each refusal is justified by a real deadlock in the recording. And a recording caught a rule the author had wrong (commit *"a deadlock schedule, and the rule it caught me getting wrong"*) — the harness doing its job, which is the entire reason it was built first.
+The code that spots an anomaly shares nothing with the simulator. It reads the finished run and checks each anomaly against its published definition. A checker built on the simulator's assumptions would approve the simulator's bugs. Every scenario is tested both ways: the anomaly must appear at levels that allow it, and must not appear at levels that prevent it.
 
-## Outcome
+### The tool refuses when it can't know
 
-Live and public, bilingual, fully static (the database drivers and Docker are development-only). Its signature view is **the score** — transactions as parallel staves on manuscript paper, operations as marks, bar lines at each step, so reading straight down a bar line shows what happened simultaneously; marks drag to re-interleave and re-run. Plus stepping with live MVCC version chains, held locks (range and gap included), and snapshot visibility; **the conductor's mark** — one red annotation on the exact step the anomaly became inevitable, cause not symptom, with a mechanism generated from the trace; **the cross-engine matrix** — one schedule against all five packs at every level (committed / aborted with error code / anomaly / refused), where a developer sees their default permits the thing they assumed impossible; a conflict graph cross-checked against brute-force serializability; and eleven framed scenarios (an on-call roster for write skew, a bank transfer for read skew).
+SQL Server picks which transaction to kill in a deadlock by a cost estimate, so the same schedule can lose a different transaction at different levels. I didn't guess. That rule is marked as not modelled, and the tool refuses the run and says why. A test checks that each refusal matches an actual deadlock in the recordings. The harness also caught one deadlock rule I had written wrong, which is why I built it first.
 
-Built solo over two days — ~9,255 lines of application code, **1,551 tests** (1,215 of them simulator-vs-real-database comparisons), 220 recorded fixtures across five engine packs (PostgreSQL 16, MySQL 8.4 InnoDB, SQL Server 2022, SQL Server 2022 with RCSI, Oracle 23ai), 328 vendor citations, four runtime dependencies and no database, SQL-parser, or graph-layout library. Oracle earned its place: an engine whose level is literally named `SERIALIZABLE` yet permits write skew is the whole argument, made undeniable.
+### The schedule reads like sheet music
+
+Transactions sit on parallel staves, like a musical score, with a bar line at each step. Reading down a bar line shows what happened at the same moment. You can drag operations to reorder them and the run updates. One red mark lands on the exact step where the anomaly became unavoidable, with a one-line explanation generated from the run. A matrix runs the same schedule on all five rule files at every level.
+
+## Result
+
+Isolation Anomaly is live and public, in English and Indonesian, as a fully static site. It models five engines: PostgreSQL 16, MySQL 8.4, SQL Server 2022, SQL Server 2022 with snapshot reads switched on, and Oracle 23ai. Eleven scenarios frame the stakes, such as an on-call roster for write skew and a bank transfer for read skew. You can also build your own schedule and share it by link. I built it alone over two days in August 2026.
+
+## Under the hood
+
+- The oracle harness runs from `docker-compose.oracle.yml` with the `pg`, `mysql2`, `mssql` and `oracledb` drivers. None of it reaches CI or the browser bundle. Re-recording produces byte-identical fixtures.
+- Waits come from each engine's own instrumentation: `pg_stat_activity`, `performance_schema.data_lock_waits`, `sys.dm_exec_requests` and `v$session.blocking_session`.
+- Recorded versions: PostgreSQL 16.14, MySQL 8.4.11 (InnoDB), SQL Server 16.0.4265.3, Oracle 23.26.2.0.0. SQL Server runs under x86 emulation on Apple Silicon.
+- Packs: `postgres-16`, `mysql-8-innodb`, `sqlserver-2022`, `sqlserver-2022-rcsi`, `oracle-23ai`, validated with Zod and carrying 328 vendor citations. There is no `if (engine === 'postgres')` anywhere. RCSI is its own pack, recorded against a separate database so the option can't leak.
+- Declared boundaries: SQL Server victim selection is `unmodelled` (five recorded runs refused); PostgreSQL rejects statements after rollback with `25P02` while SQL Server autocommits them, which is how a swallowed `3960` still writes; Oracle's serialization failure kills the statement, not the transaction; lock wait timeouts are not modelled.
+- One MVCC core with version chains and snapshot visibility, and one lock manager with range and gap locks. The trace is byte-identical for identical inputs: no clock, no randomness, no module-level state.
+- The conflict graph's cycle detection is cross-checked against brute-force enumeration of every serial order, including three-transaction schedules.
+- 1,551 tests in 11 files, about 3.6 s. 1,215 compare the simulator with real-database recordings; 229 are both-direction anomaly assertions.
+- Four runtime dependencies: Next.js 14.2.15 (`output: 'export'`), React 18.3.1, React DOM and Zod 3.23.8. No database, SQL-parser, graph-layout or state library. Six pages per locale; schedules share via URL hash.
+- The PRD called it Sekat, Indonesian for a partition. The five-pack scope went past the PRD's cap of three.
+- 38 commits on 6–7 August 2026, 9,255 lines of application code and 1,701 lines of tests.

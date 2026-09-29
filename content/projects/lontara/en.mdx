@@ -2,36 +2,56 @@
 
 ## The problem
 
-Lontara, the script of the Bugis language, is **defective**: the Unicode Buginese block has 23 consonants and five vowel signs but *no virama* — no way to write a bare consonant. So the script never records syllable-final consonants, doubled consonants, prenasalisation, or the glottal stop. `mata`, `matta`, and `manta` are all written identically; a human reader recovers the intended word from vocabulary and context.
+Lontara is the script of the Bugis language of South Sulawesi. It has 23 consonants and five vowel signs, but no way to write a consonant on its own. So it never records consonants at the end of a syllable, doubled consonants, a nasal before a consonant, or the glottal stop. The words mata, matta and manta are all written the same way. A reader picks the word from context.
 
-Existing converters hide this. They take Lontara in and emit one confident Latin string — a guess presented as an answer. The consequences are specific and real: a signmaker puts a misspelled name on a permanent sign; a learner is taught a rule that doesn't exist; someone reading family manuscripts gets one reading where six are valid, with no sign that a choice was even made.
+Existing converters hide this. They return one confident Latin spelling, which is a guess presented as an answer. A signmaker can put a misspelled name on a permanent sign. A learner can be taught a rule that doesn't exist. Someone reading family manuscripts gets one reading where six are valid, with no sign that a choice was made.
 
-So the product isn't the conversion. It's the **enumeration** — naming what the script leaves undetermined, and citing a rule for every step it does take.
+## What I built
 
-## The approach
+### The tool lists every reading the script allows
 
-### Orthographic rules are data, not code
+Paste Lontara into the reader and it returns a tree of possible Latin readings. Each branch point is labelled with the kind of ambiguity that caused it: a final consonant, a doubled consonant, a nasal or a glottal stop. Each choice the tool makes must carry a reason, so it can't pick a reading silently. The writer goes the other way. It lays Latin onto a palm-leaf band and marks lost information on the stroke where it was dropped.
 
-All 11 rules live in a JSON file, each with an id, a status (`cited` / `provisional` / `derived`), and a citation. The engine is a small interpreter over that file. The reason isn't elegance — it's that a Bugis-literate reviewer who doesn't program has to be able to audit the orthography. One command prints the whole rule set with its citations; a page renders the same data in the browser.
+### The spelling rules live where a reviewer can read them
 
-### Ambiguity is a type, not a warning
+The eleven spelling rules sit in a data file, each marked as cited, provisional or derived, with its citation. The code only interprets that file. A Bugis reader who doesn't program has to be able to audit the orthography, and one page in the app shows every rule with its source.
 
-A resolved ambiguity carries `{ class, candidates, chosen, reason, spans }` where `reason` is *required* — so a choice made without a justification is literally unconstructable. The four classes (final consonant, gemination, prenasalisation, glottal stop) are a closed set; adding one is a deliberate schema change, not a quiet edit.
+### Readings come from a word list, never from a guessed rule
 
-### The reader inverts the writer over a lexicon
+The obvious reader would try every consonant that could close each syllable. That needs a list of Bugis final consonants, and I couldn't find one to cite. Guessing it would produce confident readings that aren't Bugis. So a reading counts only if it is a known word that the writer turns back into exactly the same Lontara. The cost is that results are only as complete as the word list, and every result says so.
 
-The obvious reader branches at every syllable over every consonant that could close it — but that needs an inventory of Bugis final consonants the project can't cite, and guessing it would produce a confident-looking tree of readings that simply aren't Bugis. Instead, enumeration *inverts the writer over the lexicon*: a valid reading is a lexicon entry which, run forward through the writer, reproduces exactly this Lontara string. No uncited rule about finals is needed, and every reading carries the trace that proves it. The cost — completeness is relative to the lexicon, not absolute — is stated on every result rather than hidden.
+### Real Bugis writing caught a 56% error rate
 
-### The rule set was 56% wrong, and measurement caught it
+Bugis Wikipedia has pairs of Lontara and Latin written by people who use the script. I extracted 97 of them and scored my rules against them. They agreed 56% of the time. The test found three mistakes. Two vowel letters were the reverse of what their Unicode names suggested, é was missing entirely, and people write the glottal stop as q. Fixing them raised agreement to 94%. Two other oddities, with two cases each, may be errors in the articles, so I left them for a reviewer.
 
-Bugis Wikipedia carries community-authored Lontara–Latin pairs. Extracting 97 of them and scoring the rules against them showed **56% agreement** — and surfaced three real defects (one Unicode vowel mapping was literally *reversed* from what the character names implied; `é` was missing as a vowel entirely; the glottal stop is written `q` in practice). Fixing them took agreement to **94%**, and a test now pins that rate and requires every remaining disagreement to be named and explained. Two suspicious findings are recorded and *deliberately not acted on* — a reason to ask a reviewer, not to guess.
+### The word list claims only what it can support
 
-### Honest about what isn't done
+The word list has 1,323 entries, and each one records where it came from. 85% of the source dump turned out to be bot-generated stubs, so the list makes no claim about how common a word is, and the build fails if an entry does. Some entries are Indonesian, English or Vietnamese place names the tool can't tell apart from Bugis, so the reader badges those readings and ranks them low.
 
-The lexicon is 1,323 entries, all corpus-attested and marked as such — and the build *fails* if any of them claims a frequency it can't support, because 85% of the source dump turned out to be bot-generated stubs. Unicode discipline is a hard rule throughout: NFC normalisation and grapheme-cluster segmentation, never indexing a string by code unit for glyph logic — the single most common defect in aksara tooling.
+## Result
 
-## Outcome
+Lontara is live and public, in Indonesian and English, and works offline after the first visit. It includes an on-screen Lontara keyboard, because most phones have none. By its own rules it is deployed but not launched. No Bugis reviewer has signed off yet, the code enforces that gate, and every page says so. The spelling page lists seven open questions I recorded instead of guessing. It says plainly that it is a personal project, not an authority, and can be wrong. It transliterates and never translates. I built it alone in six days, from late July to early August 2026.
 
-Live and public on GitHub Pages: a reader that returns a *tree* of plausible Latin readings with each branch labelled by the ambiguity that caused it, a writer that lays Bugis Latin onto a palm-leaf band and marks dropped information *on the connector that dropped it*, an on-screen Lontara keyboard (most phones have none), a full script reference with a rendering-conformance page, and an orthography-disclosure page listing all seven open questions straight from the rule data. Bilingual, offline after first load, four runtime dependencies, and no transliteration library — the rule interpreter *is* the project.
+## What I'd do next
 
-Built solo in six days: 35 commits, ~9,300 lines of source, 281 passing tests. And by its own rules it is **deployed but not launched** — the reader ships only once a Bugis reviewer signs off, an unmet gate the code enforces and every page discloses. For a tool whose defining failure is confident wrongness, declaring what it doesn't yet know is the point, not a caveat.
+- Find a Bugis-literate reviewer to sign off on the rules, the seven open questions and the two unresolved corpus findings.
+- Check the rendering test page by eye on real phones. None of its 60 rows has been checked yet.
+- Build a stronger word list. The dictionaries the PRD names are unextracted PDFs with unresolved copyright.
+
+## Under the hood
+
+- Characters come from the Unicode Buginese block (U+1A00–U+1A1F), which has no virama. Latin e is U+1A1B and é is U+1A19, the reverse of what the character names imply.
+- Rules live in `data/rules/rules.json`: rule set v0.2.0, 11 rules across 4 stages (5 `cited`, 2 `provisional`, 4 `derived`). `pnpm rules:report` prints them; `/ejaan` renders them.
+- The engine is pure: `(input, direction, options, ruleSet, lexicon) => TransliterationTrace`, enforced by an ESLint override and `tests/invariants.test.ts`. `interpret.ts` writes; `enumerate.ts` reads by inverting the writer over the lexicon.
+- An ambiguity is `{ class, candidates, chosen, reason, spans }` with `reason` required. Classes are the closed set `final`, `gemination`, `prenasal`, `glottal`.
+- Trace steps carry input and output spans and name which cluster array they index. Mixing the two once pointed connector strokes at the wrong glyph.
+- NFC normalisation and `Intl.Segmenter` for grapheme clusters; never `str[i]` or `.split('')` for glyph logic.
+- The corpus comes from `{{multiscript|…}}` templates in the Bugis Wikipedia dump (CC BY-SA 4.0). `tests/corpus.test.ts` pins the 94% rate and requires every remaining disagreement to be explained. The unacted findings are `ngp` → MPA and `nc` → NYCA.
+- All 1,323 lexicon entries are `attestation: "corpus"` and `band: "unknown"`. Before de-botting, nine "common" words appeared in 617–620 articles each because they were the colour key of one repeated map caption.
+- `data/rules/reviewers.json` is empty and `pnpm gate:check` exits 1; CI runs it with `continue-on-error` so the writer and conformance page still build.
+- CI enforces a 200 KB gzipped JS budget and checks the build-time service worker's precache list against the files on disk, then fetches every URL. The worker omits `skipWaiting` and `clients.claim` to avoid mixing builds mid-session.
+- Shared text lives after the `#` in the URL, so it never reaches a server log.
+- Four runtime dependencies: Next.js 14.2.15, React 18.3.1, React DOM and Zod 3.23.8. No transliteration library. Fonts (Noto Sans Buginese, Gentium Plus, Space Mono) are subset to 76 KB of woff2.
+- 281 tests in 6 files; 6 routes in two locales, including the full script reference at `/aksara`; 12 hard rendering strings on the conformance page.
+- The first spec covered Javanese and Balinese too. I cut it to Bugis because Noto Sans Buginese has 41 glyphs and 2 OpenType features. Nulisa is linked for the other scripts. Urupu, the endonym, is the fallback name.
+- About 9,300 source lines and 35 commits from 30 July to 4 August 2026, across three active days.

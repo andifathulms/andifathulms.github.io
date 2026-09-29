@@ -2,30 +2,46 @@
 
 ## Masalahnya
 
-Matching pennies punya strategi optimal yang terbukti: lempar koin yang adil. Lakukan itu dan Anda seri di 50% melawan lawan mana pun, selamanya. Strategi lawannya sudah diterbitkan, sederhana, dan diketahui pemainnya — dan mereka tetap tak bisa menjalankannya. Celah antara "gerakan yang benar sudah diketahui" dengan "Anda benar-benar tak bisa melakukannya" adalah seluruh produk ini.
+Matching pennies adalah permainan dengan strategi terbaik yang sudah diketahui: lempar koin yang adil. Lakukan itu dan hasilnya seri 50% melawan lawan mana pun, selamanya. Strateginya sederhana, sudah dipublikasikan, dan diketahui setiap pemain, tapi orang tetap tidak bisa menjalankannya. Jarak antara tahu langkah yang benar dan mampu melakukannya itulah inti permainan ini.
 
-Ini adalah artefak portofolio dan penjelas, bukan komersial, dibangun di sekitar celah itu. Ia juga rekonstruksi historis: dua mesin prediksi berbasis relay sungguhan dari Bell Labs — SEER milik Hagelbarger (1956) dan MRM Shannon yang lebih sederhana (1953) — punya desain yang diterbitkan tetapi belum ada yang membangunnya sebagai objek interaktif yang benar-benar bisa dilawan bermain siapa pun. Brief pembangunannya secara eksplisit menolak versi mudah dari ide ini, sebuah prediktor n-gram tunggal seperti yang sudah ada di beberapa implementasi publik, sebagai "bukan karya portofolio" — rekonstruksi historis, tanding ulang historis mesin lawan mesin, ansambel lima model, dan potret prediktabilitas personal semuanya harus ada di versi pertama.
+Permainan ini juga bagian dari sejarah komputasi. Pada 1950-an, Bell Labs membangun dua mesin relai yang menebak langkah pemain berikutnya: MRM karya Shannon pada 1953 dan SEER karya Hagelbarger pada 1956. Rancangannya dipublikasikan, tapi belum ada yang membangunnya ulang sebagai sesuatu yang bisa dimainkan. Versi permainan ini dengan satu model sudah banyak di internet, jadi saya memasang standar lebih tinggi untuk versi pertama: kedua mesin bersejarah, pertandingan ulang keduanya, lima model sekaligus, dan potret cara Anda bermain.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Prediksinya dikunci sebelum masukan dibaca, dan sistem tipe menegakkannya
+### Tebakan dikunci sebelum Anda menekan
 
-Ini seluruh kredibilitas aplikasi ini. Fungsi penyegelan menghasilkan objek prediksi yang dibekukan; menyelesaikan segel itu terhadap gerakan sebenarnya pemain mengambil segel itu sebagai argumen alih-alih membacanya dari keadaan internal, sehingga tak ada jalur kode yang bisa menghitung prediksi setelah melihat tekanan tombolnya. Antarmukanya mencerminkan ini secara struktural — penangan masukan untuk gerakan pemain bahkan tak dipasang sampai sebuah segel ada. Lalu ia melangkah satu tahap lebih jauh: sebuah rutin verifikasi terpisah menyegel ulang seluruh sesi pemain dari mesin segar yang hanya diberi tekanan-tekanan historisnya, dan aplikasi menampilkan audit itu di layar, sehingga klaim integritasnya diperiksa di depan pemain alih-alih sekadar diasumsikan.
+Seluruh permainan bergantung pada kepercayaan. Kalau mesin bisa melihat tekanan Anda sebelum menebak, skornya tidak berarti apa-apa. Saya membuat setiap tebakan disegel lebih dulu, dan kode yang menilai sebuah ronde menerima tebakan bersegel itu dari luar. Tidak ada jalur yang memungkinkan mesin menebak setelah membaca input Anda. Tombolnya bahkan tidak merespons sebelum segel ada. Di akhir sesi, aplikasi memutar ulang sesi Anda lewat mesin baru dan menampilkan audit per ronde di layar.
 
-### Mesinnya hanya melihat riwayat tekanan tombol dan tak ada lagi — ditegakkan oleh tanda tangan fungsinya sendiri
+### Mesin hanya melihat arah tekanan Anda
 
-Tipe masukan tiap prediktor adalah daftar polos gerakan-gerakan lalu; tak ada tempat untuk melewatkan waktu, posisi sentuh, atau koordinat bahkan jika seseorang menginginkannya. Brief pembangunannya memperlakukan waktu reaksi sebagai sinyal yang sungguh kuat yang penggunaan diam-diamnya akan mengkhianati seluruh premis, sehingga batasan itu hidup dalam tipenya alih-alih dalam komentar yang meminta baik-baik.
+Waktu reaksi dan posisi ketukan Anda adalah petunjuk yang kuat. Memakainya diam-diam berarti mengkhianati premisnya. Setiap prediktor hanya menerima daftar tekanan Anda sebelumnya, tanpa tempat untuk mengirim waktu atau posisi. Batasan ini tertanam di bentuk kodenya, jadi tidak bisa menyelinap masuk belakangan.
 
-### Mekanisme kejujurannya adalah lantai keyakinan
+### Kalau ragu, mesin melempar koin
 
-Ketika ansambel lima prediktor tak yakin, mesinnya menarik gerakannya dari generator acak berbenih alih-alih memainkan tebakan sebenarnya — teknik yang diambil langsung dari mesin-mesin 1950-an sungguhan. Inilah yang membatasi aplikasi ini di 50% melawan lawan yang benar-benar acak, mengubah apa yang seharusnya menjadi mesin deterministik dan karenanya bisa direkayasa-balik menjadi strategi campuran yang jujur. Sebuah gerbang keadilan memainkan 100.000 ronde melawan koin berbenih di CI dan menegaskan konvergensi ke 50% sebelum deploy apa pun — dan aturan buildnya eksplisit: jika tes itu gagal, jangan disetel sampai lolos, karena mesin yang mengalahkan koin adil punya bug yang hampir pasti membocorkan masa depan ke dalam prediksinya, dan bug yang sama itu akan diam-diam menggembungkan skornya melawan orang sungguhan juga.
+Kalau kelima model tidak yakin, mesin memainkan langkah acak, seperti yang dilakukan mesin-mesin asli tahun 1950-an. Itu menahan skornya di 50% melawan pemain yang memang acak, dan mencegah siapa pun merekayasa balik mesinnya. Sebelum setiap deploy, sebuah tes memainkan 100.000 ronde melawan koin simulasi dan mewajibkan hasilnya mendekati 50%. Kalau tes itu gagal, saya tidak menyetelnya. Mesin yang bisa mengalahkan koin berarti entah bagaimana melihat masa depan, dan bug yang sama akan menggelembungkan skornya melawan manusia.
 
-### Gerbang kesetiaan historis, bukan sekadar gerbang keadilan
+### Mesin bersejarah harus mengulang sejarah
 
-Sebuah tes kedua menjalankan rekonstruksi Shannon dan Hagelbarger saling melawan selama ribuan ronde dan menegaskan mesin yang secara historis lebih sederhana menang — mereproduksi hasil 1950-an yang terdokumentasi. Kedua mesin itu dibangun langsung dari memorandum 1953 dan makalah 1956 aslinya, bukan dari ringkasan modernnya, dan setiap detail implementasi yang sungguh tak terselesaikan oleh sumber primer itu ditulis alih-alih ditebak dengan percaya diri.
+Saya membangun ulang kedua mesin dari memorandum asli 1953 dan makalah 1956, tidak dari ringkasan modern. Di bagian yang tidak dijelaskan sumbernya, saya menuliskan asumsi saya, dan catatan itu ikut dirilis di dalam aplikasi. Tes kedua mengadu kedua mesin selama ribuan ronde dan mewajibkan mesin Shannon yang lebih sederhana menang, seperti yang terjadi pada 1950-an. Kalau tidak, salah satu rekonstruksi saya keliru.
 
-## Hasil
+### Lima model tentang Anda, bersaing terbuka
 
-Live dan publik: lima prediktor berjalan bersamaan melawan tiap pemain, masing-masing terlihat sendiri-sendiri dengan bobot yang diperbarui langsung — ganti strategi Anda di tengah sesi dan Anda bisa menyaksikan model yang berbeda terlihat mengambil alih suara ansambel secara real-time. Sebuah potret prediktabilitas mengukur enam hal tentang bagaimana Anda secara spesifik gagal menjadi acak: tingkat kemenangan dengan interval keyakinan yang tepat, tingkat berganti terhadap 50% yang adil, distribusi panjang-runtutan Anda terhadap apa yang akan dihasilkan koin yang benar-benar adil, entropi kondisional, korelasi serial, dan pola tekanan spesifik mana yang Anda produksi berlebihan. Kedua mesin historisnya bermain tanding ulang yang dipentaskan satu sama lain, mereproduksi hasil terdokumentasi bahwa desain Shannon yang lebih sederhana mengalahkan desain Hagelbarger yang lebih kompleks.
+Lima prediktor bermain melawan Anda sekaligus, dan bobot masing-masing terlihat berubah sepanjang permainan. Ganti strategi di tengah jalan, dan model lain akan mengambil alih suara terbanyak. Setelah sesi selesai, sebuah potret mengukur enam hal tentang cara Anda gagal bersikap acak, termasuk seberapa sering Anda berpindah sisi, seberapa panjang deretan Anda, dan pola mana yang terlalu sering Anda ulang.
 
-Penulis tunggal, 64 commit dalam 8 hari, sekitar 12.000 baris kode. Dua dependensi runtime — React dan renderer DOM-nya — dengan setiap prediktor, setiap satu dari enam grafik pengukuran, dan kedua rekonstruksi historisnya ditulis dari nol. Latensi dari tekan-ke-tampil tetap di bawah 80 milidetik dengan menyegel prediksi ronde berikutnya segera setelah ronde saat ini tampil, sehingga mesinnya tak pernah terlihat menghitung selagi pemain menunggu. Mesinnya melaporkan apa yang diukurnya dan tak pernah mengejek — tak satu baris pun salinan teksnya menyombong atau mengomentari performa pemain, karena mesin yang berkata "kena kau" adalah mainan, dan mesin yang diam-diam melaporkan 68% menggelisahkan dengan cara yang tepat.
+## Hasilnya
+
+Mind Reader sudah live dan terbuka untuk umum. Isinya kelima prediktor, pertandingan ulang bersejarah, potret pemain, dan lab strategi tempat Anda bisa mencoba taktik seperti melafalkan digit pi. Hanya koin asli yang berhasil. Mesin menjawab dalam 80 milidetik, jadi Anda tidak pernah melihatnya berpikir. Mesin melaporkan skornya dan tidak pernah mengejek. Saya membangunnya sendiri dalam delapan hari pada September 2026.
+
+## Di balik layar
+
+- `Referee.seal()` mengembalikan `SealedPrediction` yang dibekukan; `resolve(seal, actual)` menerimanya sebagai argumen. `src/engine/verify.ts` menyegel ulang sesi dari mesin baru yang hanya diberi tekanan sebelumnya.
+- Prediktor mengimplementasikan `predict(history: readonly Move[])`. Hanya mixer yang melihat kelimanya; prediktor tidak bisa membaca satu sama lain.
+- Kelimanya: SEER (Hagelbarger 1956), MRM (Shannon 1953), n-gram orde tetap, backoff orde variabel, dan model hierarki kognitif level-k untuk pemain yang menebak-nebak dirinya sendiri.
+- Ambang keyakinan bisa diatur pengguna. `tests/fairness.test.ts` menjalankan 100.000 ronde melawan PRNG ber-seed dalam sekitar 8 detik dan memblokir deploy; `tests/historical.test.ts` mengadu MRM dan SEER lewat umpire.
+- Detail sumber yang tidak terjawab (perilaku saat seri, batas penghitung, tepi aturan pembaruan) dicatat di `src/engine/predictors/NOTES.md` dan dicetak lengkap di tampilan Archive.
+- Statistik potret: interval skor Wilson untuk tingkat menang, tingkat berpindah dibanding 50%, panjang deretan dibanding ekspektasi geometrik, entropi bersyarat orde 1–5, korelasi serial lag 1–10, dan chi-square pada frekuensi n-gram.
+- `derive.ts`, `counterfactual.ts`, dan `verify.ts` lahir dari putaran keterjelasan pada 5–7 September yang tidak ada di spesifikasi awal. Sekitar 20 commit di rentang yang sama membahas kontras, fokus, urutan tab, tabel pengganti untuk setiap grafik, dan reduced motion.
+- Agar tetap di bawah 80 ms, tebakan ronde berikutnya disegel tepat setelah setiap pengungkapan. Arena dan panel analisis adalah render tree terpisah; grafik diperbarui dengan throttle.
+- Engine-nya murni dan bisa diputar ulang dari seed, dengan jam yang diinjeksi. Seed dan konfigurasi disimpan di URL; riwayat tekanan tidak. Sesi bisa diekspor sebagai JSON dan CSV.
+- Dua dependensi runtime, React 18.3 dan React DOM. Vite 6, TypeScript 5.7, CSS biasa, SVG tulisan tangan untuk keenam jenis grafik, dua plugin Vite internal untuk metadata per rute. Bundle-nya 93.672 byte gzip dari anggaran CI 150 KB.
+- 72 tes di 11 berkas. Sekitar 12.000 baris di 77 berkas dan 64 commit dari 4 sampai 11 September 2026.

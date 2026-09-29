@@ -1,7 +1,17 @@
 {
   "slug": "lontara",
   "title": "Lontara",
-  "tagline": "A free tool for reading and writing the Bugis Lontara script — and, crucially, showing every possible reading when the script itself doesn't say which word is meant",
+  "tagline": "A Bugis Lontara reader and writer that lists every possible reading when the script leaves the word open",
+  "glance": {
+    "for": "Bugis readers, learners, linguistics students and signmakers",
+    "result": "Live and public; awaiting a Bugis reviewer before the reader launches"
+  },
+  "skills": [
+    "Language technology",
+    "Unicode and text processing",
+    "Data provenance",
+    "Offline-first PWAs"
+  ],
   "categoryTags": [
     "Personal Project",
     "Language Tool",
@@ -20,27 +30,58 @@
   "role": "Solo Developer",
   "timeframe": "Jul – Aug 2026",
   "liveUrl": "https://andifathulms.github.io/lontara/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/lontara",
   "heroImage": "/images/projects/lontara/hero.webp",
   "order": 17,
   "featured": false,
   "metrics": [
     {
-      "value": "1,323",
-      "label": "Lexicon entries, each with provenance"
-    },
-    {
       "value": "94%",
-      "label": "Corpus rule agreement (up from 56%)"
+      "label": "agreement with Bugis Wikipedia pairs, up from 56%"
     },
     {
-      "value": "281",
-      "label": "Passing tests, no transliteration library"
+      "value": "1,323",
+      "label": "word-list entries, each with its source"
+    },
+    {
+      "value": "97",
+      "label": "Lontara–Latin pairs written by Bugis users"
     },
     {
       "value": "7",
-      "label": "Open questions recorded, not guessed"
+      "label": "open questions recorded instead of guessed"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Pembaca dan penulis aksara Lontara Bugis yang mendaftar semua bacaan saat aksaranya tidak menentukan kata",
+    "glance": {
+      "for": "Pembaca Bugis, pelajar, mahasiswa linguistik, dan pembuat papan nama",
+      "result": "Live dan terbuka; menunggu peninjau Bugis sebelum pembacanya diluncurkan"
+    },
+    "skills": [
+      "Teknologi bahasa",
+      "Unicode dan pemrosesan teks",
+      "Asal-usul data",
+      "PWA offline-first"
+    ],
+    "metrics": [
+      {
+        "value": "94%",
+        "label": "cocok dengan pasangan Wikipedia Bugis, naik dari 56%"
+      },
+      {
+        "value": "1.323",
+        "label": "entri daftar kata, masing-masing dengan sumbernya"
+      },
+      {
+        "value": "97",
+        "label": "pasangan Lontara–Latin tulisan pengguna Bugis"
+      },
+      {
+        "value": "7",
+        "label": "pertanyaan ejaan dicatat sebagai terbuka"
+      }
+    ]
+  }
 }

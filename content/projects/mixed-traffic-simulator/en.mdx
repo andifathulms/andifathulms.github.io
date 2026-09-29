@@ -2,30 +2,53 @@
 
 ## The problem
 
-Indonesian road capacity analysis runs on MKJI 1997, which converts every vehicle into a "passenger car unit" using a fixed equivalence factor. Motorcycles are assigned 0.25 or 0.5 depending on road type. Two decades of Indonesian field studies have measured that supposedly fixed constant at 0.198, 0.32, 0.35, 0.4, 0.84 — and, in one Denpasar regression study, **−0.11 at one-hour aggregation**, which is physically meaningless.
+Indonesian road planners size roads with a 1997 capacity manual, MKJI. It converts every vehicle into car equivalents with a fixed factor, and a motorcycle counts as 0.25 or 0.5 of a car depending on road type. Two decades of Indonesian field studies have measured that "fixed" factor at 0.198, 0.32, 0.35, 0.4 and 0.84. One regression study in Denpasar got −0.11 at one-hour aggregation, which means nothing physically.
 
-The consequence is operational, not academic: the same roundabout in the same peak hour can rate level of service C by one method and level of service F by another. Acceptable, or failed, depending on which method someone happened to choose — and that difference funds or doesn't fund an intervention. A field study can't settle this, because you can't re-run the same hour of traffic with the motorcycles removed. A simulator can: simulate a stream with a known motorcycle share, obtain ground truth by controlled substitution — re-running the identical scenario with motorcycles replaced by cars — then apply each published estimation method to the same stream using only what a roadside observer could have seen, and show the methods disagreeing with each other and with the truth already in hand.
+This decides budgets. At one roundabout, the same peak hour rates level of service C by one method and F by another. Acceptable or failed depends on which method someone chose, and that decides whether an intervention gets funded. A field study can't settle it, because nobody can replay the same hour of traffic with the motorcycles taken out.
 
-## The approach
+## What I built
 
-### The estimator firewall — the load-bearing decision
+### A controlled experiment no street allows
 
-The whole argument collapses if the estimation methods can cheat. `src/estimators/` is structurally forbidden from importing `src/sim/` — an ESLint rule fails the build if it tries, checked in CI before every deploy. The estimators consume exactly one shared type: a crossing time, a vehicle class judged by eye, a spot speed, an occupancy time, a lateral position — the same limited view a real field engineer has. A method that can see true speeds and true vehicle identities isn't the method a field engineer used, and comparing it to one would be dishonest. The one documented exception is the ground-truth substitution itself, because ground truth is by definition the thing an observer can't obtain.
+The simulator runs a traffic stream with a known share of motorcycles. Then it replays the identical scenario with every motorcycle swapped for a car, and compares capacity. That comparison is the true answer. Next, it applies each published estimation method to the same stream and shows the methods disagreeing with each other and with the answer already in hand.
 
-### Determinism as a product feature
+### The estimators only see what a roadside observer sees
 
-A fixed 0.05-second physics timestep, decoupled from the render loop and accumulated per frame, so results never depend on the user's hardware. A single seeded generator runs through the entire simulation — `Math.random` is banned repo-wide by a lint rule. Because of that, the full application state (scenario, every parameter, the lateral movement rule, seed, speed, aggregation interval) serializes to the URL: a surprising result is shareable as a link that reproduces it exactly, and a batch parameter sweep is regenerable from its seed alone.
+The argument falls apart if the estimation methods can cheat. I walled them off from the simulation code, and the build fails if they try to reach into it. They receive only what a field engineer could record: when a vehicle crossed a line, its type judged by eye, its spot speed, how long it occupied the detector and where it was across the road. A method that knows true speeds and identities isn't the method engineers used. The only exception is the car-swap experiment, because ground truth is exactly what an observer can't get.
 
-### Naming the modelling choice instead of hiding it
+### Any result can be shared and replayed exactly
 
-There's no canonical model for lane-free traffic, so rather than pick one and imply it's physics, the app ships three selectable lateral-movement rules — strict lanes with MOBIL, gap-seeking sublane, and social-force potentials — and names the active one in the interface at all times. The social-force rule has no traffic-literature citation, so its citation field is literally `null`, and the interface renders that as a stated caveat rather than an empty field.
+The physics runs in fixed 0.05-second steps, separate from drawing, so results never depend on the viewer's hardware. All randomness comes from one seeded source. The whole state, including scenario, parameters, seed and aggregation window, fits in the link. A surprising result becomes a URL that reproduces it, and a batch sweep can be regenerated from its seed.
 
-### Negative results are reported, not clamped
+### The modelling choice is named on screen
 
-When an estimator returns a physically meaningless negative equivalence factor, it's plotted below the axis with a specific warning rather than hidden or clamped to zero. That number is the app's single most persuasive data point, and hiding it would defeat the purpose the whole app exists for.
+There is no agreed model for traffic that ignores lane lines, as Indonesian motorcycles do. So I shipped three rules for sideways movement: strict lanes, gap-seeking and a social-force model. The active one is always named on screen. The social-force rule has no citation in the traffic literature, and the interface says so as a caveat.
 
-## Outcome
+### Impossible results stay on the chart
 
-Live and public: 22 vehicles on a 230-meter ring, no bottleneck and no incident, and a traffic jam still forms from reaction dynamics alone and propagates backward forever — reproducing a published physical-traffic-flow result, measured in the app at −8.6 km/h wave speed, and enforced as a build gate rather than left as a demo. The equivalence bench plots five estimation methods against motorcycle share, with ground truth nearly flat and the regression and speed methods swinging from +16 to −30, crossing zero repeatedly and reproducing the published −0.11 at wide aggregation. A vehicle inspector shows any selected car or motorcycle's live driving-model arithmetic — free-flow term, interaction term, current and desired gap, resulting acceleration — the "show your work" view for anyone who doesn't believe the simulation.
+When an estimator returns a negative motorcycle factor, I plot it below the axis with a warning. I don't hide it or clamp it to zero. That number is the most persuasive result the app has.
 
-Sole author, 38 commits over two concentrated days, ~11,700 lines of TypeScript. Four runtime dependencies, two of them fonts — no physics library, no charting library, no simulation framework, no state-management library. Every chart, every axis, and the entire physics engine are hand-written. The app states plainly that it is not a calibrated model of any specific road and not a replacement for professional traffic-simulation software — its job is to demonstrate an assumption failing, not to plan a real intersection.
+## Result
+
+The simulator is live and public. The phantom-jam scenario puts 22 vehicles on a 230-metre ring with no bottleneck. A jam still forms from reaction delays alone and travels backward, measured in the app at −8.6 km/h, reproducing a published experiment. The equivalence bench plots five methods against motorcycle share. Ground truth stays nearly flat, while the regression and speed methods swing from +16 to −30 and reproduce the published −0.11 at wide aggregation. An inspector shows the live driving arithmetic of any vehicle you select. I built it alone over two days in September 2026.
+
+The app states plainly that it is not a calibrated model of any specific road and not a replacement for professional traffic software. Its job is to show an assumption failing.
+
+## What I'd do next
+
+- Fix two rare overlap cases the README documents: vehicles squeezed below their own width in a signal queue, and a car left 0.7 m inside a stopped angkot. Both show as numeric warnings for now.
+
+## Under the hood
+
+- `src/estimators/` can't import `src/sim/`, enforced by an ESLint `no-restricted-imports` rule in CI before deploy. Estimators consume one type, `DetectorRecord`. `src/truth/substitution.ts` is the documented exception.
+- Five methods: ground-truth substitution, time headway, multiple regression, speed regression and occupancy time. Aggregation windows are 3, 5, 15 and 60 minutes.
+- Car-following uses the Intelligent Driver Model. Lateral rules are strict lanes with MOBIL, gap-seeking sublane and social-force potentials; the social-force `citation` field is `null`.
+- `Math.random` is banned repo-wide by lint; the seeded PRNG lives in `src/sim/rng.ts`.
+- The phantom jam reproduces Sugiyama et al. (2008) and is both a build gate and a regression test. The Tirosa roundabout (LOS C by occupancy-time equivalence, F by MKJI) is cited in the spec.
+- A non-overlap assertion runs every step, with iterative lateral clearance at contact. Three commits went to collision fixes.
+- Canvas draws the road, time–space diagram and speed heatmap; the time–space diagram paints one pixel column per interval to an offscreen canvas. SVG draws the fundamental diagram, equivalence bench, discharge plot and cross-section, with hand-computed axes in `src/views/render/axis.ts`.
+- Interactive simulation stays on the main thread at 400 vehicles; batch sweeps run in a cancellable Web Worker. Trajectories export as CSV.
+- Six scenarios (phantom jam, corridor, bottleneck, signalised, angkot, bench), four vehicle classes (MC, LV, HV, PU) and a Ruang Henti Khusus toggle with a discharge plot for saturation flow and headway.
+- Speed is luminance and vehicle type is shape; hue is reserved for the five estimators. The road view's across-road stretch is capped and printed in the corner.
+- Four runtime dependencies: React 18.3, React DOM and two Overpass font packages. No physics, chart, simulation or state library. About 78 KB JS and 7 KB CSS gzipped against a 300 KB budget.
+- 129 tests across 11 suites. The engine in `src/sim/` is 2,635 lines, pure and headless. About 11,700 lines in `src/` and 38 commits on 2–3 September 2026.
