@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -124,109 +125,100 @@ function AxisLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Filters live in the URL (/lab?filter=all&q=django&shape=explainer,tool&
+ * live=1&view=list), read with useSearchParams and written with
+ * history.replaceState, which Next keeps in sync. There is no copy of them in
+ * state, so a shared link, the back button and the About page's stack links
+ * all land on exactly what the URL says.
+ *
+ * useSearchParams needs a Suspense boundary under static export. The fallback
+ * is the same gallery with no filters, so the prerendered HTML lists every
+ * project.
+ */
 export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
+  return (
+    <Suspense fallback={<GalleryView projects={projects} params={new URLSearchParams()} />}>
+      <GalleryFromUrl projects={projects} />
+    </Suspense>
+  );
+}
+
+function GalleryFromUrl({ projects }: { projects: ProjectMeta[] }) {
+  const params = useSearchParams();
+  return <GalleryView projects={projects} params={params} />;
+}
+
+interface ReadableParams {
+  get(name: string): string | null;
+}
+
+function GalleryView({ projects, params }: { projects: ProjectMeta[]; params: ReadableParams }) {
   const t = useTranslations('work');
   const tc = useTranslations('case_study');
-  const [source, setSource] = useState<Source>(DEFAULT_SOURCE);
-  const [liveOnly, setLiveOnly] = useState(false);
-  const [shapes, setShapes] = useState<Set<ProblemShape>>(new Set());
-  const [query, setQuery] = useState('');
-  const [view, setView] = useState<View>('grid');
+
+  const f = params.get('filter');
+  const source: Source = f && (SOURCES as string[]).includes(f) ? (f as Source) : DEFAULT_SOURCE;
+  const liveOnly = params.get('live') === '1';
+  const shapeParam = params.get('shape') ?? '';
+  const shapes = useMemo(
+    () => new Set<ProblemShape>(shapeParam.split(',').filter(isProblemShape)),
+    [shapeParam]
+  );
+  const query = params.get('q') ?? '';
+  const view: View = params.get('view') === 'list' ? 'list' : 'grid';
 
   const terms = useMemo(
     () => query.toLowerCase().split(/\s+/).filter(Boolean),
     [query]
   );
 
-  // Deep links: /lab?filter=all&q=django&shape=explainer,tool&live=1&view=list.
-  // The old /work?filter=independent links land on the default state.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const f = params.get('filter');
-    if (f && (SOURCES as string[]).includes(f)) setSource(f as Source);
-    if (params.get('live') === '1') setLiveOnly(true);
-    const s = params.get('shape');
-    if (s) {
-      const valid = s.split(',').filter(isProblemShape);
-      if (valid.length > 0) setShapes(new Set(valid));
-    }
-    const q = params.get('q');
-    if (q) setQuery(q);
-    if (params.get('view') === 'list') setView('list');
-  }, []);
-
-  // Keep the URL shareable without a full navigation.
-  const syncUrl = (next: Partial<{ source: Source; live: boolean; shapes: Set<ProblemShape>; query: string; view: View }>) => {
+  const write = (next: Partial<{ source: Source; live: boolean; shapes: Set<ProblemShape>; query: string; view: View }>) => {
     const s = { source, live: liveOnly, shapes, query, view, ...next };
-    const params = new URLSearchParams();
-    if (s.source !== DEFAULT_SOURCE) params.set('filter', s.source);
-    if (s.live) params.set('live', '1');
-    if (s.shapes.size > 0) params.set('shape', [...s.shapes].join(','));
-    if (s.query.trim()) params.set('q', s.query.trim());
-    if (s.view === 'list') params.set('view', 'list');
-    const qs = params.toString();
+    const out = new URLSearchParams();
+    if (s.source !== DEFAULT_SOURCE) out.set('filter', s.source);
+    if (s.live) out.set('live', '1');
+    if (s.shapes.size > 0) out.set('shape', [...s.shapes].join(','));
+    if (s.query) out.set('q', s.query);
+    if (s.view === 'list') out.set('view', 'list');
+    const qs = out.toString();
     window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''));
   };
 
-  const selectSource = (next: Source) => {
-    setSource(next);
-    syncUrl({ source: next });
-  };
-  const toggleLive = () => {
-    setLiveOnly(!liveOnly);
-    syncUrl({ live: !liveOnly });
-  };
+  const selectSource = (next: Source) => write({ source: next });
+  const toggleLive = () => write({ live: !liveOnly });
   const toggleShape = (key: ProblemShape) => {
     const next = new Set(shapes);
     if (next.has(key)) next.delete(key);
     else next.add(key);
-    setShapes(next);
-    syncUrl({ shapes: next });
+    write({ shapes: next });
   };
-  const updateQuery = (next: string) => {
-    setQuery(next);
-    syncUrl({ query: next });
-  };
-  const selectView = (next: View) => {
-    setView(next);
-    syncUrl({ view: next });
-  };
+  const updateQuery = (next: string) => write({ query: next });
+  const selectView = (next: View) => write({ view: next });
 
   const matchesShape = (p: ProjectMeta) =>
     shapes.size === 0 || (p.problemShape !== undefined && shapes.has(p.problemShape));
 
-  const visible = useMemo(
-    () =>
-      projects.filter(
-        (p) =>
-          matchesSource(p, source) && (!liveOnly || isLive(p)) && matchesShape(p) && matchesQuery(p, terms)
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [projects, source, liveOnly, shapes, terms]
+  // Fifty-odd projects: filtering on every render is cheaper than memoising.
+  const visible = projects.filter(
+    (p) => matchesSource(p, source) && (!liveOnly || isLive(p)) && matchesShape(p) && matchesQuery(p, terms)
   );
 
   // Each axis counts against the other axes' current selection, so a chip
   // never advertises results that clicking it wouldn't produce.
-  const sourceCounts = useMemo(() => {
-    const pool = projects.filter((p) => (!liveOnly || isLive(p)) && matchesShape(p) && matchesQuery(p, terms));
-    return Object.fromEntries(
-      SOURCES.map((s) => [s, pool.filter((p) => matchesSource(p, s)).length])
-    ) as Record<Source, number>;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projects, liveOnly, shapes, terms]);
+  const sourcePool = projects.filter((p) => (!liveOnly || isLive(p)) && matchesShape(p) && matchesQuery(p, terms));
+  const sourceCounts = Object.fromEntries(
+    SOURCES.map((s) => [s, sourcePool.filter((p) => matchesSource(p, s)).length])
+  ) as Record<Source, number>;
 
-  const liveCount = useMemo(
-    () => projects.filter((p) => matchesSource(p, source) && matchesShape(p) && matchesQuery(p, terms) && isLive(p)).length,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [projects, source, shapes, terms]
-  );
+  const liveCount = projects.filter(
+    (p) => matchesSource(p, source) && matchesShape(p) && matchesQuery(p, terms) && isLive(p)
+  ).length;
 
-  const shapeCounts = useMemo(() => {
-    const pool = projects.filter((p) => matchesSource(p, source) && (!liveOnly || isLive(p)) && matchesQuery(p, terms));
-    return Object.fromEntries(
-      PROBLEM_SHAPES.map((s) => [s, pool.filter((p) => p.problemShape === s).length])
-    ) as Record<ProblemShape, number>;
-  }, [projects, source, liveOnly, terms]);
+  const shapePool = projects.filter((p) => matchesSource(p, source) && (!liveOnly || isLive(p)) && matchesQuery(p, terms));
+  const shapeCounts = Object.fromEntries(
+    PROBLEM_SHAPES.map((s) => [s, shapePool.filter((p) => p.problemShape === s).length])
+  ) as Record<ProblemShape, number>;
 
   // Only offer the types that exist in the current track.
   const offeredShapes = PROBLEM_SHAPES.filter(

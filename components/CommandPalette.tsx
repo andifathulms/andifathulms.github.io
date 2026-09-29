@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import TrackMark from './TrackMark';
@@ -54,7 +54,13 @@ export default function CommandPalette({
   const input = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
-  const [isMac, setIsMac] = useState(true);
+  // Platform only affects the hint label; the shortcut accepts both keys.
+  // The server snapshot assumes Mac so the prerendered label is stable.
+  const isMac = useSyncExternalStore(
+    () => () => {},
+    () => /Mac|iPhone|iPad/.test(navigator.platform),
+    () => true
+  );
 
   const open = useCallback(() => {
     setQuery('');
@@ -64,9 +70,6 @@ export default function CommandPalette({
   }, []);
 
   useEffect(() => {
-    // Platform only affects the hint label; the shortcut accepts both keys.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMac(/Mac|iPhone|iPad/.test(navigator.platform));
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
