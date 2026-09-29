@@ -2,30 +2,45 @@
 
 ## The problem
 
-Indonesia straddles the equator, so every location in the country experiences two days a year — its "zero shadow days" — when the sun passes directly overhead at solar noon and a vertical object casts (almost) no shadow. It's a real, physically observable phenomenon that Indonesia's meteorological agency (BMKG) publishes official dates for every year, city by city — but almost nobody outside specialists knows it happens, why, or how to demonstrate it.
+Indonesia straddles the equator, so every place in the country gets two days a year when the sun passes straight overhead at noon. On those "zero shadow days", a vertical stick casts almost no shadow. BMKG, the national weather agency, publishes the dates every year, city by city. Almost nobody outside specialists knows it happens, why, or how to show it.
 
-It's built for three audiences: curious residents who want their own city's two dates and to understand the mechanism; teachers and students, for whom the phenomenon becomes a hands-on activity — on a zero shadow day, a class can pair with another location a few hundred kilometres away and reproduce Eratosthenes' original measurement of Earth's circumference; and anyone wanting quick solar-position facts. It deliberately does *not* try to be a prayer-time calculator or a weather app — different problems with different requirements.
+I built Zero Shadow Day for three groups. Residents can find their own city's two dates and see why they fall where they do. Teachers and students get a classroom activity: pair with a school a few hundred kilometres away and repeat Eratosthenes' 2,200-year-old measurement of the Earth. Anyone else gets quick facts on solar noon, sun height and shadow direction.
 
-## The approach
+## What I built
 
-### Compute everything, depend on nothing
+### Everything comes from latitude, longitude and date
 
-The entire app derives from three numbers — latitude, longitude, date — with **no external data feed, no API key, no database, no backend.** This was a conscious reaction to earlier projects being derailed by data-licensing problems: a project with zero data dependency has nothing to license and nothing to go stale. The astronomical engine (`lib/solar`), the shadow geometry, the zero-shadow-day search, the Eratosthenes module, and even the 3D scene are all hand-written — no astronomy, date, or timezone library, and no 3D engine.
+The app has no data feed, no API key, no database and no backend. Earlier projects of mine had stalled on data licensing, and a project with no data dependency has nothing to license and nothing to go stale. I wrote the sun-position engine, the shadow geometry, the date search, the Eratosthenes module and the 3D scene myself. There is no astronomy, date, timezone or 3D library.
 
-### Accuracy is verified before the product exists
+### I checked the maths before building any screen
 
-Milestone 0 had *no user interface at all* — just the solar-position math, checked against published astronomical reference tables. The reasoning: a common shortcut formula for the sun's declination is up to half a degree wrong, which near the tropics silently turns into a date several days off *while still looking plausible on screen*. Getting the invisible part right came before anything visible. And the shadow-geometry code shares **zero code** with the solar engine — enforced by a test asserting the absence of that import — so an error can only surface as a *disagreement* between two independent calculations, never as two wrong answers agreeing.
+The first milestone had no interface at all, only the sun-position maths checked against published astronomical tables. A common shortcut formula for the sun's position can be off by half a degree. Near the tropics, that turns into a date several days wrong that still looks plausible. I also wrote the shadow geometry with no shared code from the sun engine, and a test enforces that. An error then shows up as two calculations disagreeing.
 
-### "Zero" is a window, and dates are found by search
+### A shadow never quite vanishes, so I report a window
 
-The sun's disc is about half a degree wide, so a real shadow shrinks to a *minimum*, not to nothing. The app always reports a time window derived from the sun's actual apparent size that day — not a false-precision single instant — because a curious user standing outside with a literal stick could disprove an over-precise claim. And rather than solving for the exact moment the sun's declination equals a location's latitude (which can fall at any time, including the middle of the night), the app **minimises the noon shadow across each year's candidate days**. That correctly handles the boundary near the tropics, where the two yearly dates converge into one at the solstice, with no special-casing. All internal computation uses Julian Day numbers; `Date` and timezones are confined to a single display-boundary module, because Indonesia has three zones and no DST.
+The sun's disc is about half a degree wide, so a shadow shrinks to a minimum and never reaches nothing. The app always gives a time window, sized from the sun's apparent width on that date. A curious user with a stick outside could disprove a claim of one exact second. To find the dates, I search each year's candidate days for the shortest noon shadow. Near the tropics, where the two dates merge into one at the solstice, this works with no special case.
 
-### Honest about its own disagreements
+### Where BMKG and I disagree, the tests say why
 
-Where the app's dates differ from BMKG's published tables, the differences are *documented and tested* rather than hidden. Pekanbaru 2026: the app names 22 March against BMKG's 21st — the city sits 0.53° from the equator, so the crossing falls between two solar noons and the app's smaller-residual rule picks the 22nd (both within its stated one-day tolerance). And four rows of BMKG's 2025 table appear to carry only their culmination's *first* time — the test *derives* this from the Equation of Time rather than assuming it, trusting the physics over a published source once the physics could prove the discrepancy. The Eratosthenes mode shows its schoolyard error honestly against the true circumference, because that gap is the lesson, not an embarrassment to hide.
+I checked the app against 76 dates from BMKG's official 2025 and 2026 tables, covering 38 provincial capitals. Seventy-five match exactly, all 76 fall within a day, and times agree to under five seconds. The one miss is Pekanbaru 2026: I name 22 March, BMKG names the 21st. The city is 0.53° from the equator, so the sun crosses overhead between two noons. Four Papua rows in BMKG's 2025 table appear to list only their first time. A test derives that from the physics.
 
-## Outcome
+### The shadow is the readout
 
-Live and public, bilingual, fully static — coordinates are used and discarded entirely client-side, with zero runtime network requests. It ships an animated 3D **gnomon** where the shadow *is* the data readout (its length and bearing are the numbers, not decoration beside them); your two dates with culmination time to the second, broken into its two causes; shadow-tip curves and the figure-eight analemma; the **Eratosthenes measurement** with a partner-finder and honest error breakdown; and a sweep animating the sun's overhead point across the archipelago through the year.
+The main view is an animated 3D stick and shadow for any place and date. The shadow's length and direction are the numbers, not a picture beside them. I built the 3D scene by hand to keep the whole app at about 110 KB of JavaScript, under a 150 KB budget. A general 3D engine would have used the whole budget on its own.
 
-Built solo in a two-day sprint — ~9,600 lines of TS/TSX, 189 tests written before the UI existed, verified against 76 BMKG fixture points (75 exact matches, all within a day, times under five seconds). The 3D scene is a hand-rolled camera and projection (~450 lines) rather than Three.js — a deliberate tradeoff to keep the whole app at ~110 KB gzipped, under its 150 KB budget, since a general-purpose 3D engine would have blown that budget on its own. The solar engine is pure, framework-free, and extractable — shared with a sibling project, [Falak](/work/falak-visualizer), and a test keeps it that way.
+## Result
+
+Zero Shadow Day is live in Indonesian and English as a static site. Your coordinates stay in the browser, and the app makes no network requests. It shows your two dates with the sun's highest moment to the second, and explains the gap between clock noon and sun noon. It draws shadow-tip curves and the figure-eight analemma. Eratosthenes mode finds a measurement partner elsewhere in the archipelago and shows your error against the true circumference, because the gap is the lesson. A sweep animates the overhead sun across the islands through the year. Any view can be shared as a link, and dates export to a calendar file. I built it in two days in August 2026.
+
+## Under the hood
+
+- `lib/solar` is a NOAA/Meeus solar-position algorithm in pure TypeScript with no React, Next, DOM or network imports. It is shared with Falak, and `tests/solar/extractable.test.ts` keeps it extractable.
+- `lib/shadow` is independent of `lib/solar`; a test asserts the import is absent. `lib/zsd` finds dates by minimising noon shadow length; Outside the tropics it returns a structured no-result naming the latitude limit. `lib/eratosthenes` has a synthetic round-trip test that recovers a known radius exactly.
+- The numeric core uses Julian Day numbers only. `Date` and timezones live in one display module, `lib/clock`, since Indonesia has three zones and no DST.
+- Pekanbaru 2026: the app's rule picks the smaller noon-zenith residual, 0.111° on 22 March against 0.284° on 21 March. The four 2025 rows are Jayapura, Nabire, Wamena and Merauke. Their times are checked against two cities in the same zone and table, whose difference matches the change in the Equation of Time.
+- The 3D gnomon is a hand-rolled camera and perspective projection of about 450 lines, with the sky driven by solar altitude. No Three.js.
+- The PRD's flat "bleached concrete" palette gave way to a day/night sky and a full-day hero animation. Two rules stayed: vermilion only marks the zero-shadow day, and the shadow is the darkest tone on the page.
+- Accessibility pass: focus rings, error-to-field association, real headings, keyboard hints for canvas elements, toggle states and slider announcements. Contrast ratios are asserted in tests.
+- Performance pass: cached the per-year declination limits, pinned the variable font to the one weight used, and removed a city-data chunk shipped twice per route.
+- Next.js 14 static export on GitHub Pages, strict TypeScript, Tailwind, Vitest, pnpm, self-hosted fonts. CI runs `pnpm test:solar` first, then the full suite, typecheck and lint.
+- About 9,600 lines of TypeScript, 189 tests written before the UI (the README badge counts 210 at deploy time), 8 routes in 2 locales, 80 commits over 13 and 14 August 2026.

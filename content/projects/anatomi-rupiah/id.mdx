@@ -2,30 +2,51 @@
 
 ## Masalahnya
 
-Bank Indonesia menjalankan kampanye berkelanjutan yang mengajarkan warga "metode 3D" — *Dilihat, Diraba, Diterawang* — untuk memeriksa keaslian uang kertas. Hampir semua orang bisa melafalkan ketiga katanya; jauh lebih sedikit yang bisa menjelaskan apa itu tanda air secara fisik, mengapa tinta intaglio terasa timbul, atau apa yang ada di dalam benang pengaman. Materi publik yang ada menunjukkan *apa* yang harus dicari tetapi jarang *mengapa* ia bekerja — foto sebuah tanda air hanyalah bercak abu-abu di kertas. Ada juga pemeriksaan keempat yang nyaris tak pernah diajarkan: *kode tuna netra*, tanda taktil timbul yang memungkinkan pengguna tunanetra mengenali pecahan lewat sentuhan.
+Bank Indonesia mengajarkan "metode 3D" untuk memeriksa uang: Dilihat, Diraba, Diterawang. Hampir semua orang hafal tiga kata itu. Jauh lebih sedikit yang bisa menjelaskan apa sebenarnya tanda air, kenapa tinta intaglio terasa timbul, atau apa isi benang pengaman. Materi yang beredar menunjukkan apa yang harus dilihat, jarang menjelaskan kenapa cara itu berhasil. Pemeriksaan keempat, kode tuna netra, yaitu tanda timbul yang membantu penyandang tunanetra mengenali pecahan uang lewat sentuhan, nyaris tidak pernah diajarkan.
 
-Kendalanya membuat ini dua masalah sekaligus. Hukum Indonesia (UU 7/2011 Pasal 24) menjadikan reproduksi citra uang kertas tindak pidana — hingga satu tahun dan denda Rp200 juta — kecuali untuk pendidikan, ditandai "SPESIMEN," dan mengikuti syarat yang diperlakukan proyek ini sebagai batasan rekayasa yang mengikat. Jadi: **ajarkan mekanismenya, sambil tak pernah memproduksi apa pun yang bisa lolos sebagai uang asli atau berdekatan dengan palsu.**
+Ada batasan hukumnya. UU 7/2011 Pasal 24 ayat (1) melarang meniru rupiah, dengan ancaman pidana paling lama satu tahun dan denda paling banyak Rp200 juta. Pengecualiannya berlaku untuk keperluan pendidikan dan promosi, dengan tulisan "spesimen" pada tiruannya. Ayat (2) secara terpisah melarang mengedarkan rupiah tiruan. Kedua aturan itu saya perlakukan sebagai batasan teknis. Tugasnya: mengajarkan cara kerja fitur pengaman tanpa pernah menghasilkan apa pun yang bisa dianggap uang.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Tanda hukum ditanam ke dalam artwork, bukan ditumpuk di atasnya
+### Pengaman hukumnya saya bangun sebelum konten apa pun
 
-Tanda "SPESIMEN" yang diwajibkan bukan overlay CSS atau `<div>` terposisi — ia ditulis langsung ke dalam geometri path SVG setiap skema, di ruang koordinat yang sama dengan garis luar uang. Ia bertahan pada screenshot, cetakan, dan upaya apa pun untuk menyembunyikannya lewat CSS, karena **tak ada jalur kode yang bisa memproduksi citra mirip-uang tanpa tanda sama sekali.** Lapisan kepatuhan sengaja dibangun *lebih dulu*, sebelum konten nyata mana pun — memasang jaminan keamanan-hukum setelah membangun konten visual akan jauh lebih berisiko daripada membangunnya sebagai gerbang saat-build sejak hari pertama.
+Pekerjaan pertama adalah kajian hukum dan penandaan SPESIMEN, sebelum satu uang pun digambar. Menambahkan jaminan hukum setelah visualnya jadi akan jauh lebih berisiko. Tanda itu digambar langsung ke dalam data bentuk setiap diagram uang, di ruang koordinat yang sama dengan garis tepi uangnya. Tanda itu tetap ada saat di-screenshot, dicetak, atau disembunyikan lewat styling. Situs ini tidak punya cara untuk menghasilkan gambar mirip uang tanpa tanda.
 
-### Gerbang kepatuhan saat build, bukan dokumen kebijakan
+### Build gagal kalau ada gambar yang melanggar aturan
 
-`pnpm compliance:check` menjalankan delapan pemeriksaan otomatis terhadap keluaran ter-render nyata sebelum tiap build: tak ada citra raster (foto) uang di mana pun di repo, tanda SPESIMEN hadir di tiap skema ter-render, tiap skema dibatasi di bawah ukuran uang asli, tak ada jalur ekspor yang mampu memancarkan uang utuh, dan lainnya. Jika ada yang gagal, build gagal — tak ada cara mengirim konten tidak-patuh secara tak sengaja. Fotografi awalnya dikecualikan sepenuhnya, lalu dibuka *sempit* lewat pengecualian yang dilingkupi hati-hati: foto tokoh dan motif sisi belakang (26 gambar berlisensi Wikimedia Commons, masing-masing dengan kredit tercatat) diizinkan, karena seorang tokoh atau bunga bukanlah mata uang — dan pemeriksa aset menjaga kedua kasus itu tetap berbeda alih-alih melonggarkan aturan.
+Delapan pengecekan otomatis dijalankan terhadap hasil render sebelum setiap build. Pengecekan itu memastikan tidak ada foto uang di mana pun di repositori, setiap diagram punya tanda SPESIMEN, setiap diagram lebih kecil dari uang aslinya, dan tidak ada ekspor yang bisa menghasilkan uang utuh. Kalau satu saja gagal, tidak ada yang dirilis. Diagramnya saya buat sederhana dan tidak pernah fotorealistis, karena kemiripan itu sendiri akan menggugurkan pengecualian hukumnya.
 
-### Ilustrasi alih-alih fotografi — dan fisika dihitung langsung
+### Setiap mekanisme saya gambar sebagai diagram
 
-Setiap penjelas fitur keamanan adalah penampang SVG bikinan tangan (tanda air, benang pengaman, intaglio, tinta berubah warna, gambar saling isi, mikroteks, tinta UV, kode taktil), yang menghindari batasan fotografi *sekaligus* mengajarkan mekanisme lebih baik daripada foto. Demo miring perubahan-warna dan sakelar UV digerakkan oleh **fragment shader GLSL khusus yang menghitung interferensi lapisan-tipis dan transmisi cahaya yang sesungguhnya** di atas satu quad — tanpa engine 3D, dan tanpa tekstur uang diunggah ke GPU (yang akan butuh me-raster-kan SVG, melanggar aturan "tanpa citra raster uang"). Tiap panel WebGL punya fallback SVG. Sebuah lolosan pedagogi belakangan bahkan menampilkan angka fisika sungguhan di balik visualisasi alih-alih membiarkannya animasi tanpa penjelasan.
+Setiap fitur pengaman punya gambar penampang buatan tangan: tanda air, benang pengaman, intaglio, tinta berubah warna, rectoverso, mikroteks, tinta UV, dan kode tuna netra. Diagram menghindari larangan foto sekaligus menunjukkan mekanismenya lebih jelas daripada foto. Demo kemiringan tinta berubah warna dan tombol sinar UV menghitung fisika cahaya secara langsung di browser, dengan cadangan berupa gambar di perangkat yang tidak mendukungnya.
 
-### Bersumber, jujur, dan berorientasi-periksa
+### Setiap klaim merujuk Bank Indonesia, dan situs tidak pernah memberi putusan
 
-Setiap klaim faktual — deskripsi fitur, data pecahan, biografi tokoh, motif — adalah data terstruktur tervalidasi-Zod yang harus membawa sitasi ke publikasi Bank Indonesia, ditegakkan langkah build `content:validate` terpisah. Invarian kontennya ketat: jelaskan cara *memeriksa* sebuah fitur, tak pernah cara *membuat*-nya; dan situs tak pernah memberi vonis keaslian — tanpa kamera, tanpa jalur "apakah ini asli" — karena otoritas itu ada pada Bank Indonesia. Penelusuran 3D berakhir dengan pengakuan eksplisit bahwa *rabaan* tak bisa disampaikan lewat layar dan pembaca sebaiknya pergi memegang uang sungguhan. Tiap metode pemeriksaan BI dipetakan ke satu hue tetap se-situs, jadi pembaca menyerap taksonominya hanya dengan melihat warnanya.
+Setiap fakta tentang fitur, pecahan, pahlawan, dan motif disimpan sebagai data terstruktur yang wajib punya sumber, biasanya publikasi Bank Indonesia. Build gagal kalau ada yang tidak bersumber. Untuk seri terbaru tahun 2022, saya menurunkan ulang datanya dari tujuh peraturan pelaksana Bank Indonesia. Situs ini menjelaskan cara memeriksa sebuah fitur, tidak pernah cara membuatnya. Tidak ada kamera dan tidak ada tombol "apakah ini asli?", karena kewenangan itu ada di Bank Indonesia.
 
-## Hasil
+### Foto orang boleh, foto uang tidak
 
-Live dan publik, dwibahasa, sepenuhnya statis tanpa panggilan jaringan runtime (yang juga berarti tak ada permukaan sisi-server tempat fitur "periksa uang saya" bisa dipasang kelak). Ia menyajikan **loupe** interaktif — penanda fitur bernomor di tiap uang yang membuka detail termagnifikasi *di samping* diagram mekanisme — delapan penjelas mekanisme tersitasi, demo optik WebGL langsung, bagian *kode tuna netra*, biografi tokoh dan motif sisi belakang tersitasi, dan gerbang ekspor berbagi-diagram yang tak pernah bisa memancarkan uang utuh.
+Awalnya semua foto dilarang. Lalu saya membuka satu pengecualian sempit untuk pahlawan di setiap uang dan motif di bagian belakangnya, karena orang atau bunga bukan uang. Pengecekannya memisahkan kedua hal itu, jadi foto uang tetap diblokir. Masing-masing dari 26 foto berlisensi mencantumkan kredit dan sumbernya.
 
-Dibangun sendiri dalam sprint dua hari yang fokus — ~11.000 baris TS/TSX, yang subsistem tunggal terbesarnya adalah infrastruktur kepatuhan/skema/WebGL/konten (~3.900 baris), bukan UI-nya. Ia menyatakan dengan lugas bahwa ini proyek edukatif pribadi yang bersandar pada pengecualian Pasal 24, bahwa semua penggambaran bersifat skematis dan ditandai SPESIMEN, dan bahwa ia tak bisa dan tak menentukan apakah suatu uang tertentu asli. Tradeoff tersulitnya berlawanan dengan setiap naluri: skema harus tampak sengaja *belum selesai* — tak pernah fotorealistis, dibatasi di bawah ukuran asli — karena realisme itu sendiri akan menggagalkan pengecualian hukumnya.
+## Hasilnya
+
+Anatomi Rupiah sudah live dalam bahasa Indonesia dan Inggris sebagai situs statis tanpa panggilan jaringan saat dibuka. Cakupannya 10 pecahan: seri 2022 ditambah tiga pecahan terbesar seri 2016 yang masih beredar. Pengguna bisa membuka uang mana pun, mengklik penanda bernomor, dan melihat tampilan perbesaran di samping diagram mekanismenya. Tur terpandu metode 3D diakhiri dengan pengakuan bahwa rabaan tidak bisa ditampilkan di layar, lalu mengajak pembaca memegang uang yang asli. Situs ini menyatakan bahwa ia proyek edukasi pribadi yang bersandar pada pengecualian Pasal 24 ayat (1), dan tidak bisa menentukan keaslian sebuah uang. Saya membangunnya dalam dua hari pada Agustus 2026.
+
+## Langkah berikutnya
+
+- Menulis biografi Djuanda Kartawidjaja dan Idham Chalid. Ensiklopedia sumbernya (1995) tidak memuat keduanya, dan halaman tokoh menyebutkan kekosongan itu.
+- Mengirim surat yang sudah disusun untuk meminta konfirmasi resmi dari Bank Indonesia.
+
+## Di balik layar
+
+- Static export Next.js 14 (`output: 'export'`) di GitHub Pages, TypeScript strict, React, Tailwind, Zod, Vitest dengan Testing Library, pnpm. Font di-hosting sendiri lewat `next/font`. Tanpa analytics, tanpa font CDN, tanpa pustaka 3D, pengolahan gambar, atau ML.
+- `docs/bi-reproduction-guidance.md` mencatat panduan reproduksi BI yang diperiksa di milestone pertama. Fitur unduh uang utuh dihapus sepenuhnya, karena gambar uang beresolusi cetak sudah mendekati peredaran yang dilarang ayat (2).
+- Tanda SPESIMEN berupa geometri path SVG di ruang koordinat yang sama dengan garis tepi uang, bukan overlay CSS.
+- `pnpm compliance:check` menjalankan delapan pengecekan: kebijakan aset, keberadaan SPESIMEN, batas ukuran, cakupan area loupe, penandaan anatomi hero, batas permukaan ekspor, kebijakan dependensi, dan kebijakan sumber. `content:validate` menolak klaim tanpa rujukan.
+- Foto tokoh dan motif (6 tokoh, 20 motif, Wikimedia Commons domain publik atau CC-BY-SA) di-pin dengan hash seperti aset brand.
+- Demo optiknya memakai WebGL mentah dengan fragment shader GLSL yang menghitung interferensi lapisan tipis dan transmisi cahaya pada sebuah quad. Tidak ada tekstur uang yang dikirim ke GPU, karena itu berarti me-rasterisasi SVG. Kemiringan mengikuti orientasi perangkat di ponsel dan slider di perangkat lain. Tahap perbaikan pedagogi menampilkan angka asal warna demo kemiringan dan memberi tahu saat demo beralih ke penyederhanaan. Diagram mekanisme bisa dibagikan; gate permukaan ekspor mencegah keluarnya gambar uang utuh.
+- Data seri 2022 disusun ulang dari Peraturan Bank Indonesia 24/8 sampai 24/14/PBI/2022, yang menutup celah cakupan kode tuna netra.
+- Setiap metode pemeriksaan BI memakai satu warna di seluruh situs: Dilihat teal, Diraba tembaga, Diterawang amber, UV ungu.
+- Sekitar 15 commit aksesibilitas memperbaiki fokus skip-link, pengumuman ganda, ukuran target sentuh, kontras, dan panel demo yang tidak menyesuaikan lebar. Tahap SEO berikutnya menambahkan canonical URL, hreflang, pratinjau per halaman, sitemap, dan robots.
+- CI menahan deploy sampai pengecekan kepatuhan, validasi konten, typecheck, lint, dan tes lolos. Kode berlisensi MIT; konten CC BY-NC-SA 4.0.
+- Sekitar 11.000 baris TypeScript. Bagian terbesarnya, sekitar 3.900 baris di `lib/`, berisi kepatuhan, geometri skema, WebGL, dan sistem rujukan. 13 berkas tes (5 kepatuhan, 8 konten), 92 commit pada 13 dan 14 Agustus 2026.

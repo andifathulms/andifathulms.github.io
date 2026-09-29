@@ -1,7 +1,17 @@
 {
   "slug": "zero-shadow-day",
   "title": "Zero Shadow Day",
-  "tagline": "A free tool that tells anyone in Indonesia the exact two days a year the sun stands directly overhead where they live — and lets them re-run Eratosthenes' 2,200-year-old measurement of the Earth's circumference with a partner elsewhere in the country",
+  "tagline": "Finds the two days a year the sun stands overhead anywhere in Indonesia, with dates checked against BMKG",
+  "glance": {
+    "for": "Curious residents, science teachers and students across Indonesia",
+    "result": "Live in two languages, 75 of 76 BMKG dates matched exactly"
+  },
+  "skills": [
+    "Scientific computing",
+    "Test-driven validation",
+    "Science communication",
+    "Web performance"
+  ],
   "categoryTags": [
     "Personal Project",
     "Astronomy",
@@ -20,6 +30,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/zero-shadow-day/en/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/zero-shadow-day",
   "heroImage": "/images/projects/zero-shadow-day/hero.webp",
   "order": 36,
@@ -27,20 +38,50 @@
   "metrics": [
     {
       "value": "75/76",
-      "label": "Exact matches vs BMKG's official tables; all 76 within a day"
+      "label": "dates matching BMKG's official tables exactly"
+    },
+    {
+      "value": "38",
+      "label": "provincial capitals checked against BMKG"
+    },
+    {
+      "value": "~110 KB",
+      "label": "of JavaScript, including a hand-built 3D scene"
     },
     {
       "value": "0",
-      "label": "Astronomy / date / timezone libraries — the engine is hand-written"
-    },
-    {
-      "value": "~110KB",
-      "label": "Gzipped JS, with a hand-rolled 3D scene, under a 150KB budget"
-    },
-    {
-      "value": "2",
-      "label": "Zero-shadow dates a year, found by search rather than formula"
+      "label": "network requests at runtime"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Menemukan dua hari setahun saat matahari tepat di atas kepala di seluruh Indonesia, dicek dengan tabel BMKG",
+    "glance": {
+      "for": "Warga yang penasaran, guru sains, dan siswa di seluruh Indonesia",
+      "result": "Live dalam dua bahasa, 75 dari 76 tanggal BMKG cocok persis"
+    },
+    "skills": [
+      "Komputasi ilmiah",
+      "Validasi berbasis tes",
+      "Komunikasi sains",
+      "Performa web"
+    ],
+    "metrics": [
+      {
+        "value": "75/76",
+        "label": "tanggal cocok persis dengan tabel resmi BMKG"
+      },
+      {
+        "value": "38",
+        "label": "ibu kota provinsi dicocokkan dengan BMKG"
+      },
+      {
+        "value": "~110 KB",
+        "label": "JavaScript, termasuk adegan 3D buatan sendiri"
+      },
+      {
+        "value": "0",
+        "label": "permintaan jaringan saat runtime"
+      }
+    ]
+  }
 }

@@ -1,7 +1,17 @@
 {
   "slug": "nusantara-languages",
   "title": "Nusantara Languages",
-  "tagline": "An interactive map of Indonesia's 726 languages, coloured by family, with a genealogical tree wired to the map — hover a branch and every territory in that group lights up, and the other way around",
+  "tagline": "A map of Indonesia's 726 languages, linked to their family tree so each branch lights up its territory",
+  "glance": {
+    "for": "Students, linguists and anyone curious about Indonesia's languages",
+    "result": "Live in two languages, 726 languages mapped, fully static and offline"
+  },
+  "skills": [
+    "Geospatial data",
+    "Data visualisation",
+    "Open data licensing",
+    "Accessibility"
+  ],
   "categoryTags": [
     "Personal Project",
     "Data Platform",
@@ -21,6 +31,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/nusantara-languages/en/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/nusantara-languages",
   "heroImage": "/images/projects/nusantara-languages/hero.webp",
   "order": 33,
@@ -28,20 +39,50 @@
   "metrics": [
     {
       "value": "726",
-      "label": "Languages across 56 families, map ↔ tree bound"
+      "label": "Indonesian languages on one linked map"
+    },
+    {
+      "value": "56",
+      "label": "language families in the tree"
     },
     {
       "value": "58%",
-      "label": "Real speaker polygons — the rest shown honestly as points"
+      "label": "languages with a mapped speaker area"
     },
     {
       "value": "0",
-      "label": "Mapping/Newick libraries — hand-built"
-    },
-    {
-      "value": "Refused",
-      "label": "A CC-BY-NC source, rather than misuse it"
+      "label": "network requests at runtime"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Peta 726 bahasa di Indonesia, terhubung ke pohon silsilahnya sehingga setiap cabang menyalakan wilayahnya",
+    "glance": {
+      "for": "Pelajar, linguis, dan siapa pun yang penasaran dengan bahasa-bahasa di Indonesia",
+      "result": "Live dalam dua bahasa, 726 bahasa dipetakan, statis penuh dan offline"
+    },
+    "skills": [
+      "Data geospasial",
+      "Visualisasi data",
+      "Lisensi data terbuka",
+      "Aksesibilitas"
+    ],
+    "metrics": [
+      {
+        "value": "726",
+        "label": "bahasa Indonesia dalam satu peta terhubung"
+      },
+      {
+        "value": "56",
+        "label": "rumpun bahasa di pohon silsilah"
+      },
+      {
+        "value": "58%",
+        "label": "bahasa dengan peta wilayah penutur"
+      },
+      {
+        "value": "0",
+        "label": "permintaan jaringan saat runtime"
+      }
+    ]
+  }
 }

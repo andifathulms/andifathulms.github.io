@@ -2,35 +2,51 @@
 
 ## The problem
 
-Indonesia is the most seismically active country on Earth, and there's no shortage of apps that list recent earthquakes. But a list answers the wrong question. The question people actually have is personal: *"Is my city dangerous? Should I worry? Is it worse here than in Jakarta?"*
+Indonesia is the most seismically active country on Earth, and plenty of apps list the latest earthquakes. A list answers the wrong question. What people actually ask is personal: is my city dangerous, should I worry, is it worse here than in Jakarta?
 
-Two structural gaps make that hard to answer. **BMKG**, the official Indonesian agency, publishes only its *last 15 events* per feed — authoritative on what just happened, silent on patterns. **USGS** has the full historical archive, but it's global, English, and returns raw GeoJSON no ordinary resident can use. GempaWatch merges the two — USGS for historical depth, BMKG for live authority and the smaller *felt* quakes USGS never records — and turns the combined dataset into a plain-language risk profile for a specific point on the map.
+Two gaps make that hard to answer. BMKG, Indonesia's official agency, publishes only its last 15 events per feed, with no history to query. USGS keeps the full archive, but it's global, in English, and returned as raw map data. I built GempaWatch for residents checking their own area, coastal families thinking about tsunamis, students, and journalists who need facts fast during breaking news.
 
-## The approach
+## What I built
 
-### Spatial questions need a spatial database
+### I merged the national feed with the global archive
 
-Every meaningful question here is geographic — "events within 100km of here", "nearest fault line", "which region is this point in". Doing that with plain latitude/longitude columns means either wrong answers (Euclidean distance on a sphere) or full-table scans across ~70,000 events. PostGIS makes them indexed geographic queries instead. Regional profiles aggregate the entire history per region — far too expensive to run on page load — so a nightly Celery task rebuilds all profiles and the API just reads the cached result. The one exception is the "check my exact location" tool: one point, one radius, cheap enough to run live.
+USGS gives the historical depth. BMKG gives local authority and the smaller felt quakes that USGS never records. When both report the same quake, within five minutes and 50 km of each other, I keep one record and let BMKG's version win. It is the more accurate source for Indonesian events. The merged dataset answers geographic questions, like "events within 100 km of here" or "nearest fault", with a spatial database that indexes them properly.
 
-### One honest number, not four raw counts
+### One score from 0 to 100, with every weight published
 
-Nobody can interpret "217 M4+ events, 14 M5+, 2 M6+". A transparent weighted 0–100 score does the interpreting — frequency (40 points), largest recorded magnitude (30), share of shallow, more-damaging quakes (15), and closeness to a known fault (15) — every weight documented on a public methodology page. Regions are also ranked into a national percentile, so a resident gets *"more seismically active than 84% of Indonesia"* rather than a bare number. And never predictive language: historical framing only, with an explicit note that this is **not** a tsunami warning system and a link to BMKG's official alerts.
+Nobody can read "217 events above magnitude 4, 14 above 5, 2 above 6". I combine them into one score: frequency counts for 40 points, the largest recorded magnitude for 30, the share of shallow quakes for 15, and closeness to a known fault for 15. The methodology page lists every weight. Each region also gets a national percentile, so a resident reads "more active than 84% of Indonesia". The site describes history only. It states that it is not a tsunami warning system and links to BMKG's official alerts.
 
-### The pivot: the CI pipeline became the data pipeline
+### When the server went away, the build became the pipeline
 
-The original design was a server — Django on a VM, Celery polling every five minutes. A month in, the project pivoted to a **backendless static build on GitHub Pages**, which created a cascade of real problems, each solved rather than papered over:
+The first design was a server polling for new quakes every five minutes. About a month in, I moved the public site to GitHub Pages, with no backend. A scheduled job now fetches new events, rebuilds the profiles and publishes the site. To freeze the API, I run the real API code and save its answers as files that mirror the live URLs. The data can't drift from what the server would return.
 
-- **Freezing the API without payload drift.** Rather than hand-write fixtures, a command drives the *real* DRF views and dumps their output to a JSON tree mirroring the live URLs. Two API clients sit behind one interface, chosen by a build-time constant so the unused one is tree-shaken out.
-- **Running the risk engine in the browser.** With no backend, single-point checks couldn't hit Django, so the Python engine was ported to TypeScript. Because two implementations of a methodology *will* silently diverge, the port is gated by **golden fixtures**: Django's output is pinned at 39 points, and a test suite asserts the TypeScript reproduces every one exactly. The deploy **refuses to ship on mismatch** — a divergence would mean the static site reports different risk numbers than the API.
-- **Loading ~70,000 events on a phone.** The client engine packs events into parallel typed arrays — ~1.1 MB instead of tens of MB of JS objects — and stays Float64, because Float32 can't hold a magnitude like 6.6 exactly and would reintroduce the very mismatch the fixtures exist to catch.
-- **Not losing BMKG history.** BMKG exposes only its last 15 events, so every older record survives only because a past run saved it. The accumulated database is carried between ephemeral CI runs in the Actions cache — a working copy, not a backup — so it's backed up daily as workflow artifacts plus permanent monthly release-asset snapshots, both `continue-on-error` so a failed backup can never block publishing earthquake data.
+### The browser runs the same risk maths, checked at 39 points
 
-### Honest about the edges
+Without a server, the "am I in a risk zone?" check has to run on the phone. I ported the risk engine from Python to TypeScript. Two copies of a formula drift apart over time, so I pinned the server's answers at 39 test points. The deploy stops if the browser version disagrees on any of them. To load about 70,000 events on a phone, I pack them into compact number arrays of about 1.1 MB.
 
-The README states the costs plainly: static freshness is 70–90 minutes (GitHub's scheduler defers under load), email alerts need the server, and coverage is 24 admin regions — so the national percentile is against those 24, not all ~514 kabupaten. Nothing is faked; routes that need a backend are named `*.live.tsx` and only registered for live builds.
+### Earthquake history is backed up twice
 
-## Outcome
+BMKG only shows its last 15 events, so every older BMKG record exists because an earlier run saved it. Between runs, the database lives in a build cache that can be cleared at any time. I back it up daily, and keep a permanent snapshot every month. If a backup fails, publishing still goes ahead. New earthquake data matters more than the backup.
 
-Live and public on GitHub Pages, serving **69,641 earthquake events** spanning 1970–2026, merged and deduplicated across BMKG and USGS — BMKG wins any duplicate, as the locally authoritative source. It ships a live 24-hour map, a geolocation "am I in a risk zone?" report, risk profiles for 24 regions with magnitude-frequency, depth, and event-timeline charts, a region leaderboard and side-by-side compare, a fault and hazard map, and shareable risk cards.
+## Result
 
-The shipped static site is genuinely production — it self-updates on a schedule, carries real accumulated data, has a two-tier backup strategy, and gates every deploy on a correctness test. Behind it sits a complete Django + Celery server application — the canonical implementation, runnable under Docker Compose. Built solo: 51 commits over ~5 weeks, ~19,000 lines changed, and a 320-line CI/CD workflow that doubles as the data pipeline.
+GempaWatch is live on GitHub Pages with 69,641 earthquakes from 1970 to 2026, merged across BMKG and USGS. The target in the plan was more than 10,000. The site has a live 24-hour map, a location risk report, profiles for 24 regions with charts, a region leaderboard and side-by-side compare, a fault and hazard map, and shareable risk cards. The full server version, with email alerts, is complete and runs under Docker Compose, but isn't hosted. I built it alone over about five weeks, in July and August 2026.
+
+## What I'd do next
+
+- Coverage is 24 regions, so the national percentile compares against those 24. Reaching all ~514 regencies and cities needs a fuller boundary dataset.
+- The static site refreshes every 70 to 90 minutes in practice, because GitHub delays scheduled jobs under load. Email alerts need the hosted server.
+
+## Under the hood
+
+- Backend: Django with GeoDjango and PostGIS, 7 apps and 7 models, `djangorestframework-gis` for GeoJSON straight into Leaflet. Regional profiles are rebuilt nightly by a Celery task; the single-point check is the one live computation.
+- Deduplication: events within 5 minutes and 50 km are one record; a BMKG report overwrites a stored USGS one.
+- Score weights: frequency 40, max magnitude 30, shallow share 15, fault proximity 15. BMKG attribution is a legal requirement, rendered by a `SourceAttribution` component on every surface that shows their data.
+- `manage.py export_static` drives the real DRF views and writes a JSON tree matching the live URLs. `api.live.ts` and `api.static.ts` share one interface, chosen by a build-time constant so the unused client is tree-shaken out.
+- `manage.py export_risk_fixtures` pins Django's output at 39 points. A Vitest suite asserts the TypeScript port matches every one, against freshly regenerated fixtures in the deploy workflow. Convention: change Python first, regenerate fixtures, then update the port.
+- Events sit in parallel typed arrays, about 1.1 MB. They stay Float64 because Float32 can't hold a magnitude like 6.6 exactly, which would reintroduce the mismatch the fixtures exist to catch.
+- The database travels between CI runs in the GitHub Actions cache (evicted after 7 days unused). Backups: daily workflow artifacts kept 90 days, plus monthly release-asset snapshots. Release assets, because committing ~8 MB a month to git would grow every clone by ~100 MB a year. Both steps are `continue-on-error`. A cache miss self-heals from a full USGS bootstrap, minus BMKG's felt quakes.
+- Cron is set to 30 minutes; observed freshness is 70–90 minutes. Per-region OpenGraph images fall back to the site card, because Next 14 can't prerender metadata image routes under `output: export`. Backend-only routes are named `*.live.tsx` and registered only for live builds.
+- The PRD's "Fault Line" palette was rebuilt as "Seismograph". The muted text tone measured about 3.4:1 against cards, below WCAG AA, so every text token was retuned. Hex colours also broke Tailwind opacity modifiers silently; every colour is now declared once as space-separated RGB channels.
+- Reference data: 6 fault features, 24 admin region boundaries, 6 curated historical disasters (Aceh 2004 to Cianjur 2022). Beyond the PRD: percentiles, leaderboard, compare, the "Siap Gempa" preparedness checklist and location-watch email subscriptions.
+- About 19 API endpoints, 11 frontend routes, about 40 components, a 320-line CI/CD workflow. 51 commits from 1 July to 4 August 2026; about 2,800 lines of backend Python and 7,800 of frontend code.

@@ -1,7 +1,17 @@
 {
   "slug": "gempa-watch",
   "title": "GempaWatch",
-  "tagline": "A free public site that tells anyone in Indonesia how earthquake-prone their own area is — using 57 years of official records, not just the latest tremor",
+  "tagline": "An earthquake risk site that tells anyone in Indonesia how active their area is, from 69,641 recorded quakes",
+  "glance": {
+    "for": "Indonesian residents, journalists and students checking local earthquake risk",
+    "result": "Live on GitHub Pages, 57 years of quakes, 24 regions profiled"
+  },
+  "skills": [
+    "Geospatial data",
+    "Risk scoring",
+    "Data pipelines",
+    "Static site architecture"
+  ],
   "categoryTags": [
     "Personal Project",
     "Data Platform",
@@ -23,6 +33,7 @@
   "role": "Solo Developer",
   "timeframe": "Jul – Aug 2026",
   "liveUrl": "https://andifathulms.github.io/gempawatch/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/gempawatch",
   "heroImage": "/images/projects/gempa-watch/hero.webp",
   "order": 16,
@@ -30,20 +41,50 @@
   "metrics": [
     {
       "value": "69,641",
-      "label": "Earthquake events, 1970–2026"
+      "label": "earthquakes merged from BMKG and USGS"
+    },
+    {
+      "value": "1970–2026",
+      "label": "years of earthquake records covered"
     },
     {
       "value": "24",
-      "label": "Regions risk-profiled"
+      "label": "regions with a published risk profile"
     },
     {
       "value": "39",
-      "label": "Python≡TypeScript parity assertions"
-    },
-    {
-      "value": "51",
-      "label": "Commits, solo over ~5 weeks"
+      "label": "test points the browser engine must match"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Situs risiko gempa yang menunjukkan seberapa aktif daerah Anda, dari 69.641 gempa yang tercatat",
+    "glance": {
+      "for": "Warga, jurnalis, dan pelajar yang mengecek risiko gempa di daerahnya",
+      "result": "Live di GitHub Pages, 57 tahun data gempa, 24 wilayah diprofilkan"
+    },
+    "skills": [
+      "Data geospasial",
+      "Penilaian risiko",
+      "Pipeline data",
+      "Arsitektur situs statis"
+    ],
+    "metrics": [
+      {
+        "value": "69.641",
+        "label": "gempa gabungan dari BMKG dan USGS"
+      },
+      {
+        "value": "1970–2026",
+        "label": "rentang tahun catatan gempa"
+      },
+      {
+        "value": "24",
+        "label": "wilayah dengan profil risiko terbuka"
+      },
+      {
+        "value": "39",
+        "label": "titik uji yang wajib cocok di browser"
+      }
+    ]
+  }
 }

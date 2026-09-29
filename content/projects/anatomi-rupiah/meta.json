@@ -1,7 +1,17 @@
 {
   "slug": "anatomi-rupiah",
   "title": "Anatomi Rupiah",
-  "tagline": "A bilingual explainer that teaches how to spot the genuine security features on Indonesian banknotes — using original illustrated diagrams instead of photos of money, because photographing currency for this is legally restricted",
+  "tagline": "Explains how to check the security features of Indonesian banknotes, drawn as diagrams marked SPESIMEN by law",
+  "glance": {
+    "for": "Anyone in Indonesia who wants to understand banknote security features",
+    "result": "Live in two languages, 10 denominations, every claim cited"
+  },
+  "skills": [
+    "Compliance engineering",
+    "Technical illustration",
+    "Science communication",
+    "WebGL"
+  ],
   "categoryTags": [
     "Personal Project",
     "Education",
@@ -22,6 +32,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/anatomi-rupiah/id/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/anatomi-rupiah",
   "heroImage": "/images/projects/anatomi-rupiah/hero.webp",
   "order": 35,
@@ -29,20 +40,50 @@
   "metrics": [
     {
       "value": "10",
-      "label": "Denominations, each schematic marked SPESIMEN in its own geometry"
+      "label": "banknote denominations explained feature by feature"
     },
     {
       "value": "8",
-      "label": "Mechanism explainers — hand-drawn SVG cross-sections, all cited"
+      "label": "security mechanisms drawn as cited diagrams"
+    },
+    {
+      "value": "8",
+      "label": "legal compliance checks that gate every build"
     },
     {
       "value": "0",
-      "label": "Photos of banknotes — a build gate blocks raster note imagery"
-    },
-    {
-      "value": "WebGL",
-      "label": "Tilt & UV optics computed from real thin-film physics, no 3D lib"
+      "label": "photos of banknotes anywhere on the site"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Penjelasan cara memeriksa fitur pengaman uang rupiah, digambar sebagai diagram bertanda SPESIMEN sesuai undang-undang",
+    "glance": {
+      "for": "Siapa pun di Indonesia yang ingin memahami fitur pengaman uang",
+      "result": "Live dalam dua bahasa, 10 pecahan, setiap klaim bersumber"
+    },
+    "skills": [
+      "Rekayasa kepatuhan",
+      "Ilustrasi teknis",
+      "Komunikasi sains",
+      "WebGL"
+    ],
+    "metrics": [
+      {
+        "value": "10",
+        "label": "pecahan uang dijelaskan per fitur"
+      },
+      {
+        "value": "8",
+        "label": "mekanisme pengaman digambar sebagai diagram bersumber"
+      },
+      {
+        "value": "8",
+        "label": "cek kepatuhan hukum yang menahan setiap build"
+      },
+      {
+        "value": "0",
+        "label": "foto uang di seluruh situs"
+      }
+    ]
+  }
 }

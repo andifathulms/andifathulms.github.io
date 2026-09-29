@@ -1,7 +1,17 @@
 {
   "slug": "falak-visualizer",
   "title": "Falak",
-  "tagline": "Hijri calendar, prayer times, and qibla direction computed from real moon/sun astronomy — every verdict shows its numbers",
+  "tagline": "A Hijri calendar, prayer time and qibla tool that shows the moon and sun numbers behind every answer",
+  "glance": {
+    "for": "Indonesian Muslims, ilmu falak teachers and curious developers",
+    "result": "Live and free, three hisab methods compared, engine checked against JPL"
+  },
+  "skills": [
+    "Scientific computing",
+    "Test-driven validation",
+    "Browser performance",
+    "Data visualisation"
+  ],
   "categoryTags": [
     "Personal Project",
     "Web App",
@@ -22,27 +32,58 @@
   "role": "Fullstack Developer",
   "timeframe": "Jul 2026",
   "liveUrl": "https://andifathulms.github.io/falak-visualizer/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/falak-visualizer",
   "heroImage": "/images/projects/falak-visualizer/hero.webp",
   "order": 15,
   "featured": true,
   "metrics": [
     {
+      "value": "3",
+      "label": "crescent visibility methods compared side by side"
+    },
+    {
+      "value": "3,255",
+      "label": "points on the Indonesia visibility map"
+    },
+    {
+      "value": "50",
+      "label": "historical new moons checked against JPL"
+    },
+    {
       "value": "$0",
-      "label": "Hosting — runs in the browser"
-    },
-    {
-      "value": "~2,083",
-      "label": "Golden vectors pinning both engines"
-    },
-    {
-      "value": "2",
-      "label": "Engine ports, one oracle"
-    },
-    {
-      "value": "86",
-      "label": "Commits, single author"
+      "label": "hosting, everything runs in the browser"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Alat kalender Hijriah, jadwal salat, dan arah kiblat yang menampilkan angka bulan dan matahari di balik setiap jawaban",
+    "glance": {
+      "for": "Umat Muslim Indonesia, pengajar ilmu falak, dan developer yang penasaran",
+      "result": "Live dan gratis, tiga metode hisab dibandingkan, mesin dicek dengan JPL"
+    },
+    "skills": [
+      "Komputasi ilmiah",
+      "Validasi berbasis tes",
+      "Performa browser",
+      "Visualisasi data"
+    ],
+    "metrics": [
+      {
+        "value": "3",
+        "label": "metode visibilitas hilal dibandingkan berdampingan"
+      },
+      {
+        "value": "3.255",
+        "label": "titik di peta visibilitas Indonesia"
+      },
+      {
+        "value": "50",
+        "label": "bulan baru historis dicocokkan dengan JPL"
+      },
+      {
+        "value": "$0",
+        "label": "biaya hosting, semua jalan di browser"
+      }
+    ]
+  }
 }

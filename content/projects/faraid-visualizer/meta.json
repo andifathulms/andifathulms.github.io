@@ -1,7 +1,17 @@
 {
   "slug": "faraid-visualizer",
   "title": "Faraid Visualizer",
-  "tagline": "Islamic inheritance calculator that shows the full reasoning — every share traced to a Qur'an, hadith, or Indonesian state-law citation, with KHI and classical Syafi'i run side by side",
+  "tagline": "An Islamic inheritance calculator that traces every share to a cited source, comparing KHI and classical Syafi'i",
+  "glance": {
+    "for": "Indonesian families, ustadz, notaries and religious court staff",
+    "result": "Live and free, runs entirely in the browser, nothing leaves the device"
+  },
+  "skills": [
+    "Rules engines",
+    "Legal and religious domain modelling",
+    "Privacy by design",
+    "Python in the browser"
+  ],
   "categoryTags": [
     "Personal Project",
     "Web App",
@@ -22,27 +32,58 @@
   "role": "Fullstack Developer",
   "timeframe": "Jul – Aug 2026",
   "liveUrl": "https://andifathulms.github.io/faraid-visualizer/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/faraid-visualizer",
   "heroImage": "/images/projects/faraid-visualizer/hero.webp",
   "order": 15.5,
   "featured": false,
   "metrics": [
     {
-      "value": "0",
-      "label": "Third-party deps in the rule engine"
-    },
-    {
       "value": "34",
-      "label": "Rules mapped to cited sources"
+      "label": "cited sources behind every rule"
     },
     {
       "value": "61",
-      "label": "Worked examples in the validation bank"
+      "label": "worked examples passed by KHI and Syafi'i"
     },
     {
       "value": "5",
-      "label": "Rule sets — KHI + 4 classical madhab"
+      "label": "rule sets, KHI plus four madhab"
+    },
+    {
+      "value": "0",
+      "label": "inheritance data sent off the device"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Kalkulator waris Islam yang menelusuri setiap bagian ke sumber rujukannya, membandingkan KHI dan Syafi'i klasik",
+    "glance": {
+      "for": "Keluarga, ustadz, notaris, dan staf pengadilan agama di Indonesia",
+      "result": "Live dan gratis, berjalan penuh di browser, tidak ada data yang keluar"
+    },
+    "skills": [
+      "Mesin aturan",
+      "Pemodelan domain hukum dan agama",
+      "Privasi sejak desain",
+      "Python di browser"
+    ],
+    "metrics": [
+      {
+        "value": "34",
+        "label": "sumber rujukan di balik setiap aturan"
+      },
+      {
+        "value": "61",
+        "label": "contoh soal lolos untuk KHI dan Syafi'i"
+      },
+      {
+        "value": "5",
+        "label": "set aturan: KHI dan empat mazhab"
+      },
+      {
+        "value": "0",
+        "label": "data warisan yang dikirim keluar perangkat"
+      }
+    ]
+  }
 }
