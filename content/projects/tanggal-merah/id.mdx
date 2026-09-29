@@ -2,30 +2,50 @@
 
 ## Masalahnya
 
-Indonesia menerbitkan hari liburnya tiap tahun lewat SKB — keputusan bersama tiga menteri — yang menetapkan dua jenis hari libur berbeda: **libur nasional** (hari libur nasional, gratis) dan **cuti bersama** (hari cuti kolektif yang **dipotong dari hak cuti tahunan 12 hari Anda** — tetapi hanya untuk sebagian orang).
+Pekerja kantoran di Indonesia merencanakan cuti tahunan berdasarkan hari libur yang ditetapkan setiap tahun lewat SKB tiga menteri. SKB itu mengatur dua jenis hari libur. Libur nasional gratis. Cuti bersama bisa memotong jatah cuti tahunan 12 hari, tetapi hanya untuk sebagian orang.
 
-Aturannya bercabang menurut status kepegawaian, dan pemberitaan tentangnya bertentangan: setidaknya satu media membalik penetapannya sepenuhnya. Untuk 2026 ada **8 hari cuti bersama** terhadap hak 12 hari, jadi pekerja swasta di perusahaan yang tutup dan memotong tersisa **4 hari**, sementara rekannya di perusahaan yang tak tutup menyimpan seluruh 12. Kebanyakan orang menemukan ini di bulan November saat mencoba memesan perjalanan — dan setiap kalender libur lain memperlakukan ini sebagai satu "libur" tak terbedakan dan tak pernah memberi tahu Anda apa harga hari-hari itu. Masalah kedua yang dipecahkannya: dengan anggaran cuti, hari mana yang Anda beli? Satu hari kerja di antara libur dan akhir pekan mengubah satu hari cuti menjadi rentang empat hari, dan menghitung itu dengan mata di dua belas bulan itu melelahkan dan rawan salah.
+Untuk 2026 ada 8 hari cuti bersama. Pekerja swasta yang kantornya tutup dan memotong cuti bersama dari jatahnya hanya tersisa 4 hari cuti. Rekannya di kantor yang tetap buka masih punya 12 hari. Pemberitaan tentang aturan ini saling bertentangan, dan setidaknya satu media membaliknya sama sekali. Kebanyakan orang baru sadar di bulan November, saat mau memesan tiket liburan. Kalender libur lain menampilkan semua hari ini sebagai "libur" yang sama dan tidak pernah menyebut berapa biayanya bagi jatah cuti Anda.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Hari libur didekretkan, bukan dihitung
+### Status kepegawaian menentukan jawabannya
 
-Idul Fitri, Nyepi, Waisak, dan Imlek semuanya punya penentuan astronomis atau kalendris — tetapi hari libur *resmi* adalah apa pun yang dikatakan dekret pemerintah, dan dekret itu sendiri menunda tanggal Islam ke keputusan Kementerian Agama terpisah. Maka aplikasi mengirim **data dekret yang ditranskrip per tahun dan tak menghitung tanggal keagamaan mana pun.** Tahun tanpa dekret terbit mengembalikan *penolakan terstruktur* yang menyebut celahnya, tak pernah kalender yang diekstrapolasi — karena salah dengan percaya diri soal apakah seseorang punya hari libur adalah satu-satunya mode kegagalan yang benar-benar penting di sini. Setiap libur membawa kutipannya (tanggal, jenis, nomor dekret, tanggal penandatanganan) dan build menolak entri tak terkutip, tanggal ganda, atau placeholder tersisa.
+Saya menjadikan status kepegawaian sebagai masukan pertama: ASN, swasta dengan potongan, dan swasta tanpa potongan. Setiap cabang mengutip peraturan asalnya. Halaman depan menampilkan empat kartu status. Tiga menyisakan 12 hari, satu menyisakan 4. Di kalender, aplikasi menandai hari cuti bersama mana saja yang dipotong oleh pemberi kerja.
 
-### Pertentangan dicatat dan diberi harga, bukan diselesaikan diam-diam
+### Hari libur diambil dari SKB, tidak dari rumus
 
-Di mana sumber tak sepakat soal aturan cuti bersama, aplikasi menyimpan bacaan yang bersaing beserta sumbernya — dan halaman ledger *memberi harga* bacaan yang ditolak, menyatakan apa yang akan dilakukannya pada hak Anda jika itu benar. Status kepegawaian adalah input first-class (ASN, swasta-dengan-potongan, swasta-tanpa adalah tiga keluaran dengan tiap cabang mengutip instrumennya, bukan boolean), dan lembar menandai *hari mana* cuti bersama yang dipotong pemberi kerja, dengan tes yang menegaskan tanda per-hari berjumlah sama dengan total ledger di tiap tahun, pola, dan status.
+Idulfitri, Nyepi, Waisak, dan Imlek semuanya bisa diperkirakan dari bulan atau kalender. Hari libur resminya tetap mengikuti SKB, dan SKB itu menyerahkan tanggal-tanggal Islam ke keputusan terpisah dari Kementerian Agama. Karena itu saya menyalin SKB setiap tahun dan tidak menghitung tanggal keagamaan apa pun. Tahun yang belum punya SKB mendapat penolakan yang jelas dan menyebut celahnya. Salah dengan yakin soal apakah seseorang libur adalah kegagalan yang paling penting dihindari di sini.
 
-### Pengoptimalnya eksak, bukan serakah
+### Setiap hari libur membawa sumbernya
 
-Masalahnya cukup kecil untuk diselesaikan dengan benar: enumerasi celah antara blok-libur tetap, biayai tiap celah dalam hari kerja, dan pilih di bawah anggaran dengan DP — dan **oracle brute-force** dua puluh baris (tak pernah di-import di luar tes) ditulis *lebih dulu*, jadi "optimal" adalah klaim alih-alih harapan. Oracle itu menangkap bug nyata: objektif *rentang tunggal terpanjang* tak bisa memakai ulang DP dengan `max` ditukar masuk — itu mengembalikan angka yang benar dan rencana yang salah — jadi ia butuh algoritma yang sepenuhnya berbeda, dan tiap objektif punya oracle-nya sendiri. Tak ada objek `Date` di mesin: hari adalah nomor hari integer, posisi pekan adalah aritmetika, dan tahun selalu argumen eksplisit.
+Setiap hari libur mencatat tanggal, jenis, nomor SKB, dan tanggal penandatanganannya. Build gagal kalau ada hari libur tanpa kutipan, tanggal ganda, atau placeholder yang tertinggal. Saat sumber berbeda pendapat tentang aturan cuti bersama, halaman aturan menampilkan kedua tafsiran beserta sumbernya. Halaman itu juga menyebut apa akibatnya bagi jatah cuti Anda kalau tafsiran yang ditolak ternyata benar.
 
-### Dari "benar" ke "dapat dipahami"
+### Perencana cuti mencari hari terbaik secara tepat
 
-Mesin selesai dan terverifikasi, lalu rentetan panjang kerja `pedagogy`/`design`/`a11y` membangun ulang front-end untuk pembaca yang belum pernah mendengar cuti bersama: contoh bekerja dengan tanggal nyata sebelum kontrol apa pun, kutipan dipindah ke kartu yang menerapkan aturan, dan tiap objektif ditampilkan lewat apa yang *dihasilkannya*. Pelajaran jujur yang dicatat untuk klien: aritmetika yang terbukti benar tak berbuat apa-apa bagi pembaca yang tak tahu aturannya ada. Dan satu hal yang menghalangi klaim "terverifikasi" penuh didokumentasikan alih-alih ditutupi — paket data 2026 ditandai `perluVerifikasi` (tanggal ditranskrip dari kalender yang beredar luas tetapi nomor dekret belum dicek terhadap dokumen sumber), jadi situs membawa banner alih-alih menyajikan fabrikasi yang masuk akal sebagai fakta.
+Satu hari kerja yang terjepit di antara hari libur dan akhir pekan bisa mengubah satu hari cuti menjadi libur empat hari. Mencari celah seperti ini di dua belas bulan dengan mata saja melelahkan dan mudah keliru. Perencana memilih hari terbaik sesuai jatah Anda, dan saya mengeceknya dengan cara lambat yang mencoba semua kombinasi. Pengecekan itu menemukan sebuah bug. Merencanakan libur tunggal terpanjang butuh metode yang berbeda dari merencanakan total hari libur terbanyak.
 
-## Hasil
+### Kalender yang bisa diikuti orang yang belum pernah dengar aturannya
 
-Live dan publik, dwibahasa, sepenuhnya statis, offline setelah muat pertama. Ia menyajikan **lembar tahun** — dua belas bulan ditata sebagai kalender dinding Indonesia, libur nasional merah dan cuti bersama amber (hal berbeda dengan harga berbeda), dengan rentetan hari libur berturut digambar sebagai batang kontinu, jadi mengaktifkan satu hari cuti dan menyaksikan dua blok menyatu menjadi satu rentang adalah momen sentral aplikasi; empat kartu status di halaman muka (tiga menyisakan 12 hari, satu menyisakan 4); saran jembatan eksak dengan aritmetika leverage dipaparkan ("1 hari → 4 hari libur"); kurva marginal tak-monoton yang menunjukkan apa yang sebenarnya dibeli hari cuti ke-*n*; "libur yang dimakan akhir pekan" untuk pekan lima- dan enam-hari; dan ekspor ICS + PNG dengan seluruh keadaan di hash URL.
+Setelah hitungannya benar, saya membangun ulang antarmukanya untuk pembaca yang tidak tahu aturan ini ada. Contoh dengan tanggal nyata muncul sebelum kontrol apa pun. Setiap kutipan diletakkan di kartu yang menerapkannya. Setiap bulan bisa dijelajahi dengan keyboard, dan halaman mengumumkan hasilnya saat berubah.
 
-Dibangun sendiri dalam build terkonsentrasi — ~9.150 baris lintas mesin, UI, dan data, 134 tes, di atas **tiga dependensi runtime** dan tanpa pustaka tanggal, kalender, atau libur (Zod hanya saat build — sebuah commit secara eksplisit memindahkannya keluar dari bundle browser). Ia menyatakan dengan lugas bahwa ini proyek pribadi, bukan nasihat hukum ketenagakerjaan, dan bahwa kebijakan perusahaan mengatur cuti bersama di sektor swasta.
+## Hasilnya
+
+Tanggal Merah sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris, dan bisa dipakai offline setelah dimuat pertama kali. Tampilan tahunannya disusun seperti kalender dinding, dengan libur nasional berwarna merah dan cuti bersama berwarna kuning tua. Pilih satu hari cuti, dan dua blok libur menyatu menjadi satu batang. Aplikasi juga menunjukkan apa yang didapat dari setiap tambahan hari cuti dan hari libur mana yang jatuh di akhir pekan, untuk lima dan enam hari kerja. Cakupannya 2026: 17 hari libur nasional dan 8 hari cuti bersama, masing-masing dengan sumber. Situs ini menyatakan dirinya proyek pribadi, bukan nasihat hukum ketenagakerjaan, dan bahwa cuti bersama di sektor swasta mengikuti kebijakan perusahaan. Saya membangunnya pada 12 dan 13 Agustus 2026.
+
+## Langkah berikutnya
+
+- Mencocokkan nomor SKB 2026 dengan dokumen resminya. Tanggalnya diambil dari kalender 2026 yang beredar luas, jadi situs menampilkan banner sampai nomornya terverifikasi.
+- Menambah tahun lain begitu SKB-nya terbit, dan memungkinkan pengguna menambah libur daerah.
+
+## Di balik layar
+
+- Tidak ada objek `Date` di mesin. Hari berupa bilangan bulat, posisi dalam pekan dihitung dengan aritmetika, dan tahun selalu menjadi argumen eksplisit. UI mengonversinya di batas.
+- Data SKB ada di `data/skb/`. `pnpm rules:validate` berjalan paling awal dan sendirian di CI, sebelum typecheck, lint, tes, dan build. `data/skb/2026.json` bertanda `perluVerifikasi`, dengan nomor SKB dicatat sebagai `BELUM DIVERIFIKASI` dan langkah pengecekannya ada di `UPDATING.md`.
+- `data/contradictions/` menyimpan tafsiran yang bersaing tentang aturan cuti bersama, nilai yang dipakai aplikasi, dan alasannya.
+- Optimizer menelusuri celah di antara blok libur tetap, menghitung biaya tiap celah dalam hari kerja, lalu memilih sesuai jatah dengan DP. `lib/optimise/brute.ts`, oracle dua puluh baris yang tidak pernah diimpor di luar tes, di-commit lebih dulu. Tujuan libur terpanjang tidak bisa memakai DP dengan `max` (angkanya benar, rencananya salah), jadi memakai pemindaian berurutan dengan oracle sendiri.
+- "1 hari → 4 hari libur" mengukur kesinambungan. Hari yang didapat per hari cuti selalu 1,0; ada satu commit khusus untuk membetulkan kalimat itu.
+- Kurva marginal menjalankan ulang optimizer di setiap jatah. Kurvanya tidak monoton: jembatan dua hari tidak terjangkau dengan jatah satu hari, jadi hari kedua bisa lebih berharga dari hari pertama. Digambar manual dengan SVG.
+- Sebuah tes memastikan tanda potongan per hari berjumlah sama dengan total di ledger untuk setiap tahun, pola kerja, dan status.
+- Kuning tua hanya 2,48:1 di atas latar, jadi ekspor PNG memakai varian yang aman untuk teks. PNG digambar langsung di canvas tanpa rasterizer DOM. Ada ekspor ICS dan seluruh state tersimpan di hash URL.
+- Zod dipindah ke devDependencies karena validasi hanya terjadi saat build. Tiga dependensi runtime, tanpa library tanggal, kalender, atau hari libur.
+- Sekitar 9.150 baris, 134 tes di 16 berkas, 70 commit (14 aksesibilitas, 13 desain, 7 pedagogi).

@@ -1,7 +1,17 @@
 {
   "slug": "stemmer-visualizer",
   "title": "Stemmer Visualizer",
-  "tagline": "Takes an Indonesian word and shows, step by step, how the standard algorithm strips it to its root — including the steps it abandoned, and the cases where more than one root is genuinely possible",
+  "tagline": "A step-by-step view of how Indonesian words are cut to their roots, dead ends and double roots included",
+  "glance": {
+    "for": "Students, lecturers and developers working with Indonesian text",
+    "result": "Live in two languages; tested against Sastrawi on 315 words"
+  },
+  "skills": [
+    "Natural language processing",
+    "Rule engines",
+    "Algorithm visualization",
+    "Differential testing"
+  ],
   "categoryTags": [
     "Personal Project",
     "Language Tool",
@@ -20,27 +30,58 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/stemmer-visualizer/id/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/stemmer-visualizer",
   "heroImage": "/images/projects/stemmer-visualizer/hero.webp",
   "order": 21,
   "featured": false,
   "metrics": [
     {
-      "value": "44",
-      "label": "Stemming rules as cited data"
+      "value": "~30,000",
+      "label": "root words in an editable dictionary"
     },
     {
-      "value": "~30,000",
-      "label": "Root-word dictionary, swappable live"
+      "value": "44",
+      "label": "stemming rules stored as cited data"
     },
     {
       "value": "315",
-      "label": "Words checked vs Sastrawi, divergences classified"
+      "label": "words compared against Sastrawi, differences classified"
     },
     {
       "value": "0",
       "label": "NLP libraries at runtime"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Tampilan langkah demi langkah cara kata Indonesia dikupas ke kata dasarnya, termasuk jalan buntu dan akar ganda",
+    "glance": {
+      "for": "Mahasiswa, dosen, dan developer yang mengolah teks bahasa Indonesia",
+      "result": "Live dalam dua bahasa; diuji terhadap Sastrawi pada 315 kata"
+    },
+    "skills": [
+      "Pemrosesan bahasa alami",
+      "Mesin aturan",
+      "Visualisasi algoritma",
+      "Pengujian diferensial"
+    ],
+    "metrics": [
+      {
+        "value": "~30.000",
+        "label": "kata dasar di kamus yang bisa diubah"
+      },
+      {
+        "value": "44",
+        "label": "aturan stemming disimpan sebagai data bersumber"
+      },
+      {
+        "value": "315",
+        "label": "kata dibandingkan dengan Sastrawi, perbedaannya diklasifikasi"
+      },
+      {
+        "value": "0",
+        "label": "library NLP saat runtime"
+      }
+    ]
+  }
 }

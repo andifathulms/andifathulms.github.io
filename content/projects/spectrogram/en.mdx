@@ -2,33 +2,50 @@
 
 ## The problem
 
-A waveform — the squiggle everyone recognises — shows how *loud* a sound is, but not *what pitch* it is: a low hum and a high whistle look the same. A spectrogram answers the other question, and it's how speech recognition, music software, bird-call identification, and audio forensics all actually look at sound. Two audiences, and the project serves both:
+A waveform, the squiggle everyone recognises, shows how loud a sound is. It doesn't show pitch: a low hum and a high whistle look much the same. A spectrogram shows which pitches are present over time. It's how speech recognition, music software and bird-call apps look at sound.
 
-- **A curious learner** who has heard of "the Fourier transform" and wants it to become intuitive rather than an equation. The core lesson is the time–frequency tradeoff: you can't have sharp timing *and* sharp pitch at once — sharpening one blurs the other. Turned into a control you drag, it lands in about four seconds where a paragraph fails.
-- **A technical reviewer** evaluating whether the author can implement a non-trivial numerical algorithm correctly, not just call a library. The browser ships `AnalyserNode`, which draws a spectrogram in ten lines and proves nothing. This project's claim is the transform itself — and that it's *provably right*.
+I built this for two kinds of visitor. The first has heard of the Fourier transform and wants it to feel intuitive. The key idea is a trade-off: you can't have sharp timing and sharp pitch at once. The second is a technical reviewer. Browsers ship a built-in analyser that draws a spectrogram in ten lines, and that proves nothing about the person who used it. I wanted to write the transform myself and show that it's correct.
 
-There's also a trust problem: any site asking for microphone access owes the visitor a straight answer about where the audio goes. Here the answer is "nowhere", and it's structural — zero network requests at runtime, verified by a test *and* by a build-time check that fails the deploy.
+## What I built
 
-## The approach
+### I proved the maths before building any screen
 
-### The transform was verified before any interface existed
+A wrong transform still draws a convincing picture, and no amount of looking reveals the bug. So I wrote the transform and its tests first, and the interface came after. I set up four independent checks: a slow textbook version to compare against, an energy rule that must hold for every input, a round trip back to the original signal, and hand-checkable test signals. Each one catches mistakes the others miss.
 
-The first six commits are the FFT and its tests; the first UI commit is the seventh. The reasoning is specific: **a wrong FFT still draws a beautiful picture.** A subtly broken transform produces a plausible, attractive spectrogram, and no amount of looking reveals the bug. So four independent correctness signals were built first, each catching what the others miss: a naive O(n²) **DFT oracle** (the literal textbook definition, checked across every size and a seeded random corpus); **Parseval's identity** (one scalar that must hold for every input, catching scaling and indexing bugs); a **round trip** (FFT → inverse → original, catching normalisation errors); and **analytic fixtures** (DC, bin-centred sine, unit impulse, and the exact leakage kernel at a half-bin offset — each checkable by hand).
+### The trade-off is a control you drag
 
-### Speed came from data layout, not cleverness
+The main screen draws sound from your microphone or a sample as a scrolling picture, with the waveform above it. Hovering gives the exact time, pitch and loudness. The timing-versus-pitch trade-off is a control with three named positions, from "sharper in time" to "sharper in pitch". Dragging it teaches the idea faster than a paragraph. The raw settings sit behind an "advanced" fold.
 
-Real and imaginary parts live in separate `Float64Array`s rather than `{re, im}` objects; the transform runs in place; twiddle tables, window coefficients, and output buffers are allocated once per configuration and reused. Nothing is allocated per frame, because a garbage-collection pause at 60fps reads to a user as a broken app — so the benchmark asserts *flat heap growth* over a minute of sustained analysis, not just throughput. Analysis runs off the main thread in a Worker; the plate is a scrolling bitmap — a ring buffer of columns blitted as one `ImageData` per frame, never a redraw of the history.
+### Smooth on screen because nothing is thrown away
 
-### Privacy enforced by the build, not promised in copy
+At 60 frames a second, a memory clean-up pause looks like a broken app. I set up all the working memory once per setting and reused it, so the app allocates nothing per frame. The analysis runs in a background thread. The test that guards this measures memory growth over a full minute, as well as raw speed.
 
-A test scans source for any outbound reference, and a finalize step scans the *built output* for anything the browser would resolve — `src`, `<link href>`, `srcset`, `url()`, `@import` — plus a known-tracker denylist, failing the build if one appears. The one exception is four footer profile links, pinned individually by URL in both guards, because an anchor is not a fetch. The naive version of this check (fail on any `https://`) was rejected as unusable — framework error strings and licence headers contain URLs never fetched — so it targets references the browser will *actually resolve*.
+### The audio never leaves the device
 
-### An honest proof page
+Any site that asks for your microphone owes you an answer about where the audio goes. Here the answer is nowhere, and the build enforces it. A check scans the finished site for anything the browser would fetch and fails the deploy if it finds one. The only exceptions are four links to my own profiles, each listed by exact address.
 
-The comparison view runs the hand-written FFT beside the browser's `AnalyserNode` on identical input, with per-bin difference and timing for both — and it's honest in its framing: the native one is faster, and speed was never the claim. Getting the comparison *fair* required matching the spec's Blackman window, matching its exact dB scaling with no one-sided doubling, and using a stationary bin-centred input so frame alignment stops mattering.
+### A proof page that admits the browser is faster
 
-## Outcome
+The proof page runs my transform beside the browser's built-in analyser on the same input and shows the difference at every frequency. The built-in one is faster, and the page says so. Speed was never the claim. To make the comparison fair, I matched its window shape and its loudness scale exactly.
 
-Live and public, bilingual, fully offline-capable. It ships the live plate (mic or bundled audio, transformed and drawn as a scrolling spectrogram with the waveform above and the analysis window as a bracket tying the two together, hover giving an exact time/frequency/dB/bin readout in tabular figures); the **tradeoff as a control** (window size and overlap live, as three named positions with the raw parameters folded into an advanced disclosure); four switchable window functions; three frequency scales (linear, log, mel); a synthesis mode that closes the round trip (build a signal, transform it, recover exactly what you put in); and a proof page. Six bundled samples are *generated in code*, so the app is a complete experience even with the microphone denied.
+## Result
 
-Built solo in one ~4-hour session — ~8,400 lines of source, a ~990-line DSP core, 256 tests running in ~5.6s, on three runtime dependencies and zero DSP, audio, or charting libraries. Measured on desktop at the reference load: ~0.105 ms per column, ~101× real time, ~0.6 bytes of heap growth per column over a minute — that last number is the one that matters. `AnalyserNode` is linked warmly as the faster native option; the claim here is correctness, not speed.
+Spectrogram is live and public, in English and Indonesian. It offers four window shapes, three pitch scales and a synthesis mode where you build a signal from pure tones and watch the spectrum recover exactly what you put in. Six bundled samples are generated in code, so the site works even if you deny the microphone. On a desktop, the transform runs about 101 times faster than real time. I built it in a single session of about four hours on 6 August 2026.
+
+## What I'd do next
+
+- Test on a mid-range phone. The speed figures are from a desktop, and phone audio behaves differently.
+- Automate the comparison with the browser's analyser in CI. Today it's a manual check on the proof page.
+- Finish the last polish items: the harmonics gallery and the offline shell.
+
+## Under the hood
+
+- The DSP core in `lib/dsp/` is about 990 lines: an in-place radix-2 Cooley-Tukey FFT and inverse, cached twiddle and bit-reversal tables, four windows (rectangular, Hann, Hamming, Blackman) from Harris (1978), dB conversion, linear/log/mel bin mapping, framing and additive synthesis.
+- Correctness signals: a naive O(n²) DFT oracle over every size and a seeded random corpus; Parseval's identity in every suite; FFT → inverse round trip; analytic fixtures (DC, bin-centred sine, unit impulse, the Dirichlet leakage kernel at a half-bin offset). Tolerance was set once from the fixtures and never widened.
+- Real and imaginary parts live in separate `Float64Array`s. The plate is a ring buffer of columns blitted as one `ImageData` per frame.
+- The PRD called for analysis in an `AudioWorkletProcessor`, but worklets can't reliably use ES imports, which would mean a second, untested copy of the FFT. Analysis moved to a regular Worker; the worklet is a capture tap only, with a `ScriptProcessor` fallback.
+- `scripts/finalize-export.mjs` scans the built output for `src`, `<link href>`, `srcset`, `url()` and `@import`, plus a tracker denylist. W3C XML namespaces are whitelisted as inert.
+- Proof-page fairness: Blackman α = 0.16 and `20·log10(|X[k]|/fftSize)` scaling with no one-sided doubling, on a stationary bin-centred input.
+- `tests/ui/tokens.test.ts` fails if the Tailwind palette and the canvas colour module drift. A dictionary test fails if the two locales drift.
+- Benchmark at 2048 points, 75% overlap, 48 kHz: about 0.105 ms per column, about 101× real time, about 0.6 bytes of heap growth per column over a minute.
+- Next.js 14 static export, 4 routes × 2 locales, three runtime dependencies and no DSP, audio or charting library. 256 tests in 13 files, about 5.6 s. About 8,400 lines, 32 commits.

@@ -2,30 +2,45 @@
 
 ## Masalahnya
 
-Bloom filter, Count-Min sketch, dan HyperLogLog adalah struktur data yang pernah didengar setiap insinyur backend dan nyaris tak ada yang benar-benar bisa memakainya. Mereka menggerakkan hal yang diandalkan orang setiap hari — basis data melewati pembacaan disk, CDN menghitung pengunjung unik, stream processor menemukan top-N heavy hitter — tetapi literaturnya makalah dan huruf Yunani, dan kebanyakan penjelasan blog meratakan satu hal yang penting: **kesalahannya satu-sisi dan bisa dihitung di muka.** "Tidak" dari Bloom filter adalah bukti; "ya"-nya adalah petunjuk. Meratakannya menjadi "akurat 2%" mengajarkan hal yang salah.
+Hampir semua backend engineer pernah mendengar Bloom filter, Count-Min sketch, dan HyperLogLog. Sedikit yang yakin memakainya. Struktur data ini menjawab pertanyaan tentang data yang sangat besar dengan memori yang kecil dan tetap: database yang melewatkan pembacaan disk, CDN yang menghitung pengunjung unik, atau stream processor yang mencari item paling sering muncul. Makalahnya padat, dan kebanyakan tulisan blog menyederhanakan satu hal yang paling penting. Galatnya hanya ke satu arah dan bisa dihitung sebelumnya. Jawaban "tidak" dari Bloom filter itu pasti. Jawaban "ya"-nya hanya kemungkinan.
 
-Inti masalahnya adalah kepercayaan: tak ada yang mengadopsi struktur aproksimatif yang tak bisa mereka verifikasi. Maka alat ini menjalankan `Set`/`Map` sungguhan atas stream yang sama sebagai kebenaran dasar dan menandai setiap false positive saat terjadi — untuk dua audiens: insinyur yang perlu *menyetel ukurannya* untuk nyata, dan insinyur yang perlu *diyakinkan* bahwa itu aman.
+Tidak ada yang mau memakai struktur perkiraan yang tidak bisa diperiksa. Saya membangun Sketch Lab untuk dua kelompok: engineer yang perlu menentukan ukuran struktur ini untuk sistem produksi, dan engineer yang perlu melihatnya bekerja sebelum memercayainya.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Kualitas hash adalah gerbang, bukan detail
+### Jawaban pasti berjalan di samping jawaban perkiraan
 
-Setiap jaminan kesalahan dalam proyek mengasumsikan hashing seragam, dan hash buruk membatalkan semuanya *secara senyap* — kode berjalan, gambar tampak baik, angka salah. Maka MurmurHash3 tulisan-tangan mendapat suite-nya sendiri (avalanche + chi-squared) sebelum satu struktur pun ada, dan ia berjalan sebagai **job pertama di CI, menjaga setiap job lain dan deploy.** Jika hash buruk, tak ada hasil hilir yang bermakna.
+Setiap stream diproses oleh sketch dan oleh set atau map biasa yang pasti pada saat yang sama. Halaman menandai setiap false positive begitu terjadi, lengkap dengan item dan slot yang bertabrakan. Kontrol utamanya adalah slider memori. Geser memori ke bawah, dan dua kurva bergerak bersama: galat yang diprediksi rumus dan galat yang diukur dari stream.
 
-### Properti absolut dan probabilistik dipisah secara fisik
+### Memori diukur dalam byte yang sebenarnya
 
-"Bloom filter tak pernah mengembalikan tidak untuk item yang disisipkan" bukan klaim statistik, dan ia hidup di direktori tes tempat tak ada toleransi yang diizinkan. "Laju false-positive terukur jatuh dalam batas prediksi" hidup di tempat lain, dengan benih tetap, banyak percobaan, dan toleransi *diturunkan dari varians estimator dan ditulis.* Mencampurnya adalah cara seseorang akhirnya menerapkan toleransi pada properti yang tak punya. Batas ditegaskan atas hitungan lewat ekor Poisson alih-alih atas laju lewat pita normal — dalam rezim peristiwa-langka tempat filter yang tersetel baik beroperasi, aproksimasi normal tak berguna dan menghasilkan justru kegagalan palsu yang mengajari tim melebarkan toleransi sampai suite tak bermakna.
+Perbandingan dengan struktur pasti hanya bermakna kalau angkanya benar. Karena itu setiap angka memori adalah ukuran array yang dialokasikan sebenarnya, bukan hasil rumus yang disajikan sebagai pengukuran. Kalkulator menerima jumlah item dan target galat, lalu mengembalikan ukuran, rumus, dan memorinya dalam byte. Layar inilah yang membuatnya bisa dipakai untuk pekerjaan sehari-hari.
 
-### Angka memori adalah byte teralokasi nyata
+### Hash dan strukturnya saya tulis sendiri
 
-Perbandingan terhadap struktur eksak adalah kejujuran proyek, jadi memori adalah `byteLength` aktual dari typed array — tak pernah hasil formula yang disajikan sebagai pengukuran. Segalanya berbenih dan deterministik (keadaan identik byte-per-byte di mesin mana pun, tanpa `Math.random` tak berbenih di inti), dan run panjang pergi ke Web Worker dengan buffer ditransfer alih-alih diklon.
+Keempat struktur dibuat dari makalah aslinya: Bloom (1970), Count-Min (2005), HyperLogLog (2007), dan Cuckoo filter yang mendukung penghapusan. Fungsi hash-nya juga saya tulis sendiri. Setiap jaminan galat mengandaikan hash yang baik, dan hash yang buruk merusak semuanya tanpa suara. Tes hash berjalan paling awal di pipeline build, dan tidak ada yang berjalan kalau tes itu gagal.
 
-### Tesnya melakukan sains sungguhan
+### Jaminan dan peluang diuji terpisah
 
-Beberapa temuan menggeser angka alih-alih toleransi. Sebuah uji batas gagal pada ~2.500× laju buku teks di satu konfigurasi berlebih; investigasi melacaknya ke *lantai kebetulan* struktural dalam derivasi hash Kirsch-Mitzenmacher — `(4n/m²)·(1+f)/(1−f)` — dan **suku yang hilang ditambahkan ke model, toleransi tak pernah dilebarkan.** Sebuah penjaga yang ditambahkan untuk Bloom diam-diam memangkas separuh ruang sidik-jari Cuckoo filter (terukur persis 2,0× batasnya) dan diperbaiki dengan menggeser melewati bit yang dipaksa. Dan perbandingan yang diperiksa dua-arah menemukan Cuckoo ini justru *kalah* dari Bloom pada byte nyata di setiap ε — jadi teksnya mengatakan persis apa yang diberikannya (penghapusan), bukan kemenangan ruang yang tak dimilikinya.
+"Bloom filter tidak pernah menjawab tidak untuk item yang sudah dimasukkan" adalah aturan, dan saya mengujinya tanpa toleransi. "Tingkat galat tetap di dalam batas prediksi" adalah peluang, diuji dengan seed tetap, banyak percobaan, dan toleransi yang ditulis jelas. Pemisahan ini mencegah orang menambahkan kelonggaran pada aturan yang tidak boleh longgar. Setiap percobaan memakai seed, jadi masukan yang sama memberi hasil yang sama di mesin mana pun.
 
-## Hasil
+### Saat tes gagal, modelnya yang saya perbaiki
 
-Live dan publik, dwibahasa, offline setelah muat pertama. Ia menyajikan empat struktur probabilistik yang diimplementasikan dari makalahnya (Bloom 1970, Count-Min 2005, HyperLogLog 2007 termasuk rezim linear-counting rentang-kecil yang dilewati kebanyakan penjelasan, dan Cuckoo filter kunci-parsial dengan penghapusan yang berfungsi); **slider memori** — seret memori teralokasi turun dan saksikan kesalahan prediksi dari formula melacak kesalahan terukur dari stream sungguhan; struktur eksak berjalan di samping sebagai kebenaran dasar, menandai setiap false positive beserta item dan slot yang bertabrakan; kalkulator parameter (nyatakan n dan target ε, dapatkan m, k, dan memori hasilnya dalam *byte nyata*); verifikasi merge; dan stream seragam / Zipfian / adversarial / teks yang bisa dikonfigurasi, semuanya bisa dibagikan lewat URL.
+Satu tes gagal dengan galat sekitar 2.500 kali angka di buku teks. Saya menelusurinya ke efek struktural dari metode hash-nya, yang muncul saat filter diberi memori jauh lebih besar dari yang dibutuhkan. Saya menambahkan suku yang hilang ke model dan tidak menyentuh toleransinya. Pemeriksaan berikutnya menunjukkan Cuckoo filter ini memakai memori lebih besar daripada Bloom filter di setiap tingkat galat. Jadi halaman menawarkannya untuk fitur penghapusan, tanpa klaim soal hemat memori.
 
-Dibangun sendiri dalam satu build ~12 jam — ~11.900 baris TypeScript dengan test suite yang menjadi area terbesar ketiga dalam basis kode, 328 asersi di balik gerbang kualitas-hash, di atas tiga dependensi runtime dan nol pustaka hashing, sketch, atau charting. Ia instrumen portofolio yang selesai alih-alih pustaka produksi — non-goal eksplisit — tetapi kelas-produksi dalam verifikasinya: murni, deterministik, bertipe ketat.
+## Hasilnya
+
+Sketch Lab sudah live, terbuka untuk umum, tersedia dalam bahasa Inggris dan Indonesia, dan bisa dipakai offline setelah dimuat pertama kali. Isinya empat struktur ditambah pembanding pasti, pengecekan penggabungan sketch, serta stream seragam, miring, adversarial, dan teks. Setiap pengaturan bisa dibagikan sebagai link. Semua milestone di rencana selesai, termasuk Cuckoo filter yang opsional. Saya membangunnya dalam satu hari, 6 Agustus 2026, dengan tiga dependensi runtime. Ini alat belajar, bukan library produksi, dan memang itu rencananya sejak awal.
+
+## Di balik layar
+
+- MurmurHash3 32-bit dengan penurunan k-hash Kirsch-Mitzenmacher, ditulis manual. Suite hash mencakup avalanche, chi-squared, dan known vector, dan menjadi job pertama dari lima job CI berurutan: hash gate → absolute → bounds/merge → build → deploy.
+- `lib/pds` dan `lib/hash` murni: typed array masuk, typed array keluar, tanpa DOM, jam, atau state modul. Kode yang sama berjalan di browser dan di Node saat tes. PRNG ber-seed memakai sfc32, tanpa `Math.random` tanpa seed di `lib/`.
+- `tests/absolute/` tidak mengizinkan toleransi. `tests/bounds/` menguji jumlah kejadian dengan ekor Poisson, karena pita normal di sekitar rata-rata di bawah satu (λ = 0,05) gagal hanya karena satu kejadian biasa.
+- Lantai kebetulan: pada `m=65536, k=8, n=500`, slot berpola deret aritmetika dari Kirsch-Mitzenmacher membuat satu item yang sudah dimasukkan bisa mengisi semua k slot sebuah probe. Lantai yang diturunkan adalah `(4n/m²)·(1+f)/(1−f)` dan kini cocok dengan pengukuran (commit `cb8c860`).
+- Memaksa bit terendah `h₂` bernilai 1 benar untuk Bloom, tetapi membuat Cuckoo filter hanya punya 2^(f−1) fingerprint, terukur tepat 2,0× batasnya. Diperbaiki dengan menggeser melewati bit yang dipaksa (`c08fb0a`).
+- Stream Zipfian menggagalkan 906 dari 2.000 insert Cuckoo pada muatan 27%; paling banyak 2b salinan satu item yang muat. Kondisi ini dan false negative akibat penghapusan sama-sama diuji harus terjadi. Titik silang Bloom-vs-Cuckoo ada di ε ≈ 0,2%, bukan 3% yang sering dikutip, karena angka itu milik varian semi-sorted.
+- Penggabungan: Bloom memakai OR, HyperLogLog mengambil maksimum per register, Count-Min menjumlahkan. Setiap gabungan dicek terhadap sketch dari stream yang disambung. HyperLogLog mencakup rezim linear counting untuk rentang kecil.
+- Proses panjang dijalankan di Web Worker dengan `ArrayBuffer` yang ditransfer. Bit array digambar di Canvas, kurva galat di SVG; di atas ambang ukuran tertentu bit digambar sebagai kepadatan blok dan UI menyebutkannya.
+- Warna brass awalnya hanya 2,84:1; saya menggelapkannya sampai kontrasnya sama persis dengan hijau truth (5,16 / 5,55 / 4,62). `upload-pages-artifact` v4 membuang `.nojekyll`, jadi versi Actions kini dinaikkan satu major setiap kali.
+- Static export Next.js 14, 7 rute × 2 bahasa, 87,3 kB JS first-load bersama. 328 assertion di 13 berkas. Sekitar 11.900 baris TypeScript, 38 commit dalam kurang lebih 12 jam.

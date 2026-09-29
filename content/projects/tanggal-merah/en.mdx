@@ -2,30 +2,50 @@
 
 ## The problem
 
-Indonesia publishes its public holidays each year via an SKB — a joint decree of three ministers — that sets two different kinds of day off: **libur nasional** (national holidays, free) and **cuti bersama** (collective leave days that are **charged against your 12-day annual leave entitlement** — but only for some people).
+Indonesian office workers plan their annual leave around the public holidays set each year in a joint decree of three ministers. That decree creates two kinds of day off. National holidays (*libur nasional*) are free. Collective leave days (*cuti bersama*) can be charged against the 12-day annual leave entitlement, but only for some people.
 
-The rule branches by employment status, and published reporting on it is contradictory: at least one outlet reversed the assignment entirely. For 2026 there are **8 cuti bersama days** against a 12-day entitlement, so a private-sector worker at a company that closes and deducts is left with **4 days**, while a colleague at a company that doesn't close keeps all 12. Most people discover this in November when they try to book a trip — and every other holiday calendar treats these as one undifferentiated "holiday" and never tells you what the days cost you. The second problem it solves: given a leave budget, which specific days do you buy? A single workday between a holiday and a weekend converts one leave day into a four-day stretch, and working that out by eye across twelve months is tedious and error-prone.
+For 2026 there are 8 collective leave days. A private-sector worker whose company closes and deducts them is left with 4 days of leave. A colleague at a company that stays open keeps 12. News reports on the rule contradict each other, and at least one reversed it entirely. Most people find out in November, when they try to book a trip. Every other holiday calendar shows all these days as one kind of "holiday" and never says what they cost.
 
-## The approach
+## What I built
 
-### Holidays are decreed, not computed
+### Your employment status decides the answer
 
-Idul Fitri, Nyepi, Waisak, and Imlek all have astronomical or calendrical determinations — but the *official* holiday is whatever the government's decree says, and the decree itself defers the Islamic dates to a separate Ministry of Religion ruling. So the app ships **transcribed decree data per year and computes no religious date anywhere.** A year with no published decree returns a *structured refusal* naming the gap, never an extrapolated calendar — because being confidently wrong about whether someone has a day off is the only failure mode that really matters here. Every holiday carries its citation (date, type, decree number, signing date) and the build rejects an uncited entry, a duplicate date, or a leftover placeholder.
+I made employment status the first input: civil servant, private sector with deduction, and private sector without. Each branch cites the regulation it comes from. The landing page shows four status cards. Three leave you 12 days and one leaves you 4. On the calendar, the app marks exactly which collective leave days a deducting employer charged.
 
-### Contradictions are recorded and priced, not silently resolved
+### Holidays come from the decree, never from a formula
 
-Where sources disagree on the cuti bersama rule, the app holds the competing readings with their sources — and a ledger page *prices* the rejected reading, stating what it would do to your entitlement if it were true. Employment status is a first-class input (ASN, private-with-deduction, private-without are three outcomes with each branch citing its instrument, not a boolean), and the sheet marks *which* cuti bersama days a deducting employer charged, with a test asserting the per-day marks sum to the ledger's total across every year, pattern, and status.
+Idul Fitri, Nyepi, Waisak and Imlek can all be estimated from the moon or a calendar. The official holiday is whatever the decree says, and the decree defers the Islamic dates to a separate Ministry of Religious Affairs ruling. So I transcribe each year's decree and calculate no religious date anywhere. A year without a published decree gets a clear refusal that names the gap. Being confidently wrong about someone's day off is the failure that matters most here.
 
-### The optimiser is exact, not greedy
+### Every holiday carries its source
 
-The problem is small enough to solve properly: enumerate the gaps between fixed off-blocks, cost each in workdays, and select under budget with a DP — and a twenty-line **brute-force oracle** (never imported outside tests) was written *first*, so "optimal" is a claim rather than a hope. That oracle caught a real bug: the *longest single stretch* objective can't reuse the DP with `max` swapped in — that returns the right number and the wrong plan — so it needed a completely different algorithm, and each objective has its own oracle. There are no `Date` objects in the engine: days are integer day numbers, week position is arithmetic, and the year is always an explicit argument.
+Each holiday records its date, type, decree number and signing date. The build fails on a holiday with no citation, a duplicate date, or a leftover placeholder. Where sources disagree about the collective leave rule, a rules page shows both readings with their sources. It also states what the rejected reading would do to your leave if it were true.
 
-### From "correct" to "comprehensible"
+### The leave planner finds the best days exactly
 
-The engine was finished and verified, then a long run of `pedagogy`/`design`/`a11y` work rebuilt the front end for a reader who has never heard of cuti bersama: a worked example with real dates before any control, citations moved onto the card that applies the rule, and each objective shown by what it *produces*. The honest lesson recorded for a client: the arithmetic being provably right did nothing for a reader who didn't know the rule existed. And the one thing blocking a fully "verified" claim is documented rather than papered over — the 2026 data pack is flagged `perluVerifikasi` (dates transcribed from the widely-circulated calendar but decree numbers not yet checked against source documents), so the site carries a banner rather than presenting a plausible fabrication as fact.
+A single workday between a holiday and a weekend turns one leave day into a four-day break. Spotting these across twelve months by eye is tedious and easy to get wrong. The planner picks the best days for your budget, and I checked it against a slow method that tries every combination. That check caught a bug. Planning for the longest single break needs a different method from planning for the most total days off.
 
-## Outcome
+### A calendar someone who has never heard the rule can follow
 
-Live and public, bilingual, fully static, offline after first load. It ships the **year sheet** — twelve months laid out as an Indonesian wall calendar, national holidays in red and cuti bersama in amber (a different thing at a different cost), with runs of consecutive days off drawn as continuous bars, so toggling a leave day and watching two blocks snap into one stretch is the app's central moment; the four status cards on the landing page (three leave you 12 days, one leaves you 4); exact bridge suggestions with the leverage arithmetic exposed ("1 day → 4 days off"); a non-monotone marginal curve showing what the *n*th leave day actually buys; "holidays the weekend ate" for both five- and six-day weeks; and ICS + PNG export with full state in the URL hash.
+Once the maths was right, I rebuilt the interface for a reader who doesn't know the rule exists. A worked example with real dates comes before any control. Each citation sits on the card that applies it. Months became keyboard-navigable grids, and the page announces the result when it changes.
 
-Built solo in a concentrated build — ~9,150 lines across engine, UI, and data, 134 tests, on **three runtime dependencies** and no date, calendar, or holiday library (Zod is build-time only — a commit explicitly moved it out of the browser bundle). It states plainly that it is a personal project, not employment-law advice, and that company policy governs cuti bersama in the private sector.
+## Result
+
+Tanggal Merah is live and public, in Indonesian and English, and works offline after the first load. The year view is laid out like an Indonesian wall calendar, with national holidays in red and collective leave in amber. Toggle a leave day and two blocks join into one bar. It also shows what each extra leave day buys and which holidays the weekend swallows, for five- and six-day weeks. It covers 2026: 17 national holidays and 8 collective leave days, each cited. The site says it is a personal project and not employment-law advice, and that company policy governs collective leave in the private sector. I built it over 12 and 13 August 2026.
+
+## What I'd do next
+
+- Check the 2026 decree numbers against the published documents. The dates come from the widely circulated 2026 calendar, so the site shows a banner until the numbers are verified.
+- Add more years as their decrees are published, and let users add regional holidays.
+
+## Under the hood
+
+- No `Date` objects in the engine. Days are integer day numbers, week position is arithmetic, and the year is always an explicit argument. The UI converts at the boundary.
+- Decree data lives in `data/skb/`. `pnpm rules:validate` runs first and alone in CI, before typecheck, lint, tests and build. `data/skb/2026.json` is flagged `perluVerifikasi`, with decree numbers recorded as `BELUM DIVERIFIKASI` and the checks listed in `UPDATING.md`.
+- `data/contradictions/` holds the competing readings of the cuti bersama rule, which value the app uses, and why.
+- The optimiser enumerates gaps between fixed off-blocks, costs each in workdays and selects under budget with a DP. `lib/optimise/brute.ts`, a twenty-line oracle never imported outside tests, was committed first. The longest-stretch objective can't reuse the DP with `max` swapped in (right number, wrong plan), so it uses a contiguous scan with its own oracle.
+- "1 day → 4 days off" measures contiguity. Days gained per day spent is always 1.0; one commit exists to correct that wording.
+- The marginal curve reruns the optimiser at every budget. It isn't monotone: a two-day bridge is unaffordable at a budget of one, so day 2 can be worth more than day 1. Hand-drawn SVG.
+- A test asserts the per-day deduction marks sum to the ledger total across every year, work pattern and status.
+- Amber measures 2.48:1 on the background, so the PNG export uses text-safe variants. PNG is drawn straight onto a canvas with no DOM rasteriser. ICS export and full state in the URL hash.
+- Zod was moved to devDependencies, since validation is build-time only. Three runtime dependencies, no date, calendar or holiday library.
+- About 9,150 lines, 134 tests in 16 files, 70 commits (14 accessibility, 13 design, 7 pedagogy).

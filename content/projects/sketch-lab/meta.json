@@ -1,7 +1,17 @@
 {
   "slug": "sketch-lab",
   "title": "Sketch Lab",
-  "tagline": "Shows how databases store approximate answers about huge amounts of data in a tiny fixed amount of memory — with the exact, slow version running side by side so you can watch how wrong the approximation actually is",
+  "tagline": "An interactive lab for four probabilistic data structures, with the exact answer running alongside to expose every error",
+  "glance": {
+    "for": "Backend engineers sizing or evaluating approximate data structures",
+    "result": "Live in two languages; predicted and measured error shown side by side"
+  },
+  "skills": [
+    "Probabilistic data structures",
+    "Algorithm implementation",
+    "Statistical testing",
+    "Interactive visualization"
+  ],
   "categoryTags": [
     "Personal Project",
     "Developer Tool",
@@ -20,6 +30,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/sketch-lab/en/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/sketch-lab",
   "heroImage": "/images/projects/sketch-lab/hero.webp",
   "order": 28,
@@ -27,20 +38,50 @@
   "metrics": [
     {
       "value": "4",
-      "label": "Probabilistic structures, hand-written from papers"
-    },
-    {
-      "value": "328",
-      "label": "Assertions behind a hash-quality gate"
+      "label": "structures implemented from the original papers"
     },
     {
       "value": "Real bytes",
-      "label": "Memory measured, never formula'd"
+      "label": "every memory figure measured, never estimated"
+    },
+    {
+      "value": "328",
+      "label": "test assertions behind a hash-quality gate"
     },
     {
       "value": "3",
-      "label": "Runtime deps — zero sketch libraries"
+      "label": "runtime dependencies, no sketch libraries"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Lab interaktif untuk empat struktur data probabilistik, dengan jawaban pasti berjalan di sampingnya untuk menunjukkan setiap galat",
+    "glance": {
+      "for": "Backend engineer yang menimbang atau menentukan ukuran struktur data perkiraan",
+      "result": "Live dalam dua bahasa; galat prediksi dan galat terukur tampil berdampingan"
+    },
+    "skills": [
+      "Struktur data probabilistik",
+      "Implementasi algoritma",
+      "Pengujian statistik",
+      "Visualisasi interaktif"
+    ],
+    "metrics": [
+      {
+        "value": "4",
+        "label": "struktur dibuat dari makalah aslinya"
+      },
+      {
+        "value": "Byte asli",
+        "label": "setiap angka memori diukur, bukan diperkirakan"
+      },
+      {
+        "value": "328",
+        "label": "assertion tes di balik gerbang kualitas hash"
+      },
+      {
+        "value": "3",
+        "label": "dependensi runtime, tanpa library sketch"
+      }
+    ]
+  }
 }

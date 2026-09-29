@@ -1,7 +1,17 @@
 {
   "slug": "spectrogram",
   "title": "Spectrogram",
-  "tagline": "Turns sound into a picture in real time — speak, whistle or play into your mic and watch which pitches are present — with the underlying mathematics written from scratch, not borrowed from the browser",
+  "tagline": "A live spectrogram that draws the pitches in your voice, using a transform I wrote and proved correct",
+  "glance": {
+    "for": "Learners curious about sound, and reviewers checking numerical code",
+    "result": "Live in two languages; audio never leaves the device, enforced by the build"
+  },
+  "skills": [
+    "Signal processing",
+    "Numerical algorithms",
+    "Real-time rendering",
+    "Privacy by design"
+  ],
   "categoryTags": [
     "Personal Project",
     "Audio & DSP",
@@ -21,6 +31,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/spectrogram/en/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/spectrogram",
   "heroImage": "/images/projects/spectrogram/hero.webp",
   "order": 25,
@@ -28,20 +39,50 @@
   "metrics": [
     {
       "value": "0",
-      "label": "Network requests at runtime — enforced by the build"
-    },
-    {
-      "value": "256",
-      "label": "Tests, incl. a naive-DFT correctness oracle"
+      "label": "network requests at runtime, enforced by the build"
     },
     {
       "value": "~101×",
-      "label": "Real-time FFT, hand-written, zero DSP libraries"
+      "label": "faster than real time on desktop"
     },
     {
       "value": "4",
-      "label": "Independent proofs the transform is correct"
+      "label": "independent checks that the transform is correct"
+    },
+    {
+      "value": "6",
+      "label": "audio samples generated in code"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Spektrogram langsung yang menggambar nada dalam suara Anda, memakai transformasi yang saya tulis dan buktikan sendiri",
+    "glance": {
+      "for": "Pelajar yang penasaran soal suara, dan peninjau kode numerik",
+      "result": "Live dalam dua bahasa; audio tidak pernah keluar dari perangkat, dijamin build"
+    },
+    "skills": [
+      "Pengolahan sinyal",
+      "Algoritma numerik",
+      "Rendering real-time",
+      "Privasi sejak desain"
+    ],
+    "metrics": [
+      {
+        "value": "0",
+        "label": "permintaan jaringan saat runtime, dijamin build"
+      },
+      {
+        "value": "~101×",
+        "label": "lebih cepat dari waktu nyata di desktop"
+      },
+      {
+        "value": "4",
+        "label": "pemeriksaan terpisah atas kebenaran transformasi"
+      },
+      {
+        "value": "6",
+        "label": "sampel audio dibangkitkan lewat kode"
+      }
+    ]
+  }
 }

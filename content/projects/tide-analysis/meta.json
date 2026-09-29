@@ -1,7 +1,17 @@
 {
   "slug": "tide-analysis",
   "title": "Tide Analysis",
-  "tagline": "A site that watches the tide, does the math itself from raw sea-level readings, and tells you honestly when it doesn't have enough data to trust its own answer — instead of quoting numbers someone else calculated",
+  "tagline": "A tide explainer fitting eight Indonesian ports from raw readings, which refuses when a record is too short",
+  "glance": {
+    "for": "Students, curious readers and engineers reviewing numerical work",
+    "result": "Live in two languages; every fit runs in the browser"
+  },
+  "skills": [
+    "Scientific computing",
+    "Time-series analysis",
+    "Data provenance",
+    "Interactive visualization"
+  ],
   "categoryTags": [
     "Personal Project",
     "Science & Data",
@@ -20,15 +30,58 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/tide-analysis/en/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/tide-analysis",
   "heroImage": "/images/projects/tide-analysis/hero.webp",
   "order": 34,
   "featured": false,
   "metrics": [
-    { "value": "377", "label": "Tests — constants recovered from synthetic records" },
-    { "value": "Refuses", "label": "To fit what a record can't resolve (Rayleigh)" },
-    { "value": "8", "label": "Real Indonesian ports, all 4 tide regimes" },
-    { "value": "0", "label": "Tide / linear-algebra / charting libraries" }
+    {
+      "value": "8",
+      "label": "Indonesian ports covering all four tide types"
+    },
+    {
+      "value": "212 days",
+      "label": "hourly records per port, January to August 2026"
+    },
+    {
+      "value": "< 1 cm",
+      "label": "amplitude error recovering constants under 15 cm noise"
+    },
+    {
+      "value": "0",
+      "label": "tide, linear-algebra or charting libraries"
+    }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Penjelas pasang surut untuk delapan pelabuhan Indonesia dari data mentah, yang menolak kalau datanya terlalu pendek",
+    "glance": {
+      "for": "Pelajar, pembaca umum, dan engineer yang memeriksa kerja numerik",
+      "result": "Live dalam dua bahasa; setiap perhitungan berjalan di browser"
+    },
+    "skills": [
+      "Komputasi ilmiah",
+      "Analisis deret waktu",
+      "Provenans data",
+      "Visualisasi interaktif"
+    ],
+    "metrics": [
+      {
+        "value": "8",
+        "label": "pelabuhan Indonesia mencakup keempat tipe pasang surut"
+      },
+      {
+        "value": "212 hari",
+        "label": "rekaman per jam tiap pelabuhan, Januari sampai Agustus 2026"
+      },
+      {
+        "value": "< 1 cm",
+        "label": "galat amplitudo saat derau 15 cm"
+      },
+      {
+        "value": "0",
+        "label": "library pasang surut, aljabar linear, atau grafik"
+      }
+    ]
+  }
 }

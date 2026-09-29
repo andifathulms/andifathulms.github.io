@@ -1,7 +1,17 @@
 {
   "slug": "selapan",
   "title": "Selapan",
-  "tagline": "A Javanese calendar that converts any date into its traditional reckoning — and, unlike every other site that does this, shows the arithmetic behind each number and cites where the reference points came from",
+  "tagline": "A Javanese calendar that converts any date to its weton and shows the cited arithmetic behind every number",
+  "glance": {
+    "for": "Javanese families checking a weton, and Aboge communities",
+    "result": "Live in two languages; every figure opens to its working and source"
+  },
+  "skills": [
+    "Calendar algorithms",
+    "Data provenance",
+    "Cultural heritage tools",
+    "Bilingual web apps"
+  ],
   "categoryTags": [
     "Personal Project",
     "Calendar Tool",
@@ -20,6 +30,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/selapan/id/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/selapan",
   "heroImage": "/images/projects/selapan/hero.webp",
   "order": 24,
@@ -27,20 +38,50 @@
   "metrics": [
     {
       "value": "4",
-      "label": "Interlocking cycles, every number traced to a citation"
+      "label": "interlocking cycles, each traced to a cited source"
     },
     {
-      "value": "126",
-      "label": "Tests, cycle-exact over a century of days"
+      "value": "2",
+      "label": "reckonings shown side by side, Aboge and Asapon"
     },
     {
-      "value": "1633",
-      "label": "CE lunar epoch — it refuses dates before it"
+      "value": "1633 CE",
+      "label": "earliest date the lunar calendar accepts"
     },
     {
-      "value": "0",
-      "label": "Date libraries — pure integer JDN math"
+      "value": "36,524",
+      "label": "consecutive days checked for exact cycles"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Kalender Jawa yang mengubah tanggal apa pun menjadi weton dan menampilkan hitungan bersumber di balik setiap angka",
+    "glance": {
+      "for": "Keluarga Jawa yang mencari weton, dan masyarakat Aboge",
+      "result": "Live dalam dua bahasa; setiap angka bisa dibuka sampai cara hitung dan sumbernya"
+    },
+    "skills": [
+      "Algoritma kalender",
+      "Provenans data",
+      "Alat warisan budaya",
+      "Aplikasi web dwibahasa"
+    ],
+    "metrics": [
+      {
+        "value": "4",
+        "label": "siklus yang saling terkait, masing-masing bersumber"
+      },
+      {
+        "value": "2",
+        "label": "hitungan berdampingan, Aboge dan Asapon"
+      },
+      {
+        "value": "1633 M",
+        "label": "tanggal paling awal yang diterima kalender lunar"
+      },
+      {
+        "value": "36.524",
+        "label": "hari berturut-turut diuji ketepatan siklusnya"
+      }
+    ]
+  }
 }

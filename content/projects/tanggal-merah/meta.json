@@ -1,7 +1,17 @@
 {
   "slug": "tanggal-merah",
   "title": "Tanggal Merah",
-  "tagline": "An Indonesian holiday planner that shows the year's public holidays and works out exactly where to spend annual leave for the longest stretches off — while making explicit the rule most people get wrong: whether cuti bersama is charged against your leave",
+  "tagline": "An Indonesian holiday and leave planner that shows whether collective leave eats into your 12 days",
+  "glance": {
+    "for": "Indonesian office workers planning annual leave, private sector and ASN",
+    "result": "Live in two languages; every 2026 holiday cited, leave plans exact"
+  },
+  "skills": [
+    "Optimization algorithms",
+    "Regulatory data modelling",
+    "Calendar tools",
+    "Web accessibility"
+  ],
   "categoryTags": [
     "Personal Project",
     "Calendar Tool",
@@ -20,15 +30,58 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/tanggal-merah/id/tahun/#t=2026&s=swastaCutiBersamaTanpaPotong&j=12&p=lima-hari",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/tanggal-merah",
   "heroImage": "/images/projects/tanggal-merah/hero.webp",
   "order": 32,
   "featured": false,
   "metrics": [
-    { "value": "12 → 4", "label": "Leave left if your employer deducts cuti bersama" },
-    { "value": "Exact", "label": "Bridge optimiser, verified vs brute force" },
-    { "value": "134", "label": "Tests; refuses years with no published decree" },
-    { "value": "0", "label": "Date libraries — pure integer day math" }
+    {
+      "value": "12 → 4",
+      "label": "leave days left if your employer deducts"
+    },
+    {
+      "value": "25",
+      "label": "2026 holidays and collective leave days, each cited"
+    },
+    {
+      "value": "Exact",
+      "label": "leave plans, checked against every combination"
+    },
+    {
+      "value": "3",
+      "label": "employment statuses, each with its own rule"
+    }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Perencana libur dan cuti yang menunjukkan apakah cuti bersama memotong jatah cuti 12 hari Anda",
+    "glance": {
+      "for": "Pekerja kantoran swasta dan ASN yang merencanakan cuti tahunan",
+      "result": "Live dalam dua bahasa; setiap libur 2026 bersumber, rencana cuti tepat"
+    },
+    "skills": [
+      "Algoritma optimasi",
+      "Pemodelan data regulasi",
+      "Alat kalender",
+      "Aksesibilitas web"
+    ],
+    "metrics": [
+      {
+        "value": "12 → 4",
+        "label": "sisa cuti kalau kantor memotong cuti bersama"
+      },
+      {
+        "value": "25",
+        "label": "libur nasional dan cuti bersama 2026, semuanya bersumber"
+      },
+      {
+        "value": "Tepat",
+        "label": "rencana cuti, dicek terhadap semua kombinasi"
+      },
+      {
+        "value": "3",
+        "label": "status kepegawaian, masing-masing dengan aturannya"
+      }
+    ]
+  }
 }

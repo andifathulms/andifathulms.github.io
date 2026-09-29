@@ -2,30 +2,44 @@
 
 ## The problem
 
-Most tide-prediction tools work by looking up published harmonic constants — pre-calculated numbers describing how the Moon and Sun pull water at a given coastline — and summing them into a curve. That's fast, but it's a *lookup*: it proves nothing about whether the tool actually understands the physics, and it can't be adapted to a new, unpublished location.
+Students and curious readers who want to understand tides mostly find tools that look up answers. Most tide predictors take published constants, numbers that describe how the Moon and Sun pull the water at one coastline, and add them up into a curve. That's fast, but it proves nothing about the physics and can't work for a place with no published constants.
 
-This project instead starts from **raw sea-level observations** (real hourly readings from tide gauges) and derives those constants itself, in the browser, using the same least-squares curve-fitting oceanographers use. And that makes visible a problem lookup tools hide entirely: **you need enough observation time to tell some tidal patterns apart.** Two nearly-identical lunar/solar cycles (K1 and P1, or S2 and K2) can only be separated with roughly six months of data — ask a two-week record to separate them and any honest tool has to say *"I can't,"* not guess. It is explicitly **not** for maritime navigation; Indonesia's official hydrographic office is named repeatedly as the authoritative source.
+Tide Analysis starts from raw hourly sea-level readings and works out those constants itself, in the browser. That exposes something lookup tools hide. Some tidal cycles are so close that telling them apart takes about six months of data. Ask a two-week record to separate them, and the right answer is "I can't". The site is not for navigation, and it names Indonesia's official hydrographic office, Pushidrosal, as the source to use.
 
-## The approach
+## What I built
 
-### A pure computation core, so the numerical claims are testable
+### The maths is tested against records with known answers
 
-The astronomy (`lib/astro`, the Doodson argument calculator and nodal corrections) and the solver (`lib/tide`, least-squares fit, prediction, the classical Admiralty method) are plain functions over typed arrays — no React, no DOM, no clock, no network — which is what makes it possible to unit-test the actual numbers. The backbone is a **synthetic generator written before the solver**: generate a record from constants you chose, add noise you chose, then fit it and assert the recovered amplitudes match. When a synthetic test fails, the solver or the astronomy is wrong — never the tolerance.
+I wrote the astronomy, the curve fitting and the prediction engine myself, as plain functions I can test without a browser. Before the solver existed, I built a generator that makes fake tide records from constants I choose, with noise I choose. The solver has to recover those constants. With 15 cm of noise on every reading, it still recovers every amplitude within a centimetre. When one of these tests fails, the maths is wrong, never the tolerance.
 
-### Refuse rather than overfit, and report conditioning always
+### It says when a record is too short
 
-Before running a fit, the code checks whether the requested constituents are actually separable given the record's length (the Rayleigh criterion). If not, it returns a **structured refusal** naming which two conflict and how many days would resolve them — rather than fitting anyway and showing unstable, meaningless numbers, enforced by tests in both directions. Every solve returns its **condition number** as part of its result type, so no code path can silently drop the one signal that says whether the numbers mean anything. The residual — the gap between prediction and observation, where weather and storm surge live — is always drawn and never averaged away.
+Before fitting, the app checks whether the record is long enough to separate each pair of cycles. If not, it refuses and names the two that conflict and how many days would resolve them. Every fit also reports a stability figure, and the chart always shows the gap between prediction and observation, where weather and storm surges appear. The main interactive lets you drag the record length from 15 days to about six months and watch cycles become resolvable.
 
-### Honest data selection, learned the hard way
+### I pick the sensor that is actually recording
 
-Sensor selection turned out to be non-trivial. A station can report several sensors against different zero points, and the most "complete" one can be a *stuck* gauge — one radar sensor at Benoa sat flat at −0.281 m for seven months while a working gauge beside it recorded real 2.3 m tides. Simple variance selection was fooled too: a Semarang sensor's 9-metre spikes gave it artificially high variance. The rule became "largest *robust* scale, reject spikes into declared gaps," and each finding is now an asserted test. A licence gate runs before the build — two of three data sources (UHSLC, BIG) are wired up but ship **disabled**, because their Indonesian-station attribution terms were never confirmed, and the build enforces that rather than a comment.
+A tide station can report several sensors, and the most complete one can be broken. One radar sensor at Benoa sat flat at −0.281 m for seven months while the gauge beside it recorded 2.3 m tides. Another sensor, at Semarang, had 9-metre spikes that made it look the most active. I settled on picking the sensor with the largest typical range and treating spikes as gaps. Each of these cases is now a test.
 
-### Results kept because they were surprising, not smoothed over
+### Surprising results stay in, as tests
 
-Gaps in a record aren't simply "bad": losing 70% of a record *scattered* across time barely hurts the fit, while losing the same 70% as one *contiguous* outage destroys it — kept as an explicit test rather than an anecdote. And a window-stability panel cuts each record into four stretches fitted separately to answer the question the app otherwise couldn't: whether a constant belongs to the harbour or just to these months (at Benoa, M2 moves 9% between stretches; S2 moves 56%). The constituent explorer deliberately *re-sums* already-fitted constants rather than refitting live — refitting was considered and rejected because a single strong constituent would silently absorb its neighbours and destroy the spring-neap lesson.
+Losing 70% of a record in scattered pieces barely hurts the fit. Losing the same 70% in one block ruins it. I kept that as a test. A stability panel fits each record in four separate stretches to show whether a constant belongs to the harbour or to those months. At Benoa, the main lunar tide moves 9% between stretches and the main solar tide moves 56%.
 
-## Outcome
+### Data is only shipped when its licence is clear
 
-Live and public, bilingual, fully static — all fitting and prediction runs client-side against pre-bundled JSON records, with **two runtime dependencies** and no tide, linear-algebra, or charting library (the astronomy, the solver, and the hand-built "marégraphe" chart are the project). It ships live in-browser harmonic fitting with the fitted curve over the observed trace and the residual band beneath; the **Rayleigh slider** — drag record length from 15 days to ~6 months and watch constituents go from resolved to unresolved as the condition number climbs; a least-squares-vs-Admiralty comparison; a constituent explorer where toggling M2 and S2 visibly produces the two-week spring/neap beat; a one-constituent derivation walked from timestamp to constant; and Formzahl tide-type classification across 8 real Indonesian ports spanning all four regimes — computed from each station's own fit, not quoted from a paper.
+A check runs before every build and fails it if any bundled data source has an unresolved licence. Two of the three sources I wired up, UHSLC and BIG, ship switched off, because their terms for Indonesian stations were never confirmed.
 
-Built solo in a three-day build — ~12,500 lines of TypeScript, **377 tests** across 24 files, 8 bundled IOC station records (212 days of hourly data each). It states prominently and repeatedly that it is educational, not for navigation, and shows every station's source, licence, record period, and datum.
+## Result
+
+Tide Analysis is live, in Indonesian and English, and runs entirely in your browser with no server. It bundles eight Indonesian ports from the IOC sea-level network, each a 212-day hourly record from 1 January to 1 August 2026. Together they cover all four tide types, each classified from the station's own fit. You can compare modern fitting with the classical Admiralty method, and toggle cycles on and off to see the two-week spring-neap rhythm appear. One worked example walks a single constant from timestamp to answer. I built it over three days, 12 to 14 August 2026.
+
+## Under the hood
+
+- `lib/astro` holds the Doodson argument calculator and nodal corrections; `lib/tide` holds the least-squares fit, prediction and the Admiralty method. Plain functions over typed arrays, with no React, DOM, clock or network.
+- The Rayleigh criterion gates each fit. Refusals are structured and tested in both directions. K1/P1 and S2/K2 need about 183 days; 15 days resolves six of the ten standard constituents and 29 days resolves eight.
+- Every solve returns its condition number (κ) in the result type. Constituent correlation, leakage at refused frequencies and coverage masks are reported alongside.
+- Sensor rule: largest robust scale, with spikes rejected into declared gaps. Two stack overflows on real-sized inputs were fixed after synthetic tests passed.
+- `records:validate` checks every source against a licence manifest before the build. IOC, UHSLC and BIG each have an adapter to one internal `Record` shape. UHSLC was planned as enabled, but its Indonesian data is attributed through BIG.
+- The constituent explorer re-sums fitted constants and doesn't refit. A live refit would let M2 absorb its neighbours and hide the spring-neap beat between M2 and S2.
+- The ± on each constant is one standard error assuming independent hourly noise, which tidal residuals violate. At Benoa, S2's ± is about 1% while its movement between stretches is 56%. M4 moves 81%.
+- Tide type uses the Formzahl ratio, from 0.204 at Sabang to 3.486 at Kolinamil in Jakarta's port. Kolinamil has 740 missing hours and covers 202.5 of the 212 days, but its gaps are scattered and it fits cleanly. The chart is hand-built SVG, with no charting, linear-algebra or tide library. Two runtime dependencies (Next.js, React).
+- Static export to GitHub Pages, gated on tests and the licence check. 377 tests in 24 files. About 12,500 lines of TypeScript, 88 commits.

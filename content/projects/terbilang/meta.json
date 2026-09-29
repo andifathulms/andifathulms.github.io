@@ -1,7 +1,17 @@
 {
   "slug": "terbilang",
   "title": "Terbilang",
-  "tagline": "Turns Indonesian numbers into the words required on invoices and cheques — 1.500 becomes seribu lima ratus — and reads them back, correctly, at any size an accounting system can throw at it",
+  "tagline": "A library that writes Indonesian amounts in words for invoices and reads them back, exact at any size",
+  "glance": {
+    "for": "Developers building Indonesian invoicing, payroll and accounting software",
+    "result": "Every value up to a million round-trips on each change"
+  },
+  "skills": [
+    "Library design",
+    "Exhaustive testing",
+    "Financial software",
+    "Bilingual web apps"
+  ],
   "categoryTags": [
     "Personal Project",
     "Library",
@@ -20,6 +30,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/terbilang/id/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/terbilang",
   "heroImage": "/images/projects/terbilang/hero.webp",
   "order": 23,
@@ -27,20 +38,50 @@
   "metrics": [
     {
       "value": "1,000,001",
-      "label": "Exhaustive round-trips every commit (~5s)"
+      "label": "values round-tripped on every change"
     },
     {
-      "value": "0",
-      "label": "Runtime dependencies in the library"
-    },
-    {
-      "value": "BigInt",
-      "label": "End to end — correct past 2⁵³"
+      "value": "10¹⁵",
+      "label": "largest unit supported, kuadriliun"
     },
     {
       "value": "6",
-      "label": "Typed refusals — refuse, never guess"
+      "label": "typed refusals instead of a guess"
+    },
+    {
+      "value": "0",
+      "label": "runtime dependencies in the library"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Library yang menulis jumlah uang dalam huruf untuk faktur dan membacanya kembali, tetap tepat di ukuran berapa pun",
+    "glance": {
+      "for": "Developer software penagihan, penggajian, dan akuntansi Indonesia",
+      "result": "Setiap nilai sampai sejuta diuji bolak-balik di setiap perubahan"
+    },
+    "skills": [
+      "Desain library",
+      "Pengujian menyeluruh",
+      "Software keuangan",
+      "Aplikasi web dwibahasa"
+    ],
+    "metrics": [
+      {
+        "value": "1.000.001",
+        "label": "nilai diuji bolak-balik di setiap perubahan"
+      },
+      {
+        "value": "10¹⁵",
+        "label": "satuan terbesar yang didukung, kuadriliun"
+      },
+      {
+        "value": "6",
+        "label": "penolakan bertipe sebagai ganti tebakan"
+      },
+      {
+        "value": "0",
+        "label": "dependensi runtime di library"
+      }
+    ]
+  }
 }

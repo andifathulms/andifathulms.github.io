@@ -2,33 +2,50 @@
 
 ## Masalahnya
 
-Bentuk gelombang — coretan yang dikenali semua orang — menunjukkan seberapa *keras* sebuah suara, tetapi bukan *nada apa* ia: dengungan rendah dan siulan tinggi terlihat sama. Spektrogram menjawab pertanyaan yang lain, dan begitulah pengenalan suara, perangkat lunak musik, identifikasi kicau burung, dan forensik audio semuanya sebenarnya melihat suara. Dua audiens, dan proyek ini melayani keduanya:
+Bentuk gelombang, garis naik-turun yang dikenal semua orang, menunjukkan seberapa keras sebuah suara. Bentuk gelombang tidak menunjukkan nada: dengung rendah dan siulan tinggi terlihat hampir sama. Spektrogram menunjukkan nada apa saja yang muncul dari waktu ke waktu. Beginilah cara pengenal suara, software musik, dan aplikasi pengenal kicau burung melihat suara.
 
-- **Pembelajar yang penasaran** yang pernah mendengar "transformasi Fourier" dan ingin ia menjadi intuitif alih-alih persamaan. Pelajaran intinya adalah trade-off waktu–frekuensi: Anda tak bisa punya ketajaman waktu *dan* ketajaman nada sekaligus — menajamkan satu mengaburkan yang lain. Diubah menjadi kontrol yang Anda seret, ia tiba dalam sekitar empat detik di mana sebuah paragraf gagal.
-- **Peninjau teknis** yang menilai apakah penulis bisa mengimplementasikan algoritma numerik non-trivial dengan benar, bukan sekadar memanggil pustaka. Browser menyediakan `AnalyserNode`, yang menggambar spektrogram dalam sepuluh baris dan tak membuktikan apa pun. Klaim proyek ini adalah transformasinya sendiri — dan bahwa ia *terbukti benar*.
+Saya membangun ini untuk dua jenis pengunjung. Yang pertama pernah mendengar transformasi Fourier dan ingin memahaminya secara intuitif. Gagasan utamanya adalah sebuah tarik-ulur: ketepatan waktu dan ketepatan nada tidak bisa didapat sekaligus. Yang kedua adalah peninjau teknis. Browser sudah punya analyser bawaan yang bisa menggambar spektrogram dalam sepuluh baris, dan itu tidak membuktikan apa pun tentang orang yang memakainya. Saya ingin menulis transformasinya sendiri dan menunjukkan bahwa hasilnya benar.
 
-Ada pula masalah kepercayaan: situs mana pun yang meminta akses mikrofon berutang jawaban lugas kepada pengunjung tentang ke mana audionya pergi. Di sini jawabannya "tidak ke mana-mana", dan itu struktural — nol permintaan jaringan saat runtime, diverifikasi oleh tes *dan* oleh pemeriksaan saat build yang menggagalkan deploy.
+## Yang saya bangun
 
-## Pendekatannya
+### Matematikanya saya buktikan sebelum membuat layar apa pun
 
-### Transformasi diverifikasi sebelum ada antarmuka apa pun
+Transformasi yang salah tetap bisa menggambar spektrogram yang meyakinkan, dan kesalahannya tidak akan terlihat hanya dengan memandanginya. Karena itu saya menulis transformasi dan tesnya lebih dulu, baru kemudian antarmukanya. Saya menyiapkan empat pemeriksaan yang saling lepas: versi buku teks yang lambat sebagai pembanding, aturan energi yang harus berlaku untuk setiap masukan, perjalanan bolak-balik kembali ke sinyal asal, dan sinyal uji yang bisa dicek dengan tangan. Masing-masing menangkap kesalahan yang lolos dari yang lain.
 
-Enam commit pertama adalah FFT dan tesnya; commit UI pertama adalah yang ketujuh. Alasannya spesifik: **FFT yang salah tetap menggambar gambar yang indah.** Transformasi yang rusak secara halus menghasilkan spektrogram yang masuk akal dan menarik, dan sebanyak apa pun melihatnya tak mengungkap bug-nya. Maka empat sinyal ketepatan independen dibangun lebih dulu, masing-masing menangkap apa yang lain lewatkan: **oracle DFT** naif O(n²) (definisi buku teks harfiah, diperiksa lintas setiap ukuran dan korpus acak berbenih); **identitas Parseval** (satu skalar yang harus berlaku untuk setiap input, menangkap bug penskalaan dan pengindeksan); sebuah **perjalanan bolak-balik** (FFT → invers → asli, menangkap kesalahan normalisasi); dan **fixture analitik** (DC, sinus di pusat bin, impuls satuan, dan kernel kebocoran persis pada offset setengah-bin — masing-masing bisa diperiksa dengan tangan).
+### Tarik-ulurnya menjadi kontrol yang bisa digeser
 
-### Kecepatan datang dari tata letak data, bukan kepintaran
+Layar utama menggambar suara dari mikrofon atau sampel sebagai gambar bergulir, dengan bentuk gelombang di atasnya. Saat kursor diarahkan, muncul waktu, nada, dan kekerasan suara yang tepat. Tarik-ulur antara waktu dan nada menjadi kontrol dengan tiga posisi bernama, dari "lebih tajam di waktu" sampai "lebih tajam di nada". Menggesernya mengajarkan gagasan itu lebih cepat daripada satu paragraf penjelasan. Pengaturan mentahnya disimpan di bagian "lanjutan".
 
-Bagian real dan imajiner berada di `Float64Array` terpisah alih-alih objek `{re, im}`; transformasi berjalan di tempat; tabel twiddle, koefisien window, dan buffer keluaran dialokasikan sekali per konfigurasi dan dipakai ulang. Tak ada yang dialokasikan per frame, karena jeda garbage-collection pada 60fps terbaca oleh pengguna sebagai aplikasi rusak — jadi benchmark menegaskan *pertumbuhan heap datar* sepanjang satu menit analisis berkelanjutan, bukan sekadar throughput. Analisis berjalan di luar main thread dalam Worker; pelatnya adalah bitmap bergulir — ring buffer kolom yang di-blit sebagai satu `ImageData` per frame, tak pernah menggambar ulang seluruh riwayat.
+### Mulus di layar karena tidak ada memori yang dibuang
 
-### Privasi ditegakkan oleh build, bukan dijanjikan dalam teks
+Pada 60 frame per detik, jeda pembersihan memori terlihat seperti aplikasi rusak. Saya menyiapkan semua memori kerja sekali per pengaturan lalu memakainya ulang, jadi aplikasi tidak mengalokasikan apa pun per frame. Analisis berjalan di thread latar. Tes yang menjaganya mengukur pertumbuhan memori selama satu menit penuh, selain kecepatan mentahnya.
 
-Sebuah tes memindai sumber untuk referensi keluar apa pun, dan langkah finalisasi memindai *keluaran ter-build* untuk apa pun yang akan diselesaikan browser — `src`, `<link href>`, `srcset`, `url()`, `@import` — plus denylist pelacak yang dikenal, menggagalkan build jika satu muncul. Satu-satunya pengecualian adalah empat tautan profil di footer, dipaku satu per satu oleh URL di kedua penjaga, karena anchor bukanlah fetch. Versi naif pemeriksaan ini (gagal pada `https://` apa pun) ditolak sebagai tak terpakai — string error framework dan header lisensi memuat URL yang tak pernah di-fetch — jadi ia menyasar referensi yang *benar-benar* akan diselesaikan browser.
+### Audio tidak pernah keluar dari perangkat
 
-### Halaman bukti yang jujur
+Situs yang meminta akses mikrofon wajib menjelaskan ke mana audionya pergi. Di sini jawabannya tidak ke mana-mana, dan build yang memastikannya. Sebuah pemeriksaan memindai situs yang sudah jadi untuk mencari apa pun yang akan diambil browser, dan menggagalkan deploy kalau menemukannya. Satu-satunya pengecualian adalah empat tautan ke profil saya sendiri, masing-masing dicatat dengan alamat persisnya.
 
-Tampilan perbandingan menjalankan FFT tulisan-tangan di samping `AnalyserNode` browser atas input yang identik, dengan selisih per-bin dan waktu untuk keduanya — dan ia jujur dalam pembingkaiannya: yang native lebih cepat, dan kecepatan tak pernah menjadi klaimnya. Membuat perbandingannya *adil* menuntut mencocokkan window Blackman spek, mencocokkan penskalaan dB persisnya tanpa penggandaan satu-sisi, dan memakai input di pusat bin yang stasioner sehingga penyelarasan frame berhenti menjadi soal.
+### Halaman bukti yang mengakui browser lebih cepat
 
-## Hasil
+Halaman bukti menjalankan transformasi saya di samping analyser bawaan browser dengan masukan yang sama, dan menampilkan selisihnya di setiap frekuensi. Analyser bawaan lebih cepat, dan halaman itu menyebutkannya. Kecepatan memang tidak pernah menjadi klaimnya. Supaya perbandingannya adil, saya menyamakan bentuk jendela dan skala kekerasannya persis.
 
-Live dan publik, dwibahasa, sepenuhnya mampu offline. Ia menyajikan pelat langsung (mikrofon atau audio terbundel, ditransformasi dan digambar sebagai spektrogram bergulir dengan bentuk gelombang di atas dan jendela analisis sebagai kurung yang mengikat keduanya, hover memberi pembacaan waktu/frekuensi/dB/bin persis dalam angka tabular); **trade-off sebagai kontrol** (ukuran window dan tumpang tindih langsung, sebagai tiga posisi bernama dengan parameter mentah dilipat ke dalam disclosure lanjutan); empat fungsi window yang bisa ditukar; tiga skala frekuensi (linear, log, mel); mode sintesis yang menutup perjalanan bolak-balik (bangun sinyal, transformasi, pulihkan persis apa yang Anda masukkan); dan halaman bukti. Enam sampel terbundel *dibuat dalam kode*, jadi aplikasi adalah pengalaman lengkap bahkan saat mikrofon ditolak.
+## Hasilnya
 
-Dibangun sendiri dalam satu sesi ~4 jam — ~8.400 baris sumber, inti DSP ~990 baris, 256 tes berjalan dalam ~5,6s, di atas tiga dependensi runtime dan nol pustaka DSP, audio, atau charting. Terukur di desktop pada beban acuan: ~0,105 ms per kolom, ~101× waktu nyata, ~0,6 byte pertumbuhan heap per kolom sepanjang satu menit — angka terakhir itulah yang penting. `AnalyserNode` ditautkan dengan hangat sebagai opsi native yang lebih cepat; klaim di sini adalah ketepatan, bukan kecepatan.
+Spectrogram sudah live dan terbuka untuk umum, dalam bahasa Inggris dan Indonesia. Ada empat bentuk jendela, tiga skala nada, dan mode sintesis tempat Anda menyusun sinyal dari nada murni lalu melihat spektrumnya mengembalikan persis apa yang dimasukkan. Enam sampel bawaan dibangkitkan lewat kode, jadi situs tetap bisa dipakai walaupun akses mikrofon ditolak. Di desktop, transformasinya berjalan sekitar 101 kali lebih cepat dari waktu nyata. Saya membangunnya dalam satu sesi sekitar empat jam pada 6 Agustus 2026.
+
+## Langkah berikutnya
+
+- Menguji di ponsel kelas menengah. Angka kecepatannya berasal dari desktop, dan audio di ponsel berperilaku berbeda.
+- Mengotomatiskan perbandingan dengan analyser browser di CI. Saat ini perbandingan itu masih dicek manual di halaman bukti.
+- Menyelesaikan sisa pemolesan: galeri harmonik dan offline shell.
+
+## Di balik layar
+
+- Inti DSP di `lib/dsp/` sekitar 990 baris: FFT radix-2 Cooley-Tukey in-place beserta inversnya, tabel twiddle dan bit-reversal yang di-cache, empat jendela (rectangular, Hann, Hamming, Blackman) dari Harris (1978), konversi dB, pemetaan bin linear/log/mel, framing, dan sintesis aditif.
+- Sinyal kebenaran: oracle DFT naif O(n²) di setiap ukuran dan korpus acak ber-seed; identitas Parseval di setiap suite; round trip FFT → invers; fixture analitik (DC, sinus tepat di tengah bin, impuls satuan, kernel kebocoran Dirichlet pada offset setengah bin). Toleransi ditetapkan sekali dari fixture dan tidak pernah dilonggarkan.
+- Bagian real dan imajiner disimpan di `Float64Array` terpisah. Plate berupa ring buffer kolom yang di-blit sebagai satu `ImageData` per frame.
+- PRD meminta analisis di `AudioWorkletProcessor`, tetapi worklet tidak bisa diandalkan untuk memakai ES import, sehingga butuh salinan FFT kedua yang tidak teruji. Analisis dipindah ke Worker biasa; worklet hanya menjadi penyadap tangkapan, dengan fallback `ScriptProcessor`.
+- `scripts/finalize-export.mjs` memindai hasil build untuk `src`, `<link href>`, `srcset`, `url()`, dan `@import`, ditambah daftar tolak tracker. Namespace XML W3C dianggap aman.
+- Keadilan halaman bukti: Blackman α = 0,16 dan skala `20·log10(|X[k]|/fftSize)` tanpa penggandaan satu sisi, dengan masukan stasioner tepat di tengah bin.
+- `tests/ui/tokens.test.ts` gagal kalau palet Tailwind dan modul warna canvas tidak sinkron. Tes kamus gagal kalau kedua bahasa tidak sinkron.
+- Benchmark pada 2048 titik, overlap 75%, 48 kHz: sekitar 0,105 ms per kolom, sekitar 101× waktu nyata, sekitar 0,6 byte pertumbuhan heap per kolom selama satu menit.
+- Static export Next.js 14, 4 rute × 2 bahasa, tiga dependensi runtime tanpa library DSP, audio, atau grafik. 256 tes di 13 berkas, sekitar 5,6 detik. Sekitar 8.400 baris, 32 commit.

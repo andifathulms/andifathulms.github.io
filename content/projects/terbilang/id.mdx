@@ -2,32 +2,49 @@
 
 ## Masalahnya
 
-Dokumen komersial Indonesia secara hukum dan konvensi memuat jumlah dua kali: sekali dalam angka, sekali dieja dalam kata (*terbilang*). Setiap sistem akuntansi, penggajian, dan faktur di negeri ini membutuhkan fungsi ini, jadi hampir setiap sistem menulis versinya sendiri — dan sebagian besar salah dengan cara yang sampai ke kertas cetakan:
+Faktur, kuitansi, dan cek di Indonesia mencantumkan jumlah uang dua kali: sekali dalam angka dan sekali dalam huruf, yang disebut terbilang. Setiap sistem akuntansi, penggajian, dan penagihan di Indonesia membutuhkannya, jadi hampir semuanya menulis fungsinya sendiri. Banyak yang keliru, dan kekeliruannya ikut tercetak di kertas.
 
-- **Ketidakteraturan ejaan.** Bahasa Indonesia melebur `se-` pada angka 1 di depan untuk *sepuluh*, *sebelas*, *seratus*, *seribu* — tetapi pemakaian baku mengambil **`satu juta`**, bukan *sejuta*. Aturannya tampak seragam padahal tidak. Implementasi naif menghasilkan `satu ribu`.
-- **Kebocoran kelompok kosong.** `1.000.001` adalah *satu juta satu*, bukan *satu juta nol ribu satu*. Kelompok `000` harus tidak menghasilkan apa pun — bug struktural yang paling umum di ekosistem.
-- **Korupsi float yang senyap.** JavaScript kehilangan presisi integer di atas 2⁵³ ≈ 9×10¹⁵. Implementasi berbasis `number` benar hingga *triliun* dan diam-diam salah tepat sesudahnya — jadi ia lolos pengujian sekilas lalu merusak faktur sungguhan.
+Ejaannya punya aturan yang tidak seragam. Angka 1 di depan menjadi *se-* pada *sepuluh*, *seratus*, dan *seribu*, tetapi ejaan baku memakai *satu juta*, bukan *sejuta*. Kelompok kosong sering bocor: 1.000.001 dibaca *satu juta satu*, tidak pernah *satu juta nol ribu satu*. Lalu angka JavaScript kehilangan ketelitian di atas sekitar 9 kuadriliun. Kode yang memakainya benar sampai triliunan, lalu diam-diam menulis jumlah yang salah di faktur sungguhan.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Pustaka lebih dulu; situs hanya mendemonstrasikannya
+### Library dulu, situs untuk memperagakannya
 
-Tak ada di dalam paket yang tahu bahwa browser ada — tanpa React, tanpa DOM, tanpa `Intl`, tanpa `Date`. Ia berperilaku identik di Node dan browser, dan situs meng-import-nya alih-alih mengimplementasikan ulang apa pun. Pustaka terbit punya **nol dependensi runtime**, sebuah kendala keras alih-alih hasil, diverifikasi oleh build yang menjaga deklarasi tipe bebas dari tipe DOM dan framework.
+Saya membangun Terbilang sebagai library yang bisa dipakai software penagihan lain tanpa diubah. Pengguna pertama yang dituju adalah Rinci, proyek slip gaji saya, yang membutuhkannya untuk baris jumlah uang. Library ini tidak tahu apa-apa soal browser dan tidak punya dependensi runtime. Situsnya mengimpor library ini dan tidak menghitung apa pun sendiri. Saya membangun ulang seluruh situs setelah library-nya selesai, dan library-nya tidak berubah sama sekali.
 
-### `BigInt` dari ujung ke ujung, `number` tak di mana pun
+### Jumlah besar tetap tepat
 
-API menerima `bigint` atau string digit dan *tak pernah* `number` — memberikannya adalah penolakan bertipe, bukan koersi. Tak ada `parseInt`, tak ada `Number()`, tak ada aritmetika `number` di mana pun pada jalur nilai. Inilah seluruh alasan proyek ini ada, dan itu ditegaskan oleh test suite permanen di atas 2⁵³, bukan diperiksa sekali dengan tangan.
+Library hanya menerima bilangan bulat yang tersimpan tepat, berupa big integer atau string angka. Angka JavaScript biasa ditolak, tidak dikonversi, karena konversi itulah yang membuat jumlah besar menjadi salah. Serangkaian tes permanen memeriksa nilai di atas batas ketelitian. Satuan terbesar yang didukung adalah *kuadriliun* (10¹⁵), karena KBBI mencantumkan katanya. Batas itu juga membuat sebagian nilai yang didukung berada di atas batas ketelitian, sehingga tes tersebut tetap bermakna.
 
-### Menolak alih-alih menebak
+### Menolak daripada menebak
 
-Magnitudo di luar jangkauan, input non-integer, kata yang tak bisa diurai, dan opsi yang bertentangan semuanya mengembalikan error discriminated-union terstruktur yang menyebut persis apa yang gagal — tak pernah string usaha-terbaik, tak pernah hasil parsial, tak pernah clamp senyap. Kata skala berhenti di *kuadriliun* (10¹⁵), karena KBBI memuat lemanya; apa pun di 10¹⁸ atau lebih ditolak, karena pemakaian di sana genuinely belum mapan dan pustaka tak akan mengekstrapolasi polanya. Jumlah yang salah-tapi-masuk-akal pada dokumen lebih buruk daripada tanpa jumlah.
+Enam jenis kesalahan masing-masing mendapat jawaban bertipe yang menyebut persis apa yang gagal: jumlah terlalu besar, angka berkoma, kata yang tidak bisa dibaca, atau opsi yang saling bertentangan. Library tidak pernah mengembalikan tebakan atau hasil setengah jadi. Jumlah yang salah tapi terlihat wajar di faktur lebih buruk daripada tidak ada jumlah sama sekali. Di atas *kuadriliun*, pemakaiannya dalam bahasa Indonesia belum mapan, jadi library berhenti di situ dan tidak meneruskan polanya.
 
-### Verifikasi menyeluruh, bukan sampel
+### Huruf bisa dibaca kembali menjadi angka
 
-Domainnya terbatas dan fungsinya murni, jadi ia bisa diverifikasi *lengkap*. Seluruh 1.000.001 nilai dari 0 sampai 1.000.000 diformat, diperiksa strukturnya, diurai kembali, dan dibandingkan dengan aslinya — **setiap commit, dalam sekitar lima detik** — tidak disampel, tidak dilewati, tidak ditandai lambat. Ia menjaga CI. Memiliki parser jugalah yang membuat uji bolak-balik ini mungkin: `format` dan `parse` adalah invers persis di bawah opsi yang identik, dan invarian itulah yang benar-benar dibuktikan sapuan menyeluruh itu. Penguraian adalah arah yang lebih sulit — *dua ratus lima puluh ribu* adalah `(2×100 + 5×10) × 1000`, bukan `200 + 50000`.
+Kebanyakan alat hanya bekerja satu arah. Terbilang juga membaca huruf kembali menjadi angka, dan arah ini lebih sulit. *Dua ratus lima puluh ribu* berarti (2×100 + 5×10) × 1.000, bukan 200 + 50.000. Karena ada dua arah, keduanya bisa saya uji satu sama lain.
 
-## Hasil
+### Setiap angka sampai sejuta diperiksa
 
-Sebuah pustaka dual ESM/CJS (terbangun, siap diterbitkan, nol dependensi runtime) plus situs dwibahasa publik yang mendemonstrasikannya, mampu offline dengan tema siang/malam yang disetel sebelum paint pertama. Pengubah menggambar tiap kelompok tiga-angka sebagai kurung berlabel di atas digit — *juta*, *ribu* — saat Anda mengetik, dan kelompok kosong runtuh kasatmata menjadi nihil, yang menunjukkan bug paling umum ekosistem *tidak* terjadi. Ia menyajikan mode dokumen kuitansi (`# seribu lima ratus rupiah #`), lima opsi varian terkutip yang masing-masing mendokumentasikan pemakaian di balik kedua pilihan, enam penolakan bertipe yang ditampilkan dalam perlakuan khusus, dan halaman survei implementasi yang dikirim kosong secara sengaja — tak ada yang diklaim tentang paket yang tidak benar-benar diukur.
+Ruang masalahnya terbatas, jadi saya mengujinya secara menyeluruh. Setiap nilai dari 0 sampai 1.000.000 ditulis dalam huruf, diperiksa, dibaca kembali, lalu dibandingkan dengan aslinya. Itu 1.000.001 perjalanan bolak-balik di setiap perubahan, dalam sekitar lima detik, dan build gagal kalau satu saja rusak.
 
-Dibangun sendiri dalam satu sesi ~7 jam — ~4.370 baris TypeScript, API publik yang sengaja kecil (2 fungsi, 8 tipe, 4 konstanta), nol dependensi runtime, dan 1.000.001 asersi menyeluruh per run. Arah balik dan bukti menyeluruh itulah yang tak dimiliki kebanyakan implementasi di ruang ini; kerigorannya ada pada verifikasi, bukan pada jam kerja.
+## Hasilnya
+
+Library-nya sudah di-build dan siap diterbitkan, mendukung kedua format modul. Situs publiknya tersedia dalam bahasa Indonesia dan Inggris. Saat Anda mengetik, konverter menggambar kurung di atas setiap kelompok tiga angka dengan label *juta* atau *ribu*, dan kelompok kosong terlihat menghilang. Mode dokumen mencetak jumlah seperti di kuitansi: # seribu lima ratus rupiah #. Lima opsi, misalnya *sejuta*, atau *milyar* dan *miliar*, masing-masing mengutip pemakaian di balik kedua pilihannya. Halaman perbandingan dengan paket lain dirilis kosong, karena belum ada yang saya ukur. Saya membangunnya dalam waktu kurang dari tujuh jam pada 5 Agustus 2026.
+
+## Langkah berikutnya
+
+- Menerbitkan paketnya ke npm dan membuat tag rilis. Rangkaian tes menyeluruh yang menjadi syarat rilis sudah hijau.
+- Menjalankan survei terhadap paket-paket lain dan mengklasifikasikan setiap perbedaan secara tertulis.
+
+## Di balik layar
+
+- `lib/` sekitar 980 baris di 8 berkas: leksikon, pengelompokan, formatter, parser, opsi, dan error terstruktur. Tanpa React, DOM, `Intl`, `Date`, atau state di tingkat modul.
+- API: `format(bigint | string) → words` dan `parse(words) → bigint`, invers persis dengan opsi yang sama. Antarmuka publiknya 2 fungsi, 8 tipe, dan 4 konstanta.
+- Tidak ada `parseInt`, `Number()`, atau aritmetika `number` di jalur nilai. Batas bilangan bulat aman JavaScript adalah 2⁵³ ≈ 9×10¹⁵.
+- Varian error berupa discriminated union, misalnya `di-luar-jangkauan`, `tipe-tidak-didukung`, `opsi-bertentangan`.
+- Opsi: `sejuta`, `ejaanMiliar`, `mataUang`, `sen`, `kapitalisasi`. Setiap kombinasi diuji bolak-balik dengan dirinya sendiri, dan nama kuncinya tetap karena muncul di hash URL.
+- tsup membangun ESM dan CJS sekaligus dengan `.d.ts` dan `sideEffects: false`. `tsconfig.lib.json` terpisah menjaga tipe DOM dan Next keluar dari deklarasi. Versi `0.0.0`, `files: ["dist"]`, lisensi MIT.
+- Skrip survei (`pnpm survey:record`) mencatat versi paket dan tanggal pengukuran. Skrip ini sekaligus menjadi tes diferensial: setiap perbedaan harus diklasifikasikan sebagai bug kami, bug mereka, atau varian yang sah. Saat ini `data/survey/hasil.json` berisi array kosong.
+- Situsnya static export Next.js 14, 4 rute × 2 bahasa. Tema malam menukar variabel CSS lewat `data-tema="malam"` yang dipasang sebelum render pertama. State konverter disimpan di hash URL.
+- Sekitar 4.370 baris TypeScript, 26 commit.

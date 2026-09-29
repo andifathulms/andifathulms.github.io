@@ -2,32 +2,50 @@
 
 ## Masalahnya
 
-Hampir setiap perangkat lunak pencarian atau bahasa Indonesia menjalankan **stemmer** lebih dulu, agar *mempelajari*, *pelajaran*, dan *belajar* semua menyusut ke **ajar** dan dihitung sebagai kata yang sama. Di Indonesia stemmer itu nyaris selalu Nazief & Adriani, biasanya lewat pustaka Sastrawi, dipakai sebagai kotak hitam: kata masuk, akar keluar. Tiga biaya dari keburaman itu:
+Hampir semua mesin pencari dan alat bahasa untuk bahasa Indonesia terlebih dulu mengembalikan kata ke bentuk dasarnya, supaya *mempelajari*, *pelajaran*, dan *belajar* sama-sama dihitung sebagai **ajar**. Langkah ini disebut stemming. Di Indonesia, stemming hampir selalu memakai algoritma Nazief dan Adriani, biasanya lewat library Sastrawi, sebagai kotak hitam: kata masuk, kata dasar keluar.
 
-- **Jawaban salah terlihat persis seperti yang benar.** Over-stemming dan under-stemming sama-sama menghasilkan string Indonesia yang masuk akal. Tanpa melihat aturan mana yang menyala dan pencarian kamus mana yang berhasil, Anda tak bisa membedakannya.
-- **Kamusnya tak terlihat.** Algoritma berkonsultasi ke kamus kata dasar hampir di tiap langkah, jadi keluarannya bergantung pada kamus sebanyak pada aturan — tetapi kamus itu dikirim terbungkus dan tak terlihat.
-- **Ambiguitas diselesaikan diam-diam.** *beruang* adalah `ber-` + *uang* atau akar *beruang* (hewan). Algoritma mengembalikan satu dan tak berkata apa-apa. Di indeks pencarian, pilihan senyap itu adalah kesalahan senyap.
+Ini membawa tiga masalah bagi mahasiswa, dosen, dan developer yang mengandalkannya. Kata dasar yang salah terlihat sama dengan yang benar, karena keduanya tetap kata Indonesia yang masuk akal. Hasilnya bergantung pada kamus kata dasar yang tersembunyi, sama besarnya dengan bergantung pada aturannya. Lalu ada kata yang punya dua kata dasar yang sah. *Beruang* bisa berarti *ber-* ditambah *uang* ("punya uang") atau kata dasar *beruang* (hewan). Algoritmanya memilih salah satu tanpa memberi tahu.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Aturan adalah data, dan build menolak yang tak terkutip
+### Setiap langkah tampil di layar, termasuk jalan buntunya
 
-Tak satu pun dari 44 aturan ditulis di TypeScript. Masing-masing berada di JSON dengan id, pola, penulisan-ulang, presedensi, kutipan sumber, dan recoding apa pun yang dipicunya; mesinnya adalah interpreter atas data itu. Seorang linguis yang tak memprogram bisa mengaudit set aturan, dan jejak bisa menyebut aturan persis yang menyala karena id aturan bersifat first-class. Validator memeriksa skema, kutipan, dan konflik presedensi, serta menjaga deploy — aturan tanpa kutipan menggagalkan build.
+Ketik sebuah kata, dan jejaknya menampilkan setiap langkah sebagai baris bernomor: apa yang dilepas, aturan mana yang melakukannya, kata sebelum dan sesudahnya, dan apakah kamus mengenali hasilnya. Langkah yang dicoba lalu ditinggalkan tetap terlihat, dicoret dengan warna abu-abu. Anda bisa menelusurinya selangkah demi selangkah, dan sebuah animasi mengupas setiap awalan atau akhiran dari katanya.
 
-### Kamus adalah parameter, dan ambiguitas adalah hasil first-class
+### Aturannya berupa data yang bisa dibaca ahli bahasa
 
-Tanda tangan mesin adalah `(word, variant, ruleSet, dictionary) → StemTrace` — kamus selalu eksplisit, tak pernah import, yang membuat panel kamus yang bisa disunting menjadi mungkin dan membiarkan tes menukar kamus untuk *membuktikan* penyebab ketidaksesuaian. Satu set aturan menggerakkan dua traversal: satu mengikuti presedensi dan mengembalikan jawaban algoritma, satu lagi menjelajah setiap segmentasi yang diizinkan morfologi. Tes menegaskan *soundness* (akar yang dikembalikan harus muncul di himpunan kandidat), bukan kesamaan — enumerasi sengaja menemukan lebih banyak, dan surplus itulah produknya. Untuk *beruang* aplikasi melaporkan dua akar valid alih-alih diam-diam memilih satu.
+Tidak satu pun dari 44 aturan ditulis sebagai kode. Setiap aturan disimpan di berkas data lengkap dengan polanya, efeknya, prioritasnya, dan kutipan sumbernya. Mesinnya membaca berkas itu lalu menerapkannya. Ahli bahasa bisa memeriksa aturannya tanpa membaca kode, dan jejaknya bisa menyebut aturan persis yang dipakai. Build gagal kalau ada aturan tanpa kutipan.
 
-### Sastrawi adalah oracle, bukan otoritas
+### Kamusnya bisa diubah
 
-Sebuah skrip pengembangan menjalankan PySastrawi atas daftar kata dan merekam pasangannya sebagai fixture. Menjalankannya atas 315 kata menghasilkan sembilan divergensi — dan tiga benar-benar bug *kami*: dua entri kamus buruk dan satu aturan yang hilang (`per-` sebelum konsonan), yang perbaikannya juga membenarkan *pertemuan* → *temu*. Enam sisanya diklasifikasikan secara tertulis — bug kami, atau pilihan Sastrawi yang terdokumentasi — tak pernah diselaraskan otomatis demi meloloskan tes, dan masing-masing dipaku sebuah asersi sehingga tak seorang pun bisa diam-diam "memperbaiki" divergensi tanpa menulis ulang entrinya.
+Saya menjadikan kamus sebagai masukan eksplisit untuk setiap perhitungan. Panel kamus memungkinkan Anda mencari, menambah, atau menghapus kata, lalu melihat stem yang tadinya benar menjadi rusak. Perubahan tersimpan di link, jadi keadaan yang rusak itu pun bisa dibagikan. Tampilan perbandingan menunjukkan kata yang sama dengan dan tanpa kamus, sehingga terlihat jelas apa sumbangan kamusnya.
 
-### Jujur tentang apa yang belum terverifikasi
+### Kata yang ambigu mendapat lebih dari satu jawaban
 
-Makalah primer terkunci berbayar atau hilang, jadi **setiap aturan ditandai `unverified`**, tiap kutipan menunjuk ke tempat ia seharusnya diperiksa, dan sebuah `GAPS.md` merekam apa yang telah dicoba dan ke mana mencari selanjutnya — dengan tes yang menegaskan jumlah aturan tak terverifikasi, sehingga memverifikasi satu *memaksa* asersi diperbarui. Beralih ke kamus ~30.000 kata milik Sastrawi menyelesaikan dua divergensi tetapi dengan sadar merusak *perusakan* → *rusa*, karena kamus yang lebih besar membuka cabang yang salah; regresi itu diterima dan ditulis, karena cakupan dan ketepatan bukan sumbu yang sama.
+Aturan yang sama menjalankan dua penelusuran. Yang pertama mengikuti algoritma dan mengembalikan satu jawaban. Yang kedua menjelajahi semua cara kata itu bisa dipecah. Untuk *beruang*, aplikasi menampilkan kedua kata dasar yang sah dan menjelaskan alasan algoritma memilih salah satunya. Galeri enam kata yang salah dihitung algoritma ini dihitung ulang secara langsung, masing-masing diberi label cara dan titik kegagalannya.
 
-## Hasil
+### Sastrawi menjadi pembanding untuk pengujian
 
-Live dan publik, dwibahasa (Indonesia default), offline. Ia menyajikan tampilan jejak (setiap langkah sebagai baris bergaris — operasi, id aturan dan sumber, sebelum/sesudah, pencarian kamus dan hasilnya, dengan cabang yang ditinggalkan dicoret abu-abu pensil), pohon kandidat yang menandai tiap daun valid-kamus atau tidak, panel kamus yang bisa disunting di mana menghapus sebuah kata merusak stem yang tadinya benar, referensi aturan yang ditampilkan langsung dari JSON, sebuah **galeri kegagalan** enam kata yang dihitung ulang langsung, dan mode dokumen yang menandai kata ambigu dan tak tercocokkan pada paragraf yang ditempel.
+Saya membandingkan hasil saya dengan Sastrawi pada 315 kata dan menemukan sembilan perbedaan. Tiga di antaranya bug saya: dua entri kamus yang salah dan satu aturan yang terlewat. Enam sisanya diklasifikasikan secara tertulis, dan setiap perbedaan dikunci oleh tes supaya tidak ada yang mengubahnya diam-diam. Makalah aslinya tidak bisa saya dapatkan, jadi setiap aturan ditandai belum terverifikasi dan ada berkas celah yang mencatat di mana harus memeriksanya.
 
-Dibangun sendiri dalam satu sesi ~9 jam — ~5.480 baris TypeScript, 44 aturan terkutip, 59 tes, lima dependensi runtime dan nol pustaka NLP. Sastrawi ditautkan dengan menonjol sebagai pustaka yang sebaiknya dipakai di produksi; ini dibingkai sebagai alat edukasi, bukan otoritas, dengan status tak terverifikasi dan divergensi terdokumentasinya diterbitkan alih-alih disembunyikan.
+## Hasilnya
+
+Stemmer Visualizer sudah live, terbuka untuk umum, dan open source, dalam bahasa Indonesia dan Inggris, serta bisa dipakai offline. Ada tujuh halaman, termasuk referensi aturan yang dibangkitkan dari data aturannya dan mode dokumen yang menandai kata ambigu dalam paragraf yang ditempel. Aplikasi ini memakai daftar kata dasar Sastrawi yang berisi sekitar 30.000 kata. Perubahan itu memperbaiki dua perbedaan tetapi merusak satu kata, *perusakan*, yang kini menghasilkan *rusa*. Saya menerimanya dan mencatatnya. Situs ini menautkan Sastrawi sebagai library yang sebaiknya dipakai di produksi. Saya membangunnya dalam sekitar sembilan jam pada 5 Agustus 2026.
+
+## Langkah berikutnya
+
+- Memverifikasi 44 aturan terhadap makalah aslinya, dimulai dari akses institusi ke versi jurnal 2007.
+- Menjawab tiga perbedaan yang masih terbuka berdasarkan makalah, bukan intuisi.
+- Menambahkan set aturan 2005, tetapi hanya dari makalah sumbernya.
+
+## Di balik layar
+
+- Mesin di `lib/engine/` terdiri dari tujuh modul murni. Signature: `(word, variant, ruleSet, dictionary) → StemTrace`. Tanpa React, DOM, jam, atau state modul; masukan yang sama menghasilkan jejak yang identik sampai ke byte.
+- `interpret.ts` mengikuti prioritas; `enumerate.ts` menjelajahi setiap segmentasi. Tes menguji kesahihan (kata dasar yang dikembalikan ada di himpunan kandidat), bukan kesamaan.
+- Aturan disimpan di `data/rules/na96.json` dengan id tetap seperti `na96.awalan.me.luluh.ny`. `pnpm rules:validate` memeriksa skema, kutipan, dan konflik prioritas dengan Zod, dan menjadi gerbang build serta deploy.
+- Ke-44 aturan bertanda `verification: "unverified"`. Makalah 1996, perluasan 2005, dan versi TALIP 2007 tidak bisa didapat; `data/rules/GAPS.md` mencatat apa saja yang sudah dicoba. Sebuah tes menguji jumlah aturan yang belum terverifikasi, jadi memverifikasi satu aturan memaksa tes itu diperbarui.
+- Oracle: PySastrawi 1.2.1 pada 315 kata → 9 perbedaan. Yang diperbaiki: `hargai` dan `sertai` yang keliru tercatat sebagai kata dasar, serta aturan `per-` sebelum konsonan yang terlewat (aturan 22), yang sekaligus memperbaiki *pertemuan* → *temu*. Enam sisanya diklasifikasikan di `tests/oracle/divergences.md`.
+- Tes dikunci ke kamus kurasi 293 kata, karena semua fixture ditulis berdasarkan kamus itu. Daftar yang dirilis berisi 29.932 kata (sekitar 290 KB), disertakan sebagai data di bawah lisensi MIT Sastrawi dan dimuat sebagai chunk tersendiri agar JS aplikasi tetap di bawah 200 KB gzip. Tidak ada kode Sastrawi yang ikut dirilis.
+- Varian 2005 baru sebagian: perbandingan tanpa kamus sudah ada, tetapi paket aturannya harus dikarang kalau dibuat sekarang, jadi belum ada.
+- Abu-abu pensil dipecah menjadi dua nada supaya teks sekunder lolos WCAG AA. Proyek ini bernama Kupas di PRD; `kupas` masih dipakai sebagai rute halaman jejak.
+- Static export Next.js 14, 7 rute × 2 bahasa, 20 komponen, lima dependensi runtime tanpa library NLP. 59 tes Vitest di 6 berkas. Sekitar 5.480 baris, 42 commit.

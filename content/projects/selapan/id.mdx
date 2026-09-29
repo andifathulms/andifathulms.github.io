@@ -2,32 +2,52 @@
 
 ## Masalahnya
 
-*Weton* — siklus hari kelahiran Jawa seseorang, dipakai di seluruh Jawa untuk upacara penamaan, pernikahan, dan kalender berkabung — tampak seperti pencarian tabel padahal sebenarnya empat siklus yang bertumpang tindih: *pasaran* 5-hari, pekan 7-hari, *wuku* 210-hari, dan tahun lunar yang dimulai pada 1633 M, plus sistem koreksi historis bernama *kurup* yang bergeser tiap 120 tahun.
+Di seluruh Jawa, banyak keluarga memakai *weton*, hari lahir seseorang dalam siklus Jawa, untuk menentukan hari selamatan kelahiran, pernikahan, dan peringatan hari-hari setelah kematian. Kelihatannya cukup dengan melihat tabel. Kenyataannya, weton menggabungkan empat siklus: *pasaran* 5 hari, pekan 7 hari, *wuku* 210 hari, dan tahun lunar yang dimulai pada 1633 M. Ada juga sistem koreksi bernama *kurup* yang menggeser hitungan lunar setiap 120 tahun.
 
-Situs weton yang ada didukung iklan, tak mengutip apa pun, tak menunjukkan metode, dan saling bertentangan. Tiga mode kegagalan menjadi sasaran desain sesungguhnya: mereka **meng-hardcode *kurup* saat ini**, sehingga tanggal historis mana pun salah; mereka **dengan senang mengonversi tanggal sebelum 1633 M**, di mana sistem lunar belum ada; dan mereka **tak menunjukkan perhitungan**, sehingga jawaban salah tak terdeteksi pembaca. Ada celah keempat yang nyata secara sosial: sebagian komunitas berhitung dengan aturan **Aboge** yang lebih lama alih-alih **Asapon** — itulah kenapa desa Aboge kadang merayakan Idul Fitri sehari setelah penetapan nasional — dan tak ada situs yang menampilkan divergensi itu; mereka sekadar menyanggah para pengguna itu.
+Situs weton yang ada penuh iklan, tidak mengutip sumber apa pun, dan hasilnya saling berbeda. Situs-situs itu memakai *kurup* yang berlaku sekarang untuk semua tanggal, jadi tanggal sejarah keliru. Tanggal sebelum 1633 tetap dikonversi, padahal sistem lunarnya belum ada. Cara hitungnya tidak ditampilkan, jadi pembaca tidak bisa menemukan kesalahan. Masyarakat yang memakai hitungan Aboge yang lebih tua kadang merayakan Idulfitri sehari setelah tanggal nasional. Tidak ada situs yang menunjukkan perbedaan itu.
 
-Ada pula masalah etis yang diperlakukan proyek ini sebagai persyaratan first-class. Weton memberi makan *primbon* — pembacaan watak, kecocokan jodoh, hari baik — yang banyak dianggap serius dan banyak pula ditolak. Responsnya adalah pemisahan keras antara yang *dihitung* dan yang *ditafsirkan*, ditegakkan di sistem tipe, skema data, validator build, dan palet warna.
+## Yang saya bangun
 
-## Pendekatannya
+### Setiap jawaban menampilkan cara hitungnya
 
-### Julian Day Number sebagai satu-satunya representasi internal
+Setiap angka di halaman bisa dibuka untuk melihat asal-usulnya: tanggal acuan, jumlah hari sejak tanggal itu, panjang siklus, hasil, dan sumbernya. Siapa pun bisa mengulang hitungan itu dengan tangan dari layar. Saya membangun mesin kalendernya supaya setiap nilai selalu membawa cara hitung ini. Angka tanpa cara hitung tidak bisa ditampilkan sama sekali, jadi halaman tidak mungkin berbeda dari aritmetikanya.
 
-Setiap tanggal menjadi hitungan hari integer di batas UI; segala hal setelahnya adalah aritmetika integer. Tak ada objek `Date` di mana pun dalam mesin — tanpa zona waktu, tanpa DST, tanpa lokal, tanpa clock ("hari ini" diselesaikan di UI dan diberikan sebagai parameter). Tanpa pustaka tanggal, dengan sengaja: date-fns, Luxon, dan Temporal semuanya membawa semantik zona waktu yang *justru salah* untuk kalender siklus-modulo. Daftar dependensinya empat paket.
+### Tanggal acuan berasal dari sumber yang dikutip
 
-### Setiap siklus adalah modulo terhadap anchor yang *dikutip*
+Setiap siklus dihitung dari tanggal acuan yang disimpan di berkas data, lengkap dengan sumber dan letak rujukannya. Build gagal kalau tanggal acuan tidak punya kutipan atau tidak cocok dengan tanggal yang disebutkannya sendiri. Nilai yang disimpulkan dari sumber lain ditandai belum terverifikasi, tampil abu-abu, dan dicantumkan di halaman sumber dan celah yang terbuka untuk umum.
 
-Anchor berada di JSON dengan sumber, pelokasi, dan tanggal verifikasi — tak ada epoch yang di-hardcode di berkas `.ts`. Build gagal pada anchor yang tak terkutip atau tak konsisten dengan dirinya: validator menghitung ulang JDN tiap anchor dari tanggal Gregorian yang dinyatakannya dan menolak ketidakcocokan. Rentang keabsahan bersifat per-subsistem, bukan global — permintaan untuk 1500 M mengembalikan penolakan terstruktur untuk subsistem lunar *dan* nilai *pasaran* serta *wuku* yang valid, karena siklus-siklus itu benar-benar kontinu. Penolakan adalah objek bertipe, tak pernah string yang dilempar, null senyap, atau tebakan pencocokan terdekat.
+### Tanggal di luar jangkauan ditolak
 
-### Jejak itulah produknya
+Setiap siklus punya rentang berlakunya sendiri. Kalau Anda meminta tanggal di tahun 1500 M, kalender lunar menolak dan menyebutkan alasannya, sementara *pasaran* dan *wuku* tetap menjawab karena kedua siklus itu berjalan terus tanpa putus. Saya menghitung setiap tanggal sebagai bilangan bulat jumlah hari, tanpa zona waktu atau jam. Masukan yang sama selalu menghasilkan jawaban yang sama.
 
-Tanda tangan mesinnya adalah `(jdn, options) → CalendarTrace`, dan setiap nilai dalam jejak itu membawa `Derivation` — id anchor, JDN anchor, offset, modulus, hasil, sumber, dan status verified/unverified. Setiap angka yang bisa dibuka di UI ditampilkan dari struktur itu, sehingga nilai tanpa derivasi *tak bisa ditampilkan* — UI tak bisa menyimpang dari aritmetikanya. Warna membawa garis etis: indigo menampilkan nilai terhitung saja, merah rubrik menampilkan materi tradisi/primbon saja, abu-abu menandai di-luar-jangkauan dan tak terverifikasi — mencerminkan rubrikasi almanak *primbon* cetak, sehingga pembaca mempelajari perbedaannya dalam hitungan detik tanpa digurui.
+### Aboge dan Asapon berdampingan
 
-### Kejujuran sebagai artefak build
+Tampilan perbedaan menghitung tanggal yang sama dengan kedua aturan dan menunjukkan mekanisme yang memisahkan keduanya. Pada satu contoh tanggal, Asapon menghasilkan 21 Sapar dan Aboge 20 Sapar. Masyarakat Aboge bisa melihat hitungan mereka sendiri di samping hitungan nasional, dan situs ini tidak menyebut salah satunya keliru.
 
-Di mana sebuah datum disimpulkan alih-alih ditranskrip — rentang *kurup* Ajumgi, proyeksi transisi 1987, epoch *wuku* (yang bersandar pada satu sumber, di mana kesalahan fase satu *wuku* penuh akan lolos setiap uji periode) — ia ditandai `unverified` di data, ditampilkan abu-abu, dan didaftar di halaman sumber-dan-celah publik. Validator menolak klaim `verified` yang tak menyebut cross-check independen. Dan seluruh lapisan tafsir *primbon* sengaja ditahan: skema dan validatornya sudah berjalan (wajib kutipan, atribusi harus dimulai "Menurut", frasa orang-kedua atau skor apa pun ditolak saat build), tetapi ia tak akan rilis tanpa peninjau bernama yang paham praktik kalender Jawa.
+### Hitungan dan tafsiran dipisahkan
 
-## Hasil
+Weton menjadi dasar *primbon*: watak, kecocokan jodoh, dan hari baik. Banyak orang memercayainya, banyak juga yang menolaknya. Saya memberi nilai hasil hitungan satu warna, nila, dan materi tradisi warna lain, merah yang diambil dari almanak cetak. Lapisan tafsiran saya tahan seluruhnya. Aturannya sudah berjalan saat build, tetapi lapisan ini tidak akan dirilis sebelum ada peninjau yang memahami tradisi Jawa dan bersedia memeriksanya.
 
-Live dan publik, dwibahasa (Indonesia default), sepenuhnya statis. Ia menyajikan konversi dengan jejak yang bisa dibuka (setiap angka terbuka ke anchor → offset → modulus → hasil → kutipan, sehingga jawaban mana pun bisa diulang dengan tangan dari layar); **tampilan divergensi Aboge/Asapon** — tanggal yang sama dihitung dua cara dengan mekanismenya di samping, fitur yang tak dimiliki apa pun lain di internet; roda siklus konsentris beranimasi yang kasatmata menyejajar kembali pada 35 hari (*selapan*) dan 210; grid bulan tata-letak kalender dinding; perhitungan *selapanan*/*slametan* yang disajikan sebagai aritmetika tanggal lugas dan terkutip tanpa tafsir (ia melayani orang saat berduka); *pranata mangsa*; dan halaman sumber-dan-celah yang menerbitkan apa yang masih tak terverifikasi alih-alih menyembunyikannya.
+## Hasilnya
 
-Dibangun sendiri dalam satu hari — ~6.300 baris sumber, 126 tes (yang terpanjang sebuah invarian atas 36.524 hari berturut-turut), empat dependensi produksi dan tanpa pustaka tanggal. Dibingkai sebagai proyek pribadi, bukan otoritas, dengan variasi regional diakui dan bagian yang belum lengkap ditampilkan di UI.
+Selapan sudah live dalam bahasa Indonesia dan Inggris, dengan tujuh halaman di setiap bahasa. Selain konversi, ada roda siklus yang kembali sejajar setiap 35 hari (satu *selapan*) dan setiap 210 hari, tampilan kalender dinding bulanan, dan kalender pertanian tradisional (*pranata mangsa*). Situs ini juga menghitung tanggal selamatan kematian sebagai hitungan biasa yang bersumber, tanpa tafsiran. Siklusnya diuji tepat selama 36.524 hari berturut-turut. Situs ini menyebut dirinya proyek pribadi, bukan otoritas, dan mengakui bahwa praktiknya berbeda di tiap daerah. Saya membangunnya dalam satu hari, 6 Agustus 2026.
+
+## Langkah berikutnya
+
+- Mencocokkan tanggal acuan *wuku* dengan data *pawukon* Bali yang sudah diterbitkan. Saat ini acuannya hanya bersandar pada satu sumber, dan kesalahan sebesar satu *wuku* penuh akan lolos dari semua uji siklus.
+- Menerapkan panjang bulan yang tidak teratur pada tahun Dal. Batas tahunnya sudah benar, tetapi hari-hari di dalam tahun Dal bisa meleset, jadi ditandai belum terverifikasi.
+- Merilis lapisan *primbon* setelah ada peninjau yang disebut namanya.
+
+## Di balik layar
+
+- Julian Day Number adalah satu-satunya representasi tanggal di dalam mesin. Tidak ada objek `Date` di `lib/`; "hari ini" ditentukan di UI lalu dikirim sebagai parameter. Tidak ada library tanggal, karena date-fns, Luxon, dan Temporal membawa semantik zona waktu yang keliru untuk kalender berbasis modulo siklus.
+- Signature mesinnya `(jdn, options) → CalendarTrace`. Setiap nilai membawa `Derivation`: id anchor, JDN anchor, offset, modulus, hasil, sumber, dan status verifikasi.
+- Penolakan berupa objek bertipe, `{ subsystem, reason, validFrom, validTo }`, tidak pernah string yang di-throw, null, atau tebakan terdekat.
+- Anchor disimpan di `data/anchors/` sebagai JSON dengan sumber, lokasi rujukan, dan tanggal verifikasi. Validator 226 baris menghitung ulang JDN setiap anchor dari tanggal Gregoriannya dan menolak yang tidak cocok, serta menolak klaim `verified` tanpa pembanding independen. Validator ini menjadi gerbang untuk `pnpm build` dan CI.
+- Data yang dikutip: 4 anchor, 5 definisi *kurup*, tabel *neptu*, dan tabel *pranata mangsa*. Celah yang didokumentasikan: epoch *wuku* dari satu sumber, `kurup.anenhing.1987` sebagai proyeksi ke depan, rentang Ajumgi 72 tahun yang disimpulkan, dan panjang bulan tahun Dal.
+- Transisi Asapon 1936 dicek silang di berkas datanya sendiri: 24 Maret 1936, Selasa Pon.
+- Skema *primbon* (M6) sudah mewajibkan kutipan, atribusi yang diawali "Menurut", dan melarang kalimat orang kedua maupun skor.
+- Warna: nila `#2B4470` untuk nilai hasil hitungan, merah rubrik `#A83C28` untuk materi tradisi, abu-abu untuk di luar rentang dan belum terverifikasi.
+- Static export Next.js 14, 7 rute × 2 bahasa, empat dependensi produksi (next, react, react-dom, zod). Pipeline deploy: `data:validate` → `typecheck` → `lint` → `test:run` → `build`.
+- 126 tes Vitest di 8 suite; suite *kurup* paling berat dengan 29 tes. Invarian terpanjang mencakup 36.524 hari berturut-turut. Sekitar 6.300 baris, 28 commit dalam kurang lebih 3 jam 45 menit.
+- JS yang dihasilkan sekitar 880 KB tanpa kompresi di seluruh chunk, sementara target PRD 200 KB gzip untuk payload aplikasi.

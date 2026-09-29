@@ -2,30 +2,51 @@
 
 ## Masalahnya
 
-Indonesia memilih parlemen nasionalnya lewat dua aturan yang nyaris tak bisa dilakukan siapa pun dengan tangan: ambang batas nasional 4% — partai di bawahnya tak mengonversi satu pun suaranya menjadi kursi di mana pun, termasuk di dapil tempat ia menang — dan metode pembagi tertinggi Sainte-Laguë, di mana tiap 84 daerah pemilihan membagikan kursinya dengan berulang kali membagi suara partai dengan 1, 3, 5, 7 dan seterusnya. Pada pemilu 2024, 18 partai berkontestasi, 8 lolos ambang batas, dan lebih dari 17,3 juta suara sah tak menghasilkan satu kursi pun. Satu partai petahana di parlemen kehilangan ambang batas hanya sekitar 0,13 poin persentase dan tak mendapat kursi sama sekali.
+Wartawan, mahasiswa, dan staf legislatif yang membaca RUU Pemilu menghadapi hambatan yang sama. Indonesia mengubah suara menjadi kursi DPR lewat dua aturan yang hampir tidak mungkin dihitung dengan tangan. Partai yang suaranya di bawah ambang batas nasional 4% tidak mendapat kursi di mana pun, termasuk di dapil tempat ia menang. Setelah itu, setiap dari 84 dapil membagi kursinya dengan metode Sainte-Laguë, yaitu membagi suara partai dengan 1, 3, 5, 7, dan seterusnya.
 
-Ini bukan sekadar akademis: Mahkamah Konstitusi Indonesia menyatakan angka 4% itu konstitusional hanya untuk 2024, dan memerintahkan legislatif merumuskan ulang sebelum pemilu berikutnya dengan syarat yang mencakup meminimalkan suara yang terkonversi menjadi nihil. Mahkamah, pada dasarnya, memerintahkan sebuah perhitungan — dan belum ada yang mengirim instrumen publik yang menjalankannya.
+Pada Pemilu 2024, 18 partai ikut serta dan 8 lolos ambang batas. Sebanyak 17.304.303 suara sah tidak menghasilkan kursi. PPP, partai yang sebelumnya ada di DPR, kurang sekitar 0,13 poin persentase dari ambang batas. Mahkamah Konstitusi menyatakan angka 4% berlaku untuk 2024 saja dan meminta pembentuk undang-undang menetapkan angka baru sebelum 2029, dengan syarat suara yang terbuang ditekan. Itu adalah perhitungan, dan belum ada alat publik yang menjalankannya.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Mesin murni, terisolasi dari segala hal
+### Hitungan kursi ada di satu fungsi kecil yang bisa diperiksa
 
-Mesin alokasinya tak mengimpor apa pun — tanpa React, tanpa DOM, tanpa tanggal, tanpa keacakan. Satu fungsi sinkron dan deterministik menerima data partai, data dapil, dan seperangkat aturan, lalu mengembalikan alokasi lengkapnya. Ia berjalan tanpa perubahan dalam skrip Node biasa, yang membuat hasilnya bisa diperiksa secara independen alih-alih sekadar klaim yang dibuat antarmuka tentang dirinya sendiri.
+Saya memisahkan mesin alokasi dari bagian lain aplikasi. Mesin ini menerima suara partai, data dapil, dan seperangkat aturan, lalu mengembalikan hasil lengkapnya. Tidak ada dependensi, tidak ada unsur acak, tidak ada jam. Kode yang sama bisa dijalankan sebagai skrip biasa di luar browser, jadi siapa pun bisa memeriksa angkanya tanpa harus percaya pada tampilannya.
 
-### Komputasi dan tampilannya adalah objek yang sama
+### Penjelasannya menampilkan aritmetika yang sebenarnya
 
-Setiap perolehan kursi mencatat tabel pembagi lengkap pada saat kursi itu diklaim. Tampilan "tunjukkan cara kerjanya" menggambar array itu langsung — ia tak pernah menghitung ulang, sehingga gambarnya tak bisa perlahan berhenti menggambarkan aritmetika di baliknya, sebuah mode kegagalan umum pada visualisasi penjelas.
+Setiap kursi yang diberikan mesin menyimpan tabel hasil bagi lengkap pada saat kursi itu dimenangkan. Tampilan "tunjukkan cara hitungnya" menggambar catatan itu langsung dan tidak pernah menghitung ulang. Untuk dapil mana pun, Anda bisa menelusuri kursi satu per satu dan membaca setiap pembagiannya. Gambarnya tidak mungkin berbeda dari hitungannya, karena keduanya satu data yang sama.
 
-### Cukup cepat sehingga tak butuh mekanisme asinkron
+### Kursi berpindah saat aturan diubah
 
-Penghitungan ulang penuh di seluruh 84 dapil berjalan pada median 0,23 milidetik, terhadap anggaran 16 milidetik. Itu artinya slider ambang batas bisa menghitung ulang seluruh parlemen di tiap frame animasi saat digeser — tanpa debounce, tanpa idle callback, tanpa web worker — dan satu loop animasi menginterpolasi posisi dan warna ke-580 kursi dalam satu proses alih-alih memasang ratusan komponen yang dianimasikan sendiri-sendiri, yang menjadi beda antara gerakan mulus dengan frame yang jatuh di ponsel.
+Tampilan utamanya adalah ruang sidang berisi 580 kursi. Geser ambang batas dari 4,0% ke arah nol, dan kursi-kursi berpindah satu per satu dari blok satu partai ke blok partai lain. Mesin menghitung ulang ke-84 dapil dalam 0,23 milidetik, jadi hitungan bisa diulang di setiap frame animasi. Saya menggerakkan ke-580 kursi dalam satu loop animasi supaya gerakannya tetap mulus di ponsel. Begitu slider melewati 3,87%, PPP masuk ke ruang sidang.
 
-### Reproduksi adalah izin untuk dipercaya
+### Hasil 2024 harus cocok dulu sebelum simulasi boleh tampil
 
-Aplikasi ini harus mereproduksi hasil pemilu 2024 yang tersertifikasi secara persis sebelum diizinkan menawarkan kontrafaktual apa pun, dan pemeriksaan itu berjalan di CI serta menghalangi build. Ketika data yang mendasarinya belum bisa mendukung itu — tabel suara per dapil per partai hanya ada di dalam dokumen rekapitulasi pemerintah yang dipindai, dan ekstraksinya secara manual belum tuntas saat tulisan ini dibuat — antarmuka menyatakannya dengan lugas di headernya alih-alih menyajikan layar yang tampak berfungsi. Tiga dari empat berkas data yang dibutuhkan memuat angka tersertifikasi yang nyata, sehingga semua yang dihitung dari total nasional adalah nyata, termasuk jumlah suara tak terkonversi, yang cocok dengan hitungan independen masyarakat sipil hingga ke satu suara.
+Saya menetapkan aturan bahwa aplikasi harus mereproduksi hasil resmi 2024 sebelum menampilkan skenario apa pun, dan pemeriksaan ini menghentikan build kalau gagal. Tabel suara per dapil per partai hanya tersedia di PDF rekapitulasi KPU hasil pindaian, dan ekstraksinya belum saya selesaikan. Karena itu, header aplikasi menyatakan dengan jelas bahwa hasil resmi belum tereproduksi. Angka nasional memakai data resmi, dan jumlah suara yang terbuang sama persis dengan hitungan independen Perludem.
 
-## Hasil
+### Setiap aturan merujuk ke undang-undang
 
-Live dan publik: geser ambang batas nasional dari 4,0% menuju nol dan kursi-kursi individual berpindah sepanjang jalur dari satu blok partai ke blok lain — tak pernah digambar ulang, tak pernah crossfade — dan pada saat slider melewati sekitar 3,87%, partai yang gagal lolos dalam pemilu sungguhan masuk ke ruang sidang. Empat tombol aturan (ambang batas, cakupan ambang batas, metode pembagi, dan geometri dapil) semuanya bisa direproduksi dari URL, sehingga argumen tentang ambang batas hipotetis 2% adalah sebuah tautan yang bisa dikirim seseorang. Setiap aturan mengutip pasal hukumnya yang persis dan setiap angka utama mengutip dokumen sumbernya, lewat popover yang bisa ditutup dan dijangkau keyboard alih-alih tooltip yang menghilang saat mouse dijauhkan.
+Setiap aturan mengutip pasalnya di UU 7/2017, dan setiap angka utama mengutip dokumen KPU sumbernya. Kutipan terbuka di panel yang bisa dijangkau dengan keyboard dan dibaca tanpa terburu-buru. Bahasanya menggambarkan hasil secara netral, misalnya "sepuluh partai tidak memperoleh kursi".
 
-Penulis tunggal, 42 commit dalam sekitar 28 jam, ~8.000 baris kode, 40 tes dengan setiap nilai yang diharapkan dihitung tangan di atas kertas sebelum ditulis. Lima dependensi runtime, tanpa backend, tanpa analitik — empat berkas JSON statis adalah seluruh lapisan datanya. Nihil pelanggaran aksesibilitas axe-core di tiga lebar viewport dalam kedua skema warna, dan setiap satu dari lima visualisasi buatan tangannya punya padanan tabel yang sepenuhnya bisa dijangkau keyboard, karena ruang sidang setengah lingkaran bukan satu-satunya cara siapa pun seharusnya bisa memperoleh angkanya.
+## Hasilnya
+
+Suara ke Kursi sudah live, terbuka untuk umum, dan berbahasa Indonesia. Ada empat pengaturan aturan: ambang batas, cakupan ambang batas, metode pembagi, dan peta dapil. Setiap pengaturan tersimpan di tautan, jadi perdebatan soal ambang batas 2% bisa dikirim sebagai link. Aplikasi ini memodelkan 580 kursi, 84 dapil, dan 18 partai dalam lima tampilan. Setiap tampilan punya tabel dengan angka yang sama, bisa dijangkau dengan keyboard. Audit otomatis tidak menemukan satu pun pelanggaran aksesibilitas di tiga lebar layar, dalam mode terang dan gelap. Saya membangunnya dalam sekitar 28 jam, pada 2 dan 3 September 2026.
+
+## Langkah berikutnya
+
+- Menyelesaikan ekstraksi suara resmi per dapil per partai dari dokumen rekapitulasi hasil pindaian. Begitu data itu masuk, pemeriksaan reproduksi langsung lolos tanpa perubahan kode.
+- Aplikasi ini hanya mencakup aturan 2024. Alokasi tingkat caleg, aturan Pemilu 2019 dan 2014, serta versi bahasa Inggris berada di luar cakupan build ini.
+
+## Di balik layar
+
+- Mesinnya ada di `src/engine/`, 621 baris tanpa satu pun import. `allocate(parties, dapil, rules)` adalah seluruh antarmuka publiknya: sinkron dan deterministik. Isinya mencakup ambang batas, empat aturan pembagi (Sainte-Laguë, D'Hondt, Sainte-Laguë modifikasi, kuota Hare dengan sisa terbesar), penyelesaian suara seri, objek trace, dan lima metrik disproporsionalitas (termasuk Gallagher, Loosemore–Hanby, dan jumlah partai efektif).
+- Dasar hukum: UU 7/2017 Pasal 414 ayat (1) untuk ambang batas 4%, Pasal 415 ayat (2) untuk Sainte-Laguë. Putusan MK-nya adalah 116/PUU-XXI/2023. Jumlah kursi per dapil diambil dari PKPU 6/2023.
+- Loop utama memakai typed array yang diindeks per urutan partai, lalu diubah ke objek hanya di batas modul. Trace dilewati saat hitung ulang dari slider. Median 0,23 ms untuk ke-84 dapil dengan anggaran 16 ms; median 60 fps saat menggeser 4,0% ke 0 di build produksi, frame p95 17,6 ms. Tanpa debounce, tanpa `requestIdleCallback`, tanpa web worker.
+- `src/ui/motion.ts` berisi solver cubic-Bézier buatan sendiri dan satu loop rAF yang menginterpolasi ke-580 kursi dalam satu putaran.
+- Kelima tampilan ditulis manual sebagai SVG yang dirender React. `d3-array`, `d3-scale`, dan `d3-shape` hanya dipakai untuk matematika tata letak dan tidak pernah menyentuh DOM. Total lima dependensi runtime.
+- Status aturan disimpan di query string, misalnya `?t=2.0&scope=national&d=sainte-lague&geo=dapil`.
+- `public/data/dapil-2024.json` adalah placeholder sintetis bertanda `"provenance": "synthetic"`. `npm run verify` keluar dengan status gagal dan CI melaporkan gate sebagai belum bisa diuji. Mengganti berkas itu dengan versi bertanda `"certified"` membuat semuanya hijau.
+- Palet warna partai dihitung oleh `scripts/extract/solve-colors.ts`. Latar abu-abu sedang membuat target kontras 3:1 mustahil dipenuhi warna jenuh, jadi saya memindahkan instrumen ke latar hampir hitam. Sekarang semua warna lolos 3,5:1 dan tujuh partai, termasuk empat terbesar, memakai warna logonya persis.
+- Spesifikasi meminta penanda "~1%" dari rumus Laakso–Taagepera. Dengan rata-rata besaran dapil 6,90, rumus itu menghasilkan 9,5%, jadi penanda dirilis dengan nilai hasil hitungan.
+- Total payload sekitar 440 KB (228 KB JS, 31 KB CSS, 141 KB font self-hosted, 58 KB data) dengan batas 1 MB yang dicek di CI. Nol pelanggaran axe-core terhadap WCAG 2.1 A dan AA di 380, 720, dan 1400 px.
+- 40 tes Vitest, setiap nilai yang diharapkan dihitung manual di kertas lebih dulu. Sekitar 8.000 baris, 42 commit.

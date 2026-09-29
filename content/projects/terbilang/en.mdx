@@ -2,32 +2,49 @@
 
 ## The problem
 
-Indonesian commercial documents legally and conventionally carry the amount twice: once in digits, once spelled out in words (*terbilang*). Every accounting, payroll, and invoicing system in the country needs this function, so almost every one writes its own — and a large share get it wrong in ways that reach printed paper:
+Indonesian invoices, receipts and cheques carry the amount twice, once in digits and once in words, called *terbilang*. Every accounting, payroll and invoicing system in the country needs this, so almost every one writes its own. Many get it wrong in ways that end up on printed paper.
 
-- **Spelling irregularities.** Indonesian fuses `se-` onto a leading 1 for *sepuluh*, *sebelas*, *seratus*, *seribu* — but standard usage takes **`satu juta`**, not *sejuta*. The rule looks uniform and isn't. Naive implementations emit `satu ribu`.
-- **Empty-group leakage.** `1.000.001` is *satu juta satu*, never *satu juta nol ribu satu*. A group of `000` must emit nothing at all — the single most common structural bug in the ecosystem.
-- **Silent float corruption.** JavaScript loses integer precision above 2⁵³ ≈ 9×10¹⁵. A `number`-based implementation is correct all the way through *triliun* and silently wrong immediately after — so it passes casual testing and then corrupts a real invoice.
+The spelling has an irregular rule. A leading 1 becomes *se-* in *sepuluh*, *seratus* and *seribu*, but standard usage says *satu juta*, not *sejuta*. Empty groups leak: 1.000.001 is *satu juta satu*, never *satu juta nol ribu satu*. And JavaScript numbers lose precision above about 9 quadrillion. Code built on them works through the trillions, then quietly writes the wrong amount on an actual invoice.
 
-## The approach
+## What I built
 
-### A library first; the site only demonstrates it
+### A library first, with a site to show it
 
-Nothing in the package knows a browser exists — no React, no DOM, no `Intl`, no `Date`. It behaves identically in Node and the browser, and the site imports it rather than reimplementing anything. The published library has **zero runtime dependencies**, a hard constraint rather than an outcome, verified by a build that keeps the type declarations free of DOM and framework types.
+I built Terbilang as a library that other invoicing software can depend on unchanged. The first intended user is Rinci, my payslip project, which needs it for amount lines. The library knows nothing about browsers and has no runtime dependencies. The website imports it and computes nothing of its own. I rebuilt the whole site after the library was finished, and the library didn't change at all.
 
-### `BigInt` end to end, `number` nowhere
+### Large amounts stay exact
 
-The API accepts a `bigint` or a digit string and *never* a `number` — passing one is a typed refusal, not a coercion. There's no `parseInt`, no `Number()`, no `number` arithmetic anywhere in the value path. This is the whole reason the project exists, and it's asserted by a permanent test suite above 2⁵³, not verified once by hand.
+The library accepts only whole numbers stored exactly, as big integers or digit strings. Passing an ordinary JavaScript number is refused, never converted, because that conversion is where large amounts go wrong. A permanent set of tests checks values above the precision limit. The largest supported unit is *kuadriliun* (10¹⁵), because the national dictionary, KBBI, lists the word. That ceiling also puts some supported values above the precision limit, which keeps those tests meaningful.
 
-### Refuse rather than guess
+### It refuses rather than guesses
 
-Out-of-range magnitude, non-integer input, unparseable words, and contradictory options all return a structured discriminated-union error naming exactly what failed — never a best-effort string, never a partial result, never a silent clamp. Scale words stop at *kuadriliun* (10¹⁵), because KBBI carries the lemma; anything at 10¹⁸ or above is rejected, because usage there is genuinely unsettled and the library won't extrapolate the pattern. A wrong-but-plausible amount on a document is worse than no amount.
+Six kinds of error each get a typed answer that names exactly what failed: an amount too large, a number with decimals, words it can't parse, or options that contradict each other. It never returns a best guess or a partial result. A wrong but believable amount on an invoice is worse than no amount. Past *kuadriliun*, Indonesian usage is unsettled, so the library stops instead of extending the pattern.
 
-### Exhaustive verification, not sampling
+### It reads words back into numbers
 
-The domain is bounded and the function is pure, so it can be verified *completely*. All 1,000,001 values from 0 to 1,000,000 are formatted, structurally checked, parsed back, and compared to the original — **every commit, in about five seconds** — not sampled, not skipped, not marked slow. It gates CI. Having a parser is also what makes this round-trip test possible: `format` and `parse` are exact inverses under identical options, and that invariant is what the exhaustive sweep actually proves. Parsing is the harder direction — *dua ratus lima puluh ribu* is `(2×100 + 5×10) × 1000`, not `200 + 50000`.
+Most tools only go one way. Terbilang also parses words back into numbers, which is the harder direction. *Dua ratus lima puluh ribu* means (2×100 + 5×10) × 1,000, not 200 + 50,000. Having both directions lets me test them against each other.
 
-## Outcome
+### Every number up to a million is checked
 
-A dual ESM/CJS library (built, ready to publish, zero runtime deps) plus a public bilingual site that demonstrates it, offline-capable with a before-first-paint day/night theme. The converter draws each three-digit group as a labelled bracket above the digits — *juta*, *ribu* — as you type, and empty groups visibly collapse to nothing, which shows the ecosystem's most common bug *not* happening. It ships a cheque/kwitansi document mode (`# seribu lima ratus rupiah #`), five cited variant options each documenting the usage behind both choices, six typed refusals surfaced in a reserved treatment, and an implementation-survey page that ships empty by design — nothing is claimed about a package that wasn't actually measured.
+The problem is bounded, so I test it completely. Every value from 0 to 1,000,000 is written out, checked, read back and compared with the original. That's 1,000,001 round trips on every change, in about five seconds, and the build fails if any one breaks.
 
-Built solo in one ~7-hour sitting — ~4,370 lines of TypeScript, a deliberately small public API (2 functions, 8 types, 4 constants), zero runtime dependencies, and 1,000,001 exhaustive assertions per run. The reverse direction and the exhaustive proof are what most implementations in this space don't have; the rigour is in the verification, not the hours.
+## Result
+
+The library is built and ready to publish, with support for both module formats. The public site is in Indonesian and English. As you type, the converter draws brackets over each group of three digits, labelled *juta* or *ribu*, and empty groups visibly disappear. A document mode prints the amount the way it appears on a receipt: # seribu lima ratus rupiah #. Five options, such as *sejuta* or *milyar* versus *miliar*, each cite the usage behind both choices. A page for comparing other packages ships empty, because I haven't measured any yet. I built it in under seven hours on 5 August 2026.
+
+## What I'd do next
+
+- Publish the package to npm and tag a release. The exhaustive suite that gates publication is already green.
+- Run the survey against real packages and classify every disagreement in writing.
+
+## Under the hood
+
+- `lib/` is about 980 lines across 8 files: lexicon, grouping, formatter, parser, options and structured errors. No React, DOM, `Intl`, `Date` or module-level state.
+- API: `format(bigint | string) → words` and `parse(words) → bigint`, exact inverses under identical options. The public surface is 2 functions, 8 types and 4 constants.
+- No `parseInt`, `Number()` or `number` arithmetic in the value path. JavaScript's safe-integer limit is 2⁵³ ≈ 9×10¹⁵.
+- Error variants are a discriminated union, e.g. `di-luar-jangkauan`, `tipe-tidak-didukung`, `opsi-bertentangan`.
+- Options: `sejuta`, `ejaanMiliar`, `mataUang`, `sen`, `kapitalisasi`. Every combination is round-trip tested under itself, and keys are stable because they appear in the URL hash.
+- tsup builds dual ESM and CJS with `.d.ts` and `sideEffects: false`. A separate `tsconfig.lib.json` keeps DOM and Next types out of the declarations. Version `0.0.0`, `files: ["dist"]`, MIT licence.
+- The survey script (`pnpm survey:record`) records package versions and dates. It doubles as a differential test: any disagreement must be classified as our bug, their bug or a valid variant. `data/survey/hasil.json` currently holds empty arrays.
+- The site is a Next.js 14 static export, 4 routes × 2 locales. The night theme swaps CSS variables via `data-tema="malam"`, set before first paint. Converter state lives in the URL hash.
+- About 4,370 lines of TypeScript, 26 commits.

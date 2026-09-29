@@ -1,7 +1,17 @@
 {
   "slug": "seat-allocation",
   "title": "Suara ke Kursi",
-  "tagline": "Shows how 151.8 million Indonesian votes became 580 parliamentary seats, and lets anyone drag the election threshold or swap the divisor method and watch the entire parliament recompose seat by seat",
+  "tagline": "An interactive model of Indonesia's 580-seat parliament where you change the 2024 election rules and watch seats move",
+  "glance": {
+    "for": "Journalists, students and staff following Indonesia's election law debate",
+    "result": "Live in Indonesian; 84 districts recalculate in 0.23 ms as you drag"
+  },
+  "skills": [
+    "Interactive data visualization",
+    "Civic tech",
+    "Algorithm design",
+    "Web accessibility"
+  ],
   "categoryTags": [
     "Personal Project",
     "Civic Tech",
@@ -20,15 +30,58 @@
   "role": "Solo Developer",
   "timeframe": "Sep 2026",
   "liveUrl": "https://andifathulms.github.io/seat-allocation/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/seat-allocation",
   "heroImage": "/images/projects/seat-allocation/hero.webp",
   "order": 44,
   "featured": false,
   "metrics": [
-    { "value": "17,304,303", "label": "Valid votes that converted to zero seats in 2024" },
-    { "value": "0.23ms", "label": "Median time to recompute all 84 districts, on a 16ms budget" },
-    { "value": "40", "label": "Tests, every expected value hand-computed on paper first" },
-    { "value": "0", "label": "Axe-core accessibility violations across three viewport widths" }
+    {
+      "value": "17,304,303",
+      "label": "valid votes that won no seat in 2024"
+    },
+    {
+      "value": "580",
+      "label": "seats across 84 districts, recalculated live"
+    },
+    {
+      "value": "4",
+      "label": "rule controls, each saved in a shareable link"
+    },
+    {
+      "value": "0",
+      "label": "accessibility violations at three screen widths"
+    }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Model interaktif DPR 580 kursi tempat Anda mengubah aturan Pemilu 2024 dan melihat kursi berpindah",
+    "glance": {
+      "for": "Wartawan, mahasiswa, dan staf yang mengikuti pembahasan RUU Pemilu",
+      "result": "Live dalam bahasa Indonesia; 84 dapil dihitung ulang dalam 0,23 ms"
+    },
+    "skills": [
+      "Visualisasi data interaktif",
+      "Civic tech",
+      "Desain algoritma",
+      "Aksesibilitas web"
+    ],
+    "metrics": [
+      {
+        "value": "17.304.303",
+        "label": "suara sah yang tidak menghasilkan kursi pada 2024"
+      },
+      {
+        "value": "580",
+        "label": "kursi di 84 dapil, dihitung ulang langsung"
+      },
+      {
+        "value": "4",
+        "label": "pengaturan aturan, tersimpan di tautan"
+      },
+      {
+        "value": "0",
+        "label": "pelanggaran aksesibilitas di tiga lebar layar"
+      }
+    ]
+  }
 }

@@ -2,30 +2,45 @@
 
 ## The problem
 
-Bloom filters, Count-Min sketches, and HyperLogLog are the data structures every backend engineer has heard of and almost none can actually use. They power things people rely on daily — a database skipping a disk read, a CDN counting unique visitors, a stream processor finding the top-N heavy hitters — but the literature is papers and Greek letters, and most blog explanations flatten the one thing that matters: **the error is one-sided and calculable in advance.** A Bloom filter's "no" is a proof; its "yes" is a hint. Flattening that to "2% accurate" teaches the wrong thing.
+Backend engineers have all heard of Bloom filters, Count-Min sketches and HyperLogLog. Few feel confident using one. These structures answer questions about huge data in a small, fixed amount of memory: a database skipping a disk read, a CDN counting unique visitors, a stream processor finding its most frequent items. The papers are dense, and most blog posts flatten the one thing that matters. The error is one-sided and can be calculated in advance. A Bloom filter's "no" is certain. Its "yes" is only likely.
 
-The underlying pain point is trust: nobody adopts an approximate structure they can't verify. So the tool runs a real `Set`/`Map` on the same stream as ground truth and flags every single false positive as it happens — for two audiences: engineers who need to *size* one for real, and engineers who need to be *convinced* it's safe.
+Nobody adopts an approximate structure they can't check. I built Sketch Lab for two groups: engineers who need to size one for a production system, and engineers who need to see it work before they trust it.
 
-## The approach
+## What I built
 
-### Hash quality is a gate, not a detail
+### The exact answer runs beside the approximate one
 
-Every error guarantee in the project assumes uniform hashing, and a bad hash voids all of them *silently* — the code runs, the pictures look fine, the numbers are wrong. So a hand-written MurmurHash3 got its own suite (avalanche + chi-squared) before a single structure existed, and it runs as the **first job in CI, gating every other job and the deploy.** If the hash is bad, no downstream result is meaningful.
+Every stream goes through the sketch and through an ordinary exact set or map at the same time. The page flags each false positive the moment it happens, naming the item and the slots it collided with. The main control is a memory slider. Drag memory down and two curves move together: the error the formula predicts, and the error measured from the stream.
 
-### Absolute and probabilistic properties are physically separated
+### Memory is measured in real bytes
 
-"A Bloom filter never returns no for an inserted item" is not a statistical claim, and it lives in a test directory where no tolerance is permitted. "Measured false-positive rate falls within the predicted bound" lives elsewhere, with fixed seeds, many trials, and a tolerance *derived from the estimator's variance and written down.* Mixing them is how somebody eventually applies a tolerance to a property that has none. Bounds are asserted on counts via a Poisson tail rather than on rates via a normal band — in the rare-event regime a well-sized filter actually operates in, the normal approximation is worthless and produces exactly the spurious failure that teaches teams to widen tolerances until the suite means nothing.
+The comparison with the exact structures only means something if the numbers are true. So every memory figure is the actual size of the allocated arrays, never a formula presented as a measurement. A calculator takes the number of items and a target error, and returns the sizing, the formula and the memory in real bytes. That screen is what makes it a tool someone can use at work.
 
-### Memory figures are real allocated bytes
+### I wrote the hash and the structures myself
 
-The comparison against the exact structures is the project's honesty, so memory is the actual `byteLength` of the typed arrays — never a formula result presented as a measurement. Everything is seeded and deterministic (byte-identical state on any machine, no unseeded `Math.random` in the core), and long runs go to a Web Worker with buffers transferred rather than cloned.
+All four structures come from their original papers: Bloom (1970), Count-Min (2005), HyperLogLog (2007) and a Cuckoo filter that supports deletion. I wrote the hash function too. Every error guarantee assumes a good hash, and a bad one breaks them silently. The hash tests run first in the build pipeline, and nothing else runs if they fail.
 
-### The tests did real science
+### Guarantees and probabilities are tested apart
 
-Several findings moved the numbers rather than the tolerances. A bounds test failed at ~2,500× the textbook rate at one over-provisioned configuration; investigation traced it to a structural *coincidence floor* in the Kirsch-Mitzenmacher hash derivation — `(4n/m²)·(1+f)/(1−f)` — and **the missing term was added to the model, the tolerance never widened.** A guard added for Bloom silently halved the Cuckoo filter's fingerprint space (measured as exactly 2.0× its bound) and was fixed by shifting past the forced bit. And the checked-in-both-directions comparison found this Cuckoo actually *loses* to Bloom on real bytes at every ε — so the copy says exactly what it delivers (deletion), not a space win it isn't.
+"A Bloom filter never says no to an item it holds" is a rule, and I test it with zero tolerance. "The error rate stays within the predicted bound" is a probability, tested with fixed seeds, many trials and a written-down tolerance. Keeping them apart stops anyone from adding slack to a rule that has none. Every run is seeded, so the same input gives the same result on any machine.
 
-## Outcome
+### When a test failed, I fixed the model
 
-Live and public, bilingual, offline after first load. It ships four probabilistic structures implemented from the papers (Bloom 1970, Count-Min 2005, HyperLogLog 2007 including the small-range linear-counting regime most explanations skip, and a partial-key Cuckoo filter with working deletion); **the memory slider** — drag allocated memory down and watch predicted error from the formula track measured error from the actual stream; exact structures running alongside as ground truth, flagging every false positive with its item and colliding slots; a parameter calculator (state n and target ε, get m, k, and the resulting memory in *real bytes*); merge verification; and configurable uniform / Zipfian / adversarial / text streams, all shareable by URL.
+One test failed at about 2,500 times the textbook error rate. I traced it to a structural effect of the hashing method when a filter has far more memory than it needs. I added the missing term to the model and left the tolerance alone. A later check showed this Cuckoo filter uses more real memory than a Bloom filter at every error rate. So the page offers it for deletion, and makes no claim about saving space.
 
-Built solo in one ~12-hour build — ~11,900 lines of TypeScript with a test suite that is the third-largest area of the codebase, 328 assertions behind the hash-quality gate, on three runtime dependencies and zero hashing, sketch, or charting libraries. It's a finished portfolio instrument rather than a production library — an explicit non-goal — but production-grade in its verification: pure, deterministic, strict-typed.
+## Result
+
+Sketch Lab is live, public, in English and Indonesian, and works offline after the first load. It covers four structures plus the exact reference, merge checks for combining sketches, and uniform, skewed, adversarial and text streams. Every setting can be shared as a link. Every milestone in the plan shipped, including the optional Cuckoo filter. I built it in one day, on 6 August 2026, with three runtime dependencies. It's a teaching instrument, not a production library, and that was the plan from the start.
+
+## Under the hood
+
+- MurmurHash3 32-bit with Kirsch-Mitzenmacher k-hash derivation, written by hand. The hash suite covers avalanche, chi-squared and known vectors, and is the first of five sequenced CI jobs: hash gate → absolute → bounds/merge → build → deploy.
+- `lib/pds` and `lib/hash` are pure: typed arrays in, typed arrays out, no DOM, clock or module state. The same code runs in the browser and under Node in tests. Seeded PRNG is sfc32, with no unseeded `Math.random` in `lib/`.
+- `tests/absolute/` allows no tolerance. `tests/bounds/` asserts on counts with a Poisson tail, because a normal band around a sub-unit mean (λ = 0.05) fails on a single ordinary event.
+- The coincidence floor: at `m=65536, k=8, n=500`, Kirsch-Mitzenmacher's arithmetic-progression slots let one inserted item cover all k slots of a probe. The derived floor is `(4n/m²)·(1+f)/(1−f)` and now matches measurement (commit `cb8c860`).
+- Forcing `h₂`'s low bit to 1 is right for Bloom but left the Cuckoo filter only 2^(f−1) fingerprints, measured as exactly 2.0× its bound. Fixed by shifting past the forced bit (`c08fb0a`).
+- A Zipfian stream failed 906 of 2,000 Cuckoo inserts at 27% load; at most 2b copies of one item fit. Both this and deletion's false negatives are asserted to occur. Bloom-vs-Cuckoo crossover is ε ≈ 0.2%, not the often-cited 3%, which belongs to the semi-sorted variant.
+- Merges: Bloom ORs, HyperLogLog takes the per-register max, Count-Min adds. Each union is checked against the sketch of the concatenated stream. HyperLogLog includes the small-range linear-counting regime.
+- Long runs go to a Web Worker with transferred `ArrayBuffer`s. Bit arrays render on Canvas, error curves in SVG; above a size threshold bits are drawn as block densities and the UI says so.
+- Brass shipped at 2.84:1 contrast; I darkened it to match the truth green's contrast exactly (5.16 / 5.55 / 4.62). `upload-pages-artifact` v4 dropped `.nojekyll`, so Actions are now bumped one major at a time.
+- Next.js 14 static export, 7 routes × 2 locales, 87.3 kB shared first-load JS. 328 assertions across 13 files. About 11,900 lines of TypeScript, 38 commits over roughly 12 hours.
