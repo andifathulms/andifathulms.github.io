@@ -12,9 +12,9 @@ Ada tiga kelompok pengguna Aksara. Publik menjelajahi pengetahuan yang sudah ter
 
 Setiap dokumen punya ID internal sejak masih draf. Saat pertama kali terbit, dokumen itu juga mendapat kode publik, dan kode itulah alamat publiknya. Saya memilih cara ini karena tautan publik harus permanen dan bisa dikutip. Draf dan dokumen yang ditolak tidak boleh punya alamat yang bisa ditebak. Tautan yang dibentuk dari judul akan rusak begitu ada yang membetulkan salah ketik. Kode tidak pernah dipakai ulang, dan dokumen yang ditarik lalu diterbitkan lagi mendapat kode lamanya kembali.
 
-### Server yang menentukan siapa melihat apa
+### Satu fungsi yang menentukan siapa boleh membuka dokumen tertutup
 
-Ada tiga tingkat akses: publik, internal OIKN, dan terbatas. Saya memeriksanya di server untuk setiap permintaan, berdasarkan unit kerja, eselon, peran, dan akses sementara yang pernah diberikan. Browser tidak pernah menerima dokumen yang lalu harus disembunyikan. Di tengah pengerjaan, saya menemukan tautan lampiran bisa ditebak, jadi setiap unduhan sekarang melewati pemeriksaan yang sama. Dokumen terbatas tetap muncul di daftar, dengan file terkunci dan tombol untuk meminta akses selama 7, 30, atau 90 hari, atau permanen.
+Ada tiga tingkat akses: publik, internal OIKN, dan terbatas. Saya memeriksanya di server untuk setiap permintaan, berdasarkan unit kerja, eselon, peran, dan akses sementara yang pernah diberikan. Satu fungsi tunggal menentukan siapa yang boleh membuka dokumen terbatas tanpa mengajukan akses, dan setiap tempat dokumen disajikan memanggil fungsi yang sama itu, supaya aturannya tidak melenceng antara daftar, filter pencarian, dan unduhan file. Awalnya saya memberikan wewenang itu ke peran admin yang lebih luas, lalu saya persempit ke satu peran superadmin saja setelah menyadari betapa sensitifnya hal ini. Dokumen terbatas tetap muncul di daftar, dengan file terkunci dan tombol untuk meminta akses selama 7, 30, atau 90 hari, atau permanen.
 
 ### Pemeriksaan mengikuti tahap tetap dengan riwayat lengkap
 
@@ -24,29 +24,31 @@ Dokumen bergerak dari draf ke verifikasi, lalu kurasi, lalu terbit. Dokumen juga
 
 Saya memakai pencarian teks penuh di database, lengkap dengan toleransi salah ketik dan saran "mungkin maksud Anda". Pencarian ini berada di balik satu antarmuka, sehingga nanti bisa diganti mesin pencari yang lebih besar tanpa mengubah halamannya. Semua filter, urutan, dan nomor halaman tersimpan di alamat halaman. Hasil yang sudah difilter bisa di-bookmark, dibagikan, atau dimuat ulang.
 
-### Satu portal per peran, dan regulasi di daftar utama
+### Satu portal per peran
 
 Versi pertama saya memakai tombol ganti peran. Dua hari kemudian saya menggantinya dengan portal terpisah untuk setiap peran, karena pengguna dengan beberapa peran sering lupa peran apa yang sedang dipakai. Dokumen hukum nasional (JDIH) awalnya punya menu sendiri. Saya menggabungkannya ke daftar utama, karena orang mencari "regulasinya", bukan "dokumen JDIH".
 
 ## Hasilnya
 
-Saya membangun Aksara sendirian, dari repositori kosong sampai sistem yang ter-deploy, dalam sekitar dua setengah minggu di bulan Juli 2026. Aksara sudah di-deploy untuk OIKN, dan portal publiknya terbuka untuk siapa saja. Sistem ini melayani 66 endpoint API yang terdokumentasi, yang kini juga dipakai aplikasi mobile. Ada 156 tes backend, terfokus pada aturan akses dan logika kode publik. Rekomendasi bacaan didasarkan pada topik dan unit yang sama, jadi siapa pun bisa melihat alasan sebuah dokumen disarankan.
+Aksara sudah live di produksi untuk Otorita IKN sejak Juli 2026, dan portal publiknya terbuka untuk siapa saja tanpa login. Yang saya bangun sendirian dari repositori kosong terus berkembang sejak dirilis. Sistem ini kini mencakup 16 aplikasi backend dan 45 model data, meliputi kontrol akses, alur pemeriksaan, dan pencarian. Ada juga indeks federasi untuk dokumen hukum nasional, dengan 14 kelompok endpoint API terdaftar dan 206 baris data acuan yang menopang kategori tempat staf mengarsipkan dokumen. Sub-sistem gazetteer untuk menjelajah berdasarkan lokasi dan modul pencapaian untuk kontributor sama-sama ditambahkan setelah rencana awal, dan integrasi dokumen hukum nasional tumbuh punya pengklasifikasi otomatis serta indeks pencariannya sendiri, di atas sinkronisasi metadata yang jadi titik awalnya.
 
 ## Langkah berikutnya
 
-- Menyinkronkan dokumen JDIH yang tidak publik, yang masih menunggu JDIH menyediakan akun layanan.
-- Menyelesaikan dua belas butir yang dibiarkan terbuka dalam spesifikasi. Saya menandainya dan belum membangunnya.
+- Menambahkan suite tes otomatis untuk frontend, dan menjadikan suite backend sebagai pemeriksaan wajib sebelum merge.
+- Membangun dasbor evaluasi unit secara utuh; hari ini baru penghitungnya yang ada.
+- Menyelesaikan lima keputusan yang masih ditandai terbuka di kode, di antaranya nama field dari penyedia identitas untuk ID pegawai dan cara rating yang sudah ditutup dibuka kembali.
 
 ## Di balik layar
 
 - Kode publik berbentuk `AKS-2026-0042-K7mP` dan muncul di URL seperti `/pengetahuan/AKS-2026-0042-K7mP`. Bagian nomor urutnya dialokasikan dengan row lock agar dua publikasi bersamaan tidak bertabrakan.
-- Tingkat akses Publik / Internal OIKN / Terbatas diselesaikan di queryset. Enum database tetap memakai nilai asli PRD (Publik / Terbatas / Tertutup); hanya label UI yang berubah lewat satu peta di lapisan presentasi, karena "Terbatas" dan "Tertutup" nyaris bersinonim.
-- Lampiran dipindahkan dari path `/media/` mentah ke endpoint unduhan yang memeriksa akses. Task Celery mencabut izin akses yang kedaluwarsa dan mengirim notifikasi.
+- Tingkat akses Publik / Internal OIKN / Terbatas diselesaikan di queryset. `knowledge.access.may_read_any_document` adalah satu-satunya predikat yang dipakai ulang oleh pemeriksaan izin per objek, kembarannya di level SQL untuk filter kueri, dan gerbang file di backoffice.
+- Lampiran disajikan lewat endpoint unduhan yang memeriksa akses, bukan lewat path `/media/` mentah. Task Celery mencabut izin akses yang kedaluwarsa dan mengirim notifikasi.
 - Status alur: Draft → Menunggu Verifikasi → Menunggu Kurasi → Terpublikasi, ditambah Dikembalikan dan Ditolak, hanya diubah lewat transition service. Linimasa per dokumen bernama "Riwayat Alur", didukung audit log global.
-- Pencarian memakai full-text search Postgres (indeks GIN, ranking, highlight) di balik abstraksi `SearchBackend` agar Elasticsearch bisa dipasang kelak. Fallback trigram `pg_trgm` menghasilkan saran "mungkin maksud Anda" dari kueri yang pernah berhasil.
-- Daftar dan hitungan facet digabung menjadi satu request (`with_facets=1`). Pergantian filter memakai `keepPreviousData` agar panel filter tidak bergeser.
-- Portal: Kontributor, Verifikator, Kurator, dan Administrator, dengan `active_role` disimpan di server. Data JDIH diindeks sebagai metadata lewat sinkronisasi Celery harian dan diambil langsung di server dengan cache satu jam dan fallback. Integrasinya hanya-baca dan API key tetap di server.
-- Keycloak SSO dan JDIH awalnya dibangun terhadap client tiruan, lalu diganti implementasi sungguhan di balik antarmuka yang sama. Endpoint token-exchange melayani aplikasi mobile.
+- Pencarian memakai full-text search Postgres (indeks GIN, ranking, highlight) di balik abstraksi `SearchBackend` agar Elasticsearch bisa dipasang kelak. Fallback trigram `pg_trgm` menghasilkan saran "mungkin maksud Anda".
+- Integrasi JDIH hanya menyimpan metadata ringan plus `last_synced_at`, disegarkan lewat task sinkronisasi harian, dan mengambil isi dokumen langsung di server dengan cache singkat. Integrasinya kini punya pengklasifikasi otomatis dan indeks full-text sendiri, di atas sinkronisasi metadata yang diminta spesifikasi awal.
+- Sub-sistem place/gazetteer untuk penjelajahan geografis, dan modul pencapaian untuk kontributor, sama-sama ditambahkan setelah rencana pembangunan 12-milestone awal.
+- Diagram relasi entitas dibuat saat diminta, langsung dari model Django, sehingga menghasilkan halaman dokumentasi sekaligus halaman "Skema Basis Data" di backoffice dan tidak pernah basi.
+- Portal: Kontributor, Verifikator, Kurator, dan Administrator, dengan `active_role` disimpan di server.
 - Kontribusi berupa wizard empat langkah dengan draf, hingga 10 lampiran, dan impor massal CSV hingga 200 baris; baris yang tidak valid masuk sebagai draf bertanda.
 - Backend Django + DRF khusus API dan SPA React. Frontend tanpa library komponen, formulir, atau state. Tidak ada ML di V1.
-- 14 Django app, sekitar 30 model, 36 komponen halaman, sekitar 10.700 baris Python dan 12.800 baris TypeScript, 156 tes di 19 modul, 109 commit antara 6 dan 23 Juli 2026.
+- 16 aplikasi Django, 45 model konkret, 14 viewset DRF terdaftar, 206 baris masterdata yang di-seed, 1.595 fungsi tes backend, 53.323 baris Python dan 30.022 baris TypeScript, 429 commit antara 6 Juli dan 25 September 2026.
