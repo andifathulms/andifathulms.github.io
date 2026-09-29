@@ -22,7 +22,7 @@ export const SOCIALS = [
 // Person behind the studio — used for JSON-LD structured data.
 export const PERSON = {
   name: 'Andi Fathul Mukminin',
-  jobTitle: 'Fullstack Software Engineer',
+  jobTitle: 'Fullstack Developer',
   worksFor: 'Otorita IKN (Nusantara Capital Authority)',
   email: 'officialandifathul@gmail.com',
   sameAs: [

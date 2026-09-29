@@ -43,7 +43,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const description =
-    'Fullstack systems for governments, startups, and everyone between. Portfolio of Andi Fathul Mukminin.';
+    locale === 'id'
+      ? 'Portofolio Andi Fathul Mukminin, fullstack developer yang membangun sistem pemerintahan untuk ibu kota baru Indonesia di Otorita IKN.'
+      : "Portfolio of Andi Fathul Mukminin, a fullstack developer building government systems for Indonesia's new capital at Otorita IKN.";
 
   return {
     metadataBase: new URL(SITE_URL),
