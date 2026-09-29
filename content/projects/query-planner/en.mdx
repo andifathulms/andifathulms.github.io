@@ -2,30 +2,55 @@
 
 ## The problem
 
-When a SQL query is slow, the usual answer is "add an index" — and often that isn't the problem at all. A database picks how to run a query by *estimating* how many rows each step will produce, using a small statistical summary of the table. When those estimates are wrong, it confidently picks a plan that's catastrophically slow. Nothing is broken and no index is missing; the plan was chosen correctly from a false belief.
+When a database query is slow, the usual advice is to add an index. Often that isn't the problem. Before running a query, a database estimates how many rows each step will produce, using a small statistical summary of the table. When those estimates are wrong, it confidently picks a slow plan. Nothing is broken and no index is missing. The plan was chosen correctly from a false belief.
 
-The specific failure this app is built around is the **independence assumption**: asked for `city = 'Balikpapan' AND province = 'Kalimantan Timur'`, a database multiplies the two odds as if knowing the city told it nothing about the province. It predicts one row in ten thousand; the truth is one in a hundred — two orders of magnitude of error, from an assumption nobody chose. Standard tooling can't show this: `EXPLAIN` shows the winning plan and nothing else — not the dozens of candidates that lost, and not the gap between what the planner believed and what actually happened.
+A common cause is the independence assumption. Asked for rows where the city is Balikpapan and the province is Kalimantan Timur, a database multiplies the two odds as if the city said nothing about the province. It predicts one row in ten thousand. The truth is one in a hundred.
 
-## The approach
+The standard tool, EXPLAIN, shows only the winning plan. It hides the candidates that lost and the gap between belief and reality. I built Query Planner for backend and data engineers, database administrators, and anyone teaching or learning query optimisation.
 
-### The app contains a whole database engine, in the browser
+## What I built
 
-This is the central decision and everything else follows from it. Wrapping an existing engine like SQLite-in-WASM would have been far less work, but it can't do the two things the app exists for: show the losing candidate plans (`EXPLAIN` throws them away), and put the estimate and the truth side by side at every node from one system. Only an engine you control produces both — so it ships its own lexer, parser, columnar storage, B+tree index, statistics, cost model, Selinger dynamic-programming planner, and a volcano-model executor with nine physical operators.
+### I wrote a whole database engine that runs in the browser
 
-### The planner is architecturally forbidden from seeing the data
+Wrapping an existing engine would have been far less work. But no existing engine shows the plans it threw away, or puts its estimate next to the true count at every step. Only an engine I control can do both. So the app has its own query parser, table storage, index, statistics, cost model, plan search and executor with nine operators. Operator names match Postgres, so what people learn here carries over to real EXPLAIN output.
 
-`src/planner/` may not import `src/storage/` or `src/executor/` — enforced by an ESLint rule, not by convention. It reads statistics objects and nothing else. A planner that can peek at the truth is not a planner, and the whole demonstration would be a lie if this leaked. Every estimate it produces carries its own trace — the method used, the inputs, the assumptions made — and the interface renders that trace directly rather than recomputing anything, so the display can never drift out of sync with the math.
+### The planner is not allowed to see the data
 
-### The DP keeps its garbage
+A planner that can peek at the real rows isn't planning. I made the planner code unable to import the storage or executor code, and the linter fails the build if anyone tries. The planner reads statistics and nothing else. Every estimate also carries its own explanation: which method it used, its inputs and its assumptions. The screen draws that explanation directly, so the display can't drift from the maths.
 
-Selinger enumeration normally discards losing candidates the moment a cheaper one appears. Here every candidate is retained in its own cell, along with the exact fill order of the search. For 8 tables that's 255 cells and trivial memory — and it's the only reason the lattice animation can replay the real search rather than a re-enactment. Interesting orders are retained too: without them merge join can never win, and the app would quietly teach something false.
+### I keep every losing plan
 
-### Correctness is proven two ways, not asserted
+The classic plan search throws away a candidate as soon as a cheaper one appears. I keep every candidate, plus the order in which the search filled them in. For eight tables that's 255 cells and very little memory. It is what lets the animation replay the real search. I also keep plans that are only best because of their sort order. Without them, merge join can never win, and the app would teach something false.
 
-Real Postgres, compiled to WebAssembly, is the test-time oracle: identical data goes into both engines, and 33 tests assert this planner picks the same plan shape. Separately, an equivalence test asserts that every possible plan for a query returns identical results — which is what actually catches executor bugs. Where this planner genuinely disagrees with Postgres, the divergence is documented with its cause rather than tuned away, and a test asserts each disagreement *still* diverges, so the list can't quietly go stale.
+### I checked it against real Postgres
 
-## Outcome
+A copy of Postgres compiled to run in the browser serves as the test reference. The same data goes into both engines, and 33 tests check that my planner picks the same plan shape. Where the two disagree, I documented the cause in the app instead of tuning it away. A separate test checks that every possible plan for a query returns the same result, which is what catches executor bugs.
 
-Live and public: drag `random_page_cost` from 4.0 toward 1.1 — the standard SSD adjustment every DBA makes — and the cost bars re-sort and cross in real time as the winning plan rebuilds and re-executes, tracking the pointer with no easing; a four-table join re-plans in under 16 milliseconds, pinned by a performance test. The plan tree pairs the planner's guess with the real row count at every node and draws the error widening up the tree — 1.2× at a scan becomes 8× after one join and 300× at the root. The correlation view draws the independence assumption as a literal rectangle detached from the actual point cloud, and creating a multivariate statistic in one click snaps the rectangle onto the truth and re-executes the query with the corrected plan.
+### A data detail almost hid the effect
 
-Sole author, 36 commits in a single ~16.5-hour session, ~13,500 lines of TypeScript across the whole stack, 294 tests. Three runtime dependencies — no SQL library, no charting library, no graph-layout library, no animation library, no state-management library. The entire app state serializes to the URL, so a surprising plan is a link someone can send, and every query runs against data that never leaves the browser.
+My realistic Indonesian dataset listed cities grouped by province. The generator picks cities by list position, so that grouping shrank the independence error from about 30× to 3×. I re-ordered the list by population, which is also more realistic, and the effect came back.
+
+## Result
+
+Query Planner is live and public. Drag the storage cost setting from 4.0 toward 1.1, the usual adjustment for SSDs, and the cost bars cross as the winning plan changes. A four-table join re-plans and re-runs in under 16 milliseconds, one frame at 60 frames per second. The plan tree shows the estimate beside the real count and the error growing: 1.2× at a scan, 8× after one join, 300× at the top.
+
+A correlation chart draws the wrong assumption as a rectangle away from the real data. One click adds a multi-column statistic, and the estimate snaps to the truth. Nothing leaves the browser, and any plan can be shared as a link. I built it in one session of about 16.5 hours on 3 September 2026.
+
+## What I'd do next
+
+- Add the bitmap heap scan layer, which I left out of scope. All four documented disagreements with Postgres come from it.
+
+## Under the hood
+
+- Engine: recursive-descent SQL parser for a narrow subset, columnar storage, bulk-loaded B+tree index, reservoir sampling (seeded, default 30,000 rows), equi-depth histograms, MCV lists, and all three multivariate statistic kinds (functional dependencies, n-distinct, multivariate MCV).
+- Cost is a `(startup, total)` pair, so `LIMIT 10` can prefer a different plan. Selinger dynamic programming with interesting-order retention; `tests/orders.test.ts` covers a case that inverts when retention is off.
+- Volcano-model executor: seq scan, index scan, nested loop, hash join, merge join, sort, hash aggregate, group aggregate, limit. Per-node timing is sampled against a coarse counter so instrumentation doesn't distort it.
+- ESLint `no-restricted-imports` stops `src/planner/` from importing `src/storage/` or `src/executor/`. `Math.random` is banned in the engine; all randomness is seeded.
+- Each selectivity returns a `SelectivityTrace` (`mcv`, `histogram`, `independence`, `dependency`, …) that the histogram and correlation views render.
+- PGlite (Postgres in WebAssembly) is a devDependency only. `src/planner/divergences.ts` lists each disagreement, and the oracle test asserts each one still diverges. Commit `5ba8322` is titled "the PGlite oracle, and what it caught".
+- The city list lives in `src/storage/datasets/wilayah.ts`; the sampler is Zipf by list position.
+- Eight hand-written SVG instruments, including a Reingold–Tilford tidy tree, one `requestAnimationFrame` loop, and a two-theme token system rebuilt in a mid-project design revision (`a073496`).
+- `tests/copy.test.ts` bans em-dashes and marketing filler in shipped strings. Theme is kept out of the shared URL.
+- Three runtime dependencies (React, React DOM, the Geist typeface). 98 KB gzipped JS against a 350 KB budget. Zero runtime network requests.
+- CI: typecheck, lint, test, oracle, build, deploy to GitHub Pages.
+- 294 tests (261 unit and integration, 33 oracle) in 13 files. ~13,500 lines. 36 commits.

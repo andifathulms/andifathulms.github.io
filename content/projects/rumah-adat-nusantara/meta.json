@@ -1,7 +1,17 @@
 {
   "slug": "rumah-adat-nusantara",
   "title": "Rumah Adat Nusantara",
-  "tagline": "An interactive collection of 35 traditional Indonesian buildings, each computed from the cultural rules that govern it — a household's rank, a family count, a body measurement — so changing one number rebuilds the structure in front of you",
+  "tagline": "A collection of 35 traditional Indonesian buildings computed from their cultural rules, each showing how much is documented",
+  "glance": {
+    "for": "Curious Indonesian readers, plus architecture and anthropology students",
+    "result": "Live in two languages, 35 buildings, every dimension labelled with its source"
+  },
+  "skills": [
+    "Parametric 3D modelling",
+    "Cultural heritage",
+    "Data provenance",
+    "Architecture testing"
+  ],
   "categoryTags": [
     "Personal Project",
     "3D & Architecture",
@@ -20,15 +30,58 @@
   "role": "Solo Developer",
   "timeframe": "Aug–Sep 2026",
   "liveUrl": "https://andifathulms.github.io/rumah-adat-nusantara/id/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/rumah-adat-nusantara",
   "heroImage": "/images/projects/rumah-adat-nusantara/hero.webp",
   "order": 40,
   "featured": false,
   "metrics": [
-    { "value": "35", "label": "Buildings, each generated from its own cultural rule pack" },
-    { "value": "1,770", "label": "Tests across 58 files — a structural suite per building" },
-    { "value": "0", "label": "Runtime network calls — the site works with the wifi off" },
-    { "value": "0%", "label": "Measured dimensions — the honesty bar the site displays, not hides" }
+    {
+      "value": "35",
+      "label": "buildings, each generated from its own rules"
+    },
+    {
+      "value": "280",
+      "label": "pages across four views and two languages"
+    },
+    {
+      "value": "0%",
+      "label": "of dimensions from a measured survey, shown openly"
+    },
+    {
+      "value": "0",
+      "label": "network calls, works with wifi off"
+    }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Koleksi 35 bangunan adat Indonesia yang dihitung dari aturan adatnya, masing-masing menunjukkan porsi yang terdokumentasi",
+    "glance": {
+      "for": "Pembaca Indonesia yang penasaran, serta mahasiswa arsitektur dan antropologi",
+      "result": "Live dalam dua bahasa, 35 bangunan, setiap ukuran berlabel sumbernya"
+    },
+    "skills": [
+      "Pemodelan 3D parametrik",
+      "Warisan budaya",
+      "Provenans data",
+      "Pengujian arsitektur kode"
+    ],
+    "metrics": [
+      {
+        "value": "35",
+        "label": "bangunan, masing-masing dari aturannya sendiri"
+      },
+      {
+        "value": "280",
+        "label": "halaman di empat tampilan dan dua bahasa"
+      },
+      {
+        "value": "0%",
+        "label": "ukuran dari survei terukur, ditampilkan terbuka"
+      },
+      {
+        "value": "0",
+        "label": "panggilan jaringan, jalan tanpa wifi"
+      }
+    ]
+  }
 }

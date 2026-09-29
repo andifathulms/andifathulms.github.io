@@ -2,38 +2,56 @@
 
 ## The problem
 
-The standard academic method for measuring street patterns — Boeing's 2019 orientation entropy — is computed on *driving* networks. That makes Indonesian urban form largely invisible to it. A kampung is threaded with *gang*, pedestrian alleys that never appear in a car network at all. A gated perumahan is drivable but has one or two entrances and dead-ends everywhere. Measured by car alone, both come out wrong, in opposite directions.
+People who study city street patterns mostly use one measure: orientation entropy, from Geoff Boeing's 2019 paper. It is computed on the driving network. In Indonesia that misses most of how people actually move. A kampung is threaded with gang, narrow pedestrian alleys that never appear on a car map. A gated perumahan is easy to drive into, but it has one or two entrances and dead ends everywhere. Measured by car alone, both come out wrong, in opposite directions.
 
-This project computes both networks — driving and walking — for the same disc of the same city, and puts them side by side. The gap between the two is the finding. It is simultaneously a real measurement of Indonesian cities and a critique of applying car-centric metrics to cities that don't work that way.
+I built Bentuk Kota for urbanists, planners, OpenStreetMap mappers and curious readers. It measures the same disc of the same neighbourhood twice, once as a driving network and once as a walking network, and puts them side by side. The gap between the two is the finding.
 
-A deliberate ethical constraint shapes the whole product: kampung-versus-perumahan carries class overtones in Indonesia, so the app **describes and never scores**. There is no ranking, no walkability grade, no liveability index anywhere in it, and a dedicated test holds the guardrails that stop the distribution ruler from being readable as one.
+Kampung versus perumahan carries class overtones in Indonesia. So I set one rule for the whole product: it describes and never scores. There is no ranking, walkability grade or liveability index anywhere.
 
-## The approach
+## What I built
 
-### The maths is the project, so nothing was imported
+### I wrote the street maths myself
 
-No graph library, no charting library, no mapping library. Graph construction, bearing computation, binned orientation entropy, the φ orientation-order indicator, circuity sampling, degree statistics and footway-coverage measurement are all hand-written pure TypeScript, implemented from the paper with sections cited in the comments. The measurement core takes numbers in and returns numbers out — no DOM, no React, no clock, no network — which is what makes it provably correct and lets the same code run in the pipeline and in tests.
+The measurements are the project, so I didn't import a graph, chart or map library. Building the networks, reading street bearings, and computing entropy, detour ratios and junction counts are all my own code. I wrote it from the paper, with its sections cited. The measuring code takes numbers in and gives numbers out, so the same code runs in the data pipeline and in the tests.
 
-### Correctness by construction, not by inspection
+### Tests use streets with known answers
 
-There is no oracle for "what is the real entropy of Bendungan Hilir", so the tests don't look for one. They build networks whose answers are known in advance — a perfect grid, that same grid rotated 29°, a random graph, a pure tree — and check the measured values come back right. Mathematical invariants are then asserted on every histogram, synthetic and real alike: every rose must be 180°-symmetric, circuity is ≥ 1 by definition, degree proportions sum to 1.
+Nobody knows the true entropy of Bendungan Hilir, so the tests don't pretend to. They build networks whose answers are known in advance: a perfect grid, the same grid rotated 29°, a random network and a pure tree. Then they check that the measured numbers come back right. Every chart, synthetic or real, must also pass basic maths checks, such as looking the same when turned 180°.
 
-### Assumptions are controls, not constants
+### The biggest assumption is a switch readers can flip
 
-Which OSM tags count as "drivable" or "walkable" changes every number on the site. Rather than bury that choice, the tag mapping lives in one documented module, is exposed in the UI as a switchable control across three mappings, and has its sensitivity reported on its own page. The reader can see how much the conclusion depends on the modelling decision.
+Which OpenStreetMap tags count as drivable or walkable changes every number on the site. I put that choice in one documented place and exposed it on an assumptions page, as a switch between three mappings. Readers can see how much each conclusion depends on it.
 
-### Sites found by measuring, not by remembering
+### I picked sites by measuring map coverage
 
-The original plan was a hand-curated site list. Hand-listing produced 10 usable sites from 49 guesses — and the misses proved nothing, because an unconsidered neighbourhood is not a rejected one. The pivot was a density sweep across 56 cities that bins every mapped footway into disc-sized cells and ranks candidates by measured coverage. It contributed 14 of the 33 final sites, including the first discs in Papua, Lombok and Kalimantan.
+My first plan was a hand-picked list. Two rounds of guessing produced 10 usable sites from 49 guesses, and the misses proved nothing. So I wrote a sweep across 56 cities that ranks candidate areas by how many footpaths are actually mapped. It found 14 of the final 33 sites, including the first ones in Papua, Lombok and Kalimantan.
 
-### The proxy's failure modes, found the hard way
+### I wrote rules for where coverage misleads
 
-Footway coverage cannot tell an alley from a garden path. Bogor's best-covered candidate — the highest coverage ever surveyed at 40.9% — was a botanical garden; Jakarta's best was 78% inside a single park. That produced encoded rules (a >25% park share is not urban fabric; `landuse=grass` is fetched and then ignored, because mappers use it for roadside verges) and a validation check requiring the survey to predict the pipeline within one percentage point, which caught two sites entered with stale coordinates.
+Mapped footpaths can't tell an alley from a garden path. Bogor's best-covered candidate, at 40.9%, was a botanical garden. Jakarta's best was 78% inside one park. I turned those lessons into rules. I also added a check that the survey must predict the pipeline's result within one percentage point, which caught two sites entered with stale coordinates.
 
-## Outcome
+## Result
 
-93 commits over eight days, roughly 11,000 lines of TypeScript across a 2,100-line measurement core, a 2,600-line pipeline, components, pages and 1,500 lines of tests. 577 tests in 14 files, with three gated suites — synthetic, invariants, data validation — plus an accessibility audit standing between a commit and production.
+Bentuk Kota is live and public, in Indonesian and English. It covers 33 sites, each measured as two networks under three tag mappings, chosen from 126 candidate centres in 56 cities. Every site shows how well its alleys are mapped, and thin sites are flagged so missing data can't fake the finding.
 
-Every site publishes how well its alleys are actually mapped, and thin sites are flagged rather than silently compared, because missing map data would fake the headline finding. The finding itself is honestly bounded: every gated-housing candidate sought directly came back thin, at 0.9–4.4% coverage, so the kampung-versus-perumahan comparison rests on two readable gated sites out of three — stated as a number on the page rather than omitted. One commit exists purely to correct a published sentence the data had outgrown.
+That limit reaches the headline comparison. Every gated-housing candidate came back thin, at 0.9–4.4% coverage, so the kampung versus perumahan comparison rests on two readable gated sites out of three. The page states that number. The site makes no network calls once it loads. I built it in eight days in August 2026.
 
-The site ships effectively zero client-side JavaScript: cards, sorting, density modes and cross-card highlights are all server-rendered HTML and CSS, with state in the URL, so a thousand SVG paths per site never cross the hydration boundary. Contrast ratios and the type scale are recomputed by unit tests from the hex values beside them, so the design system is checked rather than remembered.
+## What I'd do next
+
+- Run a manual screen-reader pass.
+- Give the overlaid rose chart a second cue besides colour. Its two series differ by hue alone today, backed up by captions and tables.
+
+## Under the hood
+
+- Method: Boeing (2019) orientation entropy on 36-bin bearing histograms ("roses"), the φ orientation-order indicator, sampled circuity, node-degree statistics and footway coverage. The dual drive/walk application is original.
+- The measurement core in `lib/morphology/` (~2,100 lines) is pure TypeScript: no DOM, no React, no clock, no network.
+- Synthetic tests: perfect grid, grid rotated 29°, random graph, pure tree. Invariants asserted on every histogram: 180° symmetry, circuity ≥ 1, degree proportions summing to 1.
+- The OSM tag mapping lives in one module with 3 switchable mappings; sensitivity is reported on `/asumsi`. Method, limits and ODbL attribution are on `/metode`.
+- Coverage rules: a park share above 25% is not urban fabric; `landuse=grass` is fetched and ignored because mappers use it for roadside verges.
+- Data comes from targeted Overpass queries at build time, cached and rate-spaced. The PRD specified the ~1 GB Geofabrik Indonesia PBF; 33 one-kilometre discs are a few megabytes, and reading PBF would have meant a protobuf dependency for data used once.
+- Next.js 14 static export on GitHub Pages. Four runtime dependencies (Next.js, React, React DOM, Zod). Cards, sorting, density modes and cross-card highlights are server-rendered HTML and CSS with state in the URL; the only client component is a small nav-state helper.
+- The plate exports at ~4.7 MB of HTML, ~59% of it the App Router flight payload. Ruler ticks were trimmed from 165 to 66 bytes each; the rest is the collapsed data tables kept for screen readers.
+- Contrast ratios and the type scale are recomputed by unit tests from the hex values (`palette.test.ts`, `type-scale.test.ts`). A dedicated test stops the distribution ruler from reading as a ranking.
+- 577 tests in 14 files. Synthetic, invariant and data-validation suites plus an accessibility audit gate every deploy.
+- Bilingual (id/en), installable as a PWA, all milestones M0–M6 shipped. Commit `5c89a8d` exists only to correct a published sentence the data had outgrown.
+- About 11,000 lines of TypeScript, 93 commits over eight days (20–27 August 2026).

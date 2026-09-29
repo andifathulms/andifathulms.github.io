@@ -2,33 +2,52 @@
 
 ## Masalahnya
 
-Raft adalah algoritma konsensus di balik sistem seperti etcd, Consul, dan CockroachDB — mesin yang menjaga sebuah klaster tetap sepakat pada satu versi kebenaran bahkan saat mesin mati atau jaringan terbelah. Ia sengaja dirancang agar bisa diajarkan, namun alat-alat yang ada semuanya berhenti di tempat yang sama.
+Engineer yang belajar sistem terdistribusi cepat bertemu Raft. Raft adalah algoritma kesepakatan di balik etcd, Consul, dan CockroachDB. Algoritma ini menjaga sekelompok server tetap sepakat pada satu catatan bersama, bahkan saat mesin mati atau jaringan terbelah. Raft dirancang agar mudah diajarkan, tapi alat-alat pengajarannya berhenti di titik yang sama.
 
-Visualiser kanonik, RaftScope, ditulis oleh penulis makalahnya sendiri dan menunjukkan mekanismenya dengan baik: pemilihan terjadi, pesan berterbangan, log terisi. Yang tak ditunjukkannya adalah *penalarannya* — Anda menyaksikan sebuah aturan dipatuhi tetapi tak pernah tahu untuk apa. Dua celah menyusul, dan proyek ini dibangun di atas keduanya:
+Visualisasi standarnya, RaftScope, ditulis oleh penulis makalahnya sendiri. RaftScope menampilkan pemilihan, pesan, dan log yang bertambah dengan baik. Yang tidak ditampilkan adalah alasan di balik setiap aturan. Dari situ muncul dua celah. Belum ada yang memeriksa lima jaminan keamanan Raft selama simulasi berjalan. Belum ada juga yang membiarkan kita mematikan satu aturan untuk melihat apa yang rusak. Figure 8 di makalahnya membuat argumen persis seperti itu, tapi dalam bentuk diagram diam yang sulit dicerna kebanyakan pembaca.
 
-- **Tak ada yang memeriksa jaminannya.** Seluruh nilai Raft adalah lima properti keamanan yang dinyatakan. Tak ada visualiser yang mengevaluasinya terus-menerus dan memberi tahu Anda mana yang sedang berlaku.
-- **Tak ada yang membiarkan Anda mematikan sebuah aturan.** Setiap aturan tak-jelas di Raft membela satu properti spesifik. Rute tercepat memahami sebuah aturan adalah menghapusnya dan menyaksikan propertinya gagal. Figure 8 di makalah persis argumen ini, disajikan sebagai diagram statis yang tak sepenuhnya diserap kebanyakan pembaca. Ia seharusnya sebuah tombol.
+Saya membuat Raft Simulator untuk engineer yang belajar sistem terdistribusi, mahasiswa yang sedang membaca makalahnya, serta pewawancara atau pengajar yang butuh contoh langsung.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Determinisme membeli segalanya
+### Seluruh simulasi bisa diulang persis
 
-Simulasinya adalah fungsi murni: `(config, seed, actions, ablation flags) → EventTrace`, identik byte-per-byte di mesin mana pun. Satu keputusan itu membeli perjalanan waktu, tautan yang bisa dibagikan, laporan bug yang bisa direproduksi, dan fuzzing — semuanya gratis. Clock virtual menggantikan waktu dinding (memajukan waktu berarti mengeluarkan kejadian berikutnya dari antrean prioritas, jadi seribu detik tersimulasi berjalan dalam mikrodetik), tiap server adalah state machine murni, dan tak ada float di mana pun — term, indeks, dan timestamp semuanya integer.
+Pengaturan, seed, dan aksi pengguna yang sama selalu menghasilkan jalannya simulasi yang sama persis, di mesin mana pun. Saya memakai jam virtual, sehingga seribu detik simulasi lewat dalam hitungan mikrodetik. Setiap server adalah state machine yang berdiri sendiri, dan semua angkanya bilangan bulat. Keputusan ini memberi fitur putar mundur, tautan yang bisa dibagikan, laporan bug yang bisa diulang, dan pengujian acak berskala besar.
 
-### Figure 2 diimplementasikan harfiah, dan pemeriksanya independen
+### Aturannya saya tulis dari makalah, lalu diperiksa terpisah
 
-State machine diimplementasikan aturan demi aturan dari Figure 2 makalah, tiap aturan membawa komentar yang menyebut figure dan receiver rule yang diimplementasikannya — karena alat pengajaran yang keliru secara halus mengajarkan Raft yang keliru dengan percaya diri, disertai animasi bagus. Yang krusial, pemeriksa keamanan **tak berbagi kode dengan algoritma**: ia tak meng-import apa pun dari implementasi Raft kecuali tipe, dan mengevaluasi kelima properti dari definisi terbitannya atas state klaster global. Pemeriksa yang memakai ulang asumsi implementasi akan dengan senang hati memvalidasi bug-nya sendiri, jadi isolasinya struktural, bukan konvensi.
+Saya mengimplementasikan logika server aturan demi aturan dari Figure 2 di makalahnya, dan setiap aturan menyebut bagian yang diimplementasikannya. Alat ajar yang sedikit keliru akan mengajarkan Raft yang keliru dengan animasi yang meyakinkan. Pemeriksa keamanannya tidak berbagi kode dengan algoritmanya. Pemeriksa menilai lima jaminan dari definisi yang dipublikasikan setelah setiap kejadian, jadi ia tidak mungkin ikut membenarkan bug di algoritmanya.
 
-### Flag ablasi jujur, dua arah
+### Setiap aturan bisa dimatikan, dan sakelarnya ditegakkan
 
-Ketujuhnya berada di satu berkas, masing-masing dikonsultasikan di tepat satu call site bernama — jadi tak ada tempat kedua yang diam-diam masih menegakkan sebuah aturan, dan tak ada cara sebuah sakelar menjadi label UI tanpa apa pun di baliknya. Setiap toggle punya tes yang membuktikan pelanggaran terjadi saat mati *dan* tidak terjadi saat menyala. Setiap run dengan sebuah flag mati ditandai secara permanen dan kasatmata *modified Raft* — di UI dan di tautan mana pun yang dibagikan — sehingga tak seorang pun men-screenshot run yang rusak dan mengiranya algoritma sungguhan.
+Tujuh aturan bisa dimatikan. Masing-masing hanya dicek di satu tempat dalam kode, jadi tidak ada salinan tersembunyi yang diam-diam tetap menegakkannya. Setiap aturan punya tes yang membuktikan jaminannya rusak saat aturan dimatikan dan tetap utuh saat dinyalakan. Begitu satu aturan dimatikan, simulasi ditandai "modified Raft" di layar dan di tautan yang dibagikan, supaya tidak ada yang mengira simulasi rusak itu algoritma aslinya.
 
-### Ketepatan menjaga peluncuran
+### Peluncuran menunggu tiga pemeriksaan kebenaran
 
-Rencana milestone dengan sengaja menunda peluncuran publik sampai tiga sinyal ketepatan independen hijau: pemeriksa independen, fuzzing acak terhadap kelima properti, dan fixture konformansi Figure 2 per-aturan. Bahkan fitur yang semula di luar cakupan — kompaksi log penuh (§7) dan perubahan keanggotaan lewat joint consensus (§6) — dibangun dan dirilis, yang terakhir mengganti `majority(n)` sepenuhnya dengan `hasQuorum(configuration, …)` yang mensyaratkan mayoritas kedua belahan.
+Saya baru merilis setelah tiga pemeriksaan independen lolos: pemeriksa keamanan yang terpisah, pengujian acak terhadap lima jaminan, dan satu kasus uji untuk setiap aturan Figure 2. Saya juga membangun dua fitur yang awalnya tidak masuk versi pertama: pemadatan log dan perubahan keanggotaan cluster. Keduanya mengubah model data. Ukuran cluster menjadi variabel, sehingga setiap pengecekan mayoritas kini bekerja berdasarkan konfigurasi.
 
-## Hasil
+### Dua belas skenario, masing-masing menjelaskan satu hal
 
-Live dan publik, bisa dipasang dan sepenuhnya offline. Ia menyajikan pemeriksaan keamanan berkelanjutan (kelima properti dievaluasi setelah setiap kejadian, menyebut properti, indeks, term, dan node saat pelanggaran); **log ledger** — log setiap server sebagai kolom bergaris yang disejajarkan pada indeks, sehingga divergensi terbaca sebagai garis putus dan perbaikan terbaca sebagai pemimpin berjalan mundur dan menimpa; panel ablasi dengan tiap aturan dilabeli properti yang dibelanya dan bagian makalah yang membenarkannya; 12 skenario bikinan tangan (`split-vote`, `figure-8`, `log-divergence-repair`…); dan run yang bisa dibagikan dan direproduksi yang meng-encode ke URL — cara Anda mengirim rekan sebuah Figure 8 langsung.
+Simulasi acak biasanya membosankan atau justru sulit diikuti. Karena itu saya menulis 12 skenario secara manual, masing-masing menunjukkan satu fenomena, seperti suara terbelah, leader yang terisolasi setelah partisi, atau Figure 8 itu sendiri. Setiap skenario dilindungi tes determinisme.
 
-Dibangun sendiri — ~11.500 baris TypeScript, 161 tes (49 fixture Figure 2, 23 kompaksi, 16 keanggotaan, kedua arah dari ketujuh toggle ablasi, dan fuzz), di atas tiga dependensi runtime dan nol pustaka untuk simulasi, keacakan, penjadwalan, atau layout. Kelima properti keamanan berlaku sepanjang **10.000 run acak** dengan kompaksi dan perubahan keanggotaan keduanya aktif. RaftScope dan makalahnya ditautkan dengan hangat; kontribusi yang diklaim adalah ablasi dan pemeriksaan invarian, bukan penggantian.
+## Hasilnya
+
+Raft Simulator sudah live dan terbuka untuk umum, bisa dipasang, dan jalan penuh secara offline. Tampilan utamanya adalah buku log. Log setiap server disusun dalam kolom yang sejajar per posisi, jadi perbedaan terlihat sebagai garis yang patah dan perbaikannya terlihat saat leader menimpanya. Saat sebuah jaminan dilanggar, aplikasi menyebut properti, posisi, term, dan server yang terlibat. Setiap simulasi bisa dikirim sebagai tautan.
+
+Kelima jaminan keamanan tetap terpenuhi di 10.000 simulasi acak dengan pemadatan log dan perubahan keanggotaan aktif. Aplikasinya berbahasa Inggris dengan terjemahan Indonesia yang lengkap. Aplikasi ini menautkan RaftScope dan makalahnya, dan hanya mengklaim sakelar aturan dan pemeriksaannya sebagai hal baru. Saya membangunnya dalam dua hari pada Agustus 2026.
+
+## Di balik layar
+
+- Simulasinya berupa `(config, seed, actions, ablation flags) → EventTrace`, identik byte demi byte di mana pun. Priority queue menggerakkan jam virtual; seri dipecahkan dengan nomor urut eksplisit. Tidak ada `setTimeout` di logika simulasi, tidak ada float.
+- Setiap server adalah `step(state, input, config) → { state, outbox, timers }`, dengan PRNG ber-seed (`lib/sim/prng.ts`) yang dibawa di dalam state.
+- `lib/invariants` hanya mengimpor tipe dari `lib/raft`. Modul ini memeriksa Election Safety, Leader Append-Only, Log Matching, Leader Completeness, dan State Machine Safety.
+- Ketujuh flag ablasi ada di `lib/raft/rules.ts`, masing-masing dicek di satu call site bernama. Snapshot tidak punya sakelar, karena aturan 6 dan 7 di Figure 13 menyangkut liveness, bukan keamanan.
+- Aturan diberi komentar seperti `// Figure 2, AppendEntries RPC, receiver rule 2`.
+- Pemadatan log (§7, Figure 13) memaksa log menjadi bundel entri yang disimpan ditambah titik snapshot, dan hanya bisa diindeks lewat `lib/raft/log.ts`. Default-nya mati (`snapshotThreshold: 0`) agar fixture lama tetap menghasilkan trace yang sama. Transfer snapshot bertahap tidak dimodelkan.
+- Perubahan keanggotaan (§6, joint consensus) mengganti `majority(n)` dengan `hasQuorum(configuration, predicate)`, yang mensyaratkan mayoritas di kedua bagian. Aturan "minimum election timeout" di §6 menjadi flag `heardFromLeader` yang dihapus oleh timer pemilihan.
+- Figure 8 ada dua kali: tes persis di `tests/figure8` dengan pengarah yang hanya mengganti jaringan, dan skenario interaktif yang butuh satu atau dua pemilihan tambahan.
+- Audit kontras menaikkan teks sekunder dari 2,63:1 ke 5,08:1. Peran node dibedakan dengan bentuk selain warna.
+- Simulasi jalan di Web Worker. CI menjalankan suite Figure 2, Figure 13, §6, determinisme, Figure 8, ablasi, dan fuzz; fuzz menjadi gerbang deploy. Default 2.000 seed per run, bisa diatur lewat `FUZZ_RUNS`.
+- Proyek ini bernama Mufakat selama M0–M7, lalu diganti nama dan default bahasanya dipindah ke Inggris di hari terakhir.
+- Tiga dependensi runtime (Next.js 14.2, React, React DOM). JS first-load 149 KB gzip dari anggaran 250 KB. Service worker dibuat dari hasil export.
+- 161 tes di 12 suite: 49 fixture Figure 2, 23 pemadatan, 23 ablasi, 16 keanggotaan, 38 determinisme, 5 Figure 8, 7 fuzz. ~11.500 baris TypeScript, 29 commit dari 4 sampai 5 Agustus 2026.

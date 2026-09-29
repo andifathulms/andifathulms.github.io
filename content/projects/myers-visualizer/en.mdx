@@ -2,32 +2,58 @@
 
 ## The problem
 
-`git diff` runs on essentially every working day of a developer's life, and almost nobody knows what it does. Three gaps this tool targets:
+Developers run git diff almost every working day, and very few know what it does. A diff shows up only as its result. Nothing in that result hints that it came from a shortest-path search over a grid.
 
-- **The algorithm is invisible.** A diff is experienced only as output. That it's a shortest-path search over a grid — an expanding frontier, a backtracking step — is not something the output hints at.
-- **Ugly diffs go unexplained.** Everyone has seen a diff attribute a closing brace to the wrong function, or render "insert 2 lines" as "delete 5, add 7". Developers treat it as a quirk. It isn't: **a shortest edit script is usually not unique**, and which minimal one you see is decided by the algorithm's tie-breaking, not by any judgement about readability.
-- **Nobody knows why `git --patience` exists.** Alternative diff algorithms ship with git because *minimal* isn't the same as *readable*. Seeing that tradeoff on the same input is the fastest way to understand it.
+The confusing parts go unexplained too. Everyone has seen a diff blame a closing brace on the wrong function, or show "insert 2 lines" as "delete 5, add 7". People treat that as a quirk. The real reason is that the shortest set of edits is usually not unique, and the algorithm's tie-breaking picks one without any sense of what reads well. That is also why git ships other diff algorithms, such as patience.
 
-## The approach
+I built Myers Visualizer for working developers, for students and teachers of graph search, and for anyone reading Eugene Myers' 1986 paper who wants the diagrams to move.
 
-### The engine is a pure, recorded function
+## What I built
 
-`(a, b, options) → { script, trace, stats }` — no React, no DOM, no clock, no randomness. Identical inputs produce byte-identical output, and the search is *recorded* once, so stepping backwards is free: the UI replays a recording rather than re-running anything. The search operates on integer token ids, never strings — which is what real implementations do, and turns "what counts as equal?" (line vs. character, whitespace) into an explicit, user-visible setting instead of a hidden assumption.
+### I wrote the diff engine from the paper
 
-### The verifier came before the algorithm
+I implemented four diff algorithms myself: greedy Myers, the memory-saving linear-space Myers, patience and histogram. There is no diff library in the project. The engine takes two texts and options and returns the edits, a full recording of the search, and stats. It has no clock or randomness, so the same input always gives the same output. Because the search is recorded once, stepping backwards costs nothing.
 
-`apply.ts` (edit script + A → B) and a brute-force BFS oracle (true minimal `D`) were written *before* the Myers implementation, so it was built against an independent check rather than tested after the fact. Every algorithm, on every input, under every option, must produce a script that applies to A and yields B exactly. And the suite never asserts two algorithms produce the *same* script — because minimal scripts aren't unique — only that they agree on `D`. Getting that wrong yields a test suite that fails on correct code.
+### I wrote the checker before the algorithm
 
-### The lattice is canvas, and the offset lives in one place
+Before any Myers code existed, I wrote two independent checks. One applies an edit script to the first text and confirms it produces the second. The other is a slow brute-force search that finds the true minimum number of edits. Every algorithm, on every input, must pass both. The tests never expect two algorithms to give the same edits, only the same count, because several minimal answers can be correct.
 
-The edit graph draws on canvas, never DOM — no element per cell at any size, so per-frame work is O(frontier), not O(N·M), guarded by a unit test and calibrated by a real-browser benchmark. The `V` array is indexed by `k = x − y`, which goes negative; an off-by-one there is the classic Myers bug and produces plausible output on symmetric input, so the offset is centralised behind one named accessor and never inlined. The search runs in a Web Worker with a step budget, so the deliberately pathological worst-case preset can't hang the UI.
+### The grid is drawn on canvas and the search runs off the main thread
 
-### Honest presets, honestly measured
+The edit graph is the product, so a 300×300 drawing test came before any algorithm code. I draw the grid on canvas, so the page doesn't create an element per cell. Each frame only redraws the search frontier. The search itself runs in a background worker with a step budget, so even the worst-case preset can't freeze the page.
 
-Two preset claims were written before they were checked, and both were false — this implementation's tie-breaking does *not* pick the misattributed brace on the first input tried. Both were replaced with inputs that genuinely demonstrate the phenomenon, and each preset now asserts its claim in tests. The render budget was upgraded from an assertion to a measurement: a headless-Chrome benchmark builds, serves, drives the spike, and reads the numbers back.
+### Every preset's claim is tested
 
-## Outcome
+Two of my first preset claims turned out to be false when I checked them. My tie-breaking did not blame the wrong brace on the first input I tried. I replaced both with inputs that do show the effect, and now each of the 8 presets asserts its claim in a test. That rule is written into the repo's working instructions.
 
-Live and public as an installable PWA, fully offline after first load. It ships the edit graph on canvas (explored region, advancing frontier, snakes, and the chosen path drawn back through it), the `V`-array strip beside it, ambiguity enumeration (how many equally-minimal scripts exist, steppable), a four-algorithm comparison (greedy Myers, linear-space Myers, patience, histogram — all agreeing on `D` while patience halves the hunk count), the linear-space middle-snake variant with a live memory counter, full playback control, 8 asserted presets, and two locales.
+### I rebuilt the site for someone who has never run git diff
 
-Built solo — ~8,900 lines of TypeScript, 152 tests, four diff algorithms plus a BFS oracle implemented from Myers' 1986 paper, on three runtime dependencies and no diff library. Measured: a 300×300 lattice holds 59.9 fps over 220 frames; the worst case at the input cap is `D = 600` across 135,152 search steps, and the UI stays responsive.
+Late in the build I reordered the home page around a newcomer. It opens with a question, then a worked example without jargon, the idea in three steps, and why diffs blame the wrong line. Notation and the glossary come last. The grid also gained axis labels, since a newcomer who guesses them wrong reads the whole picture backwards.
+
+## Result
+
+Myers Visualizer is live, public and open source. It installs as an app and works offline after the first visit. It shows the edit graph as it fills, the algorithm's working memory beside it, how many equally minimal answers exist, and a side-by-side of all four algorithms. In the site's own example, all four need 5 edits and patience still halves the number of changed blocks.
+
+It runs at 59.9 frames per second on a 300×300 grid. At the input cap, the worst case takes 135,152 search steps and the page stays responsive. It comes in English and Indonesian. I built it in two days in August 2026.
+
+## What I'd do next
+
+- Test how the animation reads to people. The tests cover wiring, accessible text, pixels and cost, but not whether it is easy to follow.
+- Remove the one-time 100–200 ms pause when a result arrives at the input cap, by sending the trace as typed arrays.
+
+## Under the hood
+
+- The engine is a pure function, `(a, b, options) → { script, trace, stats }`, with no React, DOM, clock, randomness or module-level state. Text is tokenized into integer ids first, so line vs. character granularity and whitespace handling are explicit settings.
+- `lib/diff/` (~1,750 lines) holds greedy Myers with `V` recording and backtrack, the linear-space bidirectional variant with the middle snake, patience and histogram. No diff library.
+- `apply.ts` (script + A → B) shares no code with any search; `brute.ts` is a BFS over the edit graph for the true minimal `D`. Both were written before `myers.ts`. Tests assert `D` equality and apply-correctness, never script equality.
+- The `V` array is indexed by `k = x − y`, which goes negative. The offset sits behind one named accessor and is never inlined, since an off-by-one there looks plausible on symmetric input.
+- Canvas 2D rendering, hand-written. Per-frame work is O(frontier), not O(N·M), guarded by a unit test.
+- `pnpm bench:render` builds, serves under the production basePath and drives headless Chrome: 220 frames, draw mean 0.13 ms, p95 0.30 ms, frame median 16.70 ms (59.9 fps). Kept out of CI because timings on shared runners flake.
+- jsdom has no `Worker` and a stub canvas, so a Puppeteer smoke test reads pixels back from the built export and confirms the worker chunk loads. It immediately found a bug: the URL hash was only read on mount. The live URL passes the smoke suite 15/15.
+- Worst case at the input cap: `D = 600`, 135,152 search steps, 362,404 `V` cells. Linear-space mode shows a live memory counter for O(D²) vs O(N+M). In the comparison example all four algorithms agree on `D = 5`.
+- 8 presets: `minimal-edit`, `pure-insert`, `pure-delete`, `transposition`, `brace-misattribution`, `patience-wins`, `worst-case`, `char-level`, each asserted in `tests/presets/`.
+- Static-export fixes: `app/manifest.ts` ignored `basePath` (silent 404, no install prompt), so the manifest is a static file pinned by a test. `metadataBase` already carries the basePath, so a root-relative OG image got it twice.
+- The project started Indonesian-first and was renamed and re-defaulted to English. Algorithm terms stay English in both locales.
+- Three runtime dependencies (Next.js 14.2, React, react-dom). 87.4 KB gzipped shared first-load JS, 107 KB on the graph page, against a 250 KB budget.
+- Out of scope: file upload, directory diff, three-way merge, AST diffing, accounts. The site says git applies extra heuristics and doesn't claim byte-identical parity with git diff.
+- ~8,900 lines of TypeScript, 152 tests in 24 files, 25 commits from 4 to 5 August 2026.

@@ -1,7 +1,17 @@
 {
   "slug": "morfologi-kota",
   "title": "Bentuk Kota",
-  "tagline": "Measures the street layouts of 33 Indonesian neighbourhoods twice — once by car, once on foot — because the standard academic metric only sees the driving network and misreads a kampung completely",
+  "tagline": "An atlas measuring 33 Indonesian neighbourhoods twice, by car and on foot, to show what car-only metrics miss",
+  "glance": {
+    "for": "Urbanists, planners, OpenStreetMap mappers and curious readers",
+    "result": "Live in Indonesian and English, 33 sites, with no rankings or scores"
+  },
+  "skills": [
+    "Geospatial data",
+    "Graph algorithms",
+    "Data visualisation",
+    "Data pipelines"
+  ],
   "categoryTags": [
     "Personal Project",
     "Data Platform",
@@ -22,6 +32,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/morfologi-kota/id/lempeng/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/morfologi-kota",
   "heroImage": "/images/projects/morfologi-kota/hero.webp",
   "order": 38,
@@ -29,20 +40,50 @@
   "metrics": [
     {
       "value": "33",
-      "label": "Sites, each measured as two networks: drive and walk"
+      "label": "sites, each measured by car and on foot"
     },
     {
       "value": "126",
-      "label": "Candidate centres surveyed across 56 cities to pick them"
+      "label": "candidate centres surveyed across 56 cities"
     },
     {
-      "value": "577",
-      "label": "Tests, incl. synthetic networks with known answers"
+      "value": "3",
+      "label": "tag mappings readers can switch between"
     },
     {
-      "value": "4",
-      "label": "Runtime deps — graph maths and SVG are hand-written"
+      "value": "0",
+      "label": "network calls at runtime"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Atlas yang mengukur 33 lingkungan Indonesia dua kali, dengan mobil dan jalan kaki, untuk memperlihatkan celah metrik mobil",
+    "glance": {
+      "for": "Perencana kota, pemeta OpenStreetMap, dan pembaca yang penasaran",
+      "result": "Live dalam bahasa Indonesia dan Inggris, 33 lokasi, tanpa peringkat atau skor"
+    },
+    "skills": [
+      "Data geospasial",
+      "Algoritma graf",
+      "Visualisasi data",
+      "Pipeline data"
+    ],
+    "metrics": [
+      {
+        "value": "33",
+        "label": "lokasi, diukur dengan mobil dan jalan kaki"
+      },
+      {
+        "value": "126",
+        "label": "calon titik disurvei di 56 kota"
+      },
+      {
+        "value": "3",
+        "label": "pemetaan tag yang bisa diganti pembaca"
+      },
+      {
+        "value": "0",
+        "label": "panggilan jaringan saat runtime"
+      }
+    ]
+  }
 }

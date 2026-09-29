@@ -1,7 +1,17 @@
 {
   "slug": "myers-visualizer",
   "title": "Myers Visualizer",
-  "tagline": "An interactive tool that plays back, step by step, what happens inside `git diff` — and why it sometimes blames the wrong line",
+  "tagline": "An interactive replay of what git diff does inside, including why it sometimes blames the wrong line",
+  "glance": {
+    "for": "Developers, students and teachers curious how git diff works",
+    "result": "Live, offline-ready and open source, with four diff algorithms side by side"
+  },
+  "skills": [
+    "Algorithm visualisation",
+    "Graph search",
+    "Canvas rendering",
+    "Property-based testing"
+  ],
   "categoryTags": [
     "Personal Project",
     "Developer Tool",
@@ -21,6 +31,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/myers-visualizer/en/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/myers-visualizer",
   "heroImage": "/images/projects/myers-visualizer/hero.webp",
   "order": 19,
@@ -28,20 +39,50 @@
   "metrics": [
     {
       "value": "4",
-      "label": "Diff algorithms hand-written from the paper"
+      "label": "diff algorithms written from the paper"
     },
     {
       "value": "59.9 fps",
-      "label": "300×300 lattice, rendered on canvas"
+      "label": "on a 300×300 edit graph"
     },
     {
-      "value": "152",
-      "label": "Tests, incl. a brute-force minimal-D oracle"
+      "value": "135,152",
+      "label": "search steps in the worst case, no freeze"
     },
     {
-      "value": "0",
-      "label": "Diff libraries — the algorithm is the project"
+      "value": "8",
+      "label": "presets, each claim checked by a test"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Tayangan ulang interaktif tentang cara kerja git diff, termasuk alasan ia kadang salah menunjuk baris",
+    "glance": {
+      "for": "Developer, mahasiswa, dan pengajar yang penasaran cara kerja git diff",
+      "result": "Live, bisa offline, open source, dengan empat algoritma diff berdampingan"
+    },
+    "skills": [
+      "Visualisasi algoritma",
+      "Pencarian graf",
+      "Rendering canvas",
+      "Pengujian berbasis properti"
+    ],
+    "metrics": [
+      {
+        "value": "4",
+        "label": "algoritma diff ditulis dari makalahnya"
+      },
+      {
+        "value": "59,9 fps",
+        "label": "pada graf suntingan 300×300"
+      },
+      {
+        "value": "135.152",
+        "label": "langkah pencarian kasus terburuk, tanpa macet"
+      },
+      {
+        "value": "8",
+        "label": "preset, klaimnya diperiksa oleh tes"
+      }
+    ]
+  }
 }

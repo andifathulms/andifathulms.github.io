@@ -2,38 +2,55 @@
 
 ## Masalahnya
 
-"Tabel periodik yang bisa diklik dengan detail unsur" sudah dibuat seribu kali, dan ptable.com sudah melakukannya dengan sangat baik. Membuat satu lagi hanya layak bila ada yang belum dikerjakan siapa pun — dan ada dua.
+Siswa mengenal tabel periodik sebagai bagan untuk dihafal. Versi yang bisa diklik dengan detail unsur sudah banyak, dan ptable.com mengerjakannya dengan sangat baik. Hampir tidak ada yang menjelaskan bentuk tabelnya. Kenapa baris pertama hanya berisi dua unsur? Kenapa lantanida ditaruh di catatan kaki? Kenapa blok-bloknya selebar 2, 6, 10, dan 14 kolom? Jawabannya ada pada urutan elektron mengisi orbital.
 
-Yang pertama: bentuknya. Nyaris tak ada tabel periodik yang menjelaskan *mengapa* periode 1 berisi dua unsur, mengapa lantanida duduk di catatan kaki, atau mengapa bloknya selebar 2, 6, 10, dan 14 kolom. Jawabannya pengisian orbital — maka fitur utama situs ini adalah tabelnya merakit dirinya sendiri dari aturan itu di layar, lalu dengan jujur menyalakan sekitar dua puluh unsur yang prediksi aturannya justru meleset.
+Ada celah kedua. Belum ada tabel periodik yang menunjukkan unsur apa saja yang diproduksi Indonesia dan berapa porsinya di produksi dunia. Nikel, timah, tembaga, dan emas adalah cerita nasional yang sering didengar siswa di berita, apalagi nikel kini berada di pusat rantai pasok baterai kendaraan listrik.
 
-Yang kedua: mineral Indonesia. Tak ada tabel periodik di mana pun yang menunjukkan unsur apa saja yang diproduksi Indonesia dan berapa pangsanya terhadap keluaran dunia. Nikel, timah, tembaga, dan emas adalah cerita nasional yang nyata — nikel berada di jantung rantai pasok baterai kendaraan listrik — dan itu menyambungkan kimia dengan hal yang sudah didengar siswa di berita. Berbahasa Inggris lebih dulu dengan terjemahan Indonesia lengkap, sengaja dibalik dari proyek-proyek lain di portofolio ini, karena kosakata kimia bersifat internasional.
+Saya membuat Periodic Lens untuk siswa dan pembaca yang penasaran dengan kimia. Bahasa utamanya Inggris dengan terjemahan Indonesia yang lengkap, karena kosakata kimia bersifat internasional.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Tak diketahui bukan berarti nol
+### Tabelnya menyusun diri dari aturan pengisian
 
-Banyak properti memang belum diketahui untuk unsur superberat. Sistem tipenya membuat mustahil merepresentasikan properti sebagai angka telanjang: setiap nilai berupa `{known, value, unit, source}` atau `{unknown}`. Nilai yang hilang karena itu tak mungkin diam-diam tampil sebagai ujung bawah skala warna. "Tak diketahui" punya persis satu penampakan — pola arsir — yang didefinisikan di satu berkas dan dipakai di mana-mana, dan satu lensa khusus memetakan tak lain daripada di mana pengetahuan manusia berhenti.
+Halaman build menyebutkan aturan pengisian orbital, menghitungnya di layar, lalu menganimasikan tabel yang tersusun dari aturan itu. Setelah itu halaman menyorot sekitar 20 unsur, seperti kromium, tembaga, dan emas, yang susunan elektronnya meleset dari tebakan aturan. Tebakan aturan ditampilkan di samping nilai yang dipublikasikan. Sebuah sakelar mengganti urutan pengisian dengan urutan naif, dan panjang baris berubah dari 2, 8, 8, 18, 18, 32, 32 menjadi bentuk yang salah. Selisih itulah alasan aturannya penting.
 
-### Aturannya menggerakkan animasi, sekaligus menguji datanya
+### Data yang dipublikasikan saya simpan, aturannya saya pakai untuk mengujinya
 
-Konfigurasi elektron adalah data terbitan, tak pernah diturunkan. Aturan aufbau diimplementasikan semata untuk menjalankan animasi pengisian dan untuk *memeriksa dataset*: suite-nya menegaskan bahwa prediksi aturan itu berbeda dari nilai terbitan yang tersimpan persis pada daftar pengecualian terdokumentasi — tak lebih, tak kurang, di kedua arah. Penegasan dua arah itulah seluruh pengaman terhadap mode gagal paling berisiko, yaitu konfigurasi yang diam-diam dibangkitkan dari aturan yang justru gagal pada unsur-unsur yang menarik. Itu hal pertama yang diuji, sebelum fiturnya ada.
+Susunan elektron diambil dari data yang dipublikasikan dan tidak pernah dihasilkan dari aturan. Aturannya hanya saya pakai untuk animasi dan untuk memeriksa data. Tes memastikan aturan berbeda dari nilai yang dipublikasikan tepat pada daftar pengecualian yang terdokumentasi, dari dua arah. Risiko terbesarnya adalah data yang diam-diam dihasilkan dari aturan, karena aturan justru gagal di unsur-unsur yang paling menarik. Karena itu, pengecualian inilah yang pertama kali saya uji.
 
-### Satu lensa dalam satu waktu, ditegakkan arsitektur
+### Nilai yang tidak diketahui terlihat tidak diketahui
 
-Mode gagal kebanyakan tabel periodik mentereng adalah 118 sel yang memikul lima pengkodean yang saling bersaing. Di sini warna adalah kanal yang bisa ditukar dan tak pernah ditumpuk. Berganti lensa mewarnai ulang seluruh 118 sel dalam satu morf, dan tak ada cara menumpuk dua.
+Banyak sifat unsur superberat belum diketahui. Saya membuat sifat tidak bisa disimpan sebagai angka polos: setiap nilai diketahui, lengkap dengan satuan dan sumbernya, atau ditandai tidak diketahui. Nilai yang hilang tidak bisa diam-diam tampil sebagai ujung bawah skala warna. Nilai tidak diketahui punya satu tampilan, yaitu pola arsir, dan satu lensa khusus memetakan batas pengetahuan manusia.
 
-### Warnanya dipecahkan, bukan dipilih
+### Satu lensa sekali waktu, dengan warna yang lolos tes
 
-Palet lensa ditulis sebagai target luminans, bukan dipilih dengan mata. Tesnya lalu menegaskan bahwa ramp kontinu monoton secara luminans, bahwa nilai kategoris berjarak setidaknya 0,03 luminans agar selamat di grayscale dan pada defisiensi penglihatan warna, dan bahwa setiap nilai tetap memenuhi kontras AA terhadap teks di atasnya.
+Banyak tabel periodik yang mencolok menumpuk lima pengodean di 118 sel. Di sini warna hanya menampilkan satu sifat sekali waktu, dari sebelas lensa, dan pergantian lensa mewarnai ulang semua sel sekaligus. Saya menyusun palet dari target kecerahan. Tes memastikan skala warna naik secara konsisten, kategori tetap bisa dibedakan dalam skala abu-abu dan oleh pembaca buta warna, dan teks tetap punya kontras yang terbaca.
 
-### Properti tanpa sumber tidak dikirim
+### Setiap angka membawa sumbernya
 
-Pipeline-nya menjalankan berkas sumber TSV bersitasi per-kolom melalui validator yang memeriksa lisensi, sitasi, tahun edisi USGS, dan kelengkapan, lalu menggabungkan dan menandai yang tak diketahui menjadi satu JSON terbangkit. Validator dan keempat suite tesnya menjaga setiap deploy. Angka produksi Indonesia masing-masing membawa tahun edisi USGS dan tahap pelaporannya — ditambang atau dimurnikan — dengan "tidak diproduksi" dibedakan tegas dari "sedikit diproduksi", dan tanpa komentar kebijakan ke arah mana pun.
+Setiap sifat berasal dari file sumber dengan sitasi per kolom. Validator memeriksa lisensi, sitasi, tahun edisi survei, dan kelengkapan, dan sifat tanpa sumber tidak ikut dirilis. Angka produksi Indonesia berasal dari US Geological Survey. Setiap angka membawa tahun edisinya dan apakah yang dihitung hasil tambang atau hasil olahan. Tidak berproduksi dibedakan dari berproduksi dalam jumlah kecil, dan tidak ada komentar kebijakan ke arah mana pun.
 
 ## Hasilnya
 
-82 commit dalam tujuh hari, sekitar 8.000 baris di aplikasi, komponen, pustaka, skrip, dan tes, dengan 157 tes di 6 suite yang mencakup seluruh 118 konfigurasi, kedua arah aturan aufbau, invarian struktural, kelengkapan layout, integritas skala lensa, kontras, dan penanganan nilai tak diketahui. Empat dependensi runtime. Nol permintaan jaringan setelah halaman dimuat.
+Periodic Lens sudah live dan terbuka untuk umum dalam bahasa Inggris dan Indonesia. Situs ini mencakup 118 unsur, 11 lensa, tiga tata letak tabel dengan sel yang berpindah posisi, dan tiga tampilan, termasuk relief yang menampilkan sifat unsur sebagai ketinggian. Lensa Indonesia mencakup nikel, timah, kobalt, bauksit, tembaga, emas, dan perak.
 
-Di luar halaman build, produknya menumbuhkan tombol kontrafaktual — ganti urutan pengisian ke urutan kulit naif lalu lihat panjang barisnya berubah dari 2, 8, 8, 18, 18, 32, 32 menjadi bentuk yang salah, dan itulah seluruh alasan aturannya penting — ditambah tiga layout tabel dengan sel yang berpindah posisi, serta tiga tampilan atas kisi yang sama termasuk relief topografi yang merender properti kontinu sebagai gelombang ketinggian yang kasatmata.
+Saya melakukan perbaikan aksesibilitas tersendiri setelah fiturnya selesai. Tabelnya cukup satu tab stop dengan navigasi tombol panah, dan ada tabel teks yang bisa diurutkan dengan data yang sama. Di ponsel, tabel digulir ke samping dengan ukuran penuh, karena bentuknya adalah pokok bahasannya. Situs tidak membuat permintaan jaringan setelah halaman dimuat. Saya membangunnya dalam tujuh hari pada Agustus 2026.
 
-Enam belas commit aksesibilitas berturut-turut membentuk lintasan perbaikan yang disengaja, bukan tambalan yang ditaburkan: ARIA grid yang tak sah diganti semantik list bawaan, kisinya diciutkan ke satu perhentian tab dengan navigasi tombol panah, cincin fokus dua nada, metrik tipografi berbasis rem, nama landmark sadar-lokal, dan padanan tabel teks kisi yang bisa diurutkan. Kisinya tak pernah dialirkan ulang menjadi daftar di ponsel — bentuknya *adalah* subjeknya — jadi ia menggulir mendatar pada ukuran sel penuh. Spektrum emisi, satu lensa peregangan yang direncanakan, dipangkas, dan celahnya didokumentasikan di halaman metode alih-alih dihilangkan diam-diam.
+## Langkah berikutnya
+
+- Menambahkan lensa spektrum emisi. Lensa ini sempat direncanakan lalu dipotong, dan kekosongannya dicatat di halaman metode.
+
+## Di balik layar
+
+- Semua perhitungan kimia ada di pustaka murni (`lib/elements/`) yang jalan di Node biasa; komponen hanya merender.
+- Nilai sifat bertipe `{known, value, unit, source}` atau `{unknown}`. Pola arsir didefinisikan sekali di `lib/elements/unknown.ts`.
+- `lib/elements/aufbau.ts` menggerakkan animasi dan asersi pengecualian dua arah. Anomali adalah hal pertama yang diuji (`bf818d2`).
+- Palet disusun sebagai target luminans di `lib/design/palette.ts`. Tes memastikan skala kontinu monoton, nilai kategori berjarak minimal 0,03 luminans, dan kontras AA terhadap teks di atasnya.
+- Pipeline: sumber TSV dengan sitasi per kolom, validasi, penggabungan dan penandaan nilai kosong, lalu satu JSON hasil generate. Zod memvalidasi skemanya. Validator dan keempat suite tes menjadi gerbang setiap deploy.
+- Pemindai teks melarang komentar kebijakan dan saran keselamatan di teks yang dirilis dalam dua bahasa. Awalnya pemindai menandai file tesnya sendiri, lalu cakupannya dibatasi ke kode yang dirilis (`4c1090c`).
+- Tata letak: standar, Janet left-step, dan spiral Benfey. Tampilan: grid, relief topografi, dan linimasa penemuan. Lensa "belum terukur" dan sakelar kontrafaktual tumbuh melampaui PRD.
+- Enam belas perbaikan aksesibilitas berturut-turut: semantik list bawaan menggantikan ARIA grid yang tidak valid, satu tab stop, cincin fokus dua warna, metrik huruf berbasis rem, nama landmark sesuai bahasa, pengumuman pembaca layar saat lensa berganti.
+- Build identik byte demi byte untuk dataset yang sama, termasuk pembuatan gambar OG saat build.
+- Static export Next.js 14 di GitHub Pages. Empat dependensi runtime (next, react, react-dom, zod). Tanpa pustaka grafik, kimia, animasi, atau komponen.
+- Milestone PRD M0–M5 selesai, ditambah sebagian besar M6. Spektrum emisi dari data NIST dipotong (`04458f4`).
+- 157 tes di 6 file. Sekitar 8.000 baris TypeScript, TSX, dan CSS. 82 commit dari 20 sampai 26 Agustus 2026.

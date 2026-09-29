@@ -1,7 +1,17 @@
 {
   "slug": "query-planner",
   "title": "Query Planner",
-  "tagline": "A browser-based SQL query planner and executor that shows every plan a database considered — not just the one it picked — and puts its estimate next to the truth at every step, so you can see exactly where and why it guessed wrong",
+  "tagline": "A browser-based database engine that shows every plan it considered and where its row estimates went wrong",
+  "glance": {
+    "for": "Backend and data engineers, DBAs, and people learning query optimisation",
+    "result": "Live and public, with plan choices checked against real Postgres"
+  },
+  "skills": [
+    "Query optimisation",
+    "Database internals",
+    "Data visualisation",
+    "Test-driven development"
+  ],
   "categoryTags": [
     "Personal Project",
     "Developer Tool",
@@ -19,15 +29,58 @@
   "role": "Solo Developer",
   "timeframe": "Sep 2026",
   "liveUrl": "https://andifathulms.github.io/query-planner/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/query-planner",
   "heroImage": "/images/projects/query-planner/hero.webp",
   "order": 41,
   "featured": false,
   "metrics": [
-    { "value": "294", "label": "Tests, including 33 checked against real Postgres" },
-    { "value": "255", "label": "DP cells for an 8-table join — every losing plan kept, not discarded" },
-    { "value": "3", "label": "Runtime dependencies — no SQL, charting, or graph-layout library" },
-    { "value": "98KB", "label": "Gzipped bundle, well under its own 350KB budget" }
+    {
+      "value": "300×",
+      "label": "estimate error at the root, shown node by node"
+    },
+    {
+      "value": "< 16 ms",
+      "label": "to re-plan and re-run a four-table join"
+    },
+    {
+      "value": "33",
+      "label": "tests matching plan shapes against real Postgres"
+    },
+    {
+      "value": "255",
+      "label": "candidate cells kept for an eight-table join"
+    }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Mesin database di browser yang menampilkan setiap rencana yang dipertimbangkan dan letak taksiran barisnya meleset",
+    "glance": {
+      "for": "Engineer backend dan data, DBA, dan pembelajar optimasi query",
+      "result": "Live dan publik, pilihan rencananya dicocokkan dengan Postgres asli"
+    },
+    "skills": [
+      "Optimasi query",
+      "Internal database",
+      "Visualisasi data",
+      "Test-driven development"
+    ],
+    "metrics": [
+      {
+        "value": "300×",
+        "label": "galat taksiran di puncak, terlihat per node"
+      },
+      {
+        "value": "< 16 ms",
+        "label": "untuk merencanakan ulang join empat tabel"
+      },
+      {
+        "value": "33",
+        "label": "tes mencocokkan bentuk rencana dengan Postgres"
+      },
+      {
+        "value": "255",
+        "label": "sel kandidat disimpan untuk join delapan tabel"
+      }
+    ]
+  }
 }

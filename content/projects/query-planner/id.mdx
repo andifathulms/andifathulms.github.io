@@ -2,30 +2,55 @@
 
 ## Masalahnya
 
-Saat sebuah query SQL lambat, jawaban yang biasa adalah "tambahkan indeks" — dan seringnya itu bukan masalahnya sama sekali. Basis data memilih cara menjalankan query dengan *memperkirakan* berapa baris yang akan dihasilkan tiap langkah, memakai ringkasan statistik kecil dari tabelnya. Ketika perkiraan itu salah, ia dengan percaya diri memilih rencana yang lambatnya luar biasa. Tak ada yang rusak dan tak ada indeks yang hilang; rencananya dipilih dengan benar dari keyakinan yang salah.
+Saat sebuah query database lambat, saran yang biasa muncul adalah menambah index. Sering kali masalahnya bukan di situ. Sebelum menjalankan query, database menaksir berapa baris yang akan dihasilkan setiap langkah, berdasarkan ringkasan statistik kecil dari tabelnya. Kalau taksirannya salah, database dengan yakin memilih rencana yang lambat. Tidak ada yang rusak dan tidak ada index yang kurang. Rencananya dipilih dengan benar, hanya saja dari keyakinan yang keliru.
 
-Kegagalan spesifik yang menjadi dasar aplikasi ini adalah **asumsi independensi**: diminta `city = 'Balikpapan' AND province = 'Kalimantan Timur'`, basis data mengalikan dua peluang itu seolah mengetahui kotanya tak memberi tahu apa pun soal provinsinya. Ia memprediksi satu dari sepuluh ribu baris; kenyataannya satu dari seratus — dua orde besaran kesalahan, dari asumsi yang tak pernah dipilih siapa pun. Tooling standar tak bisa menunjukkan ini: `EXPLAIN` hanya menampilkan rencana yang menang dan tak ada lagi — bukan lusinan kandidat yang kalah, dan bukan celah antara yang diyakini planner dengan yang sebenarnya terjadi.
+Salah satu penyebab umumnya adalah asumsi independensi. Saat diminta baris dengan kota Balikpapan dan provinsi Kalimantan Timur, database mengalikan dua peluangnya seolah kota tidak memberi petunjuk apa pun soal provinsi. Tebakannya satu baris dari sepuluh ribu. Kenyataannya satu dari seratus.
 
-## Pendekatannya
+Alat standarnya, EXPLAIN, hanya menampilkan rencana pemenang. Kandidat yang kalah dan selisih antara taksiran dan kenyataan tidak terlihat. Saya membuat Query Planner untuk engineer backend dan data, administrator database, serta siapa pun yang mengajar atau mempelajari optimasi query.
 
-### Aplikasinya berisi mesin basis data yang utuh, di dalam browser
+## Yang saya bangun
 
-Ini keputusan sentralnya dan semua hal lain mengikutinya. Membungkus mesin yang sudah ada seperti SQLite-di-WASM akan jauh lebih sedikit kerjanya, tetapi tak bisa melakukan dua hal yang menjadi alasan aplikasi ini ada: menunjukkan rencana kandidat yang kalah (`EXPLAIN` membuangnya), dan menaruh perkiraan bersama kenyataan berdampingan di tiap titik dari satu sistem. Hanya mesin yang Anda kendalikan sendiri yang bisa menghasilkan keduanya — jadi aplikasi ini mengirim lexer, parser, penyimpanan kolumnar, indeks B+tree, statistik, model biaya, planner dynamic-programming Selinger, dan sebuah executor model-volcano dengan sembilan operator fisik miliknya sendiri.
+### Saya menulis mesin database utuh yang jalan di browser
 
-### Planner-nya secara arsitektural dilarang melihat datanya
+Membungkus mesin yang sudah ada jauh lebih mudah. Tapi tidak ada mesin yang menunjukkan rencana yang dibuangnya, atau menaruh taksirannya di samping jumlah sebenarnya di setiap langkah. Hanya mesin yang saya kendalikan sendiri yang bisa melakukan keduanya. Jadi aplikasi ini punya parser query, penyimpanan tabel, index, statistik, model biaya, pencarian rencana, dan eksekutor dengan sembilan operator sendiri. Nama operatornya sama dengan Postgres, jadi yang dipelajari di sini langsung terpakai saat membaca EXPLAIN sungguhan.
 
-`src/planner/` tak boleh mengimpor `src/storage/` atau `src/executor/` — ditegakkan oleh aturan ESLint, bukan sekadar konvensi. Ia membaca objek statistik dan tak ada lagi. Planner yang bisa mengintip kenyataan bukanlah planner, dan seluruh demonstrasinya akan jadi kebohongan jika ini bocor. Setiap perkiraan yang dihasilkannya membawa jejaknya sendiri — metode yang dipakai, masukannya, asumsi yang dibuat — dan antarmuka menampilkan jejak itu langsung alih-alih menghitung ulang apa pun, sehingga tampilannya tak pernah bisa melenceng dari matematikanya.
+### Planner tidak boleh melihat datanya
 
-### DP-nya menyimpan sampahnya
+Planner yang bisa mengintip baris aslinya tidak sedang merencanakan. Saya membuat kode planner tidak bisa mengimpor kode penyimpanan atau eksekutor, dan linter menggagalkan build kalau aturan itu dilanggar. Planner hanya membaca statistik. Setiap taksiran juga membawa penjelasannya sendiri: metode yang dipakai, inputnya, dan asumsinya. Layar menggambar penjelasan itu apa adanya, jadi tampilan tidak mungkin berbeda dari hitungannya.
 
-Enumerasi Selinger biasanya membuang kandidat yang kalah begitu ada yang lebih murah muncul. Di sini setiap kandidat disimpan di selnya sendiri, beserta urutan pengisian pencarian yang persis. Untuk 8 tabel itu 255 sel dan memori yang sepele — dan itulah satu-satunya alasan animasi lattice bisa memutar ulang pencarian yang sebenarnya alih-alih rekonstruksi. Urutan yang menarik juga disimpan: tanpanya merge join tak akan pernah menang, dan aplikasi ini diam-diam akan mengajarkan sesuatu yang salah.
+### Setiap rencana yang kalah saya simpan
 
-### Kebenarannya dibuktikan dua cara, bukan diasumsikan
+Pencarian rencana klasik membuang kandidat begitu ada yang lebih murah. Saya menyimpan semua kandidat, beserta urutan pengisiannya. Untuk delapan tabel, itu 255 sel dengan memori yang sangat kecil. Inilah yang membuat animasinya bisa memutar ulang pencarian yang sebenarnya. Saya juga menyimpan rencana yang unggul hanya karena urutan hasilnya. Tanpa itu, merge join tidak akan pernah menang, dan aplikasi ini akan mengajarkan hal yang keliru.
 
-Postgres sungguhan, dikompilasi ke WebAssembly, menjadi oracle saat pengujian: data yang identik masuk ke kedua mesin, dan 33 tes menegaskan planner ini memilih bentuk rencana yang sama. Terpisah, sebuah tes ekuivalensi menegaskan bahwa setiap kemungkinan rencana untuk sebuah query mengembalikan hasil yang identik — yang sebenarnya menangkap bug pada executor. Di mana planner ini benar-benar tak sepakat dengan Postgres, ketidaksepakatan itu didokumentasikan beserta sebabnya alih-alih disetel agar cocok, dan sebuah tes menegaskan tiap ketidaksepakatan itu *tetap* tak sepakat, sehingga daftarnya tak bisa diam-diam kedaluwarsa.
+### Saya mengujinya terhadap Postgres asli
 
-## Hasil
+Postgres yang dikompilasi agar jalan di browser menjadi rujukan saat tes. Data yang sama dimasukkan ke kedua mesin, dan 33 tes memastikan planner saya memilih bentuk rencana yang sama. Kalau keduanya berbeda, penyebabnya saya dokumentasikan di dalam aplikasi, tidak saya akali sampai cocok. Tes terpisah memastikan setiap rencana yang mungkin untuk satu query memberi hasil yang sama, dan tes inilah yang menangkap bug di eksekutor.
 
-Live dan publik: geser `random_page_cost` dari 4,0 menuju 1,1 — penyesuaian SSD standar yang dilakukan tiap DBA — dan bar biaya berurutan ulang serta saling silang secara real-time seiring rencana yang menang dibangun ulang dan dieksekusi ulang, mengikuti kursor tanpa easing; join empat-tabel merencanakan ulang dalam kurang dari 16 milidetik, dipatok oleh tes performa. Pohon rencana memasangkan tebakan planner dengan jumlah baris sebenarnya di tiap titik dan menggambar kesalahannya melebar naik ke atas pohon — 1,2× di sebuah scan menjadi 8× setelah satu join dan 300× di akar. Tampilan korelasi menggambar asumsi independensi sebagai persegi panjang literal yang terpisah dari kumpulan titik sebenarnya, dan membuat statistik multivariat dengan satu klik membuat persegi panjang itu menempel pada kebenarannya lalu mengeksekusi ulang query dengan rencana yang telah dikoreksi.
+### Satu detail data hampir menyembunyikan efeknya
 
-Penulis tunggal, 36 commit dalam satu sesi ~16,5 jam, ~13.500 baris TypeScript di seluruh stack, 294 tes. Tiga dependensi runtime — tanpa pustaka SQL, tanpa pustaka charting, tanpa pustaka graph-layout, tanpa pustaka animasi, tanpa pustaka state-management. Seluruh keadaan aplikasi terserialisasi ke URL, jadi sebuah rencana yang mengejutkan adalah sebuah tautan yang bisa dikirim seseorang, dan setiap query berjalan di atas data yang tak pernah meninggalkan browser.
+Dataset Indonesia yang realistis awalnya menyusun kota berkelompok per provinsi. Generatornya memilih kota berdasarkan posisi di daftar, jadi pengelompokan itu menyusutkan galat independensi dari sekitar 30× menjadi 3×. Saya mengurutkan ulang daftarnya berdasarkan jumlah penduduk, yang juga lebih realistis, dan efeknya kembali muncul.
+
+## Hasilnya
+
+Query Planner sudah live dan terbuka untuk umum. Geser pengaturan biaya penyimpanan dari 4,0 ke arah 1,1, penyesuaian yang biasa dipakai untuk SSD, dan batang biaya saling menyilang saat rencana pemenang berganti. Join empat tabel direncanakan dan dijalankan ulang dalam waktu kurang dari 16 milidetik, satu frame di 60 frame per detik. Pohon rencana menampilkan taksiran di samping jumlah sebenarnya, dan galatnya membesar: 1,2× di pemindaian, 8× setelah satu join, 300× di puncak.
+
+Grafik korelasi menggambar asumsi yang salah sebagai persegi panjang yang terlepas dari data asli. Satu klik menambah statistik multi-kolom, dan taksirannya langsung menempel ke kenyataan. Tidak ada data yang keluar dari browser, dan setiap rencana bisa dibagikan sebagai tautan. Saya membangunnya dalam satu sesi sekitar 16,5 jam pada 3 September 2026.
+
+## Langkah berikutnya
+
+- Menambahkan lapisan bitmap heap scan, yang saya keluarkan dari cakupan. Keempat perbedaan dengan Postgres yang terdokumentasi berasal dari lapisan ini.
+
+## Di balik layar
+
+- Mesin: parser SQL recursive-descent untuk subset yang sempit, penyimpanan kolumnar, index B+tree yang dimuat sekaligus, reservoir sampling (dengan seed, default 30.000 baris), histogram equi-depth, daftar MCV, dan ketiga jenis statistik multivariat (functional dependency, n-distinct, MCV multivariat).
+- Biaya berupa pasangan `(startup, total)`, sehingga `LIMIT 10` bisa memilih rencana berbeda. Dynamic programming Selinger dengan penyimpanan interesting order; `tests/orders.test.ts` mencakup kasus yang terbalik kalau penyimpanan itu dimatikan.
+- Eksekutor model volcano: seq scan, index scan, nested loop, hash join, merge join, sort, hash aggregate, group aggregate, limit. Waktu per node diambil dari penghitung kasar supaya instrumentasi tidak mengacaukan pengukuran.
+- ESLint `no-restricted-imports` mencegah `src/planner/` mengimpor `src/storage/` atau `src/executor/`. `Math.random` dilarang di engine; semua keacakan memakai seed.
+- Setiap selektivitas mengembalikan `SelectivityTrace` (`mcv`, `histogram`, `independence`, `dependency`, …) yang dirender oleh tampilan histogram dan korelasi.
+- PGlite (Postgres di WebAssembly) hanya devDependency. `src/planner/divergences.ts` mencatat setiap perbedaan, dan tes oracle memastikan masing-masing tetap berbeda. Commit `5ba8322` berjudul "the PGlite oracle, and what it caught".
+- Daftar kota ada di `src/storage/datasets/wilayah.ts`; sampler-nya Zipf berdasarkan posisi di daftar.
+- Delapan instrumen SVG buatan sendiri, termasuk tidy tree Reingold–Tilford, satu loop `requestAnimationFrame`, dan sistem token dua tema yang dibangun ulang dalam revisi desain di tengah proyek (`a073496`).
+- `tests/copy.test.ts` melarang em-dash dan kalimat pemasaran di teks yang dirilis. Tema tidak ikut disimpan di URL yang dibagikan.
+- Tiga dependensi runtime (React, React DOM, typeface Geist). JS 98 KB gzip dari anggaran 350 KB. Nol permintaan jaringan saat runtime.
+- CI: typecheck, lint, test, oracle, build, lalu deploy ke GitHub Pages.
+- 294 tes (261 unit dan integrasi, 33 oracle) di 13 file. ~13.500 baris. 36 commit.

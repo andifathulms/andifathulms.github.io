@@ -2,38 +2,55 @@
 
 ## The problem
 
-"Clickable periodic table with element details" has been built a thousand times, and ptable.com already does it excellently. Building another one is only worth doing for something nobody else does, and there were two.
+Students meet the periodic table as a chart to memorise. Clickable versions with element details already exist, and ptable.com does that very well. Almost none explain the shape itself. Why does the first row have two elements? Why do the lanthanides sit in a footnote? Why are the blocks 2, 6, 10 and 14 columns wide? The answer is the order in which electrons fill orbitals.
 
-The first is the shape. Almost no periodic table explains *why* period 1 has two elements, why the lanthanides sit in a footnote, or why the blocks are 2, 6, 10 and 14 columns wide. The answer is orbital filling — so the site's hero feature is the table assembling itself from that rule on screen, and then honestly lighting up the roughly twenty elements where the rule predicts the wrong answer.
+There was a second gap. No periodic table shows which elements Indonesia produces and at what share of world output. Nickel, tin, copper and gold are a national story students already hear on the news, since nickel sits at the centre of the electric-vehicle battery supply chain.
 
-The second is Indonesian minerals. No periodic table anywhere shows which elements Indonesia produces and at what share of world output. Nickel, tin, copper and gold are a genuine national story — nickel sits at the centre of the EV battery supply chain — and it connects chemistry to something students already hear on the news. English-first with a full Indonesian translation, deliberately reversed from the rest of this portfolio, because chemistry vocabulary is international.
+I built Periodic Lens for students and chemistry-curious readers. It is English-first with a full Indonesian translation, because chemistry vocabulary is international.
 
-## The approach
+## What I built
 
-### Unknown is not zero
+### The table builds itself from the rule
 
-Many properties are simply not known for the superheavy elements. The type system makes it impossible to represent a property as a bare number: every value is either `{known, value, unit, source}` or `{unknown}`. A missing value therefore cannot silently render as the bottom of a colour scale. Unknown has exactly one appearance — a hatch pattern — defined in one file and used everywhere, and one lens maps nothing but where human knowledge runs out.
+The build page states the filling rule, works the arithmetic on screen, and animates the table assembling from it. Then it lights up the roughly 20 elements, such as chromium, copper and gold, where the rule predicts the wrong electron arrangement. It shows the prediction next to the published value. A switch changes the filling order to a naive one, and the row lengths turn from 2, 8, 8, 18, 18, 32, 32 into a wrong shape. That difference is why the rule matters.
 
-### The rule drives the animation, and tests the data
+### I store published data and use the rule to test it
 
-Electron configurations are published data, never derived. The aufbau rule is implemented only to power the filling animation and to *check the dataset*: the suite asserts that the rule's predictions disagree with the stored published values on exactly the documented exception list — no more, no fewer, in both directions. That bidirectional assertion is the whole safeguard against the riskiest failure mode, which is configurations quietly generated from a rule that fails on precisely the interesting elements. It was the first thing tested, before the features existed.
+Electron arrangements come from published data and are never generated. I use the rule only for the animation and to check the dataset. The tests assert that the rule disagrees with the published values on exactly the documented list of exceptions, in both directions. Generating the data from the rule was the biggest risk, because the rule fails on exactly the interesting elements. So those exceptions were the first thing I tested.
 
-### One lens at a time, enforced by architecture
+### Unknown values look unknown
 
-The failure mode of most flashy periodic tables is 118 cells carrying five competing encodings. Here colour is a swappable channel that is never accumulated. Switching lens re-colours all 118 cells in a single morph, and there is no way to stack two.
+Many properties are not known for the heaviest elements. I made it impossible to store a property as a bare number: each value is either known, with a unit and source, or marked unknown. A missing value can't quietly show up as the bottom of a colour scale. Unknown has one look, a hatch pattern, and one lens maps nothing but where human knowledge runs out.
 
-### Colour is solved, not picked
+### One lens at a time, with colours that pass tests
 
-Lens palettes are authored as luminance targets rather than chosen by eye. Tests then assert that continuous ramps are luminance-monotonic, that categorical values sit at least 0.03 luminance apart so they survive greyscale and colour-vision deficiency, and that every value keeps AA contrast against the text on it.
+Most flashy periodic tables put five competing encodings on 118 cells. Here colour shows one property at a time, across eleven lenses, and switching re-colours every cell in one move. I set palettes by brightness targets. Tests check that colour scales rise steadily, that categories stay distinct in greyscale and for colour-blind readers, and that text keeps readable contrast.
 
-### A property without a source does not ship
+### Every number carries its source
 
-The pipeline runs TSV source files with per-field citations through a validator that checks licences, citations, USGS edition years and completeness, then merges and marks unknowns into one generated JSON. The validator and all four test suites gate every deploy. The Indonesian production figures each carry their USGS edition year and reporting stage — mined versus refined — with not-produced explicitly distinguished from low-produced, and no policy commentary in either direction.
+Each property comes from a source file with a citation per field. A validator checks licences, citations, survey edition years and completeness, and a property without a source doesn't ship. Indonesia's production figures come from the US Geological Survey. Each one carries its edition year and whether it counts mined or refined output. Not produced is kept distinct from produced in small amounts, and there is no policy commentary either way.
 
-## Outcome
+## Result
 
-82 commits over seven days, roughly 8,000 lines across app, components, library, scripts and tests, with 157 tests in 6 suites covering all 118 configurations, both directions of the aufbau rule, structural invariants, layout completeness, lens scale integrity, contrast and unknown handling. Four runtime dependencies. Zero network requests after page load.
+Periodic Lens is live and public in English and Indonesian. It covers 118 elements, 11 lenses, three table layouts with cells travelling between them, and three views, including a relief that shows properties as height. The Indonesian lens covers nickel, tin, cobalt, bauxite, copper, gold and silver.
 
-Beyond the build page, the product grew a counterfactual toggle — switch the filling order to naive shell order and watch the row lengths change from 2, 8, 8, 18, 18, 32, 32 into a wrong shape, which is the entire reason the rule matters — plus three table layouts with cells travelling between positions, and three views of the same grid including a topography relief that renders continuous properties as visible height waves.
+I did a separate accessibility pass after the features were built. The grid is one tab stop with arrow-key navigation, and there's a sortable text table with the same data. On phones the grid scrolls sideways at full size, because the shape is the subject. The site makes no network requests after the page loads. I built it in seven days in August 2026.
 
-Sixteen consecutive accessibility commits form a deliberate remediation pass rather than sprinkled-in fixes: invalid grid ARIA replaced with native list semantics, the grid collapsed to one tab stop with arrow-key navigation, two-tone focus rings, rem-based type metrics, locale-aware landmark names, and a sortable text-table equivalent of the grid. The grid is never reflowed into a list on mobile — the shape *is* the subject — so it scrolls horizontally at full cell size instead. Emission spectra, a planned stretch lens, was cut, and the gap is documented on the method page rather than quietly dropped.
+## What I'd do next
+
+- Add the emission spectra lens. It was planned and cut, and the gap is documented on the method page.
+
+## Under the hood
+
+- All chemistry lives in a pure library (`lib/elements/`) that runs in plain Node; components only render.
+- Property values are typed as `{known, value, unit, source}` or `{unknown}`. The hatch pattern is defined once in `lib/elements/unknown.ts`.
+- `lib/elements/aufbau.ts` drives the animation and the bidirectional exception assertion. The anomalies were the first thing tested (`bf818d2`).
+- Palettes are authored as luminance targets in `lib/design/palette.ts`. Tests assert monotonic continuous ramps, categorical values at least 0.03 luminance apart, and AA contrast against the text on each value.
+- Pipeline: TSV sources with per-field citations, validate, merge and mark unknowns, one generated JSON. Zod validates the schema. The validator and all four test suites gate every deploy.
+- A copy scan bans policy commentary and safety guidance in shipped copy in both locales. It flagged its own test file at first and was scoped to shipped code (`4c1090c`).
+- Layouts: standard, Janet left-step and Benfey spiral. Views: grid, topography relief and discovery timeline. The unmeasured lens and the counterfactual toggle grew beyond the PRD.
+- Sixteen consecutive accessibility fixes: native list semantics in place of invalid grid ARIA, a single tab stop, two-tone focus rings, rem-based type metrics, locale-aware landmark names, screen-reader announcements for lens changes.
+- Builds are byte-identical for the same datasets, including build-time OG image generation.
+- Next.js 14 static export on GitHub Pages. Four runtime dependencies (next, react, react-dom, zod). No charting, chemistry, animation or component library.
+- PRD milestones M0–M5 complete plus most of M6. Emission spectra from NIST data were cut (`04458f4`).
+- 157 tests in 6 files. About 8,000 lines of TypeScript, TSX and CSS. 82 commits from 20 to 26 August 2026.

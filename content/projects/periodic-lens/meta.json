@@ -1,7 +1,17 @@
 {
   "slug": "periodic-lens",
   "title": "Periodic Lens",
-  "tagline": "An interactive periodic table that explains why the table has its famous shape — by animating the physics rule that builds it — and shows which elements Indonesia digs out of the ground as a share of world production",
+  "tagline": "A periodic table that builds its own shape on screen and maps Indonesia's share of world mineral production",
+  "glance": {
+    "for": "Students and readers curious about chemistry",
+    "result": "Live in English and Indonesian, every figure cited to its source"
+  },
+  "skills": [
+    "Science communication",
+    "Data visualisation",
+    "Data validation",
+    "Accessibility"
+  ],
   "categoryTags": [
     "Personal Project",
     "Education",
@@ -22,27 +32,58 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/periodic-lens/en/table/?lens=category&layout=standard&view=grid",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/periodic-lens",
   "heroImage": "/images/projects/periodic-lens/hero.webp",
   "order": 39,
   "featured": false,
   "metrics": [
     {
+      "value": "118",
+      "label": "elements, each with cited properties"
+    },
+    {
       "value": "11",
-      "label": "Lenses over 118 elements — exactly one active at a time"
+      "label": "lenses, one active at a time"
     },
     {
       "value": "~20",
-      "label": "Elements where the rule predicts the wrong configuration"
+      "label": "elements where the filling rule is wrong"
     },
     {
-      "value": "157",
-      "label": "Tests, incl. both directions of the aufbau exception list"
-    },
-    {
-      "value": "4",
-      "label": "Runtime deps — no charting or chemistry library"
+      "value": "7",
+      "label": "Indonesian minerals with world production share"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Tabel periodik interaktif yang menyusun bentuknya sendiri di layar dan memetakan porsi Indonesia di produksi mineral dunia",
+    "glance": {
+      "for": "Siswa dan pembaca yang penasaran dengan kimia",
+      "result": "Live dalam bahasa Inggris dan Indonesia, setiap angka menyebut sumbernya"
+    },
+    "skills": [
+      "Komunikasi sains",
+      "Visualisasi data",
+      "Validasi data",
+      "Aksesibilitas"
+    ],
+    "metrics": [
+      {
+        "value": "118",
+        "label": "unsur, sifatnya lengkap dengan sumber"
+      },
+      {
+        "value": "11",
+        "label": "lensa, satu aktif sekali waktu"
+      },
+      {
+        "value": "~20",
+        "label": "unsur tempat aturan pengisian meleset"
+      },
+      {
+        "value": "7",
+        "label": "mineral Indonesia dengan porsi produksi dunia"
+      }
+    ]
+  }
 }

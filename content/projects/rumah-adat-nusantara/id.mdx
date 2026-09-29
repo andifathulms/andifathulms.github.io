@@ -2,30 +2,57 @@
 
 ## Masalahnya
 
-Kebanyakan orang Indonesia mengenal "rumah adat" sebagai daftar hafalan ujian sekolah: sebuah nama, sebuah provinsi, foto sebuah atap. Tak ada yang menjelaskan *mengapa* atapnya berbentuk begitu. Informasinya ada — di etnografi, volume survei provinsi — tetapi tersebar, kebanyakan tak diterjemahkan, dan ditulis untuk spesialis. Di sisi lain, jawaban digital yang biasa — model 3D fotorealistik — diam-diam justru memperburuk keadaan: render yang mulus menyatakan setiap dimensi dengan percaya diri penuh, termasuk yang tak pernah diukur siapa pun.
+Kebanyakan orang Indonesia mengenal rumah adat sebagai daftar hafalan untuk ujian sekolah: sebuah nama, sebuah provinsi, gambar sebuah atap. Tidak ada yang menjelaskan kenapa atapnya berbentuk seperti itu. Pengetahuannya ada di etnografi, buku survei provinsi, dan monografi arsitektur. Tapi semuanya tersebar, kebanyakan belum diterjemahkan, dan ditulis untuk para spesialis.
 
-Proyek ini menjawab keduanya. Ia menghasilkan tiap bangunan dari aturan budaya yang mengaturnya — pangkat sebuah rumah tangga, jumlah keluarga, ukuran tubuh — sehingga mengubah salah satu angka bermakna sosial itu secara nyata membangun ulang strukturnya. Dan di setiap layar, ia menyatakan dengan lugas seberapa banyak dari yang Anda lihat itu terdokumentasi versus tebakan berdasar milik penulisnya sendiri.
+Jawaban digital yang biasa, model 3D yang fotorealistik, diam-diam membuat keadaan lebih buruk. Render yang mulus menyatakan setiap ukuran dengan penuh keyakinan, termasuk ukuran yang tidak pernah diukur siapa pun.
 
-## Pendekatannya
+Saya membuat Rumah Adat Nusantara terutama untuk pembaca Indonesia yang penasaran, di ponsel, dalam bahasa Indonesia. Situs ini juga untuk mahasiswa dan pengajar arsitektur atau antropologi yang ingin melihat logika dan rujukannya, lalu memeriksanya.
 
-### Bangunannya adalah turunan dari aturan
+## Yang saya bangun
 
-`buildHouse(rules)` adalah fungsi murni dan deterministik: aturan masuk, daftar bagian dan sambungan keluar. Tak ada slider "kelengkungan atap" di mana pun dalam produk ini, karena bentuk atap adalah konsekuensi, bukan masukan — kontrolnya hanya menawarkan hal yang benar-benar akan dikatakan sebuah rumah tangga tentang dirinya sendiri: sebuah pangkat, jumlah ruang, hitungan upacara yang pernah digelar, jumlah keluarga di bawah satu bubungan. Setiap tiang, kasau, dan sambungan di seluruh 35 bangunan dihasilkan oleh aritmetika tulisan tangan — tanpa impor CAD, tanpa pustaka mesh, tanpa CSG, tanpa pustaka lofting.
+### Setiap bangunan dihitung dari aturan adatnya
 
-### Inti netral-tradisi, tumbuh hanya lewat ekstraksi
+Setiap bangunan dibangkitkan dari aturan yang mengaturnya: pangkat sebuah rumah tangga, jumlah keluarga di bawah satu atap, jumlah ruang, atau panjang lengan bawah pemiliknya. Ubah salah satu angka itu dan bangunannya tersusun ulang di depan mata. Tidak ada slider lengkung atap, karena bentuk atap adalah hasil. Kontrolnya hanya menawarkan hal yang akan disebut sebuah keluarga tentang dirinya sendiri. Setiap tiang, kasau, dan sambungan saya tulis sebagai hitungan biasa, tanpa impor CAD atau pustaka pemodelan.
 
-`lib/core/` menyimpan apa yang secara mekanis benar untuk bangunan apa pun — bagian, sambungan, urutan bangun, simetri, provenans — generik terhadap apa yang disebut tiap tradisi untuk hal-halnya, sehingga sebuah bagian Minangkabau tak bisa mengaku sebagai tahap konstruksi Toraja dan tetap lolos type-check. Tak ada yang pindah ke inti sampai setidaknya dua paket bangunan menulisnya secara independen; abstraksi yang dirancang dari satu contoh akan keluar berbentuk seperti contoh itu sambil tampak tervalidasi. Sebuah tes menggagalkan build jika inti bahkan menyebut nama satu tradisi, atau jika satu tradisi mengimpor tradisi lain.
+### Inti bersama hanya tumbuh dari pola yang berulang
 
-### Provenans adalah tipe, bukan metadata
+Inti bersama menyimpan hal yang berlaku untuk bangunan apa pun: bagian, sambungan, urutan pembangunan, simetri, dan sumber. Semua hal yang bersifat budaya tetap tinggal di bangunan pemiliknya. Tidak ada yang masuk ke inti sebelum dua bangunan membutuhkannya secara terpisah, karena abstraksi dari satu contoh akan ikut berbentuk seperti contoh itu. Saya memilih rumah gadang Minangkabau sebagai bangunan kedua justru karena ia akan membongkar asumsi: bubungannya membentang ke arah lain dan bentuknya tidak simetris. Tes menggagalkan build kalau inti menyebut nama sebuah tradisi.
 
-Setiap dimensi dibungkus dengan kelasnya — measured, canon, atau interpolated — dan kunci sumbernya. Antarmuka membacanya, sebuah rute khusus mendaftar tiap dimensi dengan kutipannya, dan angka dari dua bangunan tak pernah dirata-ratakan, karena angka rata-rata akan membiarkan bangunan yang tak disurvei bersembunyi di balik bangunan yang disurvei. Hari ini tak satu pun dari 35 bangunan yang `measured`, dan situs ini menyatakannya dengan lantang: satu invarian — model versus gambar terukur nyata — secara permanen melaporkan **skipped**, dan menggerakkannya adalah metrik kemajuan yang dinyatakan proyek ini, bukan sesuatu yang bisa digantikan oleh bangunan baru.
+### Setiap ukuran menyebut asal-usulnya
 
-### Setiap gambar adalah proyeksi dari model
+Setiap ukuran diberi label terukur, kanon, atau interpolasi, lengkap dengan sumbernya. Halaman sumber mendaftar setiap ukuran beserta rujukannya dan seberapa besar rumahnya berubah kalau angka itu digeser. Saya tidak pernah merata-ratakan angka dari dua bangunan, karena bangunan yang belum disurvei bisa bersembunyi di balik bangunan yang sudah disurvei. Setiap bangunan juga punya catatan kehati-hatian yang menyebut penyederhanaannya. Saat ini belum ada satu pun ukuran yang terukur, dan sebuah bilah di setiap layar menunjukkan pembagian itu.
 
-Siluet halaman muka, plat katalog, favicon, gambar ortografis yang diekspor, dan ke-70 kartu berbagi sosial semuanya dihitung dari bagian yang sama yang dijalankan suite invarian di atasnya, dan dibandingkan piksel-demi-piksel dengan generator di CI. Ilustrasi yang tak sesuai dengan model bukan bug di sini — itu mustahil secara struktural untuk dihasilkan. Pencahayaan bekerja dengan cara yang sama: setiap bangunan punya lokasi nyata (35 di antaranya, meliputi tiga zona waktu), dan matahari dalam adegan adalah matahari sungguhan di atas lokasi itu pada tanggal yang dipilih, termasuk hari tanpa-bayangan yang dihitung ketika mataharinya tepat di atas kepala.
+### Setiap gambar berasal dari modelnya
 
-## Hasil
+Siluet di halaman depan, pelat katalog, gambar teknik yang diekspor, dan ke-70 kartu berbagi dihitung dari bagian yang sama dengan yang diperiksa tes. CI membandingkannya piksel demi piksel dengan generatornya, jadi sebuah ilustrasi tidak mungkin berbeda dari modelnya. Mataharinya juga dihitung. Setiap bangunan punya lokasi nyata, dan adegannya menampilkan posisi matahari sebenarnya di atas lokasi itu pada tanggal yang dipilih.
 
-Live dan publik: 35 bangunan — 26 rumah, dua lumbung, tiga balai, sebuah istana, sebuah rumah perahu, sebuah makam batu, sebuah menara kremasi, sebuah kompleks sembilan bangunan, dan sepasang pusaka leluhur — masing-masing dengan generator, paket aturan, tabel sumber, dan suite invarian struktural sendiri yang dijalankan atas setidaknya lima kombinasi aturan, ditambah sebuah kontraconto yang sengaja dibangun untuk mematahkannya. Penulis tunggal, 210 commit, ~96.600 baris kode, 1.770 tes di 58 berkas, semuanya menjaga gerbang deploy: satu pemeriksaan struktural yang gagal menghentikan rilis sebelum ia dikirim.
+### Bangunan disandingkan, tidak pernah dilebur
 
-Tanpa backend, tanpa basis data, dan tanpa satu pun panggilan jaringan saat runtime — setiap tekstur digambar di canvas saat dimuat, dan situs ini bekerja dengan wifi mati. Satu-satunya pengecualian yang disengaja dari "aritmetika tulisan tangan" adalah three.js, dipakai hanya untuk merasterisasi mesh yang telah dihasilkan sendiri oleh proyek ini. Angka jujur yang paling dibanggakan proyek ini justru yang paling tak menyanjung: setiap dimensi di setiap bangunan saat ini `interpolated`, karena belum ada survei terukur yang terpasang — dan situs ini menampilkan celah itu di setiap layar alih-alih menyembunyikannya, menyebut gambar terukur nyata pertama sebagai pekerjaan bernilai tertinggi yang masih menanti.
+Halaman perbandingan menaruh dua bangunan di satu garis tanah dengan satu skala. Saya tidak melebur satu tradisi menjadi tradisi lain, karena itu menyiratkan kesinambungan yang tidak ada. Gerakan dibatasi pada lima animasi yang masing-masing menunjukkan satu mekanisme, seperti rangka yang berdiri sambungan demi sambungan atau hujan yang mengalir dari atap. Tidak ada yang berputar sekadar hiasan.
+
+## Hasilnya
+
+Rumah Adat Nusantara sudah live dan terbuka untuk umum dalam bahasa Indonesia dan Inggris. Isinya 35 bangunan: 26 rumah, dua lumbung, tiga balai, sebuah istana, sebuah rumah perahu, sebuah makam batu, sebuah menara kremasi, sebuah kompleks sembilan bangunan, dan sepasang rumah leluhur. Lokasinya membentang di tiga zona waktu. Setiap bangunan punya empat halaman, total 280, dan pemeriksaan strukturnya sendiri yang dijalankan pada minimal lima kombinasi aturan. Pemeriksaan yang gagal menghentikan rilis. Situs ini tidak punya backend dan tidak memanggil jaringan, jadi tetap jalan tanpa wifi. Saya membangunnya dalam delapan hari, dari 25 Agustus sampai 1 September 2026.
+
+## Langkah berikutnya
+
+- Memasukkan gambar survei terukur yang pertama. Satu pemeriksaan, model dibandingkan dengan gambar terukur sungguhan, akan terus melaporkan "skipped" sampai saat itu. Menggeser status itu adalah ukuran kemajuan yang dinyatakan proyek ini.
+- Memperluas ekspor gambar dan penurunan langkah demi langkah ke bangunan selain yang pertama.
+- Membuat ukiran menjadi bentuk 3D, yang saat ini masih digambar di canvas.
+
+## Di balik layar
+
+- `buildHouse(rules)` murni dan deterministik: aturan masuk, bagian dan sambungan keluar. `lib/` tidak boleh menyentuh three.js, DOM, `Math.random`, atau jam; `components/` tidak membangkitkan apa pun; lapisan aplikasi tidak tahu bangunan mana yang dipegangnya.
+- `lib/core/` (~3.200 baris) generik terhadap kosakata setiap tradisi, sehingga bagian Minangkabau tidak bisa mengklaim tahap konstruksi Toraja dan tetap lolos type-check. Tes gagal kalau inti menyebut nama tradisi atau satu tradisi mengimpor tradisi lain.
+- Kelas provenance: `measured`, `canon`, dan `interpolated`. `checkAgainstSurvey` selalu melaporkan skipped. Audit ukuran yang di-hardcode justru menaikkan porsi interpolasi, dan angka yang lebih tinggi itulah yang dirilis.
+- Contoh: tongkonan Toraja dengan 155 bagian dan 33 sambungan, rumah bubungan tinggi Banjar dengan 318 bagian, rumah Arfak yang 168 kakinya masing-masing miring menurut hash posisi gridnya.
+- Rute per bangunan: `/bangun` (generator), `/rakit` (pendirian rangka), `/baca` (matahari, hujan, potongan, rencana tapak), `/sumber` (rujukan dan sensitivitas). `/banding` membandingkan dua bangunan.
+- Catatan kehati-hatian setiap bangunan menyebut batasannya. Catatan untuk sudung Orang Rimba, misalnya, menyatakan bahwa Orang Rimba adalah orang-orang yang masih hidup di hutan yang terus menyusut, dan halaman ini bukan catatan tentang masa lalu.
+- Sumbernya antara lain Waterson, The Living House (1990), dan buku-buku survei arsitektur Departemen P&K. Kalau kosakata ukiran milik para pengukir tertentu, paket bangunannya tidak menampilkan ukiran daripada mengarang anggota kosakata itu.
+- URL: path adalah bangunannya, query string adalah rumah itu dalam nama parameter tradisinya sendiri, fragment adalah kamera, tanggal, dan jam. Nama lama Tongkonan dan Pasak masih bisa dibuka dan dialihkan.
+- Posisi matahari NOAA diimplementasikan sendiri dan divalidasi dengan nilai almanak. Lokasi membentang dari 5,6° LU (Banda Aceh) sampai 10,5° LS (Seba), 95,3° BT sampai 140,7° BT (Jayapura).
+- three.js adalah satu-satunya pengecualian yang disengaja, hanya untuk merasterisasi mesh yang dibangkitkan proyek ini. Rasteriser PNG dan alfabet goresan buatan sendiri menghasilkan 70 kartu berbagi. Garis pantai Natural Earth disimpan di repo, tidak pernah diambil saat runtime.
+- Pelajaran: build yang hijau tetap merilis satu rute yang error saat dibuka (material dengan kunci string), dan satu atap lolos keenam belas pemeriksaan padahal kelihatan salah. Keduanya melahirkan tes umum, termasuk `checkRoofFollowsSection`. Empat pemeriksaan pernah hanya mengulang input-nya dan dibangun ulang dari angka yang independen.
+- Dynamic import per bangunan memangkas first load dari 579 KB menjadi ~262 KB. Ambient occlusion masih berupa bidang kontak radial-gradient.
+- Empat dependensi runtime (next, react, react-dom, three). 365 file HTML hasil export.
+- 1.770 tes di 58 file. ~96.600 baris, ~65.200 di antaranya untuk 35 paket aturan. 210 commit, 61 di hari tersibuk.

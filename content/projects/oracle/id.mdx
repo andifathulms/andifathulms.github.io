@@ -2,30 +2,52 @@
 
 ## Masalahnya
 
-Kebanyakan orang, termasuk banyak insinyur, percaya "kami mengenkripsinya dengan AES" berarti sebuah pesan aman. Tidak. Sebuah serangan nyata dan terdokumentasi dengan baik — padding oracle — memulihkan seluruh pesan terenkripsi tanpa pernah mematahkan cipher-nya sendiri, dengan mengeksploitasi fakta bahwa sebuah server akan memberi tahu apakah padding sebuah pesan valid. Satu bit umpan balik itu, diulang sekitar dua ribu kali, cukup untuk merekonstruksi seluruh plaintext-nya.
+Banyak orang, termasuk engineer, percaya bahwa "sudah dienkripsi dengan AES" berarti pesannya aman. Kenyataannya tidak begitu. Serangan yang sudah lama didokumentasikan, padding oracle, bisa memulihkan seluruh pesan terenkripsi tanpa membobol cipher-nya. Serangan ini hanya butuh server yang memberi tahu apakah padding sebuah pesan valid. Satu jawaban ya atau tidak, ditanyakan sekitar 2.000 kali per blok, sudah cukup untuk menyusun ulang teksnya.
 
-Masalah yang diatasi ini adalah soal keyakinan, bukan informasi: serangan ini sudah ditulis di lusinan tempat, dan tulisan-tulisan itu tak meyakinkan siapa pun, karena satu halaman aljabar tak membuat pembaca merasa AES mereka jadi tak relevan. Visualisasi serangan ini yang sudah ada punya dua masalah berulang: banyak yang mengandung bug implementasi sungguhan — mereka melewati sebuah pemeriksaan false-positive halus yang sebenarnya dibutuhkan serangannya — dan kebanyakan diam-diam menyimpan jawabannya dalam sebuah variabel lalu menganimasikannya kembali ke penonton, yang membuatnya jadi trik sulap alih-alih demonstrasi. Aplikasi ini sama sekali tak punya kode jaringan: sebuah tes memeriksa bundel yang di-build dan menggagalkannya jika API jaringan apa pun muncul di mana pun di dalamnya, sehingga ketidakmampuannya menyerang server sungguhan adalah properti dari build itu sendiri, bukan janji dalam README.
+Penjelasan tentang serangan ini ada di puluhan tempat, tapi jarang mengubah keyakinan orang. Satu halaman aljabar tidak membuat pembaca merasa bahwa AES-nya tidak relevan. Kebanyakan animasi yang ada juga melewatkan pengecekan positif palsu yang dibutuhkan serangan ini. Banyak pula yang diam-diam menyimpan jawabannya di sebuah variabel lalu memutarnya kembali.
 
-## Pendekatannya
+Saya membuat Oracle untuk engineer yang perlu memahami kenapa enkripsi terautentikasi itu ada, untuk pengajar keamanan yang butuh demo langsung, dan untuk siapa pun yang ingin menilai apakah saya bisa mengimplementasikan kriptografi dengan benar.
 
-### Rahasianya disegel di balik closure, dan antarmukanya benar-benar tak bisa melihatnya
+Ini demo edukasi, bukan alat serangan. Aplikasinya tidak punya kode jaringan sama sekali. Sebuah tes memindai bundle hasil build dan menggagalkan build kalau ada API jaringan di dalamnya, jadi ketidakmampuannya menyerang server sungguhan adalah sifat dari build itu sendiri.
 
-Ini mekanisme integritas yang menopang seluruh aplikasi ini. Satu modul menghasilkan kunci, plaintext, dan initialization vector, mengenkripsi, lalu hanya menyerahkan ke atas ciphertext, IV, sebuah fungsi oracle satu-boolean, dan sebuah penghitung panggilan — kunci dan plaintext-nya hidup sepenuhnya di dalam closure dan tak pernah diekspor ke mana pun yang bisa dijangkau antarmuka. Jadi ketika sebuah karakter yang dipulihkan muncul di layar, ia muncul karena serangannya benar-benar menghasilkannya; tak ada jalur kode yang membuat antarmuka bisa sekadar diberi jawabannya. Ini ditegakkan dua cara: pada level tipe, objek yang diserahkan ke setiap tampilan tak punya kolom yang mampu menampung kunci atau plaintext, dan saat runtime, sebuah tes menyimpan plaintext yang diketahui dalam closure-nya sendiri, menjalankan serangan sungguhan terhadapnya, dan menegaskan byte yang dipulihkan cocok — membuktikan aplikasi ini tak curang alih-alih sekadar mengklaimnya.
+## Yang saya bangun
 
-### Oracle-nya mengembalikan tepat satu boolean, tak ada lagi
+### Rahasianya saya kunci di tempat yang tak terjangkau layar
 
-Tanda tangan tipenya menerima sebuah ciphertext dan mengembalikan boolean polos — tanpa detail galat, tanpa informasi waktu, tanpa indikasi byte mana yang gagal. Tipe kembalian yang lebih kaya akan membiarkan serangannya curang dan akan salah merepresentasikan sinyal sungguhan yang didapat penyerang di dunia nyata. Serangannya harus bekerja dari satu bit karena itulah kebenaran dari serangan sungguhan.
+Satu modul membuat kunci, pesan, dan blok awal, mengenkripsinya, lalu hanya menyerahkan empat hal: teks terenkripsi, blok awal, oracle ya-atau-tidak, dan penghitung panggilan. Kunci dan pesannya tidak pernah keluar dari modul itu. Jadi saat huruf yang dipulihkan muncul di layar, huruf itu memang hasil serangan. Sebuah tes menyimpan pesan yang sudah diketahui di ruang tertutupnya sendiri, menjalankan serangan asli, lalu mencocokkan byte hasilnya. Aplikasi ini membuktikan bahwa ia tidak curang.
 
-### Disambiguasi false-positive-nya diimplementasikan, dianimasikan, dan terbukti perlu
+### Oracle hanya menjawab satu bit
 
-Saat memulihkan byte terakhir sebuah blok, serangan naif bisa mengenai false positive: jika plaintext sungguhan kebetulan sudah berakhir dengan byte padding tertentu, sebuah pemalsuan yang direkayasa juga bisa terlihat seperti padding valid secara kebetulan, dan implementasi naif diam-diam mencatat byte yang salah lalu merusak setiap byte yang dipulihkan setelahnya. Perbaikan yang benar adalah mengganggu byte sebelumnya dan bertanya ulang ke oracle-nya. Aplikasi ini mengimplementasikan pemeriksaan itu, menganimasikannya sebagai ketukan yang terlihat sendiri dalam pemulihannya, membiarkan pembaca mematikannya dan menyaksikan pemulihannya rusak terlihat, dan sebuah tes khusus menegaskan jalur naifnya sungguh gagal pada plaintext yang dikonstruksi untuk memicunya — sehingga perbaikannya terbukti perlu alih-alih sekadar diasumsikan ide bagus.
+Oracle menerima pesan terenkripsi dan mengembalikan benar atau salah. Tidak ada detail error, tidak ada info waktu, tidak ada petunjuk byte mana yang gagal. Jawaban yang lebih kaya akan membuat serangannya curang dan tidak mencerminkan apa yang dilihat penyerang sungguhan. Jadi serangannya bekerja dari satu bit, sama seperti aslinya.
 
-### Jalankan serangannya sekali, lalu putar ulang jejaknya — jangan pernah animasikan secara real-time
+### Pengecekan positif palsu saya bangun, dan pembaca boleh mematikannya
 
-Mesin serangannya murni, sinkron, dan tak mengimpor apa pun — tanpa React, tanpa DOM, bahkan tanpa jam. Ia menjalankan seluruh serangan dalam milidetik di muka dan menghasilkan jejak terstruktur yang mencatat setiap byte kandidat yang dicoba, setiap putusan oracle, setiap probe disambiguasi, dan resolusi setiap byte dengan aritmetika lengkapnya. Antarmukanya tak pernah menjalankan ulang serangannya; ia hanya menggambar sebuah posisi dalam jejak itu. Ini membuat penggeseran maju-mundur lewat pemulihannya gratis, memisahkan sepenuhnya kecepatan animasi dari komputasi, dan membuat momen spesifik apa pun dalam pemulihannya bisa dibagikan sebagai URL.
+Saat memulihkan byte terakhir sebuah blok, serangan yang naif bisa menerima kecocokan kebetulan dan mencatat byte yang salah. Semua byte sesudahnya ikut rusak. Perbaikannya adalah mengubah byte sebelumnya lalu bertanya lagi. Saya mengimplementasikannya dan menganimasikannya sebagai langkah tersendiri. Pembaca bisa mematikannya dan melihat pemulihannya rusak. Sebuah tes memastikan versi naif memang gagal pada pesan yang dibuat untuk memicunya.
 
-## Hasil
+### Serangan dijalankan sekali, lalu rekamannya diputar ulang
 
-Live dan publik: sebuah tumpukan byte empat baris adalah tampilan utama aplikasi ini — apa yang dikirim penyerang, padding apa yang sebenarnya dinilai oracle, blok cipher perantara, dan plaintext-nya — dengan baris plaintext dimulai sebagai kekosongan sungguhan lalu terisi dari kanan ke kiri, satu byte emas setiap kalinya, seiring serangannya benar-benar memulihkan tiap satu. Sebuah sakelar menukar AES-128 tulisan tangan sungguhan dengan cipher mainan yang dilabeli jelas, dan serangan yang sama memulihkan plaintext yang sama dengan biaya yang sama pada keduanya — mendemonstrasikan alih-alih sekadar menyatakan bahwa cipher spesifiknya tak relevan bagi serangan ini. Menyalakan encrypt-then-MAC membuat setiap pemalsuan yang direkayasa gagal autentikasi sebelum pernah didekripsi, sehingga oracle-nya mengembalikan putusan yang identik untuk setiap pertanyaan dan pemulihannya terlihat kelaparan — tak ada emas yang pernah muncul — yang justru untuk itulah enkripsi terautentikasi ada, ditunjukkan alih-alih dideskripsikan dalam prosa.
+Mesin serangannya tidak memuat kode antarmuka dan tidak memakai jam. Seluruh serangan selesai dalam hitungan milidetik dan merekam setiap tebakan, setiap putusan oracle, setiap pengecekan ulang, dan hitungan di balik setiap byte. Layar hanya menampilkan satu titik di rekaman itu. Menggeser maju-mundur tidak memakan biaya, kecepatan animasi lepas dari perhitungan, dan setiap momen bisa dibagikan sebagai tautan.
 
-Penulis tunggal, 65 commit dalam 7 hari, sekitar 3.560 baris TypeScript. Dua dependensi runtime — React dan renderer DOM-nya — dengan AES-128, SHA-256, HMAC, mode cipher CBC, dan padding PKCS7 semuanya diimplementasikan dari nol alih-alih diambil dari pustaka kriptografi mana pun. Sebuah serangan penuh berbiaya sekitar 2.000 panggilan oracle per blok, cocok dengan rata-rata teoretisnya dan ditegaskan oleh tes. Aplikasi ini juga mengirim mode bit-flipping yang mendemonstrasikan kelenturan (malleability) dasar yang sama dari arah lain: menulis ulang `user=guest` menjadi `user=admin` dalam pesan terenkripsi, tanpa pernah memegang kuncinya.
+### Kriptografinya saya tulis sendiri
+
+AES-128, SHA-256, HMAC, mode CBC, dan padding PKCS7 semuanya kode saya sendiri, dicek dengan vektor uji resmi. Dependensi runtime-nya hanya React dan renderer DOM-nya. Rencana awal memakai modul AES yang sudah dikompilasi. Saya membatalkannya karena kode tulisan sendiri tidak butuh file biner untuk diaudit dan tidak butuh pengecualian dari aturan tanpa jaringan.
+
+## Hasilnya
+
+Oracle sudah live dan terbuka untuk umum. Tampilan utamanya adalah tumpukan byte empat baris: yang dikirim penyerang, padding yang dinilai oracle, blok tengah, dan teks hasil pemulihan yang terisi dari kanan ke kiri dengan warna emas. Sebuah sakelar menukar AES asli dengan cipher mainan yang diberi label jelas, dan serangannya memulihkan teks yang sama dengan biaya yang sama. Kalau encrypt-then-MAC dinyalakan, setiap pesan palsu gagal sebelum didekripsi, sehingga warna emas tidak pernah muncul.
+
+Mode kedua mengubah "user=guest" menjadi "user=admin" di pesan terenkripsi tanpa kunci. Pemulihan butuh sekitar 2.000 panggilan oracle per blok, sesuai rata-rata teoretisnya. Saya membangunnya dalam tujuh hari pada September 2026.
+
+## Di balik layar
+
+- `src/engine/secret.ts` mengembalikan `AttackTarget` (ciphertext, IV, oracle, penghitung panggilan). Tipe ini tidak punya field `key` atau `plaintext`, dan `index.ts` di engine hanya mengekspor permukaan untuk serangan. `tests/view-blindness.test.ts` menjalankan serangan terhadap plaintext yang disimpan di closure milik tes.
+- `type Oracle = (ciphertext: Uint8Array) => boolean`.
+- Disambiguasi: kalau plaintext berakhir dengan `0x02`, `… 02 02` hasil rekayasa juga padding yang valid. Serangan mengubah byte kedua dari belakang lalu bertanya ulang. `tests/disambiguation.test.ts` memastikan jalur naif gagal pada plaintext yang berakhir `0x02`. Sakelarnya `?dis=0`.
+- Engine-nya murni dan sinkron, tanpa import apa pun, bahkan `Date`. PRNG dengan seed (`src/engine/rng.ts`) membuat setiap sesi bisa diulang dari URL; posisi dari tautan lama dijepit ke timeline yang dibangun.
+- AES-128 sekitar 230 baris (`src/engine/aes.ts`), dikunci dengan vektor uji FIPS-197, sekitar 7,5 KB kode sumber. PRD awalnya meminta AES teraudit yang dikompilasi ke WebAssembly.
+- CI menjalankan typecheck, lint, test, build, lalu grep yang gagal kalau `fetch`, `XMLHttpRequest`, `WebSocket`, atau `sendBeacon` muncul di bundle, baru kemudian deploy ke GitHub Pages.
+- Tumpukan awalnya tiga baris dan mendapat baris keempat (padding yang sebenarnya dinilai oracle) di tengah pengerjaan. Grafik batang di panel cipher dibuang dan diganti dua angka.
+- Perbaikan aksesibilitas: pintasan Space memblokir Space di setiap tombol (WCAG 2.1.1); tablist tanpa tabpanel diganti tombol dengan `aria-pressed` (WCAG 4.1.2); pintasan satu huruf `f`/`r` dihapus (WCAG 2.1.4). Satu-satunya animasi SMIL, yang lolos dari pengaturan reduced motion, dibuang. Kontras minimal 4,5:1, ekspor hex/tabel untuk setiap byte yang dipulihkan.
+- State memakai React context dan reducer buatan sendiri; animasi satu loop `requestAnimationFrame`; CSS polos (~2.080 baris).
+- Sekitar 128 panggilan oracle per byte. Ukuran halaman ~73 KB gzip dari anggaran 250 KB.
+- 43 tes di 11 file. ~3.560 baris TypeScript. 65 commit di `main` (68 di semua ref), 5 sampai 11 September 2026.

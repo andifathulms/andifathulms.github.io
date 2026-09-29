@@ -2,30 +2,57 @@
 
 ## The problem
 
-Most Indonesians meet "rumah adat" — traditional houses — as a list to memorize for a school exam: a name, a province, a photo of a roof. Nothing in that explains *why* the roof is that shape. The information exists, in ethnographies and provincial survey volumes, but it's scattered, mostly untranslated, and written for specialists. At the same time, the usual digital answer — a photorealistic 3D model — quietly makes things worse: a smooth render states every dimension with total confidence, including the ones nobody has ever measured.
+Most Indonesians meet rumah adat, the traditional houses, as a list to memorise for a school exam: a name, a province, a picture of a roof. Nothing in that explains why the roof has that shape. The knowledge exists in ethnographies, provincial survey volumes and architectural monographs. But it is scattered, mostly untranslated, and written for specialists.
 
-This project answers both. It generates each building from the cultural rules that govern it — a household's rank, a family count, a body measurement — so changing one of those socially meaningful numbers visibly rebuilds the structure. And on every screen, it states plainly how much of what you're looking at is documented versus the author's own informed guess.
+The usual digital answer, a photorealistic 3D model, makes this worse in a quiet way. A smooth render states every dimension with full confidence, including the ones nobody has ever measured.
 
-## The approach
+I built Rumah Adat Nusantara for a curious Indonesian reader on a phone, in Indonesian first. It also serves architecture and anthropology students and teachers who want the logic and the citations, and will check them.
 
-### The building is downstream of the rules
+## What I built
 
-`buildHouse(rules)` is a pure, deterministic function: rules in, a list of parts and joints out. There is no "roof curvature" slider anywhere in the product, because a roof shape is a consequence, not an input — the controls only offer things a household would actually say about itself: a rank, a room count, a tally of ceremonies held, the number of families under one ridge. Every post, rafter, and joint across all 35 buildings is emitted by hand-written arithmetic — no CAD import, no mesh library, no CSG, no lofting library.
+### Each building is computed from its cultural rules
 
-### A tradition-neutral core, grown only by extraction
+Every building is generated from the rules that govern it: a household's rank, the number of families under one roof, a room count, the length of the owner's forearm. Change one of those numbers and the structure rebuilds in front of you. There is no roof-curve slider, because a roof shape is a result. The controls only offer things a household would say about itself. I wrote every post, rafter and joint as plain arithmetic, with no CAD imports or modelling libraries.
 
-`lib/core/` holds what is mechanically true of any built thing — parts, joints, build order, symmetry, provenance — generic over what each tradition calls things, so a Minangkabau part can't claim a Toraja construction stage and still type-check. Nothing moves into the core until at least two building packs have written it independently; an abstraction designed from one example comes out shaped like that example while looking validated. A test fails the build if the core so much as names a tradition, or if one tradition imports another.
+### I grew the shared core only from repeated patterns
 
-### Provenance is a type, not metadata
+A shared core holds what is true of any building: parts, joints, build order, symmetry and sources. Everything cultural stays with the building it belongs to. Nothing moves into the core until two buildings have needed it independently, because an abstraction built from one example takes that example's shape. I chose the Minangkabau rumah gadang as the second building because it would break things: its ridge runs the other way and it is asymmetric. Tests fail the build if the core names a tradition.
 
-Every dimension is wrapped with a class — measured, canon, or interpolated — and a source key. The UI reads it, a dedicated route lists every dimension with its citation, and figures from two buildings are never averaged, because an averaged number would let an unsurveyed building hide behind a surveyed one. Today nothing in any of the 35 buildings is `measured`, and the site says so loudly: one invariant — model versus a real measured drawing — permanently reports **skipped**, and moving it is the project's stated progress metric, not something a new building can substitute for.
+### Every dimension says where it came from
 
-### Every picture is a projection of the model
+Each dimension is labelled measured, canon or interpolated, with a source. A source page lists every dimension with its citation and how much the house changes if that number moves. I never average figures across two buildings, because that would let an unsurveyed building hide behind a surveyed one. Each building also has a caution that states its simplifications. Today no dimension in any building is measured, and a bar on every screen shows that split.
 
-Landing-page silhouettes, catalogue plates, the favicon, exported orthographic drawings, and all 70 social share cards are computed from the same parts the invariant suite runs over, and pixel-compared against the generator in CI. An illustration that disagreed with the model isn't a bug here — it's structurally impossible to produce. Lighting works the same way: each building has a real site (35 of them, spanning three time zones), and the sun in the scene is the actual sun over that site on the chosen date, including the computed zero-shadow day where it passes directly overhead.
+### Every picture comes from the model
 
-## Outcome
+Landing silhouettes, catalogue plates, exported drawings and all 70 share cards are computed from the same parts the tests check. CI compares them pixel by pixel against the generator, so an illustration can't disagree with the model. The sun is computed too. Each building has its actual site, and the scene shows the actual sun over that site on the chosen date.
 
-Live and public: 35 buildings — 26 houses, two granaries, three halls, a palace, a houseboat, a stone tomb, a cremation tower, a nine-building compound, and a pair of ancestor shrines — each with its own generator, rule pack, source table, and structural invariant suite run over at least five rule combinations, plus a deliberate counterexample built specifically to break it. Sole author, 210 commits, ~96,600 lines of code, 1,770 tests across 58 files, all gating the deploy: a failing structural check stops the release before it ships.
+### Buildings sit side by side and never morph
 
-No backend, no database, and no runtime network call anywhere — every texture draws on a canvas at load, and the site works with the wifi off. The one deliberate exception to "hand-written arithmetic" is three.js, used only to rasterize meshes the project already generated itself. The honest number the project is proudest of is also its least flattering: every dimension in every building is currently `interpolated`, because no measured survey has been wired in yet — and the site displays that gap on every screen rather than hiding it, naming the first real measured drawing as the highest-value work still ahead of it.
+A comparison page places any two buildings on one ground line at one scale. I don't morph one tradition into another, because that would assert a continuity that doesn't exist. Motion is limited to five animations that each show a mechanism, such as the frame going up joint by joint or rain running off the roof. Nothing spins for decoration.
+
+## Result
+
+Rumah Adat Nusantara is live and public in Indonesian and English. It has 35 buildings: 26 houses, two granaries, three halls, a palace, a houseboat, a stone tomb, a cremation tower, a nine-building compound and a pair of ancestor shrines. Their sites span three time zones. Each building has four pages, 280 in total, and its own structural checks run over at least five rule combinations. A failing check stops the release. The site has no backend and makes no network calls, so it works with wifi off. I built it in eight days, from 25 August to 1 September 2026.
+
+## What I'd do next
+
+- Wire in the first measured survey drawing. One check, the model against a surveyed drawing, reports "skipped" until then. Moving it is the project's stated measure of progress.
+- Extend the drawing export and step-by-step derivation beyond the first building.
+- Extrude the carving, which is drawn on a canvas today.
+
+## Under the hood
+
+- `buildHouse(rules)` is pure and deterministic: rules in, parts and joints out. `lib/` may not touch three.js, the DOM, `Math.random` or the clock; `components/` generates nothing; the app layer doesn't know which building it holds.
+- `lib/core/` (~3,200 lines) is generic over each tradition's vocabulary, so a Minangkabau part can't claim a Toraja construction stage and still type-check. Tests fail if the core names a tradition or one tradition imports another.
+- Provenance classes are `measured`, `canon` and `interpolated`. `checkAgainstSurvey` permanently reports skipped. An audit of hardcoded dimensions raised the interpolated share, and the higher number shipped.
+- Examples: the Toraja tongkonan at 155 parts and 33 joints, the Banjar rumah bubungan tinggi at 318 parts, the Arfak house whose 168 legs each lean by a hash of their grid position.
+- Routes per building: `/bangun` (generator), `/rakit` (frame-raising), `/baca` (sun, rain, section, site plan), `/sumber` (citations and sensitivity). `/banding` compares two buildings.
+- Each building's caution states its limits. The Orang Rimba sudung's, for example, says the Orang Rimba are living people in a forest that is shrinking, and this is not a record of the past.
+- Sources include Waterson, The Living House (1990) and the Departemen P&K architecture survey volumes. Where a carving vocabulary belongs to particular carvers, the pack shows none instead of inventing members of it.
+- URL: the path is the building, the query string is that house in the tradition's own parameter names, the fragment is camera, date and time. The old names Tongkonan and Pasak still resolve and redirect.
+- NOAA solar position implemented by hand and validated against almanac values. Sites span 5.6° N (Banda Aceh) to 10.5° S (Seba), 95.3° E to 140.7° E (Jayapura).
+- three.js is the one deliberate exception, used only to rasterise meshes the project generated. A hand-written PNG rasteriser and stroke alphabet produce the 70 share cards. Natural Earth coastline is vendored, never fetched.
+- Lessons: a green build still shipped a route that threw on load (string-keyed materials), and a roof passed all sixteen checks while looking wrong. Both led to general tests, including `checkRoofFollowsSection`. Four checks once only restated their input and were rebuilt on independent numbers.
+- Dynamic imports per building cut first load from 579 KB to ~262 KB. Ambient occlusion is still a radial-gradient contact plane.
+- Four runtime dependencies (next, react, react-dom, three). 365 exported HTML files.
+- 1,770 tests in 58 files. ~96,600 lines, of which the 35 rule packs are ~65,200. 210 commits, 61 on the busiest day.
