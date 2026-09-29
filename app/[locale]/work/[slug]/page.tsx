@@ -14,11 +14,14 @@ import {
   extractHeadings,
   readingTimeMinutes,
   slugify,
+  splitUnderTheHood,
+  trackOf,
 } from '@/lib/content';
 import { routing } from '@/i18n/routing';
 import { routeMetadata } from '@/lib/site';
-import QuickFactsStrip from '@/components/QuickFactsStrip';
+import AtAGlance from '@/components/AtAGlance';
 import PrintButton from '@/components/PrintButton';
+import TrackMark from '@/components/TrackMark';
 import MetricsStrip from '@/components/MetricsStrip';
 import ReadingProgress from '@/components/ReadingProgress';
 import CaseStudyToc from '@/components/CaseStudyToc';
@@ -90,43 +93,49 @@ export default async function CaseStudyPage({
 
   const content = getProjectContent(slug, locale) ?? getProjectContent(slug, 'en');
   if (!content) notFound();
+  const { main, hood } = splitUnderTheHood(content);
 
   const t = await getTranslations({ locale, namespace: 'case_study' });
   const ta = await getTranslations({ locale, namespace: 'a11y' });
+  const tw = await getTranslations({ locale, namespace: 'work' });
+  const tn = await getTranslations({ locale, namespace: 'nav' });
   const { prev, next } = getAdjacentProjects(slug, locale);
   const screenshots = getProjectScreenshots(slug);
-  const toc = extractHeadings(content);
-  const readingMinutes = readingTimeMinutes(content);
+  const track = trackOf(project);
+  const HOOD_ID = 'under-the-hood';
+  const toc = [
+    ...extractHeadings(main),
+    ...(hood ? [{ level: 2 as const, text: t('under_the_hood'), slug: HOOD_ID }] : []),
+  ];
+  // Reading time covers what everyone reads; the collapsed section is extra.
+  const readingMinutes = readingTimeMinutes(main);
+  const indexHref = track === 'government' ? '/work' : '/lab';
+  const heroSrc = project.heroImage || screenshots[0]?.src;
 
   return (
     <article className="pt-page-top pb-8">
       <ReadingProgress />
-      {/* Hero banner */}
-      {/* The banner used to be a fixed aspect-ratio box with the title block
-          absolutely positioned inside it and overflow-hidden. At 320px, or at
-          200% zoom, the icon + tags + h1 + tagline needed more height than the
-          box had, and the excess was clipped (1.4.4 / 1.4.10). The content is
-          in normal flow now and sets the height; the image sits behind it, so
-          the banner can grow instead of cropping the title. */}
-      <div className="relative min-h-[12rem] md:min-h-[16rem] bg-navy/50 overflow-hidden">
-        {project.heroImage && (
-          <Image
-            src={project.heroImage}
-            alt=""
-            aria-hidden="true"
-            fill
-            className="object-cover object-top opacity-40"
-            priority
-          />
-        )}
-        {/* Flat scrim. PRD §4 and CLAUDE.md both commit to "no gradients —
-            flat surfaces", and this banner held the only bg-gradient-* in the
-            repo. A single opacity darkens the whole image evenly, which is
-            what the title needed anyway: the previous gradient was weakest
-            exactly where the screenshot's own headline sits. */}
-        <div className="absolute inset-0 bg-navy/80" />
-        <div className="relative flex min-h-[12rem] md:min-h-[16rem] flex-col justify-end px-gutter pt-10 pb-10">
-          <div className="max-w-page mx-auto w-full">
+      <div className="mx-auto max-w-page px-gutter">
+        {/* Title block. The old banner put the screenshot behind an 80% navy
+            scrim, which hid the one thing that proves the work exists; the
+            screenshot now sits in full view beside the at-a-glance panel. */}
+        <nav aria-label="Breadcrumb" className="mb-6 flex items-center justify-between gap-4 text-sm">
+          <Link
+            href={indexHref}
+            className="group inline-flex min-h-touch items-center gap-2 text-text-muted transition-colors hover:text-cream"
+          >
+            <span aria-hidden="true" className="transition-transform group-hover:-translate-x-0.5">←</span>
+            <TrackMark track={track} />
+            {track === 'government' ? tn('work') : tn('lab')}
+            {project.problemShape && (
+              <span className="text-text-subtle">/ {tw(`type_${project.problemShape}`)}</span>
+            )}
+          </Link>
+          <span className="font-mono text-xs text-text-subtle">{t('min_read', { min: readingMinutes })}</span>
+        </nav>
+
+        <header className="mb-10 max-w-4xl">
+          <h1 className="mb-4 flex items-center gap-4 font-heading text-h1 font-normal tracking-[-0.025em] text-cream">
             {project.icon && (
               <Image
                 src={project.icon}
@@ -134,47 +143,35 @@ export default async function CaseStudyPage({
                 aria-hidden="true"
                 width={56}
                 height={56}
-                className="mb-4 h-12 w-12 md:h-14 md:w-14 rounded-lg border border-edge object-cover"
+                className="h-12 w-12 flex-shrink-0 rounded-xl border border-line object-cover md:h-14 md:w-14"
               />
             )}
-            {/* Category tags */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {project.categoryTags.map((tag) => (
-                <span
-                  key={tag}
-                  className="font-mono text-meta text-accent-2 border border-line-muted px-2 py-0.5 rounded"
-                >
-                  {tag}
-                </span>
-              ))}
+            {project.title}
+          </h1>
+          <p className="max-w-3xl text-lead text-text-muted">{project.tagline}</p>
+        </header>
+
+        <div className="mb-6 grid items-start gap-6 lg:grid-cols-[1.35fr_1fr]">
+          {heroSrc && (
+            <div className="relative aspect-[16/10] overflow-hidden rounded-media border border-line-strong bg-deck">
+              <Image
+                src={heroSrc}
+                alt={t('screenshots')}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 660px"
+                className="object-cover object-top"
+              />
             </div>
-            <h1 className="font-heading text-h1 font-normal text-cream mb-2">
-              {project.title}
-            </h1>
-            <p className="text-text-muted text-lead">{project.tagline}</p>
+          )}
+          <AtAGlance project={project} />
+        </div>
+
+        {project.metrics && project.metrics.length > 0 && (
+          <div className="mb-16">
+            <MetricsStrip metrics={project.metrics} label={t('results_label')} />
           </div>
-        </div>
-      </div>
-
-      <div className="max-w-page mx-auto px-gutter">
-        {/* Back to work index + reading time */}
-        <div className="mt-6 flex items-center justify-between gap-4">
-          <Link
-            href="/work"
-            className="group inline-flex items-center gap-1.5 font-mono text-meta text-text-subtle hover:text-gold transition-colors"
-          >
-            <span className="transition-transform group-hover:-translate-x-0.5">←</span>
-            {t('all_projects')}
-          </Link>
-          <span className="font-mono text-meta text-text-subtle">
-            {t('min_read', { min: readingMinutes })}
-          </span>
-        </div>
-
-        {/* Quick facts */}
-        {/* Print sits at the right end of the action row — for the reader who
-            forwards this case study to a decision-maker. */}
-        <QuickFactsStrip project={project} action={<PrintButton label={ta('print')} />} />
+        )}
 
         {/* Collapsed table of contents below the desktop breakpoint — the
             sticky sidebar version disappears entirely under lg:, leaving a
@@ -206,8 +203,32 @@ export default async function CaseStudyPage({
 
         {/* Body + sticky table of contents */}
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-12">
-          <div className="prose-case-study max-w-prose">
-            <MDXRemote source={content} components={mdxComponents} />
+          <div className="max-w-prose">
+            <div className="prose-case-study">
+              <MDXRemote source={main} components={mdxComponents} />
+            </div>
+
+            {/* Technical detail for engineers, collapsed so the case study
+                reads in three minutes for everyone else (VOICE.md rule 6). */}
+            {hood && (
+              <details id={HOOD_ID} className="group mt-14 scroll-mt-24 rounded-media border border-line bg-deck">
+                <summary className="flex min-h-touch cursor-pointer list-none items-center justify-between gap-4 rounded-media px-5 py-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold [&::-webkit-details-marker]:hidden">
+                  <span>
+                    <span className="block font-heading text-h3 text-cream">{t('under_the_hood')}</span>
+                    <span className="text-sm text-text-muted">{t('under_the_hood_hint')}</span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="text-xl text-gold transition-transform group-open:rotate-45 motion-reduce:transition-none"
+                  >
+                    +
+                  </span>
+                </summary>
+                <div className="prose-case-study border-t border-line px-5 pb-2 pt-5 text-[0.9375rem]">
+                  <MDXRemote source={hood} components={mdxComponents} />
+                </div>
+              </details>
+            )}
           </div>
           {toc.length > 1 && (
             <aside className="hidden lg:block">
@@ -218,14 +239,6 @@ export default async function CaseStudyPage({
           )}
         </div>
 
-        {/* Outcomes — only renders when meta.json declares metrics. Placed
-            after the prose rather than before it: the numbers ("12 → 4")
-            were unreadable without the vocabulary the write-up itself
-            establishes, so the payoff now lands once the reader has it. */}
-        {project.metrics && project.metrics.length > 0 && (
-          <MetricsStrip metrics={project.metrics} label={t('results_label')} />
-        )}
-
         {/* Screenshots gallery */}
         {screenshots.length > 0 && (
           <ScreenshotGallery screenshots={screenshots} label={t('screenshots')} />
@@ -233,24 +246,33 @@ export default async function CaseStudyPage({
 
         {/* Full tech stack */}
         <div className="border-t border-line mt-16 pt-8">
-          <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
+          <p className="mb-3 font-mono text-xs uppercase tracking-widest text-text-subtle">
             {t('stack')}
           </p>
           <TechStackChips stack={project.techStack} maxVisible={20} size="md" linked />
         </div>
 
-        {/* Conversion CTA */}
-        <section className="border-t border-line mt-16 pt-12 text-center">
-          <h2 className="font-heading text-h2 font-normal text-cream mb-3">
-            {t('cta_title')}
-          </h2>
-          <p className="text-text-muted mb-6 max-w-md mx-auto">{t('cta_body')}</p>
-          <Link
-            href="/contact"
-            className="inline-block px-7 py-3 bg-gold text-navy text-sm font-medium rounded hover:bg-gold/90 transition-colors"
-          >
-            {t('cta_button')}
-          </Link>
+        {/* Conversion CTA — for a recruiter as much as a client. */}
+        <section className="mt-16 flex flex-col items-start gap-6 rounded-media border border-line bg-deck p-8 sm:p-10 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="mb-2 font-heading text-h2 font-normal text-cream">{t('cta_title')}</h2>
+            <p className="text-text-muted">{t('cta_body')}</p>
+          </div>
+          <div className="flex flex-shrink-0 flex-wrap gap-3">
+            <Link
+              href="/contact"
+              className="inline-flex min-h-touch items-center rounded-control bg-gold px-5 py-3 text-sm font-medium text-navy transition-colors hover:bg-gold/90"
+            >
+              {t('cta_button')}
+            </Link>
+            <Link
+              href="/cv"
+              className="inline-flex min-h-touch items-center rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
+            >
+              {t('cta_cv')}
+            </Link>
+            <PrintButton label={ta('print')} />
+          </div>
         </section>
 
         {/* Next / prev navigation */}

@@ -4,26 +4,23 @@ interface MetricsStripProps {
 }
 
 /**
- * Scannable outcomes strip for a case study — renders only when the project's
- * meta.json declares real `metrics`. Kept factual: no invented numbers.
+ * Outcomes, right under the hero. Impact metrics only (VOICE.md rule 5), so
+ * they read without the write-up's vocabulary and belong before it.
  */
 export default function MetricsStrip({ metrics, label }: MetricsStripProps) {
   if (!metrics || metrics.length === 0) return null;
 
+  const cols = metrics.length >= 4 ? 'lg:grid-cols-4' : metrics.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
+
   return (
-    <section className="border-b border-line pb-8 mb-10" aria-label={label}>
-      <p className="font-mono text-meta text-accent uppercase tracking-wider mb-5">
-        {label}
-      </p>
-      <dl className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-8">
+    <section aria-label={label}>
+      <dl className={`grid grid-cols-2 gap-px overflow-hidden rounded-media border border-line bg-line ${cols}`}>
         {metrics.map((m) => (
-          // dt first so the term is announced before its value, and only once:
-          // the label used to be rendered twice (an sr-only dt plus a visible
-          // p), so assistive tech read every figure's label two times. The `p`
-          // was also an invalid direct child of the dl wrapper.
-          <div key={m.label} className="flex flex-col-reverse">
-            <dt className="text-meta text-text-subtle leading-snug">{m.label}</dt>
-            <dd className="font-heading text-h2 font-normal text-cream leading-none mb-2 break-words hyphens-none [overflow-wrap:anywhere]">
+          // dt first so the term is announced before its value; reversed
+          // visually and packed to the top so values align when labels wrap.
+          <div key={m.label} className="flex flex-col-reverse justify-end bg-navy px-5 py-5">
+            <dt className="text-sm leading-snug text-text-muted">{m.label}</dt>
+            <dd className="mb-2 font-heading text-stat leading-none text-cream [overflow-wrap:anywhere]">
               {m.value}
             </dd>
           </div>

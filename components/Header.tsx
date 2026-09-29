@@ -105,7 +105,9 @@ export default function Header() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-7" aria-label={ta('main_nav')}>
           {navLinks.map(({ href, label }) => {
-            const active = pathname === href || pathname.startsWith(href + '/');
+            // Case studies from both tracks live under /work/[slug], so only
+            // the index pages mark a nav item current.
+            const active = pathname === href;
             return (
               <Link
                 key={href}

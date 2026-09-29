@@ -55,9 +55,14 @@ type LocalizedCopy = Partial<Pick<ProjectMeta, 'tagline' | 'glance' | 'skills' |
  */
 export function localizeProject(project: ProjectMeta, locale?: string): ProjectMeta {
   const { id, ...base } = project;
-  if (locale !== 'id' || !id) return base;
-  return { ...base, ...id };
+  if (locale !== 'id') return base;
+  const timeframe = base.timeframe?.replace(/\b(May|Aug|Oct|Dec)\b/g, (m) => ID_MONTHS[m]);
+  return { ...base, ...id, timeframe };
 }
+
+// Timeframes are written as "May – Jul 2026"; only these four abbreviations
+// differ in Indonesian.
+const ID_MONTHS: Record<string, string> = { May: 'Mei', Aug: 'Agu', Oct: 'Okt', Dec: 'Des' };
 
 /** Every real project on one track, in manifest `order`. */
 export function getTrackProjects(track: Track, locale?: string): ProjectMeta[] {
@@ -198,6 +203,25 @@ export function getProjectContent(slug: string, locale: string): string | null {
   // Case study MDX conventionally opens with "# Title", but the hero banner
   // above already renders the title — strip it here so it isn't duplicated.
   return raw.replace(/^#\s+.+\n+/, '');
+}
+
+/** The heading that opens a case study's collapsible technical section, per locale (VOICE.md). */
+export const HOOD_HEADINGS: Record<string, string> = {
+  en: 'Under the hood',
+  id: 'Di balik layar',
+};
+
+/**
+ * Split case study MDX into the part everyone reads and the "Under the hood"
+ * section, which the page renders collapsed. The heading line itself is
+ * dropped; the page supplies its own summary.
+ */
+export function splitUnderTheHood(mdx: string): { main: string; hood: string | null } {
+  const headings = Object.values(HOOD_HEADINGS).join('|');
+  const match = new RegExp(`^##\\s+(?:${headings})\\s*$`, 'm').exec(mdx);
+  if (!match) return { main: mdx, hood: null };
+  const hood = mdx.slice(match.index + match[0].length).trim();
+  return { main: mdx.slice(0, match.index).trimEnd(), hood: hood || null };
 }
 
 export function slugify(text: string): string {

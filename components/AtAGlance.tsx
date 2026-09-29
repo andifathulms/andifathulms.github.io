@@ -1,52 +1,53 @@
 import { useTranslations } from 'next-intl';
 import type { ProjectMeta } from '@/lib/content';
 
-interface QuickFactsStripProps {
-  project: ProjectMeta;
-  /** Optional trailing control, pinned to the right end of the action row. */
-  action?: React.ReactNode;
-}
-
-export default function QuickFactsStrip({ project, action }: QuickFactsStripProps) {
+/**
+ * The 30-second version of a case study, beside the hero screenshot: who it's
+ * for, my role, when, what came of it, the skills it shows, and where to see
+ * it. Built from meta.json, so it's in the page's language via the id block.
+ */
+export default function AtAGlance({ project }: { project: ProjectMeta }) {
   const t = useTranslations('case_study');
   const isPrivate = project.status === 'private';
   // Access badge only makes sense when there's a public URL to click through to.
   const accessBadge =
     project.liveUrl && project.access && project.access !== 'public' ? project.access : null;
 
-  return (
-    <div className="border-y border-line py-6 my-10">
-      {/* Role + timeframe only — the stack used to repeat here and again,
-          linked, in the full tech-stack section near the Outcome. Same
-          information twice with no connection to the project's own claims
-          about its dependencies; the linked listing near Outcome is the one
-          that survives. */}
-      <div className="grid grid-cols-2 gap-6">
-        {/* Role */}
-        {project.role && (
-          <div>
-            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
-              {t('role')}
-            </p>
-            <p className="text-sm text-cream">{project.role}</p>
-          </div>
-        )}
+  const rows = [
+    { label: t('for'), value: project.glance?.for },
+    { label: t('role'), value: project.role },
+    { label: t('timeframe'), value: project.timeframe, mono: true },
+    { label: t('result'), value: project.glance?.result },
+  ].filter((r) => r.value);
 
-        {/* Timeframe */}
-        {project.timeframe && (
-          <div>
-            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-1.5">
-              {t('timeframe')}
-            </p>
-            <p className="font-mono text-sm text-cream">{project.timeframe}</p>
+  return (
+    <aside className="rounded-media border border-line-strong bg-deck p-5 sm:p-6" aria-label={t('at_a_glance')}>
+      <p className="mb-4 font-mono text-xs uppercase tracking-widest text-gold">{t('at_a_glance')}</p>
+      <dl className="grid grid-cols-[5.5rem_1fr] gap-x-4 gap-y-3 text-[0.9375rem]">
+        {rows.map((r) => (
+          <div key={r.label} className="contents">
+            <dt className="pt-px text-sm text-text-subtle">{r.label}</dt>
+            <dd className={`text-cream ${r.mono ? 'font-mono text-sm' : ''}`}>{r.value}</dd>
+          </div>
+        ))}
+        {project.skills && project.skills.length > 0 && (
+          <div className="contents">
+            <dt className="pt-1 text-sm text-text-subtle">{t('skills')}</dt>
+            <dd className="flex flex-wrap gap-1.5">
+              {project.skills.map((s) => (
+                <span key={s} className="rounded bg-deck-2 px-2 py-1 text-[0.8125rem] text-cream">
+                  {s}
+                </span>
+              ))}
+            </dd>
           </div>
         )}
-      </div>
+      </dl>
 
       {/* Action links or private badge */}
-      <div className="mt-5 pt-5 border-t border-line flex flex-wrap items-center gap-3">
+      <div className="mt-5 flex flex-wrap items-center gap-2.5 border-t border-line pt-5">
         {isPrivate ? (
-          <span className="font-mono text-meta text-text-subtle border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded">
+          <span className="text-sm text-text-subtle border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded-control">
             {t('private_badge')}
           </span>
         ) : (
@@ -57,7 +58,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-meta text-accent-2 border border-line-muted min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded hover:border-edge-strong transition-colors"
+                  className="text-sm text-accent-2 border border-line-strong min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-control hover:border-edge-strong transition-colors"
                 >
                   {t('view_staging')} ↗
                   {/* The caveat used to live only in a `title`, which is
@@ -77,13 +78,13 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                   // min-h-touch to match its neighbours: every other control
                   // in this row got it in the touch-target pass, so the gold
                   // primary was the one button sitting short.
-                  className="font-mono text-meta font-medium bg-gold text-navy min-h-touch inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded hover:bg-gold/90 transition-colors"
+                  className="text-sm font-medium bg-gold text-navy min-h-touch inline-flex items-center gap-1.5 px-4 py-2 rounded-control hover:bg-gold/90 transition-colors"
                 >
                   {t('view_live')} ↗
                 </a>
               ))}
             {accessBadge === 'internal' && (
-              <span className="font-mono text-meta text-text-subtle border border-edge min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded">
+              <span className="text-sm text-text-subtle border border-edge min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-control">
                 <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                   <rect x="2.5" y="6" width="9" height="6" rx="1" stroke="currentColor" strokeWidth="1.2" />
                   <path d="M4.5 6V4.5a2.5 2.5 0 015 0V6" stroke="currentColor" strokeWidth="1.2" />
@@ -93,7 +94,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
               </span>
             )}
             {accessBadge === 'registration' && (
-              <span className="font-mono text-meta text-accent border border-line min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded">
+              <span className="text-sm text-accent border border-line-strong min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-control">
                 {t('access_registration')}
                 <span className="sr-only">— {t('access_registration_hint')}</span>
               </span>
@@ -105,7 +106,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-meta text-text-muted border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded hover:border-edge-strong transition-colors"
+                    className="text-sm text-text-muted border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded-control hover:border-edge-strong transition-colors"
                   >
                     {t('view_github')} {project.githubUrl!.length > 1 ? `(${i + 1})` : ''} ↗
                   </a>
@@ -115,7 +116,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-meta text-text-muted border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded hover:border-edge-strong transition-colors"
+                    className="text-sm text-text-muted border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded-control hover:border-edge-strong transition-colors"
                   >
                     {t('view_github')} ↗
                   </a>
@@ -123,8 +124,7 @@ export default function QuickFactsStrip({ project, action }: QuickFactsStripProp
           </>
         )}
 
-        {action && <div className="ml-auto">{action}</div>}
       </div>
-    </div>
+    </aside>
   );
 }
