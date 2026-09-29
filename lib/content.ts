@@ -134,6 +134,7 @@ const FEATURED_ORDER = [
   'doserx', // indep · tool
   'anatomi-rupiah', // indep · explainer
   'quranlytics', // indep · data
+  'gempa-watch', // indep · data
 ];
 
 export function getFeaturedProjects(limit = 3): ProjectMeta[] {

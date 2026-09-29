@@ -26,7 +26,7 @@
   "githubUrl": "https://github.com/andifathulms/gempawatch",
   "heroImage": "/images/projects/gempa-watch/hero.webp",
   "order": 16,
-  "featured": false,
+  "featured": true,
   "metrics": [
     {
       "value": "69,641",
