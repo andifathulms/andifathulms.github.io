@@ -20,11 +20,11 @@
   "status": "active",
   "role": "Fullstack Developer",
   "timeframe": "May – Jul 2026",
-  "liveUrl": null,
+  "liveUrl": "https://andifathulms.github.io/cubiq/",
   "githubUrl": null,
   "heroImage": "/images/projects/cubiq/hero.webp",
   "order": 9,
-  "featured": false,
+  "featured": true,
   "metrics": [
     {
       "value": "8",
