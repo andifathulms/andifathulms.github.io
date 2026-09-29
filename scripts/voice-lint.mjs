@@ -52,7 +52,7 @@ const BANNED = {
     { re: /\binstead of\b/gi, max: 1, why: 'not-X-but-Y' },
     // Counted commits and lines are effort metrics. The bare word is fine —
     // the Git rebase simulator is about commits.
-    { re: /~?\d[\d,.]*\+?\s+commits?\b|\blines of (code|python|typescript|ts)\b|~?\d[\d,.]*k?\s+lines\b/gi, max: 0, why: 'effort metric in visible copy' },
+    { re: /~?\d[\d,.]*\+?\s+commits?\b|\blines of (code|python|typescript|ts)\b|~?\d{1,3}(?:[,.]\d{3})+\s+lines\b|~?\d+(?:\.\d+)?k\s+lines\b/gi, max: 0, why: 'effort metric in visible copy' },
   ],
   id: [
     { re: /\bsecara jujur\b|\bjujur\b/gi, max: 0, why: 'self-grading' },
