@@ -2,53 +2,51 @@
 
 ## The problem
 
-Otorita IKN produces a lot of institutional knowledge across its ten Eselon-1 units: regulations, technical reports, academic studies and field notes. The old system kept it all but made it hard to use. There was no search, so staff asked colleagues for files over chat. Uploading meant a long two-step form with no drafts, so most knowledge never got uploaded. Managers had no view of what existed or which units were contributing.
+Otorita IKN produces a lot of institutional knowledge across its ten Eselon-1 units: regulations, technical reports, academic studies and field notes. The old system kept it all but made it hard to use. There was no search, so staff asked colleagues for files over chat. Uploading meant a long two-step form with no drafts, so most knowledge never got uploaded. Managers had no view of what existed, what was waiting for review, or which units were contributing.
 
-Three groups share Aksara: the public, browsing published knowledge with no login; staff, uploading and reading internal material; and verifiers, curators and administrators, who approve and organise it. Much of the material isn't public, and some is limited to the directorate that owns it.
+Three groups share Aksara. The public browses published knowledge without logging in. Staff upload and read internal material. Verifiers, curators and administrators approve and organise it. Much of the material isn't public, and some of it is limited to the directorate that owns it.
 
 ## What I built
 
 ### Every document gets a permanent public code
 
-Each document has a private internal ID from the moment it's a draft. On its first publish it also gets a public code, and that code is its public address. I chose this because a public link has to be permanent and citable, and a link built from the title would break the moment someone fixed a typo. Codes are never reused, and a document that's unpublished and republished gets its old code back.
+Each document has a private internal ID from the moment it's a draft. On its first publish it also gets a public code, and that code is its public address. I chose this because a public link has to be permanent and citable. Drafts and rejected items should have no address anyone can guess. A link built from the title would break the moment someone fixed a typo. Codes are never reused, and a document that is unpublished and published again gets its old code back.
 
-### One function decides who can see a closed document
+### The server decides who sees what
 
-There are three access levels: public, internal to OIKN, and restricted, checked on the server for every request against a person's work unit, rank, roles and any temporary access they were granted. One function decides who can open a restricted document without asking, called from every place a document is served, so the rule can't drift between the listing, search and file downloads. I first gave that power to a broader admin role, then narrowed it to one superadmin role once I saw how sensitive it was. A restricted item still shows up, locked, with a button to request access for 7, 30 or 90 days, or permanently.
+There are three access levels: public, internal to OIKN, and restricted. I check them on the server for every request, against the person's work unit, rank, roles and any temporary access they were granted. The browser never receives a document it then has to hide. Midway through the build I found attachment links could be guessed, so every download now goes through the same check. A restricted item still shows up in listings with a locked file and a button to request access, granted for 7, 30 or 90 days, or permanently.
 
 ### Review follows fixed steps with a full history
 
-A document moves from draft to verification, then curation, then published, or it's returned or rejected. Only the system changes that status, never a manual edit. Verifiers and curators each work a split-screen queue with three choices: approve, return with a required note, or reject. Every step lands on a timeline nobody can edit. A revised, already-published document stays live until the revision passes review again.
+A document moves from draft to verification, then curation, then published. It can also be returned or rejected. Only the system changes that status, never a manual edit. Verifiers and curators each work in a split-screen queue with three choices: approve, return with a required note, or reject. Every step is written to a timeline on the document that nobody can edit. If a published document is revised, the live version stays public until the revision passes review again.
 
 ### Search that forgives typos and keeps the link
 
-I shipped database full-text search with typo tolerance and a "did you mean" suggestion, behind a single interface so a larger search engine can replace it later without touching the pages. Every filter, sort and page number lives in the address bar, so a filtered result can be bookmarked, shared or refreshed.
+I shipped database full-text search with typo tolerance and a "did you mean" suggestion. The search sits behind a single interface, so a larger search engine can replace it later without touching the pages. Every filter, sort and page number lives in the address bar. A filtered result can be bookmarked, shared or refreshed.
 
-### One portal per role
+### One portal per role, and regulations in the main listing
 
-My first version had a role switcher. Two days in, I replaced it with a separate portal for each role, because people holding several roles lost track of which one they were using. National legal records (JDIH) started as their own menu, too, until I merged them into the main listing, because people look for "the regulation", not a document type.
+My first version had a role switcher. Two days in, I replaced it with a separate portal for each role, because people with several roles lost track of which one they were using. National legal records (JDIH) started as their own menu. I merged them into the main listing, because people look for "the regulation", not "a JDIH document".
 
 ## Result
 
-Aksara has been live in production for Otorita IKN since July 2026, its public portal open to any visitor with no login. What I built alone has kept growing since launch. It now spans 16 backend apps and 45 data models: access control, the review workflow, search, and a federated index of national legal records, with 14 registered API endpoint groups and 206 seeded reference rows behind its categories. A gazetteer for browsing by place, an achievements system for contributors, and an auto-classifier for the legal-records feed were all added after the original plan.
+I built Aksara alone, from an empty repository to a deployed system, in about two and a half weeks in July 2026. It is deployed for OIKN, and the public portal is open to any visitor. It serves 66 documented API endpoints, which a native mobile app now shares. There are 156 backend tests, focused on the access rules and the public code logic. Suggested reading is based on shared topics and units, so anyone can see why an item was suggested.
 
 ## What I'd do next
 
-- Add a frontend test suite, and make the backend one a required merge check.
-- Build the full unit-evaluation dashboard; only the underlying counters exist today.
-- Close five decisions still flagged open in code, among them the identity provider's employee-ID field and how a closed rating reopens.
+- Sync non-public JDIH records, which waits on JDIH providing a service account.
+- Resolve the twelve items the spec left as open decisions. I flagged them and left them unbuilt.
 
 ## Under the hood
 
 - Public codes look like `AKS-2026-0042-K7mP` and appear in URLs such as `/pengetahuan/AKS-2026-0042-K7mP`. The sequence part is allocated under a row lock so simultaneous publishes can't collide.
-- Access levels Publik / Internal OIKN / Terbatas are resolved in the queryset. `knowledge.access.may_read_any_document` is the one predicate reused by the per-object permission check, its SQL-level twin for query filtering, and the backoffice file gate.
-- Attachments are served through an access-checked download endpoint, never raw `/media/` paths. A Celery sweep revokes expired access grants and sends a notification.
+- Access levels Publik / Internal OIKN / Terbatas are resolved in the queryset. The database enum kept the PRD's original values (Publik / Terbatas / Tertutup); only the UI labels changed, through one presentation-layer map, because "Terbatas" and "Tertutup" are near-synonyms.
+- Attachments moved off raw `/media/` paths onto an access-checked download endpoint. A Celery sweep revokes expired access grants and sends a notification.
 - Workflow statuses: Draft → Menunggu Verifikasi → Menunggu Kurasi → Terpublikasi, plus Dikembalikan and Ditolak, changed only through transition services. The per-document timeline is "Riwayat Alur", backed by a global audit log.
-- Search is Postgres full-text (GIN indexes, ranking, highlighting) behind a `SearchBackend` abstraction so Elasticsearch can drop in later. A `pg_trgm` trigram fallback powers the "did you mean" suggestions.
-- JDIH integration stores only light metadata plus a `last_synced_at`, refreshed by a daily sync task, and live-fetches document content server-side with a short cache. It has grown to include an auto-classifier and its own full-text index on top of the metadata sync the original spec called for.
-- A place/gazetteer sub-system for geographic browsing, and an achievements module for contributors, were both added after the original 12-milestone build plan.
-- The entity-relationship diagram is generated on request straight from the Django models, so it renders both a docs page and a backoffice "Skema Basis Data" page and never goes stale.
-- Portals: Kontributor, Verifikator, Kurator and Administrator, with `active_role` held server-side.
+- Search is Postgres full-text (GIN indexes, ranking, highlighting) behind a `SearchBackend` abstraction so Elasticsearch can drop in later. A `pg_trgm` trigram fallback powers the "did you mean" suggestions from previously successful queries.
+- Listing and facet counts were merged into one round-trip (`with_facets=1`). Filter switching uses `keepPreviousData` so the filter rail doesn't reflow.
+- Portals: Kontributor, Verifikator, Kurator and Administrator, with `active_role` held server-side. JDIH records are indexed as metadata by a daily Celery sync and fetched live server-side with a one-hour cache and a fallback. The integration is read-only and the API key stays on the server.
+- Keycloak SSO and JDIH were built against mockable client interfaces first, then real implementations. A token-exchange endpoint serves the mobile app.
 - Contribution is a four-step wizard with drafts, up to 10 attachments, and a CSV bulk import of up to 200 rows where invalid rows land as flagged drafts.
 - Django + DRF API-only backend and a React SPA. No component, form or state library on the frontend. No ML in V1.
-- 16 Django apps, 45 concrete models, 14 registered DRF viewsets, 206 seeded masterdata rows, 1,595 backend test functions, 53,323 Python lines and 30,022 TypeScript lines, 429 commits between 6 July and 25 September 2026.
+- 14 Django apps, about 30 models, 36 page components, about 10,700 lines of Python and 12,800 lines of TypeScript, 156 tests across 19 modules, 109 commits between 6 and 23 July 2026.

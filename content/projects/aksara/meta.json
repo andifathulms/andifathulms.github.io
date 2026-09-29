@@ -4,7 +4,7 @@
   "tagline": "A searchable library for Otorita IKN's knowledge, where the server checks every reader's access across three levels",
   "glance": {
     "for": "The public, OIKN staff, and the people who review knowledge",
-    "result": "Live in production for OIKN, built and maintained solo"
+    "result": "Deployed for OIKN in about two and a half weeks, built solo"
   },
   "skills": [
     "Access control",
@@ -20,19 +20,17 @@
   "problemShape": "workflow",
   "techStack": [
     "Django",
-    "Django REST Framework",
+    "React",
+    "TypeScript",
     "PostgreSQL",
     "Celery",
     "Redis",
-    "React",
-    "TypeScript",
-    "Vite",
-    "Tailwind CSS",
+    "Keycloak",
     "Docker"
   ],
   "status": "active",
-  "role": "Solo Developer",
-  "timeframe": "Jul 2026 – present",
+  "role": "Fullstack Developer",
+  "timeframe": "Jul 2026",
   "liveUrl": "https://aksara.ikn.go.id",
   "access": "public",
   "githubUrl": null,
@@ -41,27 +39,27 @@
   "featured": true,
   "metrics": [
     {
-      "value": "16",
-      "label": "backend apps organizing the system"
+      "value": "10",
+      "label": "Eselon-1 units sharing one library"
     },
     {
-      "value": "45",
-      "label": "database models across the system"
+      "value": "3",
+      "label": "access levels checked on the server"
     },
     {
-      "value": "14",
-      "label": "API viewsets exposed to the frontend"
+      "value": "66",
+      "label": "documented API endpoints, shared with mobile"
     },
     {
-      "value": "206",
-      "label": "masterdata rows seeded across categories"
+      "value": "156",
+      "label": "backend tests on access and public codes"
     }
   ],
   "id": {
     "tagline": "Perpustakaan pengetahuan Otorita IKN yang bisa dicari, dengan server memeriksa akses setiap pembaca di tiga tingkat",
     "glance": {
       "for": "Publik, staf OIKN, dan para pemeriksa pengetahuan",
-      "result": "Sudah live di produksi untuk OIKN, dibangun dan dirawat sendiri"
+      "result": "Ter-deploy untuk OIKN dalam sekitar dua setengah minggu, dikerjakan sendiri"
     },
     "skills": [
       "Kontrol akses",
@@ -71,25 +69,21 @@
     ],
     "metrics": [
       {
-        "value": "16",
-        "label": "aplikasi backend penyusun sistem"
+        "value": "10",
+        "label": "unit Eselon-1 dalam satu perpustakaan"
       },
       {
-        "value": "45",
-        "label": "model basis data di seluruh sistem"
+        "value": "3",
+        "label": "tingkat akses diperiksa di server"
       },
       {
-        "value": "14",
-        "label": "viewset API yang dipakai frontend"
+        "value": "66",
+        "label": "endpoint API terdokumentasi, dipakai juga mobile"
       },
       {
-        "value": "206",
-        "label": "baris masterdata di berbagai kategori"
+        "value": "156",
+        "label": "tes backend untuk akses dan kode publik"
       }
     ]
-  },
-  "source": {
-    "schema": "portfolio-context/v2",
-    "generated": "2026-09-30"
   }
 }
