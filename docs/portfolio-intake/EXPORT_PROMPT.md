@@ -42,7 +42,12 @@ name and create the folder. If two could match, stop and ask me.
   data. If a number exists only in a planning document (PRD target, not
   measured), mark it as a target.
 - Live status: check the deploy config and README. If you can't tell whether
-  a URL is production, staging, or down, say so in section 9.
+  a URL is production, staging, or down, say so in section 9. The status in
+  the frontmatter and the words in sections 3 and 9 must agree: don't write
+  status `live` and then "deployed to staging" in section 3.
+- `launched` is the date the production URL first served real users, only if
+  the repo records it (a release note, a deploy tag, a changelog entry). If it
+  doesn't, write `null`. Never use the first commit date as a launch date.
 - Where two sources disagree (e.g. an old CLAUDE.md vs the code), the code and
   git win. Write the disagreement in section 8.
 
@@ -81,6 +86,7 @@ team: <solo | team of N>
 timeframe:
   start: <YYYY-MM-DD>
   end: <YYYY-MM-DD or ongoing>
+launched: <YYYY-MM-DD the production URL first served users, or null>
 techStack: [<most important first, max 10, product names as usually written>]
 ---
 
@@ -115,10 +121,21 @@ did what. 30–120 words.
 | --- | --- | --- | --- |
 | <what is counted, lowercase> | <number> | <impact / scale / effort / target> | <command, file, or doc> |
 
-Kinds: impact = what changed for users; scale = size of what it handles
-(records, sectors, cities, users); effort = commits, lines, tests, days;
-target = planned, not measured. At least 3 rows of impact or scale if they
-exist. Include effort rows too (they go in the technical section on the site).
+Kinds, strictly:
+
+- impact = what changed for the people who use it (time saved, manual steps
+  removed, errors caught, access granted, labels verified, cost avoided).
+- scale = the size of what it serves, in things a non-engineer can picture:
+  people, organisations, units, documents, records, places, cities, sectors,
+  drugs, languages, years of data.
+- effort = anything about the codebase or the work: apps, modules, models,
+  tables, endpoints, viewsets, routes, components, files, migrations, seed
+  rows, lines, tests, commits, days. These are always effort, even when large.
+- target = planned or designed-for, not measured.
+
+Give at least 3 impact or scale rows if the repo supports them. If it has
+fewer, write one line under the table: "Only N user-facing figures exist."
+Include effort rows too (they go in the technical section on the site).
 
 ## 6. Limits and next steps
 

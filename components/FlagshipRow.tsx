@@ -47,7 +47,13 @@ export default function FlagshipRow({
         : null;
 
   return (
-    <article className="grid items-center gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
+    // The screenshot always gets the wider column. Reversing only the order
+    // left it in the narrow one on alternate rows.
+    <article
+      className={`grid items-center gap-8 lg:gap-14 ${
+        reverse ? 'lg:grid-cols-[1fr_1.2fr]' : 'lg:grid-cols-[1.2fr_1fr]'
+      }`}
+    >
       <ViewTransition name={`shot-${project.slug}`} share="morph" default="none">
         <Link
           href={href}

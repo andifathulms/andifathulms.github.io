@@ -76,9 +76,11 @@ true, the fact behind it says so. If it needs the adjective, it isn't proven.
 ### 5. Count what users feel
 
 Use numbers a reader can picture: people served, records, sectors, cities,
-drugs, years of data, response times. Commit counts and lines of code are
-effort, not outcome. They may appear in "Under the hood" only, never in
-`metrics`, the tagline, or the visible sections.
+drugs, years of data, response times. Anything that counts the codebase is
+effort, not outcome: commits, lines, tests, apps, models, tables, endpoints,
+viewsets, routes, components, migrations, seed rows. Those may appear in
+"Under the hood" only, never in `metrics`, the tagline, or the visible
+sections. `npm run lint:voice` flags them.
 
 - ✕ 241 commits over ~3 weeks
 - ✓ ~2,200 business permit codes, set up without code

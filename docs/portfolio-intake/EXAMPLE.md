@@ -16,6 +16,7 @@ team: solo
 timeframe:
   start: 2026-08-10
   end: 2026-08-12
+launched: null
 techStack: [Next.js, React, TypeScript, Tailwind CSS, Zod, Vitest, GitHub Actions, GitHub Pages]
 ---
 

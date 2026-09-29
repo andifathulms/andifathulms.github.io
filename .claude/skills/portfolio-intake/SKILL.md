@@ -8,184 +8,234 @@ description: Turn a project's PORTFOLIO_CONTEXT.md (schema portfolio-context/v2)
 You are updating the AFM Studio portfolio from a fact sheet. The fact sheet is
 `content/projects/<slug>/PORTFOLIO_CONTEXT.md`, written in another repository
 by the prompt in `docs/portfolio-intake/EXPORT_PROMPT.md`. Your output is three
-files in the same folder: `meta.json`, `en.mdx`, `id.mdx`. Nothing else changes
-unless a step below says so.
+files in the same folder: `meta.json`, `en.mdx`, `id.mdx`. Nothing else changes.
 
-Follow the steps in order. Do not skip the checks. When a step says STOP, stop
-and ask the user; don't guess.
+Your job is to be a careful editor, not a writer. Every sentence you publish
+must be traceable to the fact sheet or to the current case study. When in
+doubt, leave it out or STOP and ask. A shorter true case study is always
+better than a fuller one with one invented detail.
+
+Follow the steps in order. Do not skip checks. STOP means: stop, tell the user
+exactly what you found, and wait.
 
 ## Arguments
 
 - `/portfolio-intake <slug>` — one project.
 - `/portfolio-intake` with no slug — run `node scripts/check-context.mjs --pending`
-  and process every pending project, one at a time, one commit each.
+  and process every pending project, one at a time, one commit each. Finish
+  and commit one project before reading the next.
 
 ## Step 1 — Validate the fact sheet
 
 Run `node scripts/check-context.mjs <slug>`.
 
-- Any **error**: STOP. Show the errors. A schema error usually means the
-  context must be re-exported with the current prompt. A secret or IP error
-  means the file must be fixed at the source; never copy that content anywhere.
-- **Warnings**: note them for the final report and continue.
+- Any **error**: STOP. Show the errors and say the context must be fixed and
+  re-exported in the project's repo. Do not fix the fact sheet yourself,
+  not even to reclassify a row; it's the other repo's source of truth.
+- Warning "status is live but section 3 mentions staging": STOP and ask the
+  user whether the project is in production.
+- Other **warnings**: note them for the report and continue.
 
 ## Step 2 — Read, in this order
 
-1. `VOICE.md` — all of it. The rules there are not optional.
+1. `VOICE.md` — all of it.
 2. `content/projects/<slug>/PORTFOLIO_CONTEXT.md` — the facts.
 3. The current `meta.json`, `en.mdx`, `id.mdx` for this slug, if they exist.
-4. Reference shape and tone, all three files each:
-   - `content/projects/lantara/` for government work,
-   - `content/projects/pola-hujan/` for lab work.
-   If the slug you're processing is one of these, use `content/projects/cubiq/`
-   instead.
+4. Reference shape and tone, all three files each: `content/projects/lantara/`
+   for government work, `content/projects/pola-hujan/` for lab work. If the
+   slug you're processing is one of these, use `content/projects/cubiq/`.
 
-Then write down, before any prose: every number and date in the fact sheet's
-frontmatter and sections 5 and 8. This list is the only source of numbers you
-may use. Section 9 lists what you must not publish.
+## Step 3 — Build the fact ledger (write it out, keep it for the report)
 
-How to read the sections:
+Before any prose, write a list with one line per fact you may use:
 
-- **Section 5 rows** are exact. When a row becomes a metric or a sentence,
-  keep its meaning: don't add qualifiers the row doesn't state ("each",
-  "all", "every", "checked", "verified", "in production"). If the row says
-  "699 BMKG season zones compared", write that, not "checked against all 699".
-- **`target` rows** are plans, not results. Never a metric, never stated as
-  achieved. They may appear in "What I'd do next" only if section 6 also
-  lists the goal.
-- **Section 8** items are instructions: fix every wrong claim it names, and
-  add any fact it says the current case study is missing.
-- **Numbers already on the site** that the context doesn't repeat: keep them
-  only if the old copy is the only place they appear and section 8 doesn't
-  contradict them.
+```
+[ctx §5] 34 locations classified from satellite rainfall (scale)
+[ctx fm] status live, launched null, timeframe 2026-08-10 → 2026-08-12
+[ctx §8] README's "130+ tests" is stale → 1,595
+[old]    access request durations 7, 30, 90 days or permanent
+[ctx §9] DO NOT PUBLISH: internal mirror hostname
+```
 
-## Step 3 — Decide new or update
+Sources:
+- `ctx fm`, `ctx §1`…`§10` — the fact sheet. These win every conflict.
+- `old` — a fact in the current case study that the fact sheet neither states
+  nor contradicts. You may keep it; you may not change its wording's meaning.
+- Nothing else. No inference, no general knowledge about the technology, no
+  "probably".
+
+Then list **conflicts**: every place the current case study disagrees with the
+fact sheet (a number, a status, a date, a name). The fact sheet wins each one.
+
+## Step 4 — Decide new or update
 
 - **New project** (no `meta.json`): build every field from the mapping below.
-- **Update**: change only what the mapping marks as *from context*. Keep
-  `order`, `featured`, `heroImage` and extra `categoryTags` as they are unless
-  the user asked otherwise.
-- STOP if the context's `track` differs from the current track (a government
-  project becoming lab or the reverse) — confirm with the user first.
+- **Update**: edit, don't rewrite. Keep every existing sentence whose facts are
+  still in the ledger. Change only what the fact sheet changes, add what it
+  adds, remove what it contradicts. Keep `order`, `featured`, `heroImage` and
+  extra `categoryTags` unless the user asked otherwise.
+- STOP if the fact sheet's `track` differs from the project's current track.
 
-## Step 4 — meta.json mapping
+## Step 5 — Metrics (the most common mistake — read twice)
 
-| meta.json field | Rule |
+A metric is something a non-engineer can picture: people, organisations,
+units, documents, records, places, cities, sectors, drugs, languages, years of
+data, time saved, errors caught.
+
+Never a metric, whatever the fact sheet's `kind` column says:
+- anything about the codebase: apps, modules, models, tables, endpoints,
+  viewsets, routes, components, files, migrations, seed rows, lines, tests,
+  commits, days of work;
+- `target` rows (planned, designed-for);
+- `effort` rows.
+
+How to choose 3–4:
+1. Candidates: fact-sheet rows of kind `impact` or `scale` that pass the rule
+   above. `impact` first.
+2. If fewer than 3: add existing site metrics that pass the rule and aren't
+   contradicted by the fact sheet. Never drop a picturable existing metric in
+   favour of a codebase one.
+3. Still fewer than 2: STOP and tell the user the fact sheet has no
+   user-facing figures; ask whether to publish without a metrics strip.
+4. `value` copied exactly. `label` lowercase, 3–8 words, no final full stop,
+   same meaning as the source row, never repeats the value.
+
+The same rule applies to prose: codebase counts appear only under
+"Under the hood".
+
+## Step 6 — meta.json mapping
+
+| Field | Rule |
 | --- | --- |
 | `slug` | frontmatter `slug` (must equal the folder name) |
-| `title` | from context: `title` |
-| `tagline` | write it: VOICE.md tagline formula, ≤ 18 words, no em-dash, no final full stop, no stack names. Built from section 1. |
-| `glance.for` | write it from section 2: who uses it, ≤ 12 words |
-| `glance.result` | write it from status + section 5: the outcome in one line, ≤ 14 words |
-| `skills` | write 3–4 recruiter-searchable skills from sections 4 and 7 (e.g. "Workflow engines", "Geospatial data"). Not library names. |
-| `categoryTags` | must contain `"Government"` if and only if `track` is `government`. New lab projects: `["Personal Project", "Web App"]`. New government projects: `["Government", "Web App"]`. Keep existing extra tags. |
-| `problemShape` | from context |
-| `techStack` | from context, same order |
+| `title` | fact sheet `title` |
+| `tagline` | VOICE.md tagline formula, ≤ 18 words, no em-dash, no final full stop, no stack names. From section 1. Update: keep the old one unless it's contradicted. |
+| `glance.for` | who uses it, ≤ 12 words, from section 2 |
+| `glance.result` | the outcome in one line, ≤ 14 words, using the status words below. No codebase counts. |
+| `skills` | 3–4 recruiter-searchable skills from sections 4 and 7. Not library names. Update: keep unless wrong. |
+| `categoryTags` | contains `"Government"` iff `track` is `government`. New lab: `["Personal Project", "Web App"]`. New government: `["Government", "Web App"]`. Keep extra tags. |
+| `problemShape` | fact sheet |
+| `techStack` | fact sheet, same order |
 | `status` | `live`, `staging`, `internal` → `"active"`; `private`, `unreleased` → `"private"` |
-| `role` | from context `role`, in Title Case ("Solo Developer", "Fullstack Developer") |
-| `timeframe` | from `timeframe`: same month → `"Aug 2026"`; same year → `"May – Jul 2026"`; across years → `"Dec 2025 – Feb 2026"`; ongoing → `"Jun 2025 – present"`. En dash with spaces. Three-letter English months. |
+| `role` | fact sheet `role`, Title Case ("Solo Developer") |
+| `timeframe` | same month → `"Aug 2026"`; same year → `"May – Jul 2026"`; across years → `"Dec 2025 – Feb 2026"`; ongoing → `"Jun 2025 – present"`. En dash with spaces, three-letter English months. |
 | `liveUrl` | `live`/`internal` → `liveUrl`; `staging` → `stagingUrl`; `private`/`unreleased` → `null` |
-| `liveIsStaging` | `true` only when status is `staging`; otherwise omit the key |
-| `access` | from context |
-| `githubUrl` | from context (`null` if private) |
-| `heroImage` | update: keep. New: `/images/projects/<slug>/hero.webp` if that file exists, else `/images/projects/<slug>/cover.svg` and tell the user a hero screenshot is needed. |
+| `liveIsStaging` | `true` only for `staging`; otherwise omit the key |
+| `access` | fact sheet |
+| `githubUrl` | fact sheet (`null` if private) |
+| `heroImage` | update: keep. New: `/images/projects/<slug>/hero.webp` if it exists, else `/images/projects/<slug>/cover.svg`, and report that a screenshot is needed. |
 | `order` | update: keep. New: highest existing `order` + 1. |
 | `featured` | update: keep. New: `false`. |
-| `metrics` | 3–4 rows from section 5 with kind `impact` or `scale` only. `value` copied exactly; `label` lowercase, 3–8 words, no final full stop, doesn't repeat the value, same meaning as the row. Never `effort` or `target` rows. With more than 4 candidates: `impact` before `scale`; then prefer rows a reader can picture (people, places, records) over technical ones; among equals, keep the rows already on the site. |
-| `id` | Indonesian `tagline`, `glance`, `skills`, `metrics` (same count and same values as `metrics`, values may use Indonesian number formatting). |
-| `source` | `{ "schema": "portfolio-context/v2", "generated": "<frontmatter generated>" }` — this marks the context as taken in. |
+| `metrics` | Step 5 |
+| `id` | Indonesian `tagline`, `glance`, `skills`, `metrics` (same count, same values; values may use Indonesian number formatting) |
+| `source` | `{ "schema": "portfolio-context/v2", "generated": "<frontmatter generated>" }` |
 
 Key order: `slug, title, tagline, glance, skills, categoryTags, problemShape,
 techStack, status, role, timeframe, liveUrl, liveIsStaging, access, githubUrl,
 heroImage, order, featured, metrics, id, source`. Two-space indent, UTF-8 (no
-`\u` escapes), trailing newline. Validate it parses.
+`\u` escapes), trailing newline.
 
-## Step 5 — en.mdx
+### Status words — use exactly these ideas, nothing stronger
 
-Exactly this shape (VOICE.md "Case study shape"):
+| Frontmatter | English | Indonesian |
+| --- | --- | --- |
+| `live`, `access: public` | "is live" / "is live at <domain>" | "sudah live" |
+| `live`, `access: registration` | "is live; anyone can register" | "sudah live; siapa pun bisa mendaftar" |
+| `internal` or `access: internal` | "runs inside <org>; login required" | "berjalan di internal <org>; perlu login" |
+| `staging` | "a public staging site is up" | "situs staging-nya sudah bisa diakses" |
+| `private` / `unreleased` | "private" / "not released yet" | "privat" / "belum dirilis" |
+
+- Say "in production" only for `live` or `internal`.
+- Attach a date to going live ("live since …", "launched in …") only if
+  `launched` is a date, and use that date. Never use the first commit date.
+- The build period comes from `timeframe` ("built between July and September
+  2026", or "since July 2026" for ongoing).
+
+## Step 7 — en.mdx
 
 ```
 # <title>
 
 ## The problem
-<from sections 1–2: who has the problem, what it costs them, what existed before. 80–130 words. No stack names, no code.>
+<sections 1–2 (+ old): who has the problem, what it cost them, what existed before. 80–130 words.>
 
 ## What I built
-### <decision 1 from section 4, as a plain sentence>
+### <a decision from section 4, as a plain sentence>
 <what I chose, why, what it made possible. 50–100 words.>
-### <decision 2> …  (3–5 of these)
+(3–5 of these; section 4 decisions first, old ones only if still supported)
 
 ## Result
-<status in plain words (live / public staging / internal, login required / private), who uses it, scale, what changed. Numbers from section 5. 60–120 words. End with when it was built, from the timeframe.>
+<status words, who uses it, scale (Step 5 figures only), what changed, when it was built. 60–120 words.>
 
 ## What I'd do next
-<only if section 6 has items: 2–3 bullets, taken from section 6. Omit the whole section if section 6 says none.>
+<2–3 bullets from section 6 only. Omit the section if section 6 has none.>
 
 ## Under the hood
-<bullets from section 7, plus the effort rows from section 5 (commits, lines, tests). Code identifiers go here and only here.>
+<section 7 bullets, section 5 effort rows (apps, models, endpoints, tests, lines, commits), code identifiers.>
 ```
 
 - 450–650 words above "Under the hood".
-- First person for decisions. People before systems.
-- Corrections in section 8 override anything in the old case study.
-- Nothing from section 9 appears anywhere.
-- Status words must match the frontmatter: never call a staging or internal
-  system "live in production".
+- Apply every section 8 correction. Section 8 items are instructions: fix the
+  wrong claim, add the missing fact.
+- Nothing from section 9 appears anywhere, even paraphrased.
+- Keep each fact's meaning exactly. Don't widen it with "each", "all",
+  "every", "always", "verified", "fully", "in production" unless the source
+  says so.
 
-## Step 6 — id.mdx
+## Step 8 — id.mdx
 
-Same content in natural Indonesian, written from the English meaning, not
-translated line by line (VOICE.md "Bahasa Indonesia"). Headings, exactly:
-`## Masalahnya`, `## Yang saya bangun`, `## Hasilnya`, `## Langkah berikutnya`
-(optional), `## Di balik layar`. Use "saya". Indonesian months in prose
-(Mei, Agu, Okt, Des). Indonesian number formatting in prose (2.200, 13,7 ribu).
+Same content in natural Indonesian, written from the English meaning (VOICE.md
+"Bahasa Indonesia"). Headings: `## Masalahnya`, `## Yang saya bangun`,
+`## Hasilnya`, `## Langkah berikutnya` (optional), `## Di balik layar`. Use
+"saya", Indonesian months in prose, Indonesian number formatting in prose.
+The Indonesian must not contain a fact the English doesn't.
 
-## Step 7 — Check
+## Step 9 — Check
 
-Run all of these. Fix what they flag; don't commit until they pass.
+Run all of these. Fix what they flag. Don't commit until they pass.
 
-1. `npm run lint:voice -- <slug>` — must end with `1/1 projects clean`. A
-   warning may stay only if fixing it would make the copy wrong; say why in
-   the report.
+1. `npm run lint:voice -- <slug>` — must end `1/1 projects clean`. Codebase
+   count and metric warnings are never acceptable. Any other kept warning
+   needs a reason in the report.
 2. `node -e "JSON.parse(require('fs').readFileSync('content/projects/<slug>/meta.json','utf8'))"`
-3. `node scripts/check-assets.mjs` — image budgets.
-4. By hand: every number in `meta.json`, `en.mdx` and `id.mdx` appears in your
-   Step 2 list. Every date matches the timeframe. No section 9 item appears.
+3. `node scripts/check-assets.mjs`
+4. Ledger audit, by hand, sentence by sentence through `en.mdx`, `meta.json`
+   and `id.mdx`: each factual claim maps to a ledger line; no ledger `[ctx §9]`
+   item appears; every status phrase matches the table in Step 6; every date
+   matches `timeframe` or `launched`. Fix, then audit again.
 
-A full `npm run build` needs network access for fonts; run it if you can, and
-say so if you couldn't.
+`npm run build` needs network access for fonts; run it if you can, and say so
+if you couldn't.
 
-## Step 8 — Commit
+## Step 10 — Commit
 
-One project per commit. Stage only that project's three files:
+One project per commit, only its three files:
 
 ```
 git add content/projects/<slug>/meta.json content/projects/<slug>/en.mdx content/projects/<slug>/id.mdx
 git commit -m "content(<slug>): take in portfolio context of <generated date>
 
-<one or two lines: what changed — new project, new numbers, status change,
-corrections applied>"
+<what changed, as facts: "metrics: X → Y", "status wording: staging → live",
+"added section 8 correction: README test count">"
 ```
 
-End the commit message with the attribution lines your session requires.
-`PORTFOLIO_CONTEXT.md` is git-ignored; never force-add it. Don't push unless
-the user asks.
+- Call something a "correction" only if it is in section 8.
+- Don't describe a removed fact as "stale" or "wrong" unless section 8 says so;
+  write "removed: <fact> (not in the fact sheet)".
+- End with the attribution lines your session requires. Never force-add
+  `PORTFOLIO_CONTEXT.md`. Don't push unless asked.
 
-## Step 9 — Report
+## Step 11 — Report
 
-For each project, tell the user:
+For each project: new or updated; the tagline; metrics before → after;
+conflicts found and how the fact sheet resolved them; facts removed; section 9
+items withheld (by category); validator and lint warnings; open questions.
 
-- new or updated, and the new English tagline;
-- numbers that changed from the previous version, and corrections applied;
-- validator warnings and any lint warning you kept;
-- open questions from section 9 (status you couldn't confirm, missing hero
-  screenshot, anything you left out).
+## Never
 
-## Things you must not do
-
-- Invent a number, date, user count, or roadmap item.
-- Use a `target` or `effort` row as a site metric.
-- Copy text from section 9, or any secret, anywhere.
-- Change `order`, `featured` or `heroImage` of an existing project unasked.
-- Touch other projects, components, or messages in the same commit.
-- Mark the context taken in (`source`) if Step 7 failed.
+- Invent a number, date, status, user count, name or roadmap item.
+- Publish a codebase count, a `target` row or an `effort` row as a metric or
+  in the visible story.
+- Say "in production" or "live since" beyond what the frontmatter supports.
+- Edit `PORTFOLIO_CONTEXT.md`, other projects, components or messages.
+- Record `source` if Step 9 failed.

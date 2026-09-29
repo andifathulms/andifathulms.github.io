@@ -43,6 +43,11 @@ const ENUMS = {
 };
 const KINDS = ['impact', 'scale', 'effort', 'target'];
 
+// Counts of the codebase are effort, never scale or impact (EXPORT_PROMPT,
+// "Kinds, strictly"). A recruiter can't picture "45 models".
+export const CODE_TERMS =
+  /\b(django apps?|backend apps?|apps|modules?|(?:data|database|django|concrete) models?|tables?|endpoints?|viewsets?|routes?|route files|components?|files|migrations?|seed(ed)? rows|masterdata rows|lines|loc|tests?|test functions|commits?|days)\b/i;
+
 // Secrets and internal identifiers. Errors: these must never reach the site's
 // source tree, even in a git-ignored file that a later session might quote.
 const SECRETS = [
@@ -118,6 +123,10 @@ export function checkContext(file, expectedSlug) {
     warnings.push(`frontmatter: status "${fm.status}" but liveUrl is set; the site will not link it`);
   }
   if (fm.status === 'internal' && fm.access === 'public') warnings.push('frontmatter: status "internal" with access "public" — check which is right');
+  if (fm.launched !== undefined && fm.launched !== null && !DATE.test(asDate(fm.launched))) {
+    errors.push('frontmatter: launched must be YYYY-MM-DD or null');
+  }
+  if (fm.launched === undefined) warnings.push('frontmatter: "launched" is missing (use null if unknown)');
 
   // Sections, in order.
   const headings = [...body.matchAll(/^##\s+(.+?)\s*$/gm)].map((m) => m[1]);
@@ -148,11 +157,17 @@ export function checkContext(file, expectedSlug) {
     if (!metric || !value) errors.push(`section 5 row ${i + 1} is missing a metric or value`);
     if (!KINDS.includes((kind ?? '').toLowerCase())) errors.push(`section 5 row ${i + 1}: kind "${kind}" is not one of ${KINDS.join(' | ')}`);
     if (!source || /^(-|n\/a|none|unknown)$/i.test(source)) errors.push(`section 5 row ${i + 1} ("${metric}") has no source`);
+    if (['impact', 'scale'].includes((kind ?? '').toLowerCase()) && CODE_TERMS.test(metric ?? '')) {
+      errors.push(`section 5 row ${i + 1} ("${metric}") counts the codebase; its kind must be "effort", not "${kind}"`);
+    }
   });
   const impact = rows.filter(([, , k]) => ['impact', 'scale'].includes((k ?? '').toLowerCase())).length;
   if (rows.length && impact < 2) warnings.push(`section 5 has ${impact} impact/scale rows; the case study needs 3–4 metrics`);
 
   if (section('1. Summary').length === 0) errors.push('section 1 is empty');
+  if (fm.status === 'live' && /\bstaging\b/i.test(section('3. My role'))) {
+    warnings.push('status is "live" but section 3 mentions staging — the intake will stop until this is confirmed');
+  }
   if (section('2. Audience and problem').split(/\s+/).length < 40) warnings.push('section 2 is very short (< 40 words)');
 
   for (const [re, what] of SECRETS) {

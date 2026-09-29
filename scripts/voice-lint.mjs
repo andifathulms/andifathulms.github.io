@@ -68,6 +68,14 @@ const BANNED = {
 
 const BUDGET = { min: 350, max: 700, sentence: 22 };
 
+// A number followed by a piece of the codebase ("45 models", "14 viewsets").
+// Fine under Under the hood; in the visible story or in metrics it's an effort
+// figure dressed as an outcome (VOICE.md rule 5).
+const CODE_COUNT =
+  /\b~?\d[\d.,]*\+?\s+(?:[a-z]+\s+)?(django apps?|backend apps?|apps|data models|database models|django models|tables|endpoints|api endpoint groups|viewsets|routes|route files|components|migrations|seed(?:ed)? rows|masterdata rows|test functions|tests|aplikasi backend|model basis data|endpoint|tabel|rute)\b/gi;
+const CODE_LABEL =
+  /\b(django apps?|backend apps?|(?:data|database|django|concrete) models?|model basis data|tables?|endpoints?|viewsets?|routes?|components?|migrations?|seed(ed)? rows|masterdata|test functions|tests?|commits?|aplikasi backend|model basis data|tabel|rute|tes)\b/i;
+
 /** Split MDX into its visible part and the "Under the hood" part. */
 function splitHood(mdx, locale) {
   const marker = new RegExp(`^##\\s+${HEADINGS[locale].hood}\\s*$`, 'm');
@@ -132,6 +140,9 @@ function lintMdx(slug, locale, warn) {
   const xNotY = headingsVisible.filter((h) => /,\s*(not|bukan)\s/i.test(h) || /:\s/.test(h));
   if (xNotY.length) warn(`${locale}: heading reads as a reveal — "${xNotY[0]}"`);
 
+  const counts = prose(visible).match(CODE_COUNT) || [];
+  if (counts.length) warn(`${locale}: codebase count in the visible story — "${counts[0]}" (move it to ${HEADINGS[locale].hood})`);
+
   const code = (stripFences(visible).match(/`[^`]+`/g) || []).length;
   if (code) warn(`${locale}: ${code} inline code span(s) above "${HEADINGS[locale].hood}"`);
 
@@ -160,6 +171,7 @@ function lintMeta(slug, warn) {
     }
     for (const x of m?.metrics ?? []) {
       if (/commit|lines? of|baris kode|\bLOC\b/i.test(x.label)) warn(`${label}metric "${x.label}" is an effort metric`);
+      else if (CODE_LABEL.test(x.label)) warn(`${label}metric "${x.label}" counts the codebase, not something a reader can picture`);
     }
   };
 
