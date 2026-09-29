@@ -1,9 +1,8 @@
-import { existsSync } from 'fs';
-import path from 'path';
 import * as si from 'simple-icons';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import CopyButton from '@/components/CopyButton';
+import { Link } from '@/i18n/navigation';
 import { CONTACT, routeMetadata } from '@/lib/site';
 
 export async function generateMetadata({
@@ -70,7 +69,6 @@ export default async function ContactPage({
 
   const mailto = `mailto:${CONTACT.email}?subject=${encodeURIComponent(t('email_subject'))}`;
   const whatsapp = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(t('whatsapp_message'))}`;
-  const hasResume = existsSync(path.join(process.cwd(), 'public', CONTACT.resumePath.replace(/^\//, '')));
 
   return (
     <div className="pt-page-top pb-section px-gutter">
@@ -81,20 +79,17 @@ export default async function ContactPage({
             <h1 className="font-heading text-h1 font-normal text-cream mb-4">
               {t('title')}
             </h1>
-            <p className="font-heading text-h3 text-gold mb-6">{t('subtitle')}</p>
+            <p className="font-heading text-h3 text-text-muted mb-6">{t('subtitle')}</p>
 
             {/* Availability status */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-line bg-gold/[0.04] px-3.5 py-1.5 mb-8">
-              {/* Flat dot. The pulsing halo it replaces was the last
-                  glow-adjacent effect on the site, against PRD §4's "no
-                  gradients, drop shadows, or glow/neon — flat surfaces". */}
-              <span className="inline-flex h-2 w-2 rounded-full bg-gold" />
-              <span className="font-mono text-meta text-text-muted">{t('availability')}</span>
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-line-strong px-3.5 py-1.5 mb-8">
+              <span aria-hidden="true" className="inline-flex h-2 w-2 rounded-full bg-lagoon" />
+              <span className="text-sm text-text-muted">{t('availability')}</span>
             </div>
 
             <p className="text-text-muted leading-relaxed mb-8">{t('body')}</p>
 
-            <p className="font-mono text-meta text-text-subtle border-t border-line pt-6 max-w-md">
+            <p className="text-body text-text-muted border-t border-line pt-6 max-w-md">
               {t('note')}
             </p>
           </div>
@@ -113,7 +108,7 @@ export default async function ContactPage({
               href={whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-4 rounded bg-gold px-5 py-4 text-navy transition-colors hover:bg-gold/90 mb-4"
+              className="group flex items-center gap-4 rounded-media bg-gold px-5 py-4 text-navy transition-colors hover:bg-gold/90 mb-4"
             >
               <ChannelIcon name="whatsapp" />
               <div>
@@ -129,7 +124,7 @@ export default async function ContactPage({
                 control fighting the row for the same click. */}
             <a
               href={mailto}
-              className="group flex items-center gap-4 rounded border border-edge px-5 py-4 transition-colors hover:border-edge-strong mb-2"
+              className="group flex items-center gap-4 rounded-media border border-edge bg-deck px-5 py-4 transition-colors hover:border-edge-strong mb-2"
             >
               <span className="text-text-subtle transition-colors group-hover:text-cream">
                 <ChannelIcon name="email" />
@@ -167,17 +162,13 @@ export default async function ContactPage({
                   <ChannelIcon name="linkedin" />
                   {t('linkedin_cta')}
                 </a>
-                {hasResume && (
-                  <a
-                    href={CONTACT.resumePath}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group min-h-touch inline-flex items-center gap-2.5 text-sm text-text-muted transition-colors hover:text-gold"
-                  >
-                    <ChannelIcon name="resume" />
-                    {t('resume_download')}
-                  </a>
-                )}
+                <Link
+                  href="/cv"
+                  className="group min-h-touch inline-flex items-center gap-2.5 text-sm text-text-muted transition-colors hover:text-gold"
+                >
+                  <ChannelIcon name="resume" />
+                  {t('resume_download')}
+                </Link>
               </div>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { routeMetadata } from '@/lib/site';
 import { Link } from '@/i18n/navigation';
-import StackIcon from '@/components/StackIcon';
+import StackUsageList from '@/components/StackUsageList';
 import SocialLinks from '@/components/SocialLinks';
 import PrintButton from '@/components/PrintButton';
 import { getFeaturedProjects, getPortfolioStats, getStackUsage } from '@/lib/content';
@@ -79,7 +79,7 @@ export default async function AboutPage({
               />
             </div>
           ) : (
-            <div className="w-64 h-64 md:w-80 md:h-80 mx-auto md:mx-0 rounded-2xl bg-navy border border-line flex items-center justify-center flex-shrink-0">
+            <div className="w-64 h-64 md:w-80 md:h-80 mx-auto md:mx-0 rounded-2xl bg-deck border border-line flex items-center justify-center flex-shrink-0">
               <span className="font-heading text-display text-accent select-none">AF</span>
             </div>
           )}
@@ -142,7 +142,7 @@ export default async function AboutPage({
 
         <div className="max-w-prose">
           {/* 2. Bio paragraphs */}
-          <div className="space-y-6 text-text-muted leading-relaxed">
+          <div className="space-y-6 text-lead text-text-prose leading-relaxed">
             <p>{t('bio_1')}</p>
             <p>{t('bio_2')}</p>
             <p>{t('bio_3')}</p>
@@ -170,45 +170,21 @@ export default async function AboutPage({
               {t('stack_note', { total: stats.total })}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1">
-              {stackTop.map((tech) => (
-                <Link
-                  key={tech.name}
-                  href={`/work?q=${encodeURIComponent(tech.name)}`}
-                  className="group min-h-touch flex items-center gap-3 border-b border-line py-2.5 transition-colors hover:border-line-strong"
-                >
-                  <StackIcon name={tech.name} className="w-5 h-5 flex-shrink-0 text-text-subtle transition-colors group-hover:text-gold" />
-                  <span className="font-mono text-meta text-text-muted transition-colors group-hover:text-cream">
-                    {tech.name}
-                  </span>
-                  <span className="ml-auto font-mono text-meta text-text-subtle">
-                    {t('stack_systems', { count: tech.count })}
-                  </span>
-                </Link>
-              ))}
-            </div>
+            <StackUsageList
+              items={stackTop}
+              countLabel={(count) => t('stack_systems', { count })}
+            />
 
             {stackRest.length > 0 && (
               <details className="mt-1 group/details">
                 <summary className="cursor-pointer list-none font-mono text-meta text-accent uppercase tracking-wider pt-3 pb-1 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold [&::-webkit-details-marker]:hidden">
                   {t('stack_show_more', { count: stackRest.length })}
                 </summary>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1 mt-2">
-                  {stackRest.map((tech) => (
-                    <Link
-                      key={tech.name}
-                      href={`/work?q=${encodeURIComponent(tech.name)}`}
-                      className="group min-h-touch flex items-center gap-3 border-b border-line py-2.5 transition-colors hover:border-line-strong"
-                    >
-                      <StackIcon name={tech.name} className="w-5 h-5 flex-shrink-0 text-text-subtle transition-colors group-hover:text-gold" />
-                      <span className="font-mono text-meta text-text-muted transition-colors group-hover:text-cream">
-                        {tech.name}
-                      </span>
-                      <span className="ml-auto font-mono text-meta text-text-subtle">
-                        {t('stack_systems', { count: tech.count })}
-                      </span>
-                    </Link>
-                  ))}
+                <div className="mt-2">
+                  <StackUsageList
+                    items={stackRest}
+                    countLabel={(count) => t('stack_systems', { count })}
+                  />
                 </div>
               </details>
             )}
@@ -232,7 +208,7 @@ export default async function AboutPage({
                   <Link
                     key={project.slug}
                     href={`/work/${project.slug}`}
-                    className="group min-h-touch inline-flex items-center gap-1.5 rounded border border-edge px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
+                    className="group min-h-touch inline-flex items-center gap-1.5 rounded-control border border-edge px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
                   >
                     {project.title}
                     {/* The canonical arrow-reveal: hidden and offset at rest,
@@ -250,7 +226,7 @@ export default async function AboutPage({
               </div>
               <Link
                 href="/work"
-                className="text-sm text-accent hover:text-cream transition-colors"
+                className="inline-flex min-h-touch items-center text-sm font-medium text-gold hover:text-cream transition-colors"
               >
                 {t('view_all_work')} →
               </Link>
@@ -263,12 +239,20 @@ export default async function AboutPage({
               {t('cta_title')}
             </h2>
             <p className="text-text-muted mb-6">{t('cta_body')}</p>
-            <Link
-              href="/contact"
-              className="inline-block px-6 py-3 bg-gold text-navy text-sm font-medium rounded hover:bg-gold/90 transition-colors"
-            >
-              {t('cta_button')}
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/contact"
+                className="inline-flex min-h-touch items-center rounded-control bg-gold px-5 py-3 text-sm font-medium text-navy transition-colors hover:bg-gold/90"
+              >
+                {t('cta_button')}
+              </Link>
+              <Link
+                href="/cv"
+                className="inline-flex min-h-touch items-center rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
+              >
+                {t('cta_cv')}
+              </Link>
+            </div>
           </div>
         </div>
 

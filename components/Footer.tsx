@@ -1,18 +1,28 @@
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
+import { SOCIALS } from '@/lib/site';
 
 export default function Footer() {
   const t = useTranslations('footer');
   const tn = useTranslations('nav');
+  // Build time is "now" for a static site; the year moves on with each deploy.
+  const year = new Date().getFullYear();
+
+  const pages = [
+    { href: '/work', label: tn('work') },
+    { href: '/lab', label: tn('lab') },
+    { href: '/about', label: tn('about') },
+    { href: '/cv', label: tn('cv') },
+    { href: '/contact', label: tn('contact') },
+  ];
 
   return (
-    <footer className="border-t border-line mt-24">
-      <div className="max-w-page mx-auto px-gutter py-section-tight">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
-          {/* Left: tagline + copyright */}
+    <footer className="mt-24 border-t border-line">
+      <div className="mx-auto max-w-page px-gutter py-section-tight">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-[1.4fr_1fr_1fr] md:gap-8">
           <div>
-            <div className="flex items-center gap-2.5 mb-3">
+            <div className="mb-4 flex items-center gap-2.5">
               <Image
                 src="/images/brand/logo-mark.svg"
                 alt=""
@@ -21,61 +31,42 @@ export default function Footer() {
                 height={32}
                 className="h-8 w-8 rounded-[7px]"
               />
-              <p className="font-heading text-lead font-normal text-cream">AFM Studio</p>
+              <p className="font-heading text-lead text-cream">AFM Studio</p>
             </div>
-            <p className="text-body text-text-muted leading-relaxed mb-4">{t('tagline')}</p>
-            <p className="font-mono text-meta text-text-subtle">{t('copyright')}</p>
+            <p className="mb-5 max-w-sm text-body leading-relaxed text-text-muted">{t('tagline')}</p>
+            <p className="font-mono text-xs text-text-subtle">{t('copyright', { year })}</p>
           </div>
 
-          {/* Middle: quick links */}
           <div>
-            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-4">
+            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-text-subtle">
               {t('links_title')}
             </p>
-            <nav className="flex flex-col gap-2">
-              {[
-                { href: '/work', label: tn('work') },
-                { href: '/about', label: tn('about') },
-                { href: '/contact', label: tn('contact') },
-              ].map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="text-sm text-text-muted hover:text-cream transition-colors w-fit"
-                >
+            <nav className="flex flex-col gap-2.5">
+              {pages.map(({ href, label }) => (
+                <Link key={href} href={href} className="w-fit text-sm text-text-muted transition-colors hover:text-cream">
                   {label}
                 </Link>
               ))}
             </nav>
           </div>
 
-          {/* Right: socials + currently building */}
           <div>
-            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-4">
+            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-text-subtle">
               {t('social_title')}
             </p>
-            <div className="flex flex-col gap-2 mb-6">
-              {[
-                { href: 'https://github.com/andifathulms', label: 'GitHub' },
-                { href: 'https://linkedin.com/in/andifathulmukminin', label: 'LinkedIn' },
-                { href: 'https://tiktok.com/@nusantaramapper', label: 'TikTok' },
-                { href: 'mailto:officialandifathul@gmail.com', label: 'Email' },
-              ].map(({ href, label }) => (
+            <div className="flex flex-col gap-2.5">
+              {SOCIALS.map(({ href, label }) => (
                 <a
                   key={href}
                   href={href}
                   target={href.startsWith('http') ? '_blank' : undefined}
                   rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  className="text-sm text-text-muted hover:text-cream transition-colors w-fit"
+                  className="w-fit text-sm text-text-muted transition-colors hover:text-cream"
                 >
                   {label}
                 </a>
               ))}
             </div>
-            <p className="font-mono text-meta text-text-subtle">
-              {t('currently_building')}{' '}
-              <span className="text-accent-2">AFM Studio</span>
-            </p>
           </div>
         </div>
       </div>

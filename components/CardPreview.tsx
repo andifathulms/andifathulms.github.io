@@ -61,7 +61,7 @@ export default function CardPreview({ hero, images, alt, sizes }: CardPreviewPro
           alt={alt}
           fill
           sizes={sizes}
-          className="object-cover opacity-70 transition-transform duration-500 group-hover:scale-[1.04] group-hover:opacity-90 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+          className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -79,7 +79,7 @@ export default function CardPreview({ hero, images, alt, sizes }: CardPreviewPro
             fill
             sizes={sizes}
             loading="lazy"
-            className={`object-cover transition-opacity duration-500 ${
+            className={`object-cover object-top transition-opacity duration-500 ${
               hovering && index === i ? 'opacity-100' : 'opacity-0'
             }`}
           />

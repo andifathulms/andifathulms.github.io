@@ -11,7 +11,7 @@ export default function PrintButton({ label }: { label: string }) {
     <button
       type="button"
       onClick={() => window.print()}
-      className="print-hide min-h-touch inline-flex items-center gap-2 rounded border border-edge px-3.5 py-2 font-mono text-meta text-text-subtle transition-colors hover:border-edge-accent hover:text-gold"
+      className="print-hide min-h-touch inline-flex items-center gap-2 rounded-control border border-edge px-4 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
     >
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path

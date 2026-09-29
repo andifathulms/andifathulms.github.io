@@ -25,19 +25,20 @@ export default function ProcessSection() {
   return (
     <section className="reveal border-t border-line py-section-tight px-gutter">
       <div className="max-w-page mx-auto">
-        <SectionHeading title={t('title')} subtitle={t('subtitle')} className="mb-stack" />
+        <SectionHeading tone="primary" title={t('title')} subtitle={t('subtitle')} className="mb-stack" />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+        {/* Numbered because it is a real sequence: spec, then plan, then build. */}
+        <ol className="mb-10 grid grid-cols-1 gap-px overflow-hidden rounded-media border border-line bg-line md:grid-cols-3">
           {steps.map((step) => (
-            <div key={step.label}>
-              <p className="font-mono text-meta text-accent mb-3">{step.label}</p>
-              <h3 className="font-heading text-lead font-normal text-cream mb-3">{step.title}</h3>
-              <p className="text-body text-text-muted leading-relaxed">{step.description}</p>
-            </div>
+            <li key={step.label} className="bg-navy p-6 sm:p-7">
+              <p className="mb-4 font-mono text-meta text-gold">{step.label}</p>
+              <h3 className="mb-3 font-sans text-lead font-semibold text-cream">{step.title}</h3>
+              <p className="text-body leading-relaxed text-text-muted">{step.description}</p>
+            </li>
           ))}
-        </div>
+        </ol>
 
-        <p className="font-mono text-meta text-text-subtle border-t border-line pt-6">
+        <p className="max-w-3xl border-l-2 border-edge-accent pl-5 text-lead text-text-prose">
           {t('note')}
         </p>
       </div>

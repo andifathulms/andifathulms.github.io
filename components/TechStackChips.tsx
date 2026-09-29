@@ -39,7 +39,7 @@ export default function TechStackChips({
         linked ? (
           <Link
             key={tech}
-            href={`/work?q=${encodeURIComponent(tech)}`}
+            href={`/lab?filter=all&q=${encodeURIComponent(tech)}`}
             className={`${chipClass} min-h-touch inline-flex items-center transition-colors hover:border-edge-accent hover:text-cream`}
           >
             {tech}

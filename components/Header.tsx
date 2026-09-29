@@ -16,9 +16,11 @@ export default function Header() {
 
   const navLinks = [
     { href: '/work', label: t('work') },
+    { href: '/lab', label: t('lab') },
     { href: '/about', label: t('about') },
-    { href: '/contact', label: t('contact') },
+    { href: '/cv', label: t('cv') },
   ];
+  const contactActive = pathname === '/contact';
 
   // While the mobile menu is open it behaves as a modal surface: Escape
   // closes it, Tab cycles inside it, the page underneath doesn't scroll, and
@@ -81,11 +83,12 @@ export default function Header() {
   }, [menuOpen]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-line bg-navy/95 backdrop-blur-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-line bg-navy/90 backdrop-blur-sm">
       <div className="max-w-page mx-auto px-gutter h-16 flex items-center justify-between">
         <Link
           href="/"
           className="group flex items-center gap-2.5 font-heading text-lead font-normal text-cream transition-colors hover:text-gold"
+          aria-label="AFM Studio — Andi Fathul Mukminin"
         >
           <Image
             src="/images/brand/logo-mark.svg"
@@ -100,7 +103,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8" aria-label={ta('main_nav')}>
+        <nav className="hidden md:flex items-center gap-7" aria-label={ta('main_nav')}>
           {navLinks.map(({ href, label }) => {
             const active = pathname === href || pathname.startsWith(href + '/');
             return (
@@ -109,13 +112,20 @@ export default function Header() {
                 href={href}
                 aria-current={active ? 'page' : undefined}
                 className={`nav-link text-sm transition-colors ${
-                  active ? 'text-gold' : 'text-text-muted hover:text-cream'
+                  active ? 'text-cream' : 'text-text-muted hover:text-cream'
                 }`}
               >
                 {label}
               </Link>
             );
           })}
+          <Link
+            href="/contact"
+            aria-current={contactActive ? 'page' : undefined}
+            className="inline-flex h-9 items-center rounded-control bg-gold px-4 text-sm font-medium text-navy transition-colors hover:bg-gold/90"
+          >
+            {t('contact')}
+          </Link>
           <LocaleSwitcher />
         </nav>
 
@@ -148,14 +158,14 @@ export default function Header() {
           aria-label={ta('main_nav')}
           className="md:hidden border-t border-line bg-navy px-gutter py-4 flex flex-col gap-4"
         >
-          {navLinks.map(({ href, label }) => {
+          {[...navLinks, { href: '/contact', label: t('contact') }].map(({ href, label }) => {
             const active = pathname === href || pathname.startsWith(href + '/');
             return (
               <Link
                 key={href}
                 href={href}
                 aria-current={active ? 'page' : undefined}
-                className={`text-sm transition-colors ${
+                className={`min-h-touch inline-flex items-center text-base transition-colors ${
                   active ? 'text-gold' : 'text-text-muted'
                 }`}
                 onClick={() => setMenuOpen(false)}

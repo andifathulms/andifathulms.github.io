@@ -2,8 +2,9 @@ import fs from 'fs';
 import path from 'path';
 
 import { PROBLEM_SHAPES, type ProblemShape } from './shapes';
+import { isLive, trackOf, yearOf, type Track } from './project';
 
-export { PROBLEM_SHAPES, type ProblemShape };
+export { PROBLEM_SHAPES, type ProblemShape, isLive, trackOf, yearOf, type Track };
 
 export interface ProjectMeta {
   slug: string;
@@ -58,6 +59,13 @@ export function localizeProject(project: ProjectMeta, locale?: string): ProjectM
   return { ...base, ...id };
 }
 
+/** Every real project on one track, in manifest `order`. */
+export function getTrackProjects(track: Track, locale?: string): ProjectMeta[] {
+  return getAllProjects(locale).filter(
+    (p) => p.status !== 'placeholder' && trackOf(p) === track
+  );
+}
+
 export interface PortfolioStats {
   total: number;
   government: number;
@@ -71,12 +79,12 @@ export interface PortfolioStats {
  */
 export function getPortfolioStats(): PortfolioStats {
   const projects = getAllProjects().filter((p) => p.status !== 'placeholder');
-  const isGov = (p: ProjectMeta) => p.categoryTags.includes('Government');
+  const isGov = (p: ProjectMeta) => trackOf(p) === 'government';
   return {
     total: projects.length,
     government: projects.filter(isGov).length,
     independent: projects.filter((p) => !isGov(p)).length,
-    live: projects.filter((p) => p.liveUrl && !p.liveIsStaging).length,
+    live: projects.filter(isLive).length,
   };
 }
 
@@ -269,11 +277,18 @@ export function getProjectScreenshots(slug: string): ProjectScreenshot[] {
     });
 }
 
+/**
+ * Previous / next within the same track, so reading through the government
+ * systems doesn't drop the reader into a browser game halfway.
+ */
 export function getAdjacentProjects(
   currentSlug: string,
   locale?: string
 ): { prev: ProjectMeta | null; next: ProjectMeta | null } {
-  const all = getAllProjects(locale).filter((p) => p.status !== 'placeholder');
+  const current = getProjectMeta(currentSlug);
+  const all = current
+    ? getTrackProjects(trackOf(current), locale)
+    : getAllProjects(locale).filter((p) => p.status !== 'placeholder');
   const index = all.findIndex((p) => p.slug === currentSlug);
   return {
     prev: index > 0 ? all[index - 1] : null,

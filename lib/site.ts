@@ -8,8 +8,7 @@ export const CONTACT = {
   email: 'officialandifathul@gmail.com',
   whatsapp: '6281355056456', // international format, no leading 0 / no +
   linkedin: 'https://linkedin.com/in/andifathulmukminin',
-  // Résumé lives at public/andi-fathul-mukminin-cv.pdf when present.
-  resumePath: '/andi-fathul-mukminin-cv.pdf',
+  github: 'https://github.com/andifathulms',
 };
 
 // Social / professional channels — surfaced on About, home, and footer.
