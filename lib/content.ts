@@ -136,6 +136,7 @@ const FEATURED_ORDER = [
   'quranlytics', // indep · data
   'gempa-watch', // indep · data
   'zero-shadow-day', // indep · explainer
+  'pola-hujan', // indep · explainer
 ];
 
 export function getFeaturedProjects(limit = 3): ProjectMeta[] {

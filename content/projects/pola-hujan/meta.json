@@ -25,7 +25,7 @@
   "githubUrl": "https://github.com/andifathulms/pola-hujan",
   "heroImage": "/images/projects/pola-hujan/hero.webp",
   "order": 37,
-  "featured": false,
+  "featured": true,
   "metrics": [
     {
       "value": "34",
