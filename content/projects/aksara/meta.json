@@ -41,8 +41,16 @@
   "featured": true,
   "metrics": [
     {
+      "value": "43",
+      "label": "government units sharing one document library"
+    },
+    {
       "value": "10",
-      "label": "Eselon-1 units sharing one library"
+      "label": "knowledge domains organizing the whole archive"
+    },
+    {
+      "value": "92",
+      "label": "topic subcategories under those ten domains"
     },
     {
       "value": "3",
@@ -63,8 +71,16 @@
     ],
     "metrics": [
       {
+        "value": "43",
+        "label": "unit pemerintahan yang berbagi satu perpustakaan"
+      },
+      {
         "value": "10",
-        "label": "unit Eselon-1 dalam satu perpustakaan"
+        "label": "domain pengetahuan yang menyusun seluruh arsip"
+      },
+      {
+        "value": "92",
+        "label": "subkategori topik di bawah sepuluh domain itu"
       },
       {
         "value": "3",
