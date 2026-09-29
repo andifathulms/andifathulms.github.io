@@ -23,44 +23,40 @@ it; the PRD covers *what* and *why*.
 
 ## Design tokens
 
-Implement these as CSS variables / Tailwind theme extensions — do not
-hardcode hex values throughout components.
+`DESIGN.md` is the source of truth for the visual system; the tokens live in
+the `@theme` block of `app/globals.css` (Tailwind v4). Do not hardcode hex
+values in components.
 
-```js
-// tailwind.config.js theme.extend.colors
-colors: {
-  navy: '#0D1B2A',   // base background
-  clay: '#C9603D',   // accent 1 — secondary accent, dividers, hover
-  gold: '#C99A3E',   // accent 2 — primary accent, CTAs, links
-  cream: '#E8E3D8',  // body text on dark backgrounds
-}
+```css
+--color-navy:   #0A1520;  /* page background (archival ink)            */
+--color-deck:   #0F1D2B;  /* raised surface: featured rows, panels      */
+--color-deck-2: #14263A;  /* surface inside a deck: chips, code         */
+--color-gold:   #E0AE52;  /* act here: primary CTA, links, active state */
+--color-clay:   #E07A56;  /* government track marker                    */
+--color-lagoon: #6FB8AB;  /* independent lab marker, "Live" status      */
+--color-cream:  #EEE8DC;  /* text                                       */
 ```
 
-- Dark-first design. The navy background is the default surface — do not
-  build this as a light theme with a dark mode toggle; it is dark by design.
-- No gradients, no drop shadows, no glow/neon effects. Flat surfaces.
-- Section dividers: thin gold hairlines (`border-t border-gold/30` style),
-  not boxed cards with hard borders, for the marketing/editorial pages.
-- Case study quick-facts strip and stack-chip components CAN use subtle
-  bordered "chip" styling (small radius, 1px border) since those are
-  functional UI elements, not editorial content blocks.
+- Dark-first design. Navy is the page; there is no light theme or toggle.
+- No gradients, no drop shadows, no glow/neon effects. Depth comes from the
+  navy → deck → deck-2 surfaces and hairline borders only.
+- Section dividers are neutral hairlines (`border-t border-line`).
+- Bordered chips are for filters, skills and the full stack list on case
+  studies. Project cards use a single label line instead.
 
 ## Typography
 
 ```js
-// fonts — use next/font for optimization
-heading: 'Fraunces' (serif) — fallback: Lora, Georgia, serif
-body:    'Inter' (sans)     — fallback: 'General Sans', system-ui, sans-serif
-mono:    'JetBrains Mono'   — fallback: 'IBM Plex Mono', monospace
+// fonts — loaded with next/font/google in app/[locale]/layout.tsx
+heading: 'Fraunces' (variable, SOFT + opsz axes) — fallback: Lora, Georgia, serif
+body:    'Geist' (sans)                          — fallback: Inter, system-ui, sans-serif
+mono:    'Geist Mono'                            — fallback: 'JetBrains Mono', monospace
 ```
 
-- Headings use the serif (`font-heading` Tailwind class).
-- Body copy, nav, buttons use the sans (`font-sans`, Tailwind default).
-- Tech-stack chips, dates, tags, project metadata use the mono
-  (`font-mono`).
-- Limit to two font weights per family in practice — regular (400) and
-  medium/semibold (500-600). Avoid heavy/black weights — they clash with the
-  editorial tone described in the PRD.
+- Headings use the serif (`font-heading`) at weight 400 (`font-normal`).
+- Body copy, nav, buttons and category labels use the sans (`font-sans`).
+- Numbers, dates, timeframes and kicker labels use the mono (`font-mono`).
+- Weights: 400–600. Never heavier.
 
 ## Routing structure
 
@@ -69,8 +65,12 @@ app/
   [locale]/
     layout.tsx              — locale-aware root layout, header, footer
     page.tsx                — home
+    lab/
+      page.tsx               — independent project index (grid / list, search)
+    cv/
+      page.tsx               — printable HTML résumé built from the manifests
     work/
-      page.tsx               — case study index
+      page.tsx               — government systems (feature rows)
       [slug]/
         page.tsx              — case study detail (generateStaticParams
                                  from content files, see Content model)

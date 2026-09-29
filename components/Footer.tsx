@@ -21,7 +21,7 @@ export default function Footer() {
                 height={32}
                 className="h-8 w-8 rounded-[7px]"
               />
-              <p className="font-heading text-lead font-medium text-cream">AFM Studio</p>
+              <p className="font-heading text-lead font-normal text-cream">AFM Studio</p>
             </div>
             <p className="text-body text-text-muted leading-relaxed mb-4">{t('tagline')}</p>
             <p className="font-mono text-meta text-text-subtle">{t('copyright')}</p>

@@ -73,7 +73,7 @@ export default function ProjectCard({
             className="h-8 w-8 flex-shrink-0 rounded-lg border border-edge object-cover"
           />
         )}
-        <h3 className="font-heading text-h3 font-medium text-cream group-hover:text-gold transition-colors">
+        <h3 className="font-heading text-h3 font-normal text-cream group-hover:text-gold transition-colors">
           {project.title}
           <span
             aria-hidden="true"

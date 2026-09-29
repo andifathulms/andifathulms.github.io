@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google';
+import { Fraunces, Geist, Geist_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
@@ -11,23 +11,26 @@ import Footer from '@/components/Footer';
 import Analytics from '@/components/Analytics';
 import '../globals.css';
 
+// Fraunces is loaded as a variable font so the optical-size and SOFT axes are
+// available: at display sizes, opsz 144 + SOFT is what makes it read as
+// editorial rather than as a heavy default serif.
 const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-fraunces',
-  weight: ['400', '500'],
+  axes: ['SOFT', 'opsz'],
+  style: ['normal', 'italic'],
   display: 'swap',
 });
 
-const inter = Inter({
+const geist = Geist({
   subsets: ['latin'],
-  variable: '--font-inter',
-  weight: ['400', '500'],
+  variable: '--font-geist',
   display: 'swap',
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const geistMono = Geist_Mono({
   subsets: ['latin'],
-  variable: '--font-jetbrains-mono',
+  variable: '--font-geist-mono',
   weight: ['400', '500'],
   display: 'swap',
 });
@@ -110,7 +113,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${fraunces.variable} ${geist.variable} ${geistMono.variable}`}
     >
       <body>
         <script

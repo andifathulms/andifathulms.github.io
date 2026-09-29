@@ -88,7 +88,7 @@ export default async function AboutPage({
             <p className="font-mono text-meta text-gold uppercase tracking-widest mb-4">
               {t('intro')}
             </p>
-            <h1 className="font-heading text-h1 font-medium text-cream mb-8">
+            <h1 className="font-heading text-h1 font-normal text-cream mb-8">
               {t('title')}
             </h1>
             <div className="space-y-3">
@@ -124,7 +124,7 @@ export default async function AboutPage({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {statItems.map((s) => (
               <div key={s.label}>
-                <p className="font-heading text-stat font-medium text-cream leading-none mb-1.5">
+                <p className="font-heading text-stat font-normal text-cream leading-none mb-1.5">
                   {s.value}
                 </p>
                 <p className="text-meta text-text-subtle leading-snug">{s.label}</p>
@@ -135,7 +135,7 @@ export default async function AboutPage({
 
         {/* Positioning statement */}
         <figure className="max-w-doc mb-16 border-l-2 border-edge-accent pl-6">
-          <blockquote className="font-heading text-h2 font-medium text-text-muted leading-snug">
+          <blockquote className="font-heading text-h2 font-normal text-text-muted leading-snug">
             {t('pull_quote')}
           </blockquote>
         </figure>
@@ -259,7 +259,7 @@ export default async function AboutPage({
 
           {/* 6. CTA */}
           <div className="border-t border-line mt-14 pt-10">
-            <h2 className="font-heading text-h2 font-medium text-cream mb-3">
+            <h2 className="font-heading text-h2 font-normal text-cream mb-3">
               {t('cta_title')}
             </h2>
             <p className="text-text-muted mb-6">{t('cta_body')}</p>

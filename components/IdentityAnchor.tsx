@@ -42,7 +42,7 @@ export default function IdentityAnchor() {
             <p className="font-mono text-meta text-gold uppercase tracking-widest mb-4">
               {t('label')}
             </p>
-            <h2 className="font-heading text-h3 font-medium text-cream mb-4">
+            <h2 className="font-heading text-h3 font-normal text-cream mb-4">
               {t('name')}
             </h2>
             <p className="text-text-muted leading-relaxed mb-6 text-lead">

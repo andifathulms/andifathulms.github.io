@@ -34,7 +34,7 @@ export default async function WorkPage({
     <div className="pt-page-top pb-section px-gutter">
       <div className="max-w-page mx-auto">
         <div className="mb-16">
-          <h1 className="font-heading text-h1 font-medium text-cream mb-4">
+          <h1 className="font-heading text-h1 font-normal text-cream mb-4">
             {t('title')}
           </h1>
           <p className="text-text-muted max-w-lg">{t('subtitle')}</p>

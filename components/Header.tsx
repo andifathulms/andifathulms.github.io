@@ -85,7 +85,7 @@ export default function Header() {
       <div className="max-w-page mx-auto px-gutter h-16 flex items-center justify-between">
         <Link
           href="/"
-          className="group flex items-center gap-2.5 font-heading text-lead font-medium text-cream transition-colors hover:text-gold"
+          className="group flex items-center gap-2.5 font-heading text-lead font-normal text-cream transition-colors hover:text-gold"
         >
           <Image
             src="/images/brand/logo-mark.svg"

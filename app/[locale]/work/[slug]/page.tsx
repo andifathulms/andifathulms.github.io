@@ -148,7 +148,7 @@ export default async function CaseStudyPage({
                 </span>
               ))}
             </div>
-            <h1 className="font-heading text-h1 font-medium text-cream mb-2">
+            <h1 className="font-heading text-h1 font-normal text-cream mb-2">
               {project.title}
             </h1>
             <p className="text-text-muted text-lead">{project.tagline}</p>
@@ -241,7 +241,7 @@ export default async function CaseStudyPage({
 
         {/* Conversion CTA */}
         <section className="border-t border-line mt-16 pt-12 text-center">
-          <h2 className="font-heading text-h2 font-medium text-cream mb-3">
+          <h2 className="font-heading text-h2 font-normal text-cream mb-3">
             {t('cta_title')}
           </h2>
           <p className="text-text-muted mb-6 max-w-md mx-auto">{t('cta_body')}</p>

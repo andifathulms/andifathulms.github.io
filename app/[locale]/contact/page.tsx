@@ -78,7 +78,7 @@ export default async function ContactPage({
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Left: intro */}
           <div>
-            <h1 className="font-heading text-h1 font-medium text-cream mb-4">
+            <h1 className="font-heading text-h1 font-normal text-cream mb-4">
               {t('title')}
             </h1>
             <p className="font-heading text-h3 text-gold mb-6">{t('subtitle')}</p>

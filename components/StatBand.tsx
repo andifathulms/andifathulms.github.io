@@ -41,7 +41,7 @@ export default function StatBand({
           {/* Cream, not gold — the number itself is the credibility signal;
               gold stays reserved for the CTA and the arrow-reveal below. */}
           <span
-            className={`block font-heading font-medium text-cream leading-none ${
+            className={`block font-heading font-normal text-cream leading-none ${
               hero ? 'text-h2 mb-1.5' : 'text-stat mb-2.5'
             }`}
           >

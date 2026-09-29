@@ -28,7 +28,7 @@ export default function SectionHeading({
         <p className="font-mono text-meta uppercase tracking-widest text-accent mb-3">{eyebrow}</p>
       )}
       <h2
-        className={`font-heading font-medium text-cream ${
+        className={`font-heading font-normal text-cream ${
           primary ? 'text-h2 mb-4' : 'text-h3 mb-2.5'
         }`}
       >

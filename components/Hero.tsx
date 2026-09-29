@@ -13,7 +13,7 @@ export default function Hero({ stats }: { stats: PortfolioStats }) {
           <p className="anim-fade-up font-mono text-meta uppercase tracking-widest text-accent mb-5">
             {t('eyebrow')}
           </p>
-          <h1 className="anim-fade-up font-heading text-display font-medium text-cream mb-6">
+          <h1 className="anim-fade-up font-heading text-display font-normal text-cream mb-6">
             {t('headline')}
           </h1>
           <p className="anim-fade-up anim-delay-1 text-lead text-text-muted max-w-xl mb-10">

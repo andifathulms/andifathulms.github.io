@@ -14,7 +14,7 @@ export default function ServiceCard({ title, description, href }: ServiceCardPro
       href={href}
       className="group block border-t border-line pt-5 hover:border-line-strong transition-colors"
     >
-      <h3 className="font-heading text-lead font-medium text-cream mb-2 group-hover:text-gold transition-colors">
+      <h3 className="font-heading text-lead font-normal text-cream mb-2 group-hover:text-gold transition-colors">
         {title}
         <span
           aria-hidden="true"

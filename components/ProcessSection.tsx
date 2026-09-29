@@ -31,7 +31,7 @@ export default function ProcessSection() {
           {steps.map((step) => (
             <div key={step.label}>
               <p className="font-mono text-meta text-accent mb-3">{step.label}</p>
-              <h3 className="font-heading text-lead font-medium text-cream mb-3">{step.title}</h3>
+              <h3 className="font-heading text-lead font-normal text-cream mb-3">{step.title}</h3>
               <p className="text-body text-text-muted leading-relaxed">{step.description}</p>
             </div>
           ))}

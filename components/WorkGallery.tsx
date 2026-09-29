@@ -405,7 +405,7 @@ export default function WorkGallery({ projects }: { projects: ProjectMeta[] }) {
           .map((section) => (
             <section key={section.key} aria-label={section.label}>
               <div className="flex items-baseline gap-3 border-b border-line pb-3 mb-8">
-                <h2 className="font-heading text-h3 font-medium text-cream">{section.label}</h2>
+                <h2 className="font-heading text-h3 font-normal text-cream">{section.label}</h2>
                 <span className="font-mono text-meta text-text-subtle">
                   {section.items.length} {t('count_label')}
                 </span>

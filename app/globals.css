@@ -2,56 +2,63 @@
 
 @theme {
   /* ------------------------------------------------------------------
-     Brand palette — the identity colours. Use these for surfaces,
-     borders and decoration. For *text*, use the semantic tokens below,
-     which are pre-flattened against navy so their contrast is known.
+     Brand palette — "the Bound Ledger, opened up" (DESIGN.md). Each colour
+     has one job:
+       navy    the page (archival ink)
+       deck    raised surface for featured rows, panels, cards
+       gold    act here: primary CTA, links, active state
+       clay    the government track marker
+       lagoon  the independent lab marker and "live" status
+       cream   text
+     `navy` keeps its name so existing bg-navy utilities follow the new ink.
      ------------------------------------------------------------------ */
-  --color-navy: #0D1B2A;
-  --color-clay: #C9603D;
-  --color-gold: #C99A3E;
-  --color-cream: #E8E3D8;
+  --color-navy: #0A1520;
+  --color-deck: #0F1D2B;
+  --color-deck-2: #14263A;
+  --color-clay: #E07A56;
+  --color-gold: #E0AE52;
+  --color-lagoon: #6FB8AB;
+  --color-cream: #EEE8DC;
 
   /* ------------------------------------------------------------------
-     Semantic text colours. Every value is opaque and its WCAG contrast
-     ratio against the navy base (#0D1B2A) is recorded here. 4.5:1 is the
-     floor — never introduce a text colour below it, and prefer these
-     tokens over `text-cream/NN` opacity utilities, which silently fall
-     under the floor (cream/50 = 4.3:1, cream/40 = 3.2:1, clay/70 = 2.8:1).
+     Semantic text colours. Opaque, with WCAG contrast recorded against the
+     three surfaces (navy / deck / deck-2). 4.5:1 is the floor — prefer these
+     tokens over `text-cream/NN` opacity utilities, which silently fall under
+     it.
      ------------------------------------------------------------------ */
-  --color-text: #E8E3D8;         /* 13.6:1 — primary body + headings   */
-  --color-text-muted: #A6A7A4;   /*  7.2:1 — secondary prose, taglines */
-  --color-text-subtle: #909392;  /*  5.6:1 — the dimmest allowed text  */
-  --color-accent: #C99A3E;       /*  6.8:1 — gold: links, CTAs, chips  */
-  --color-accent-2: #D9764F;     /*  5.5:1 — clay, lightened for text  */
+  --color-text: #EEE8DC;         /* 15.1 / 14.0 / 12.6 — headings, UI      */
+  --color-text-prose: #CBCCC6;   /* 11.4 / 10.6 /  9.5 — long-form reading */
+  --color-text-muted: #A2ABB0;   /*  7.9 /  7.3 /  6.6 — secondary copy    */
+  --color-text-subtle: #8A949B;  /*  6.0 /  5.5 /  5.0 — the dimmest text  */
+  --color-accent: #E0AE52;       /*  9.1 /  8.4 /  7.6 — gold: links, CTAs */
+  --color-accent-2: #E07A56;     /*  6.2 /  5.8 /  5.2 — clay: government  */
+  --color-accent-3: #6FB8AB;     /*  8.0 /  7.4 /  6.7 — lagoon: lab, live */
 
   /* ------------------------------------------------------------------
-     Borders. Decorative, so exempt from the text contrast floor — but not
-     exempt from having a rule. Before these, 18 different opacities were in
-     circulation (cream/5 through /40, gold/15 through /60, clay/20 through
-     /70) with nothing distinguishing them, so a border's weight carried
-     accidental emphasis instead of meaning.
-
+     Borders. Neutral blue-grey hairlines on the ink, so gold only appears
+     where something is actionable.
        line          section dividers and resting edges
        line-strong   hover / active / focus edges
-       line-muted    edges inside a surface, quieter than the surface's own
-       edge-accent   a gold edge that is doing deliberate work (CTA, quote)
+       line-muted    edges inside a raised surface
+       edge*         control borders (inputs, secondary buttons)
+       edge-accent   a gold edge that is doing deliberate work
      ------------------------------------------------------------------ */
-  --color-line: rgba(201, 154, 62, 0.20);
-  --color-line-strong: rgba(201, 154, 62, 0.45);
-  --color-line-muted: rgba(232, 227, 216, 0.14);
-  --color-edge: rgba(232, 227, 216, 0.20);
-  --color-edge-strong: rgba(232, 227, 216, 0.42);
-  --color-edge-accent: rgba(201, 154, 62, 0.55);
+  --color-line: #1D3045;
+  --color-line-strong: #2B425A;
+  --color-line-muted: #17283A;
+  --color-edge: #2B425A;
+  --color-edge-strong: #3E5873;
+  --color-edge-accent: rgba(224, 174, 82, 0.55);
 
   /* ------------------------------------------------------------------
      Type scale — one scale for the whole site. Body text never goes
      below --text-body (16px); --text-meta (14px) is the floor for
      functional chips and metadata only, never for prose.
      ------------------------------------------------------------------ */
-  --text-display: clamp(2.5rem, 5.2vw, 3.75rem);   /* 40 → 60px  hero h1 */
-  --text-display--line-height: 1.08;
-  --text-h1: clamp(2.25rem, 4vw, 3rem);            /* 36 → 48px  page h1 */
-  --text-h1--line-height: 1.12;
+  --text-display: clamp(2.5rem, 6vw, 4.5rem);      /* 40 → 72px  hero h1 */
+  --text-display--line-height: 1.02;
+  --text-h1: clamp(2.25rem, 4.6vw, 3.5rem);        /* 36 → 56px  page h1 */
+  --text-h1--line-height: 1.05;
   --text-h2: clamp(1.875rem, 3.2vw, 2.375rem);     /* 30 → 38px  section */
   --text-h2--line-height: 1.15;
   --text-stat: clamp(2rem, 3.5vw, 2.75rem);        /* 32 → 44px  numerals*/
@@ -72,7 +79,7 @@
        doc    — document-like pages that mix prose with tabular data
        prose  — running prose; ~80 characters at the body size
      ------------------------------------------------------------------ */
-  --container-page: 64rem;        /* 1024px */
+  --container-page: 72rem;        /* 1152px */
   --container-doc: 48rem;         /*  768px */
   --container-prose: 42rem;       /*  672px */
 
@@ -97,10 +104,15 @@
   --spacing-stack: 3rem;          /*  48px — gap below a section heading */
   --spacing-gutter: 1.5rem;       /*  24px */
 
+  /* Radii. Controls stay tight; media and panels are softer so screenshots
+     read as products rather than thumbnails. */
+  --radius-control: 0.5rem;       /*  8px — buttons, inputs, chips      */
+  --radius-media: 0.75rem;        /* 12px — screenshots, panels, cards  */
+
   /* Typography — CSS vars injected by next/font on <html> */
   --font-heading: var(--font-fraunces), Lora, Georgia, serif;
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), "IBM Plex Mono", monospace;
+  --font-sans: var(--font-geist), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "JetBrains Mono", monospace;
 }
 
 html {
@@ -166,10 +178,22 @@ button:focus-visible {
   }
 }
 
+/* Fraunces at display sizes: optical sizing on, the soft cut, slightly tight
+   tracking. Weight comes from the utility class (400 by default). In the base
+   layer so a tracking-* utility can still override it. */
+@layer base {
+  .font-heading {
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 50;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+}
+
 body {
   background-color: var(--color-navy);
   color: var(--color-text);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-geist), "Inter", system-ui, sans-serif;
   font-size: var(--text-body);
   line-height: var(--text-body--line-height);
   -webkit-font-smoothing: antialiased;
@@ -298,13 +322,20 @@ body {
   font-size: var(--text-body);
 }
 
+.prose-case-study > h2:first-child {
+  margin-top: 0;
+}
+
 .prose-case-study h2 {
   font-family: var(--font-heading);
-  font-size: var(--text-h3);
-  font-weight: 500;
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+  font-weight: 400;
+  font-variation-settings: "SOFT" 50;
+  letter-spacing: -0.015em;
   color: var(--color-text);
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
+  margin-top: 3.5rem;
+  margin-bottom: 1.25rem;
 }
 
 /* Anchor jumps (TOC) should clear the fixed header. */
@@ -321,10 +352,10 @@ body {
 }
 
 .prose-case-study h3 {
-  font-family: var(--font-heading);
+  font-family: var(--font-sans);
   font-size: var(--text-lead);
-  font-weight: 500;
-  color: var(--color-accent);
+  font-weight: 600;
+  color: var(--color-text);
   margin-top: 2rem;
   margin-bottom: 0.75rem;
 }
@@ -332,7 +363,7 @@ body {
 .prose-case-study p {
   line-height: var(--text-body--line-height);
   margin-bottom: 1.25rem;
-  color: var(--color-text-muted);
+  color: var(--color-text-prose);
 }
 
 .prose-case-study ul {
@@ -343,7 +374,7 @@ body {
 
 .prose-case-study ul li {
   line-height: var(--text-body--line-height);
-  color: var(--color-text-muted);
+  color: var(--color-text-prose);
   margin-bottom: 0.375rem;
 }
 
@@ -355,8 +386,8 @@ body {
 .prose-case-study code {
   font-family: var(--font-mono);
   font-size: 0.875em;
-  background-color: rgba(201, 154, 62, 0.1);
-  color: var(--color-accent);
+  background-color: var(--color-deck-2);
+  color: var(--color-text);
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
 }
