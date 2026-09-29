@@ -16,7 +16,7 @@
       "fact_lab": "independent projects",
       "fact_live": "live today",
       "cta_work": "See the government work",
-      "cta_cv": "View CV",
+      "cta_cv": "Download CV",
       "collage_label": "Screenshots of government systems"
     },
     "flagship": {
@@ -64,7 +64,7 @@
       "title": "Hiring, or have a project in mind?",
       "subtitle": "I'm open to full-time roles and select freelance work. A few sentences about the role or the project is enough to start.",
       "contact": "Get in touch",
-      "cv": "View CV"
+      "cv": "Download CV"
     },
     "stats": {
       "systems_shipped": "Projects shipped",
@@ -148,7 +148,7 @@
     "cta_title": "Hiring, or building something similar?",
     "cta_body": "I'm open to full-time roles and select freelance work.",
     "cta_button": "Get in touch",
-    "cta_cv": "View CV",
+    "cta_cv": "Download CV",
     "gallery_enlarge": "Enlarge: {caption}",
     "gallery_enlarge_hint": "click to enlarge",
     "gallery_show_all": "View all {count} screenshots",
@@ -184,7 +184,7 @@
     "cta_title": "Let's talk",
     "cta_body": "Whether it's a role or a project, a few sentences are enough to start.",
     "cta_button": "Get in touch",
-    "cta_cv": "View CV",
+    "cta_cv": "Download CV",
     "stack_note": "Counted from the {total} projects on this site. Every number opens the projects it came from.",
     "stack_systems": "{count, plural, one {# project} other {# projects}}",
     "stack_show_more": "Show {count, plural, one {# more tool} other {# more tools}}",
@@ -194,22 +194,66 @@
     "title": "CV",
     "meta_description": "Curriculum vitae of Andi Fathul Mukminin, fullstack developer at Otorita IKN.",
     "name": "Andi Fathul Mukminin",
-    "headline": "Fullstack developer",
-    "location": "Nusantara, Indonesia",
+    "headline": "Fullstack developer · Django, React, Next.js, TypeScript",
+    "location": "Nusantara / Balikpapan, East Kalimantan",
     "summary_title": "Summary",
     "summary": "Fullstack developer and civil servant at Otorita IKN, building government systems for Indonesia's new capital. I take projects from a written spec to production: requirements, architecture, backend, frontend and deployment. {government} government systems and {lab} independent projects, {live} of them live.",
     "experience_title": "Experience",
-    "experience_role": "Fullstack developer, civil servant (ASN)",
-    "experience_org": "Otorita IKN · Directorate of Data and Artificial Intelligence",
-    "experience_body": "I build internal and public systems for the authority developing Nusantara, Indonesia's new capital.",
     "government_title": "Government systems",
     "lab_title": "Selected independent projects",
     "lab_more": "{count} more in the lab",
     "skills_title": "Skills",
     "stack_title": "Stack, by number of projects",
     "contact_title": "Contact",
-    "print": "Print or save as PDF",
-    "generated_note": "Generated from the same project files as the rest of this site, so it is always current."
+    "print": "Print this page",
+    "generated_note": "Generated from the same project files as the rest of this site, so it is always current.",
+    "download": "Download CV (PDF)",
+    "experience": [
+      {
+        "role": "Fullstack developer",
+        "org": "Otorita IKN (Nusantara Capital Authority)",
+        "meta": "Jun 2025 – present · Nusantara, on-site · Directorate of Data and Artificial Intelligence · civil service title: Junior Policy Analyst",
+        "body": "I build and run the digital platforms for Indonesia's new capital. The government systems below are this role's work. Beyond them:",
+        "points": [
+          "Implemented Portal Data IKN (satudata.ikn.go.id), a CKAN open data portal with Solr search, Keycloak single sign-on and statistical metadata aligned to the BPS SIRuSa national standard.",
+          "Run production operations for the official IKN website (ikn.go.id), a vendor-built Next.js and Payload CMS platform, on GCP with Nginx, PM2, Docker and Cloudflare.",
+          "Wrote the Naskah Urgensi for an OIKN regulation on application governance, which makes the Directorate the technical review gate for application development across the Authority."
+        ]
+      },
+      {
+        "role": "Software developer",
+        "org": "Kubikasi",
+        "meta": "Dec 2021 – May 2025 · South Jakarta · hybrid",
+        "body": "A logistics company offering truck rental and freight distribution, run on an in-house transportation management system.",
+        "points": [
+          "Built the backend and frontend of the TMS in Django: booking, fleet dispatch and shipment tracking for large-goods distribution across Jakarta.",
+          "Built and maintained the REST API behind the customer web app and the internal operations tools.",
+          "Implemented order, booking and tracking flows that give customers clear pricing and live shipment status."
+        ]
+      },
+      {
+        "role": "Python developer (contract)",
+        "org": "Platon",
+        "meta": "Feb 2022 – Feb 2023 · Yogyakarta · remote",
+        "body": "",
+        "points": [
+          "Delivered Python work in data science and web development for a range of client briefs."
+        ]
+      },
+      {
+        "role": "Software engineer intern",
+        "org": "PT PLN UIP Sulawesi",
+        "meta": "Jun 2021 – Nov 2021 · Makassar · on-site",
+        "body": "",
+        "points": [
+          "Built a web app for monitoring and evaluating financial processes in the Budget and Finance Division, using Django, Bootstrap 5 and HTMX."
+        ]
+      }
+    ],
+    "education_title": "Education",
+    "education": "D4 (applied bachelor's), Software Engineering · Politeknik Negeri Padang · graduated 2022 · GPA 3.59 / 4.00",
+    "languages_title": "Languages",
+    "languages": "Indonesian (native) · English (professional working proficiency)"
   },
   "contact": {
     "title": "Contact",
@@ -218,7 +262,7 @@
     "email_label": "Email",
     "whatsapp_label": "WhatsApp",
     "linkedin_label": "LinkedIn",
-    "resume_download": "View CV",
+    "resume_download": "Download CV (PDF)",
     "copy": "Copy",
     "copied": "Copied",
     "copy_failed": "Select & copy manually",

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { ViewTransition, type ReactNode } from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Image from 'next/image';
@@ -18,7 +18,7 @@ import {
   trackOf,
 } from '@/lib/content';
 import { routing } from '@/i18n/routing';
-import { routeMetadata } from '@/lib/site';
+import { CONTACT, routeMetadata } from '@/lib/site';
 import AtAGlance from '@/components/AtAGlance';
 import PrintButton from '@/components/PrintButton';
 import TrackMark from '@/components/TrackMark';
@@ -153,16 +153,18 @@ export default async function CaseStudyPage({
 
         <div className="mb-6 grid items-start gap-6 lg:grid-cols-[1.35fr_1fr]">
           {heroSrc && (
-            <div className="relative aspect-[16/10] overflow-hidden rounded-media border border-line-strong bg-deck">
-              <Image
-                src={heroSrc}
-                alt={t('screenshots')}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 660px"
-                className="object-cover object-top"
-              />
-            </div>
+            <ViewTransition name={`shot-${project.slug}`} share="morph" default="none">
+              <div className="relative aspect-[16/10] overflow-hidden rounded-media border border-line-strong bg-deck">
+                <Image
+                  src={heroSrc}
+                  alt={t('screenshots')}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 660px"
+                  className="object-cover object-top"
+                />
+              </div>
+            </ViewTransition>
           )}
           <AtAGlance project={project} />
         </div>
@@ -265,12 +267,14 @@ export default async function CaseStudyPage({
             >
               {t('cta_button')}
             </Link>
-            <Link
-              href="/cv"
-              className="inline-flex min-h-touch items-center rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
+            <a
+              href={CONTACT.cvPdf}
+              download
+              className="inline-flex min-h-touch items-center gap-2 rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
             >
               {t('cta_cv')}
-            </Link>
+              <span aria-hidden="true">↓</span>
+            </a>
             <PrintButton label={ta('print')} />
           </div>
         </section>

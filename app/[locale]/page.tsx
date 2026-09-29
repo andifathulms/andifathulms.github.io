@@ -16,7 +16,7 @@ import {
   getTrackProjects,
   PROBLEM_SHAPES,
 } from '@/lib/content';
-import { routeMetadata, SITE_NAME } from '@/lib/site';
+import { CONTACT, routeMetadata, SITE_NAME } from '@/lib/site';
 
 export async function generateMetadata({
   params,
@@ -209,12 +209,14 @@ export default async function HomePage({
             >
               {t('cta.contact')}
             </Link>
-            <Link
-              href="/cv"
-              className="inline-flex min-h-touch items-center rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
+            <a
+              href={CONTACT.cvPdf}
+              download
+              className="inline-flex min-h-touch items-center gap-2 rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
             >
               {t('cta.cv')}
-            </Link>
+              <span aria-hidden="true">↓</span>
+            </a>
           </div>
         </div>
       </section>

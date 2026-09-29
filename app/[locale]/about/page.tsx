@@ -3,11 +3,10 @@ import path from 'path';
 import Image from 'next/image';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { routeMetadata } from '@/lib/site';
+import { CONTACT, PERSON, routeMetadata } from '@/lib/site';
 import { Link } from '@/i18n/navigation';
 import StackUsageList from '@/components/StackUsageList';
 import SocialLinks from '@/components/SocialLinks';
-import PrintButton from '@/components/PrintButton';
 import { getFeaturedProjects, getPortfolioStats, getStackUsage } from '@/lib/content';
 
 export async function generateMetadata({
@@ -34,7 +33,6 @@ export default async function AboutPage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'about' });
   const ts = await getTranslations({ locale, namespace: 'home.stats' });
-  const ta = await getTranslations({ locale, namespace: 'a11y' });
 
   const hasPhoto = existsSync(path.join(process.cwd(), 'public/images/about/photo.jpg'));
   const stats = getPortfolioStats();
@@ -67,9 +65,9 @@ export default async function AboutPage({
       <div className="max-w-page mx-auto">
 
         {/* 1. Photo + name + role strip */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-10 md:gap-16 items-center mb-20">
           {hasPhoto ? (
-            <div className="relative w-64 h-64 md:w-80 md:h-80 mx-auto md:mx-0 rounded-2xl overflow-hidden flex-shrink-0">
+            <div className="relative w-64 h-64 md:w-80 md:h-80 mx-auto md:mx-0 rounded-2xl overflow-hidden flex-shrink-0 border border-line">
               <Image
                 src="/images/about/photo.jpg"
                 alt="Andi Fathul Mukminin"
@@ -85,12 +83,13 @@ export default async function AboutPage({
           )}
 
           <div>
-            <p className="font-mono text-meta text-gold uppercase tracking-widest mb-4">
-              {t('intro')}
-            </p>
-            <h1 className="font-heading text-h1 font-normal text-cream mb-8">
+            <p className="font-mono text-xs text-text-subtle uppercase tracking-widest mb-4">
               {t('title')}
+            </p>
+            <h1 className="font-heading text-h1 font-normal text-cream mb-3">
+              {PERSON.name}
             </h1>
+            <p className="text-lead text-text-muted mb-8">{t('intro')}</p>
             <div className="space-y-3">
               {[
                 { label: t('role_label'), value: t('role_value') },
@@ -98,7 +97,7 @@ export default async function AboutPage({
                 { label: t('location_label'), value: t('location_value') },
               ].map(({ label, value }) => (
                 <div key={label} className="flex gap-4 items-baseline">
-                  <span className="font-mono text-meta text-accent uppercase tracking-wider w-28 flex-shrink-0">
+                  <span className="font-mono text-xs text-text-subtle uppercase tracking-widest w-28 flex-shrink-0">
                     {label}
                   </span>
                   <span className="text-text-muted text-body">{value}</span>
@@ -108,13 +107,18 @@ export default async function AboutPage({
 
             {/* Social / professional channels */}
             <div className="mt-8">
-              <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
+              <p className="font-mono text-xs text-text-subtle uppercase tracking-widest mb-3">
                 {t('connect_label')}
               </p>
               <SocialLinks />
-              <div className="mt-4">
-                <PrintButton label={ta('print')} />
-              </div>
+              <a
+                href={CONTACT.cvPdf}
+                download
+                className="mt-4 inline-flex min-h-touch items-center gap-2 rounded-control border border-edge px-4 py-2 text-sm text-cream transition-colors hover:border-edge-strong"
+              >
+                {t('cta_cv')}
+                <span aria-hidden="true">↓</span>
+              </a>
             </div>
           </div>
         </div>
@@ -151,7 +155,7 @@ export default async function AboutPage({
 
           {/* 3. Availability */}
           <div className="border-t border-line mt-14 pt-10">
-            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
+            <p className="font-mono text-xs text-text-subtle uppercase tracking-widest mb-3">
               {t('availability_label')}
             </p>
             <p className="text-text-muted leading-relaxed">{t('availability')}</p>
@@ -163,7 +167,7 @@ export default async function AboutPage({
               project) the same weight as Django (16) and omitted Vitest (16)
               entirely — exactly the drift counting removes. */}
           <div className="border-t border-line mt-14 pt-10">
-            <p className="font-mono text-meta text-accent uppercase tracking-wider mb-3">
+            <p className="font-mono text-xs text-text-subtle uppercase tracking-widest mb-3">
               {t('stack_title')}
             </p>
             <p className="text-body text-text-muted mb-8 max-w-xl">
@@ -177,7 +181,7 @@ export default async function AboutPage({
 
             {stackRest.length > 0 && (
               <details className="mt-1 group/details">
-                <summary className="cursor-pointer list-none font-mono text-meta text-accent uppercase tracking-wider pt-3 pb-1 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold [&::-webkit-details-marker]:hidden">
+                <summary className="cursor-pointer list-none font-mono text-xs text-text-subtle uppercase tracking-widest pt-3 pb-1 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold [&::-webkit-details-marker]:hidden">
                   {t('stack_show_more', { count: stackRest.length })}
                 </summary>
                 <div className="mt-2">
@@ -190,7 +194,7 @@ export default async function AboutPage({
             )}
 
             {stackOnce.length > 0 && (
-              <p className="mt-6 font-mono text-meta text-text-subtle leading-relaxed">
+              <p className="mt-6 text-sm text-text-subtle leading-relaxed">
                 <span className="text-text-muted">{t('stack_once_label')}:</span>{' '}
                 {stackOnce.map((tech) => tech.name).join(' · ')}
               </p>
@@ -200,7 +204,7 @@ export default async function AboutPage({
           {/* 5. Selected work — connect the narrative to real projects */}
           {featured.length > 0 && (
             <div className="border-t border-line mt-14 pt-10">
-              <p className="font-mono text-meta text-accent uppercase tracking-wider mb-5">
+              <p className="font-mono text-xs text-text-subtle uppercase tracking-widest mb-5">
                 {t('selected_work_label')}
               </p>
               <div className="flex flex-wrap gap-2.5 mb-5">
@@ -211,16 +215,6 @@ export default async function AboutPage({
                     className="group min-h-touch inline-flex items-center gap-1.5 rounded-control border border-edge px-3.5 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
                   >
                     {project.title}
-                    {/* The canonical arrow-reveal: hidden and offset at rest,
-                        sliding in on hover — the same gesture used on
-                        project/service cards and stat labels, not a variant
-                        of it. */}
-                    <span
-                      aria-hidden="true"
-                      className="text-gold opacity-0 -translate-x-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 motion-reduce:transition-none motion-reduce:translate-x-0"
-                    >
-                      →
-                    </span>
                   </Link>
                 ))}
               </div>
@@ -246,12 +240,14 @@ export default async function AboutPage({
               >
                 {t('cta_button')}
               </Link>
-              <Link
-                href="/cv"
-                className="inline-flex min-h-touch items-center rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
+              <a
+                href={CONTACT.cvPdf}
+                download
+                className="inline-flex min-h-touch items-center gap-2 rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
               >
                 {t('cta_cv')}
-              </Link>
+                <span aria-hidden="true">↓</span>
+              </a>
             </div>
           </div>
         </div>

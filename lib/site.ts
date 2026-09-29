@@ -9,6 +9,8 @@ export const CONTACT = {
   whatsapp: '6281355056456', // international format, no leading 0 / no +
   linkedin: 'https://linkedin.com/in/andifathulmukminin',
   github: 'https://github.com/andifathulms',
+  // The PDF résumé, served as-is from public/. /cv is the web version.
+  cvPdf: '/CV_Andi_Fathul_Mukminin_Salahuddin.pdf',
 };
 
 // Social / professional channels — surfaced on About, home, and footer.

@@ -2,7 +2,6 @@ import * as si from 'simple-icons';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import CopyButton from '@/components/CopyButton';
-import { Link } from '@/i18n/navigation';
 import { CONTACT, routeMetadata } from '@/lib/site';
 
 export async function generateMetadata({
@@ -162,13 +161,14 @@ export default async function ContactPage({
                   <ChannelIcon name="linkedin" />
                   {t('linkedin_cta')}
                 </a>
-                <Link
-                  href="/cv"
+                <a
+                  href={CONTACT.cvPdf}
+                  download
                   className="group min-h-touch inline-flex items-center gap-2.5 text-sm text-text-muted transition-colors hover:text-gold"
                 >
                   <ChannelIcon name="resume" />
                   {t('resume_download')}
-                </Link>
+                </a>
               </div>
             </div>
           </div>

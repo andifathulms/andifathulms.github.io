@@ -19,6 +19,13 @@ const SLUG_MAP: Record<string, keyof typeof si> = {
   'MinIO': 'siMinio',
   'Celery': 'siCelery',
   'Figma': 'siFigma',
+  'Vitest': 'siVitest',
+  'Zod': 'siZod',
+  'Vite': 'siVite',
+  'FastAPI': 'siFastapi',
+  'GitHub Actions': 'siGithubactions',
+  'Leaflet': 'siLeaflet',
+  'D3': 'siD3',
 };
 
 interface Props {

@@ -16,7 +16,7 @@
       "fact_lab": "proyek mandiri",
       "fact_live": "sudah live",
       "cta_work": "Lihat karya pemerintahan",
-      "cta_cv": "Lihat CV",
+      "cta_cv": "Unduh CV",
       "collage_label": "Tangkapan layar sistem pemerintahan"
     },
     "flagship": {
@@ -64,7 +64,7 @@
       "title": "Sedang merekrut, atau punya proyek?",
       "subtitle": "Saya terbuka untuk posisi full-time dan proyek freelance tertentu. Beberapa kalimat tentang posisi atau proyeknya sudah cukup untuk mulai.",
       "contact": "Hubungi saya",
-      "cv": "Lihat CV"
+      "cv": "Unduh CV"
     },
     "stats": {
       "systems_shipped": "Proyek dirilis",
@@ -148,7 +148,7 @@
     "cta_title": "Sedang merekrut, atau membangun hal serupa?",
     "cta_body": "Saya terbuka untuk posisi full-time dan proyek freelance tertentu.",
     "cta_button": "Hubungi saya",
-    "cta_cv": "Lihat CV",
+    "cta_cv": "Unduh CV",
     "gallery_enlarge": "Perbesar: {caption}",
     "gallery_enlarge_hint": "klik untuk memperbesar",
     "gallery_show_all": "Lihat semua {count} tangkapan layar",
@@ -184,7 +184,7 @@
     "cta_title": "Mari bicara",
     "cta_body": "Baik soal posisi maupun proyek, beberapa kalimat sudah cukup untuk mulai.",
     "cta_button": "Hubungi saya",
-    "cta_cv": "Lihat CV",
+    "cta_cv": "Unduh CV",
     "stack_note": "Dihitung dari {total} proyek di situs ini. Setiap angka membuka proyek asalnya.",
     "stack_systems": "{count, plural, other {# proyek}}",
     "stack_show_more": "Tampilkan {count} tools lainnya",
@@ -194,22 +194,66 @@
     "title": "CV",
     "meta_description": "Curriculum vitae Andi Fathul Mukminin, fullstack developer di Otorita IKN.",
     "name": "Andi Fathul Mukminin",
-    "headline": "Fullstack developer",
-    "location": "Nusantara, Indonesia",
+    "headline": "Fullstack developer · Django, React, Next.js, TypeScript",
+    "location": "Nusantara / Balikpapan, Kalimantan Timur",
     "summary_title": "Ringkasan",
     "summary": "Fullstack developer dan ASN di Otorita IKN, membangun sistem pemerintahan untuk ibu kota baru Indonesia. Saya membawa proyek dari spesifikasi tertulis sampai produksi: kebutuhan, arsitektur, backend, frontend, dan deployment. {government} sistem pemerintahan dan {lab} proyek mandiri, {live} di antaranya sudah live.",
     "experience_title": "Pengalaman",
-    "experience_role": "Fullstack developer, ASN",
-    "experience_org": "Otorita IKN · Direktorat Data dan Kecerdasan Buatan",
-    "experience_body": "Saya membangun sistem internal dan publik untuk otorita yang membangun Nusantara, ibu kota baru Indonesia.",
     "government_title": "Sistem pemerintahan",
     "lab_title": "Proyek mandiri pilihan",
     "lab_more": "{count} lainnya di lab",
     "skills_title": "Keahlian",
     "stack_title": "Stack, berdasarkan jumlah proyek",
     "contact_title": "Kontak",
-    "print": "Cetak atau simpan sebagai PDF",
-    "generated_note": "Dibuat dari berkas proyek yang sama dengan bagian lain situs ini, jadi selalu terbaru."
+    "print": "Cetak halaman ini",
+    "generated_note": "Dibuat dari berkas proyek yang sama dengan bagian lain situs ini, jadi selalu terbaru.",
+    "download": "Unduh CV (PDF)",
+    "experience": [
+      {
+        "role": "Fullstack developer",
+        "org": "Otorita IKN",
+        "meta": "Jun 2025 – sekarang · Nusantara, di kantor · Direktorat Data dan Kecerdasan Buatan · jabatan fungsional: Analis Kebijakan Ahli Pertama",
+        "body": "Saya membangun dan menjalankan platform digital untuk ibu kota baru Indonesia. Sistem pemerintahan di bawah ini adalah hasil peran ini. Selain itu:",
+        "points": [
+          "Mengimplementasikan Portal Data IKN (satudata.ikn.go.id), portal data terbuka berbasis CKAN dengan pencarian Solr, single sign-on Keycloak, dan metadata statistik yang mengikuti standar nasional SIRuSa BPS.",
+          "Menjalankan operasional produksi situs resmi IKN (ikn.go.id), platform Next.js dan Payload CMS buatan vendor, di GCP dengan Nginx, PM2, Docker, dan Cloudflare.",
+          "Menulis Naskah Urgensi untuk peraturan OIKN tentang tata kelola aplikasi, yang menjadikan Direktorat sebagai gerbang validasi teknis pengembangan aplikasi di seluruh Otorita."
+        ]
+      },
+      {
+        "role": "Software developer",
+        "org": "Kubikasi",
+        "meta": "Des 2021 – Mei 2025 · Jakarta Selatan · hybrid",
+        "body": "Perusahaan logistik yang menyediakan sewa truk dan distribusi barang, dijalankan dengan sistem manajemen transportasi buatan sendiri.",
+        "points": [
+          "Membangun backend dan frontend TMS dengan Django: pemesanan, penugasan armada, dan pelacakan pengiriman barang besar di Jakarta.",
+          "Membangun dan merawat REST API untuk aplikasi web pelanggan dan tools operasional internal.",
+          "Mengimplementasikan alur pesanan, pemesanan, dan pelacakan yang memberi pelanggan harga yang jelas dan status pengiriman secara langsung."
+        ]
+      },
+      {
+        "role": "Python developer (kontrak)",
+        "org": "Platon",
+        "meta": "Feb 2022 – Feb 2023 · Yogyakarta · remote",
+        "body": "",
+        "points": [
+          "Mengerjakan tugas Python di bidang data science dan pengembangan web untuk berbagai klien."
+        ]
+      },
+      {
+        "role": "Software engineer (magang)",
+        "org": "PT PLN UIP Sulawesi",
+        "meta": "Jun 2021 – Nov 2021 · Makassar · di kantor",
+        "body": "",
+        "points": [
+          "Membangun aplikasi web untuk memantau dan mengevaluasi proses keuangan di Divisi Anggaran dan Keuangan, dengan Django, Bootstrap 5, dan HTMX."
+        ]
+      }
+    ],
+    "education_title": "Pendidikan",
+    "education": "D4 Rekayasa Perangkat Lunak · Politeknik Negeri Padang · lulus 2022 · IPK 3,59 / 4,00",
+    "languages_title": "Bahasa",
+    "languages": "Indonesia (bahasa ibu) · Inggris (profesional)"
   },
   "contact": {
     "title": "Kontak",
@@ -218,7 +262,7 @@
     "email_label": "Email",
     "whatsapp_label": "WhatsApp",
     "linkedin_label": "LinkedIn",
-    "resume_download": "Lihat CV",
+    "resume_download": "Unduh CV (PDF)",
     "copy": "Salin",
     "copied": "Tersalin",
     "copy_failed": "Pilih & salin manual",

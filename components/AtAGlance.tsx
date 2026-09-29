@@ -47,7 +47,7 @@ export default function AtAGlance({ project }: { project: ProjectMeta }) {
       {/* Action links or private badge */}
       <div className="mt-5 flex flex-wrap items-center gap-2.5 border-t border-line pt-5">
         {isPrivate ? (
-          <span className="text-sm text-text-subtle border border-edge min-h-touch inline-flex items-center px-3 py-1.5 rounded-control">
+          <span className="inline-flex min-h-touch items-center gap-1.5 px-1 text-sm text-text-subtle">
             {t('private_badge')}
           </span>
         ) : (
@@ -84,7 +84,7 @@ export default function AtAGlance({ project }: { project: ProjectMeta }) {
                 </a>
               ))}
             {accessBadge === 'internal' && (
-              <span className="text-sm text-text-subtle border border-edge min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-control">
+              <span className="inline-flex min-h-touch items-center gap-1.5 px-1 text-sm text-text-subtle">
                 <svg width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                   <rect x="2.5" y="6" width="9" height="6" rx="1" stroke="currentColor" strokeWidth="1.2" />
                   <path d="M4.5 6V4.5a2.5 2.5 0 015 0V6" stroke="currentColor" strokeWidth="1.2" />
@@ -94,7 +94,7 @@ export default function AtAGlance({ project }: { project: ProjectMeta }) {
               </span>
             )}
             {accessBadge === 'registration' && (
-              <span className="text-sm text-accent border border-line-strong min-h-touch inline-flex items-center gap-1.5 px-3 py-1.5 rounded-control">
+              <span className="inline-flex min-h-touch items-center gap-1.5 px-1 text-sm text-text-muted">
                 {t('access_registration')}
                 <span className="sr-only">— {t('access_registration_hint')}</span>
               </span>

@@ -7,6 +7,12 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 const nextConfig: NextConfig = {
   ...(process.env.NODE_ENV === 'production' && { output: 'export' }),
   trailingSlash: true,
+  // Lets a project's screenshot morph from its card into the case study
+  // header (<ViewTransition name="shot-…">). Browsers without the View
+  // Transitions API navigate as before.
+  experimental: {
+    viewTransition: true,
+  },
   images: {
     unoptimized: true,
   },

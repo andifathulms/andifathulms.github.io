@@ -1,3 +1,4 @@
+import { ViewTransition } from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import type { ProjectMeta } from '@/lib/content';
@@ -47,25 +48,27 @@ export default function FlagshipRow({
 
   return (
     <article className="grid items-center gap-8 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
-      <Link
-        href={href}
-        tabIndex={-1}
-        aria-hidden="true"
-        className={`group relative block aspect-[16/10] overflow-hidden rounded-media border border-line-strong bg-deck ${
-          reverse ? 'lg:order-2' : ''
-        }`}
-      >
-        {project.heroImage && (
-          <Image
-            src={project.heroImage}
-            alt=""
-            fill
-            priority={priority}
-            sizes="(max-width: 1024px) 100vw, 620px"
-            className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-          />
-        )}
-      </Link>
+      <ViewTransition name={`shot-${project.slug}`} share="morph" default="none">
+        <Link
+          href={href}
+          tabIndex={-1}
+          aria-hidden="true"
+          className={`group relative block aspect-[16/10] overflow-hidden rounded-media border border-line-strong bg-deck ${
+            reverse ? 'lg:order-2' : ''
+          }`}
+        >
+          {project.heroImage && (
+            <Image
+              src={project.heroImage}
+              alt=""
+              fill
+              priority={priority}
+              sizes="(max-width: 1024px) 100vw, 620px"
+              className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+            />
+          )}
+        </Link>
+      </ViewTransition>
 
       <div>
         <p className="mb-3 font-mono text-meta text-text-subtle">

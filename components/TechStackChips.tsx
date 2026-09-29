@@ -30,8 +30,8 @@ export default function TechStackChips({
   // to action, so it rests at the muted tone and only brightens on hover.
   const chipClass =
     size === 'sm'
-      ? 'font-mono text-meta px-2 py-0.5 border border-line text-text-muted rounded'
-      : 'font-mono text-sm px-2.5 py-1 border border-line text-text-muted rounded';
+      ? 'text-sm px-2 py-0.5 border border-line text-text-muted rounded'
+      : 'text-sm px-3 py-1 border border-line-strong text-text-muted rounded-control';
 
   return (
     <div className="flex flex-wrap gap-1.5">

@@ -63,6 +63,15 @@ export default async function CvPage({
   setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'cv' });
 
+  // Work history comes from the PDF résumé (public/CV_…pdf); keep the two in
+  // step when either changes. Projects below are read from the manifests.
+  const experience = t.raw('experience') as {
+    role: string;
+    org: string;
+    meta: string;
+    body: string;
+    points: string[];
+  }[];
   const stats = getPortfolioStats();
   const government = getTrackProjects('government', locale);
   const lab = getTrackProjects('lab', locale);
@@ -110,7 +119,15 @@ export default async function CvPage({
               ))}
             </ul>
           </div>
-          <div className="print-hide">
+          <div className="print-hide flex flex-wrap gap-3">
+            <a
+              href={CONTACT.cvPdf}
+              download
+              className="inline-flex min-h-touch items-center gap-2 rounded-control bg-gold px-5 py-2 text-sm font-medium text-navy transition-colors hover:bg-gold/90"
+            >
+              {t('download')}
+              <span aria-hidden="true">↓</span>
+            </a>
             <PrintButton label={t('print')} />
           </div>
         </header>
@@ -124,9 +141,22 @@ export default async function CvPage({
 
         <section className="mb-12">
           <SectionTitle>{t('experience_title')}</SectionTitle>
-          <p className="font-medium text-cream">{t('experience_role')}</p>
-          <p className="mb-2 text-text-muted">{t('experience_org')}</p>
-          <p className="text-text-prose">{t('experience_body')}</p>
+          <ol className="flex flex-col gap-8">
+            {experience.map((job) => (
+              <li key={job.org}>
+                <p className="font-medium text-cream">
+                  {job.role} · {job.org}
+                </p>
+                <p className="mb-2 font-mono text-xs text-text-subtle">{job.meta}</p>
+                {job.body && <p className="mb-2 text-text-prose">{job.body}</p>}
+                <ul className="list-disc space-y-1 pl-5 text-text-prose marker:text-text-subtle">
+                  {job.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
         </section>
 
         <section className="mb-12">
@@ -185,6 +215,17 @@ export default async function CvPage({
                 </li>
               ))}
             </ul>
+          </div>
+        </section>
+
+        <section className="mb-12 grid gap-10 sm:grid-cols-2">
+          <div>
+            <SectionTitle>{t('education_title')}</SectionTitle>
+            <p className="text-text-prose">{t('education')}</p>
+          </div>
+          <div>
+            <SectionTitle>{t('languages_title')}</SectionTitle>
+            <p className="text-text-prose">{t('languages')}</p>
           </div>
         </section>
 

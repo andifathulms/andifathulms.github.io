@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { PortfolioStats, ProjectMeta } from '@/lib/content';
+import { CONTACT } from '@/lib/site';
 
 /**
  * Who, where, and what for — in that order. The right half is the work
@@ -30,6 +31,8 @@ export default function Hero({
     'right-0 top-[29%] w-[70%] h-[42%]',
     'left-[6%] bottom-0 w-[64%] h-[34%]',
   ];
+  // Each caption goes in a corner the next frame doesn't cover.
+  const captions = ['bottom-2 left-2', 'top-2 right-2', 'bottom-2 left-2'];
 
   return (
     <section className="px-gutter pb-section pt-hero-top">
@@ -64,12 +67,14 @@ export default function Hero({
             >
               {t('cta_work')}
             </Link>
-            <Link
-              href="/cv"
-              className="inline-flex min-h-touch items-center rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
+            <a
+              href={CONTACT.cvPdf}
+              download
+              className="inline-flex min-h-touch items-center gap-2 rounded-control border border-edge px-5 py-3 text-sm font-medium text-cream transition-colors hover:border-edge-strong"
             >
               {t('cta_cv')}
-            </Link>
+              <span aria-hidden="true">↓</span>
+            </a>
           </div>
         </div>
 
@@ -94,7 +99,7 @@ export default function Hero({
                     className="object-cover object-top"
                   />
                 )}
-                <figcaption className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 rounded-md border border-line-strong bg-navy px-2 py-1 font-mono text-xs text-cream">
+                <figcaption className={`absolute ${captions[i]} inline-flex items-center gap-1.5 rounded-md border border-line-strong bg-navy px-2 py-1 font-mono text-xs text-cream`}>
                   <span aria-hidden="true" className="h-1.5 w-1.5 rounded-[2px] bg-clay" />
                   {p.title}
                 </figcaption>

@@ -1,3 +1,4 @@
+import { ViewTransition } from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import type { ProjectMeta } from '@/lib/content';
@@ -32,17 +33,19 @@ export default function ProjectCard({
 
   return (
     <Link href={`/work/${project.slug}`} className="group flex h-full flex-col">
-      <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-media border border-line bg-deck transition-colors group-hover:border-line-strong">
-        <CardPreview
-          hero={project.heroImage}
-          images={project.previewImages ?? []}
-          alt={project.title}
-          sizes={CARD_SIZES}
-        />
-        {isLive(project) && (
-          <StatusPill label={labels.live} className="absolute right-2.5 top-2.5 z-10" />
-        )}
-      </div>
+      <ViewTransition name={`shot-${project.slug}`} share="morph" default="none">
+        <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-media border border-line bg-deck transition-colors group-hover:border-line-strong">
+          <CardPreview
+            hero={project.heroImage}
+            images={project.previewImages ?? []}
+            alt={project.title}
+            sizes={CARD_SIZES}
+          />
+          {isLive(project) && (
+            <StatusPill label={labels.live} className="absolute right-2.5 top-2.5 z-10" />
+          )}
+        </div>
+      </ViewTransition>
 
       <div className="mb-2 flex items-center gap-2 text-sm text-text-muted">
         <TrackMark track={trackOf(project)} />
@@ -68,14 +71,15 @@ export default function ProjectCard({
             className="h-7 w-7 flex-shrink-0 rounded-md border border-line object-cover"
           />
         )}
-        <span>
-          {project.title}
-          <span
-            aria-hidden="true"
-            className="ml-1.5 inline-block -translate-x-1 text-gold opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:translate-x-0 motion-reduce:transition-none"
-          >
-            →
-          </span>
+        {/* The arrow is a sibling, not inline text: inline, it could be
+            balanced onto a second line of a short title, which pushed the
+            icon and tagline out of line with neighbouring cards. */}
+        <span className="min-w-0 [text-wrap:wrap]">{project.title}</span>
+        <span
+          aria-hidden="true"
+          className="-translate-x-1 flex-shrink-0 text-gold opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:translate-x-0 motion-reduce:transition-none"
+        >
+          →
         </span>
       </h3>
 

@@ -178,6 +178,26 @@ button:focus-visible {
   }
 }
 
+/* View transitions: a project's screenshot morphs from its card (or feature
+   row) into the case study header. Everything else swaps instantly. */
+::view-transition-group(.morph) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+::view-transition-old(.morph),
+::view-transition-new(.morph) {
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 /* Fraunces at display sizes: optical sizing on, the soft cut, slightly tight
    tracking. Weight comes from the utility class (400 by default). In the base
    layer so a tracking-* utility can still override it. */
