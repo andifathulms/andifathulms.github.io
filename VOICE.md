@@ -120,8 +120,11 @@ Target 450–650 words across the visible sections (a three-minute read).
 | `## The problem` | `## Masalahnya` | 80–130 words | Who has the problem, what it costs them, what existed before. No code, no stack names. |
 | `## What I built` | `## Yang saya bangun` | 3–5 × `###`, 50–100 words each | Each `###` heading is a decision in plain words. Each section says what I chose, why, and what it made possible. |
 | `## Result` | `## Hasilnya` | 60–120 words | Status (live, staging, internal), who uses it, scale, what changed. Numbers from `meta.json` only. |
-| `## What I'd do next` | `## Langkah berikutnya` | 2–3 bullets, optional | Only when the source names a limit or next step. Never invent a roadmap. |
 | `## Under the hood` | `## Di balik layar` | Any length, optional | Bullet list of technical detail. Collapsed on the page. |
+
+There is no "next steps" section. Roadmaps go stale faster than anyone
+updates a portfolio, and a stale one reads as a false claim (decided 30 Sep
+2026). Known limits that matter can be stated once, plainly, in Result.
 
 The page renders the title, so the file opens with `# Title` and that line is
 stripped. Use these exact section headings. The case study page finds

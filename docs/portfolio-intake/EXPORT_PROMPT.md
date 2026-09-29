@@ -127,7 +127,9 @@ Kinds, strictly:
   removed, errors caught, access granted, labels verified, cost avoided).
 - scale = the size of what it serves, in things a non-engineer can picture:
   people, organisations, units, documents, records, places, cities, sectors,
-  drugs, languages, years of data.
+  drugs, languages, years of data. Name what the number counts precisely:
+  "units the system files documents under" is not "units using the system".
+  Usage (users, staff, visitors) only from real usage data.
 - effort = anything about the codebase or the work: apps, modules, models,
   tables, endpoints, viewsets, routes, components, files, migrations, seed
   rows, lines, tests, commits, days. These are always effort, even when large.
@@ -140,7 +142,10 @@ Include effort rows too (they go in the technical section on the site).
 ## 6. Limits and next steps
 
 Only what the repo itself states: known gaps, TODOs, deferred features,
-data limits. Bullet list. "None stated." if there are none.
+data limits. Bullet list. "None stated." if there are none. This section is
+never published; it stops the site from calling unfinished work finished. Check
+each item against the code before listing it: if the docs say "TBD" but the
+feature exists, it isn't a limit.
 
 ## 7. Technical detail
 

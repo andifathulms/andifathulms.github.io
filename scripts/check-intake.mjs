@@ -14,13 +14,17 @@
  * Checks, all errors unless noted:
  *  1. numbers   every number in the visible story, tagline, glance and metrics
  *               appears in the fact sheet or in the --base version
- *  2. next      "What I'd do next" exists only if section 6 has items, and its
- *               numbers come from section 6
+ *  2. next      no "What I'd do next" / "Langkah berikutnya" section (removed
+ *               site-wide on 30 Sep 2026: roadmaps go stale)
  *  3. launch    no "live since …" / "launched in …" unless `launched` is a date
  *  4. status    "in production" only for live/internal; "is live" not for staging
  *  5. hosts     no domain that isn't the project's own URLs or already published
  *  6. source    meta.source.generated matches the fact sheet
  *  7. stack     technologies named in prose but missing from techStack (warning)
+ *  8. usage     a sentence or metric saying something is used/shared/served by
+ *               N must take N from a section 5 row about people (users, staff,
+ *               employees, visitors…). "43 units the system files documents
+ *               under" is not "43 units use it".
  */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -127,21 +131,13 @@ if (unsourced.length) {
 
 // ---- 2. next steps ----------------------------------------------------------
 
-const ctxNext = ctxSection(6);
-const noneStated = /^none( stated)?\.?$/i.test(ctxNext.trim());
 for (const [label, mdx, heading] of [
   ['en', en, "What I'd do next"],
   ['id', id, 'Langkah berikutnya'],
 ]) {
-  const next = section(mdx, heading);
-  if (next === null) continue;
-  if (noneStated) {
-    errors.push(`${label}: "${heading}" exists but section 6 says none — remove it`);
-    continue;
+  if (section(mdx, heading) !== null) {
+    errors.push(`${label}: "${heading}" section exists — the site has no next-steps section; remove it`);
   }
-  const allowed = numbers(ctxNext);
-  const bad = [...numbers(next)].filter((n) => worth(n) || Number(n) > 1).filter((n) => !allowed.has(n));
-  if (bad.length) errors.push(`${label}: "${heading}" has numbers not in section 6: ${bad.join(', ')} (next steps come from section 6 only)`);
 }
 
 // ---- 3. launch date ---------------------------------------------------------
@@ -150,8 +146,8 @@ const launched = asDate(fm.launched);
 if (!launched) {
   const MONTHS = 'January|February|March|April|May|June|July|August|September|October|November|December';
   const BULAN = 'Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember';
-  const enLaunch = new RegExp(`\\b(live|launched|in production|running|deployed|in use)\\b[^.]{0,60}\\bsince\\b|\\blaunched (in|on) (${MONTHS}|\\d{4})`, 'i');
-  const idLaunch = new RegExp(`\\b(live|diluncurkan|berjalan|dipakai|beroperasi)\\b[^.]{0,60}\\bsejak\\b|\\bdiluncurkan (pada )?(${BULAN}|\\d{4})`, 'i');
+  const enLaunch = new RegExp(`\\b(live|launched|in production|running|deployed|in use)\\b[^.]{0,60}\\bsince\\b|\\blaunched (in|on) (${MONTHS}|\\d{4})|\\b(since|after|before) (the )?launch\\b`, 'i');
+  const idLaunch = new RegExp(`\\b(live|diluncurkan|berjalan|dipakai|beroperasi)\\b[^.]{0,60}\\bsejak\\b|\\bdiluncurkan (pada )?(${BULAN}|\\d{4})|\\b(sejak|setelah|sebelum) (di)?(luncurkan|peluncuran|rilis)\\b`, 'i');
   const hit = (re, t) => re.exec(t)?.[0];
   const e = hit(enLaunch, visible(en) + '\n' + (meta.glance?.result ?? ''));
   const i = hit(idLaunch, visible(id) + '\n' + (meta.id?.glance?.result ?? ''));
@@ -212,6 +208,41 @@ for (const d of readdirSync(PROJECTS)) {
 const stack = new Set(meta.techStack ?? []);
 const named = [...everyTech].filter((t) => t.length > 3 && !stack.has(t) && new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(en));
 if (named.length) warnings.push(`named in en.mdx but not in techStack: ${named.join(', ')} — add it, or confirm the fact sheet supports it`);
+
+// ---- 8. usage claims -------------------------------------------------------
+
+const PEOPLE = /\b(users?|people|persons?|employees?|staff|visitors?|members?|citizens?|residents?|applicants?|students?|participants?|readers?|players?|patients?|downloads?|sessions?|visits?|pegawai|pengguna|warga|peserta|pengunjung)\b/i;
+const USE_EN = /\b(use|uses|used|using|serve|serves|served|serving|share|shares|shared|sharing|relies on|rely on|adopted|visited)\b/i;
+const USE_ID = /\b(pakai|memakai|dipakai|guna|menggunakan|digunakan|melayani|dilayani|berbagi|mengandalkan)\b/i;
+
+const peopleNumbers = new Set();
+for (const line of ctxSection(5).split('\n')) {
+  const cells = line.split('|').map((c) => c.trim());
+  if (cells.length < 5) continue;
+  const [, metric, value, kind] = cells;
+  if (['impact', 'scale'].includes((kind ?? '').toLowerCase()) && PEOPLE.test(metric ?? '')) {
+    for (const n of numbers(value ?? '')) peopleNumbers.add(n);
+  }
+}
+const sentencesOf = (t) => t.split(/(?<=[.!?])\s+|\n+/).filter(Boolean);
+// The fact sheet may state usage in prose too ("Three groups use it"); a
+// number it puts next to a usage verb is sourced.
+for (const sentence of sentencesOf(ctxBody).filter((x) => USE_EN.test(x) && PEOPLE.test(x) || /\bgroups?\b/i.test(x) && USE_EN.test(x))) {
+  for (const n of numbers(sentence)) peopleNumbers.add(n);
+}
+const usageClaims = [
+  ...sentencesOf(visible(en)).filter((x) => USE_EN.test(x)),
+  ...sentencesOf(visible(id)).filter((x) => USE_ID.test(x)),
+  ...[meta.glance?.for, meta.glance?.result].filter((x) => x && USE_EN.test(x)),
+  ...(meta.metrics ?? []).filter((m) => USE_EN.test(m.label)).map((m) => `${m.value} ${m.label}`),
+  ...(meta.id?.metrics ?? []).filter((m) => USE_ID.test(m.label)).map((m) => `${m.value} ${m.label}`),
+];
+for (const claim of usageClaims) {
+  const bad = [...numbers(claim)].filter((n) => Number(n) >= 2 && !/^(19|20)\d\d$/.test(n) && !peopleNumbers.has(n));
+  if (bad.length) {
+    errors.push(`usage claim with a number not from a section 5 row about people: "${claim.trim().slice(0, 90)}"`);
+  }
+}
 
 // ---- report -----------------------------------------------------------------
 

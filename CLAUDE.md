@@ -114,7 +114,7 @@ content/
   **source material only** — never rendered on the public site.
 - **Copy follows `VOICE.md`.** Read it before writing or editing any case study,
   tagline or UI string. Case studies use the sections it defines (The problem /
-  What I built / Result / What I'd do next / Under the hood, and their Indonesian
+  What I built / Result / Under the hood, and their Indonesian
   equivalents). `meta.json` carries `glance`, `skills`, impact-first `metrics`,
   and an `id` block with the Indonesian versions of those fields plus the
   tagline. Run `npm run lint:voice -- <slug>` after editing.

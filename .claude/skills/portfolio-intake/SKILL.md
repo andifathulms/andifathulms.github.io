@@ -71,8 +71,21 @@ differ (old copy "twelve open items", section 6 "five open decisions": use
 five, drop twelve).
 
 `[old]` facts may stay in the problem, what-I-built and under-the-hood
-sections. They never go into "What I'd do next" (section 6 only) or into
-status, dates or metrics (frontmatter and Step 5 only).
+sections. They never go into status, dates or metrics (frontmatter and Step 5
+only).
+
+Section 6 (limits and next steps) is **never published** — the site has no
+next-steps section. Use it only to avoid overclaiming: don't describe
+anything listed there as finished. It can be stale (the repo's own docs lag
+behind the work), so don't state its items as current gaps either.
+
+**Usage claims.** "Used by", "shared by", "serves", "staff across N units use
+it", "N people rely on it": only with a number from a section 5 row about
+people (users, staff, employees, visitors, members…), or a sentence of the fact
+sheet that itself says so. A row counting what the system *organises*
+(units, domains, categories, records) is not usage. Write "documents are filed
+under 43 units", never "43 units use it". If section 5 says no usage data
+exists, make no usage claim with a number.
 
 ## Step 4 — Decide new or update
 
@@ -119,7 +132,7 @@ The same rule applies to prose: codebase counts appear only under
 | `title` | fact sheet `title` |
 | `tagline` | VOICE.md tagline formula, ≤ 18 words, no em-dash, no final full stop, no stack names. From section 1. Update: keep the old one unless it's contradicted. |
 | `glance.for` | who uses it, ≤ 12 words, from section 2 |
-| `glance.result` | the outcome in one line, ≤ 14 words, using the status words below. No codebase counts. |
+| `glance.result` | the outcome as a fragment, ≤ 14 words, starting with the status word itself, never with "Is"/"It is": "Live at aksara.ikn.go.id, built solo since July 2026", "Internal to OIKN; login required". No codebase counts, no usage numbers without a people row. |
 | `skills` | 3–4 recruiter-searchable skills from sections 4 and 7. Not library names. Update: keep unless wrong. |
 | `categoryTags` | contains `"Government"` iff `track` is `government`. New lab: `["Personal Project", "Web App"]`. New government: `["Government", "Web App"]`. Keep extra tags. |
 | `problemShape` | fact sheet |
@@ -175,9 +188,6 @@ heroImage, order, featured, metrics, id, source`. Two-space indent, UTF-8 (no
 ## Result
 <status words, who uses it, scale (Step 5 figures only), what changed, when it was built. 60–120 words.>
 
-## What I'd do next
-<2–3 bullets from section 6 only. Omit the section if section 6 has none.>
-
 ## Under the hood
 <section 7 bullets, section 5 effort rows (apps, models, endpoints, tests, lines, commits), code identifiers.>
 ```
@@ -194,7 +204,7 @@ heroImage, order, featured, metrics, id, source`. Two-space indent, UTF-8 (no
 
 Same content in natural Indonesian, written from the English meaning (VOICE.md
 "Bahasa Indonesia"). Headings: `## Masalahnya`, `## Yang saya bangun`,
-`## Hasilnya`, `## Langkah berikutnya` (optional), `## Di balik layar`. Use
+`## Hasilnya`, `## Di balik layar`. Use
 "saya", Indonesian months in prose, Indonesian number formatting in prose.
 The Indonesian must not contain a fact the English doesn't.
 
@@ -208,8 +218,9 @@ Run all of these. Fix what they flag. Don't commit until they pass.
 2. `node -e "JSON.parse(require('fs').readFileSync('content/projects/<slug>/meta.json','utf8'))"`
 3. `node scripts/check-assets.mjs`
 4. `node scripts/check-intake.mjs <slug>` — the machine half of the audit:
-   unsourced numbers, next steps outside section 6, launch dates without
-   `launched`, status words, unknown hostnames, the `source` marker. It must
+   unsourced numbers, a next-steps section, launch dates without `launched`
+   (including "since launch"), status words, unknown hostnames, usage claims
+   without a people row, the `source` marker. It must
    print ✓. Its stack warning means: add the technology to nothing, but say in
    the report which technology the prose names that the fact sheet doesn't.
    Do not argue with an error; change the copy.
@@ -248,6 +259,8 @@ items withheld (by category); validator and lint warnings; open questions.
 ## Never
 
 - Invent a number, date, status, user count, name or roadmap item.
+- Add a "What I'd do next" / "Langkah berikutnya" section.
+- Turn a count of what the system organises into a count of who uses it.
 - Publish a codebase count, a `target` row or an `effort` row as a metric or
   in the visible story.
 - Say "in production" or "live since" beyond what the frontmatter supports.

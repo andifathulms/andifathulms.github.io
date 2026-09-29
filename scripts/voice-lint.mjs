@@ -25,12 +25,12 @@ const only = args.filter((a) => !a.startsWith('--'));
 const HEADINGS = {
   en: {
     required: ['The problem', 'What I built', 'Result'],
-    optional: ["What I'd do next"],
+    optional: [],
     hood: 'Under the hood',
   },
   id: {
     required: ['Masalahnya', 'Yang saya bangun', 'Hasilnya'],
-    optional: ['Langkah berikutnya'],
+    optional: [],
     hood: 'Di balik layar',
   },
 };
