@@ -124,6 +124,7 @@ export function getAllProjects(): ProjectMeta[] {
 // alternates employer and problem-shape so the set opens strong. Any featured
 // project not named here falls back to after the listed ones, by `order`.
 const FEATURED_ORDER = [
+  'climate-watch', // indep · data
   'falak-visualizer', // indep · tool
   'aksara', // gov · workflow
   'jdih', // gov · workflow
@@ -132,7 +133,6 @@ const FEATURED_ORDER = [
   'scimotion', // indep · explainer
   'doserx', // indep · tool
   'anatomi-rupiah', // indep · explainer
-  'climate-watch', // indep · data
   'quranlytics', // indep · data
 ];
 
