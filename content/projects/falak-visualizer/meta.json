@@ -25,7 +25,7 @@
   "githubUrl": "https://github.com/andifathulms/falak-visualizer",
   "heroImage": "/images/projects/falak-visualizer/hero.webp",
   "order": 15,
-  "featured": false,
+  "featured": true,
   "metrics": [
     {
       "value": "$0",
