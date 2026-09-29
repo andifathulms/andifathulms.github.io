@@ -37,10 +37,27 @@ Run `node scripts/check-context.mjs <slug>`.
 4. Reference shape and tone, all three files each:
    - `content/projects/lantara/` for government work,
    - `content/projects/pola-hujan/` for lab work.
+   If the slug you're processing is one of these, use `content/projects/cubiq/`
+   instead.
 
 Then write down, before any prose: every number and date in the fact sheet's
 frontmatter and sections 5 and 8. This list is the only source of numbers you
 may use. Section 9 lists what you must not publish.
+
+How to read the sections:
+
+- **Section 5 rows** are exact. When a row becomes a metric or a sentence,
+  keep its meaning: don't add qualifiers the row doesn't state ("each",
+  "all", "every", "checked", "verified", "in production"). If the row says
+  "699 BMKG season zones compared", write that, not "checked against all 699".
+- **`target` rows** are plans, not results. Never a metric, never stated as
+  achieved. They may appear in "What I'd do next" only if section 6 also
+  lists the goal.
+- **Section 8** items are instructions: fix every wrong claim it names, and
+  add any fact it says the current case study is missing.
+- **Numbers already on the site** that the context doesn't repeat: keep them
+  only if the old copy is the only place they appear and section 8 doesn't
+  contradict them.
 
 ## Step 3 — Decide new or update
 
@@ -74,7 +91,7 @@ may use. Section 9 lists what you must not publish.
 | `heroImage` | update: keep. New: `/images/projects/<slug>/hero.webp` if that file exists, else `/images/projects/<slug>/cover.svg` and tell the user a hero screenshot is needed. |
 | `order` | update: keep. New: highest existing `order` + 1. |
 | `featured` | update: keep. New: `false`. |
-| `metrics` | 3–4 rows from section 5 with kind `impact` or `scale` only, most meaningful first. `value` copied exactly; `label` lowercase, 3–8 words, no final full stop, doesn't repeat the value. Never `effort` or `target` rows. |
+| `metrics` | 3–4 rows from section 5 with kind `impact` or `scale` only. `value` copied exactly; `label` lowercase, 3–8 words, no final full stop, doesn't repeat the value, same meaning as the row. Never `effort` or `target` rows. With more than 4 candidates: `impact` before `scale`; then prefer rows a reader can picture (people, places, records) over technical ones; among equals, keep the rows already on the site. |
 | `id` | Indonesian `tagline`, `glance`, `skills`, `metrics` (same count and same values as `metrics`, values may use Indonesian number formatting). |
 | `source` | `{ "schema": "portfolio-context/v2", "generated": "<frontmatter generated>" }` — this marks the context as taken in. |
 

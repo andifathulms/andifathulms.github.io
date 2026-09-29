@@ -49,3 +49,6 @@ content/projects/*/CLAUDE.md
 content/projects/*/PORTFOLIO_CONTEXT.md
 content/projects/*/PRODUCT.md
 content/projects/*/AGENTS.md
+
+# Claude Code agent worktrees
+.claude/worktrees/
