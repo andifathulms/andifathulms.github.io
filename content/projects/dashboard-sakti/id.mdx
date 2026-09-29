@@ -1,27 +1,48 @@
 # Dashboard SAKTI
 
-## Permasalahan
+## Masalahnya
 
-Enam satuan kerja (satker) anggaran operasional OIKN masing-masing memiliki data pengeluaran yang terkunci di sistem SAKTI Kemenkeu. Setiap kali tim Biro POKS membutuhkan angka — untuk laporan Power BI, tinjauan eksekutif, atau submission triwulanan — seseorang harus login manual ke SAKTI, mengunduh satu file Excel per satker, dan menyatukan hasilnya. Tidak ada tren historis, tidak ada tampilan terpusat, tidak ada cara menghubungkan angka ke alat lain tanpa entri ulang manual.
+Otorita IKN punya enam satuan kerja (satker), dan data anggaran serta realisasi setiap satker tersimpan di SAKTI, sistem milik Kementerian Keuangan. Setiap kali biro perencanaan butuh angka untuk laporan, rapat pimpinan, atau Power BI, seseorang harus login ke SAKTI, mengunduh file Excel per satker, lalu menggabungkannya secara manual.
 
-## Pendekatan
+Akibatnya tidak ada riwayat dan tidak ada tampilan tunggal. Tidak ada yang bisa melihat pergerakan belanja dari waktu ke waktu. Setiap alat lain yang butuh angkanya mendapatkannya lewat salin-tempel. Tim data ingin angka-angka itu terkumpul otomatis, tersimpan dari waktu ke waktu, dan tampil di satu tempat.
 
-### Simulasi mekanisme token SAKTI yang tidak biasa
+## Yang saya bangun
 
-API SAKTI nyata menggunakan pola token Bearer sekali pakai yang ketat: setiap respons menyertakan token baru, token sebelumnya langsung tidak valid, dan endpoint `resetToken` terpisah mem-bootstrap token pertama. Alih-alih memblokir pengembangan pada kredensial nyata, saya membangun simulasi lengkap ini di aplikasi Django `mock_sakti` — penyimpan token dalam memori dengan rotasi UUID yang mencerminkan struktur respons SAKTI yang sebenarnya. Beralih ke produksi hanya memerlukan perubahan dua variabel lingkungan.
+### Pipeline malam yang mengambil data setiap satker
 
-### Airflow dengan dynamic task mapping per satker
+Sebuah job terjadwal berjalan setiap malam pukul 02.00 WIB. Job ini menarik enam jenis data SAKTI untuk setiap satker aktif secara paralel, lalu menyimpannya ke database. Daftar satker dibaca dari database saat job dimulai. Administrator cukup menambah atau menonaktifkan satker di panel admin, dan job berikutnya langsung mengikuti. Tidak ada satker yang di-hardcode. Setiap job aman diulang, karena menyimpan data yang sama dua kali akan memperbaruinya, bukan menggandakannya.
 
-DAG `sakti_daily_sync` mengkueri tabel `Satker` saat runtime dan menggunakan `.expand()` Airflow untuk menghasilkan task fetch paralel untuk setiap satker aktif. Menambah atau menonaktifkan satker di panel admin secara otomatis mengubah apa yang diambil pipeline — tidak ada yang dikodekan keras.
+### Saya mensimulasikan SAKTI supaya pekerjaan tidak menunggu akses
 
-### DAG memanggil Django ORM langsung
+Kredensial SAKTI yang asli belum tersedia. Cara login SAKTI juga tidak biasa: setiap respons memberikan kunci sekali pakai yang baru, dan kunci sebelumnya langsung tidak berlaku. Saya membangun server tiruan kecil yang berperilaku sama, termasuk respons kunci kedaluwarsa, dan menyajikan data contoh untuk keenam jenis data. Seluruh pipeline berjalan di atasnya. Pindah ke sistem asli cukup dengan mengubah dua pengaturan, tanpa mengubah kode.
 
-Alih-alih menambahkan lapisan HTTP antara Airflow dan database, task DAG memanggil model Django langsung dengan memasang source backend ke container Airflow dan mengatur `DJANGO_SETTINGS_MODULE`. Semua logika upsert berada di satu tempat dan menggunakan `update_or_create` Django — aman untuk dijalankan ulang, tidak ada duplikat.
+### Satu tempat untuk logika penyimpanan
 
-### Simplifikasi yang diketahui: toggle granularitas anggaran
+Job terjadwal menulis ke database lewat model data yang sama dengan aplikasi web. Saya memilih cara ini ketimbang menaruh API web di antara keduanya, supaya aturan penyimpanan data hanya ada di satu tempat. Konsekuensinya, penjadwal bergantung pada kode aplikasi web. Untuk enam satker, itu pertukaran yang wajar.
 
-Data `Anggaran` di SAKTI bersifat per-item tanpa kolom tanggal. Toggle granularitas pada grafik tren memperkirakan deret waktu dengan membagi total anggaran secara merata ke seluruh periode. Ini didokumentasikan dalam komentar kode sebagai simplifikasi yang diketahui.
+### Dashboard dengan penanda sinkronisasi dan ekspor Excel
 
-## Hasil
+Dashboard-nya punya tiga halaman. Halaman ringkasan menampilkan total anggaran, total realisasi, dan persentase serapan, lengkap dengan grafik tren dan gauge. Halaman detail merinci satu satker per program dan kegiatan, dengan filter tanggal. Halaman pengelolaan menampilkan daftar satker. Setiap job malam mencatat status, jumlah baris, durasi, dan pesan error, lalu dashboard menampilkan kapan data terakhir disinkronkan. Tampilan apa pun bisa diekspor ke file Excel yang sudah diformat.
 
-Fungsional end-to-end: DAG Airflow → SAKTI client → MySQL → REST API → dashboard React → ekspor Excel. Pipeline lengkap berjalan terhadap mock server di lingkungan dev, mencakup semua enam jenis endpoint SAKTI di seluruh satker aktif. Stack Docker produksi (`docker-compose.prod.yml`) dengan multi-stage builds, healthchecks, dan `restart: unless-stopped` sudah diverifikasi dan siap di-deploy begitu provisi kredensial Kemenkeu (whitelist IP + API key) selesai.
+## Hasilnya
+
+Saya membangun platform ini dalam dua hari di bulan Juni 2026, dari repositori kosong. Semuanya berjalan dari ujung ke ujung: job malam, client SAKTI, database, API, dashboard, dan ekspor Excel. Saat ini platform berjalan di atas server SAKTI tiruan dengan data contoh. Setup produksinya sudah siap dan teruji bisa menyala dengan bersih. Data asli menunggu Kementerian Keuangan memberikan kredensial. Di versi pertama ini dashboard belum punya login sendiri, dan ditujukan untuk jaringan internal OIKN.
+
+## Langkah berikutnya
+
+- Menyambungkan ke SAKTI asli begitu kredensial tersedia, lalu deploy ke server internal OIKN.
+- Mengganti estimasi tren anggaran. Data anggaran SAKTI tidak bertanggal, jadi grafiknya membagi setiap total secara merata ke tiap periode. Riwayat bertanggal dari SAKTI akan memperbaikinya.
+- Mengubah placeholder peringatan kegagalan menjadi notifikasi email atau chat.
+
+## Di balik layar
+
+- DAG Airflow `sakti_daily_sync` membaca tabel `Satker` saat runtime dan memakai `.expand()` untuk dynamic task mapping. Task-nya: `fetch_ref_sts`, `fetch_ref_admin_uraian`, lalu `fetch_data_ang`, `fetch_spp_header`, dan `fetch_capaian_ro` per satker, lalu `normalize_and_load` dan `log_sync_result`.
+- Task DAG mengimpor model Django langsung: source backend di-mount ke container Airflow dengan `DJANGO_SETTINGS_MODULE` terpasang. Upsert memakai `update_or_create`.
+- Django app `mock_sakti` menyimpan token di memori dengan rotasi UUID, meniru Bearer token sekali pakai milik SAKTI dan endpoint bootstrap `resetToken`, serta menyajikan fixture JSON yang deterministik.
+- `SaktiClient` memisahkan state token (`auth.py`) dari alur request (`client.py`) dan mencoba ulang dengan exponential backoff lewat `tenacity`.
+- `SyncLog` menyimpan status, jumlah baris, durasi, dan error per task. Hook `notify_failure_placeholder` sudah terpasang di DAG.
+- Ekspor Excel memakai `openpyxl`: header tebal, lebar kolom otomatis, format mata uang, dan baris header yang dibekukan.
+- Baris `Anggaran` tidak punya kolom tanggal, jadi toggle granularitas di grafik membagi total anggaran secara merata. Riwayat `refSts` yang bertanggal akan menggantikannya.
+- Data aplikasi dan metadata Airflow berbagi satu container MySQL 8, sebagai database terpisah dengan user terpisah.
+- Lima service Docker dengan multi-stage build dan healthcheck; `docker-compose.prod.yml` memakai `restart: unless-stopped`.
+- 8 Django app, 9 endpoint REST termasuk health dan status sinkronisasi, 10 komponen React, sekitar 5.000 baris Python dan JSX, 10 commit dalam sembilan fase.

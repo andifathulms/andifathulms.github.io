@@ -1,41 +1,47 @@
 # E-Monev IKN
 
-## Permasalahan
+## Masalahnya
 
-Indonesia sedang membangun ibu kota baru dari awal dalam lima tahap pembangunan yang mencakup 2022 hingga 2045. Puluhan unit kerja pemerintah menjalankan kegiatan bersamaan — infrastruktur, tata kelola, lingkungan, program sosial — masing-masing dengan anggaran, target, dan tonggak triwulanannya sendiri. Tanpa sistem terpusat, koordinator tidak memiliki tampilan kemajuan lintas unit, pelaporan triwulanan bersifat manual dan terfragmentasi, kesenjangan anggaran versus realisasi tidak dapat terdeteksi sampai review sudah terlambat, peta jalan 23 tahun (matriks Indikasi Program) tidak memiliki rumah digital, dan tidak ada jejak formal siapa menyetujui atau menolak laporan dan alasannya. Tenggat pelaporan juga tidak ditegakkan — unit bisa mengirim atau mengubah data di luar jendela pelaporan resmi.
+Indonesia sedang membangun ibu kota baru dari nol, dalam lima tahap dari 2022 sampai 2045. Puluhan unit kerja menjalankan kegiatan secara bersamaan, di bidang infrastruktur, tata kelola, lingkungan, dan sosial. Setiap kegiatan punya anggaran, target, dan capaian triwulannya sendiri.
 
-Target pengguna mencakup hierarki enam peran: anggota unit kerja yang melaporkan kemajuan kegiatan, reviewer dan approver di level admin dan deputi, serta administrator yang mengelola master data dan penjadwalan seluruh sistem.
+Sebelum ada E-Monev, koordinator tidak punya satu tampilan untuk melihat progres lintas unit. Laporan triwulan disusun manual. Selisih antara anggaran dan realisasi sering baru ketahuan saat review sudah terlambat. Peta jalan 23 tahun itu tidak punya rumah digital. Tidak ada catatan resmi tentang siapa yang menyetujui atau menolak laporan dan apa alasannya. Unit juga masih bisa mengirim atau mengubah angka setelah periode pelaporan ditutup.
 
-## Pendekatan
+## Yang saya bangun
 
-### Hierarki peran berurutan, bukan bitmask
+### Enam peran dalam satu urutan
 
-Enam peran — `super_admin, admin, deputi_pp, eselon_1, eselon_2, guest` — berada dalam daftar `ROLE_HIERARCHY` eksplisit, dan setiap pemeriksaan permission direduksi menjadi `user.has_min_role(min_role)`, satu perbandingan posisi daftar. Kelas permission seperti `IsSuperAdmin` atau `CanApproveRO` adalah pembungkus tipis di atas satu perbandingan itu, sehingga menambahkan aksi baru yang dibatasi di mana pun dalam sistem cukup satu baris kelas permission, bukan pemeriksaan ad-hoc baru.
+Ada enam peran, dari super admin sampai tamu, dengan tingkat deputi dan eselon di antaranya. Saya menaruh semuanya dalam satu daftar berurutan. Setiap pemeriksaan hak akses cukup menanyakan satu hal: apakah peran orang ini minimal setinggi ini? Menambah aksi baru yang dilindungi cukup satu baris. Urutan yang sama menentukan akses di API sekaligus halaman yang tampil di browser.
 
-### Status review sebagai state machine, bukan flag status
+### Laporan triwulan bergerak lewat tahap tetap
 
-Kemajuan triwulanan (`TriwulanProgress`) membawa `ReviewStatus` — Draft, Submitted, Need Revision, Approved — yang diatur oleh peta `VALID_TRANSITIONS` dan metode `transition_to()` yang memvalidasi perpindahan dan menulis baris `ReviewHistory` (status-dari, status-ke, aktor, catatan) pada setiap perubahan. Apakah sebuah entri masih bisa diedit diturunkan langsung dari statusnya, yang menjadi penggerak UI edit-lock di frontend. Hasilnya adalah jejak audit yang sepenuhnya dapat dikueri untuk setiap submit, approve, reject, dan reopen — bukan sesuatu yang direkonstruksi setelahnya dari log aplikasi. (Pipeline persetujuan terpisah untuk Rencana Operasional yang ada sebelumnya kemudian sengaja dihapus, setelah menjadi jelas bahwa gerbang persetujuan yang sesungguhnya berada di level Triwulan — satu alur kerja, bukan dua yang saling bersaing.)
+Setiap kegiatan punya laporan progres triwulan berisi rencana, realisasi, dan file bukti. Laporan bergerak dari draf ke terkirim, lalu disetujui atau dikembalikan untuk revisi. Hanya perpindahan yang sah yang bisa terjadi, dan setiap perpindahan mencatat siapa, kapan, dan alasannya. Laporan hanya bisa diubah selama masih draf, jadi halamannya terkunci begitu laporan dikirim. Rencana operasional dulu punya tahap persetujuan sendiri. Saya menghapusnya, karena persetujuan yang sesungguhnya ada di laporan triwulan, dan dua antrean review berarti kerja dua kali.
 
-### Tenggat yang ditegakkan di tempat yang tidak bisa dilewati
+### Tenggat yang ditegakkan server
 
-Model `ReportingWindow`, `PerencanaanWindow`, dan `RencanaOperasionalWindow` memungkinkan admin mendefinisikan jadwal buka/tutup, termasuk perpanjangan tenggat per unit. Validasinya berada di `reporting_window/services.py` dan dipanggil dari serializer dan view itu sendiri — penulisan di luar jendela aktif memunculkan `ValidationError` di sisi server terlepas dari apa yang ditampilkan frontend, sehingga banner di dashboard hanyalah gula UX di atas aturan yang tidak bisa dilewati dengan memanggil API secara langsung.
+Administrator mengatur kapan jendela pelaporan dan perencanaan dibuka dan ditutup, dan bisa memperpanjang tenggat untuk satu unit. Server memeriksa jendela itu di setiap penulisan data. Perubahan yang terlambat ditolak, bahkan kalau seseorang memanggil sistemnya secara langsung. Banner di dashboard hanya memberi tahu apa yang sudah ditegakkan server.
 
-### SSO dengan resolusi unit organisasi otomatis
+### Login yang menemukan unit Anda sendiri
 
-Keycloak mengirimkan string jabatan mentah — "DIREKTUR DATA DAN KECERDASAN BUATAN" — yang perlu diselesaikan ke catatan unit kerja tertentu, dan skema Keycloak sendiri tidak dapat diubah untuk menyematkan ID. Scorer normalisasi dan fuzzy word-overlap berjalan pada setiap login: menghapus diakritik, memetakan prefiks jabatan ke prefiks unit organisasi, dan menilai overlap kata untuk menemukan kecocokan yang tepat, tanpa langkah penugasan pengguna-ke-organisasi secara manual.
+Pegawai login lewat single sign-on IKN. Sistem itu mengirim nama jabatan sebagai teks biasa, seperti "Direktur Data dan Kecerdasan Buatan", dan tidak bisa diubah untuk mengirim ID unit. Saya menulis pencocok yang merapikan nama jabatan dan menilai kemiripan katanya untuk menemukan unit kerja yang tepat di setiap login. Tidak ada yang perlu memetakan pegawai ke unit secara manual.
 
-### Memigrasikan data langsung ke primary key UUID
+### Masalah dan impor data yang terstruktur
 
-Semua model master data awalnya menggunakan kunci bigint auto-increment. Memindahkannya ke UUID — untuk menghilangkan urutan implisit dan membuat penggabungan data lintas-lingkungan aman — berarti menulis jalur migrasi maju yang sesungguhnya untuk database yang sudah di-deploy dan terisi data, bukan sekadar migrasi instalasi baru, ditambah pembersihan inkonsistensi riwayat migrasi yang muncul pada database yang sudah tersedia di sepanjang proses.
+Awalnya, masalah dalam sebuah kegiatan ditulis di satu kolom catatan bebas. Saya memberinya catatan tersendiri. Satu kegiatan bisa punya banyak isu, masing-masing dengan status, unit yang membantu, dan riwayat tindak lanjut. Impor massal juga diperlakukan sama: admin mengunggah spreadsheet, melihat semua error tanpa ada data yang tersimpan, lalu menyimpan semuanya sekaligus.
 
-### Masalah terstruktur alih-alih field teks, impor tervalidasi alih-alih impor buta
+## Hasilnya
 
-Pelacakan kegiatan awal tidak memiliki tempat nyata untuk mencatat masalah berulang selain satu field teks bebas. `Isu` dan `TindakLanjut` kini menjadi model tersendiri — satu kegiatan bisa membawa banyak isu, masing-masing dengan status, unit pembantu, dan jejak tindak lanjutnya sendiri. Impor massal master data mendapat kekakuan yang sama: alur `bulk_validate` / `bulk_commit` dua langkah memungkinkan admin melakukan dry-run unggahan Excel atau CSV, menyelesaikan foreign key, dan meninjau setiap error sebelum apa pun benar-benar ditulis ke database.
+E-Monev mencakup seluruh kerangka pemantauan IKN: 24 KPI di lima tahap, delapan prinsip, dan enam aspek, sepanjang peta jalan 23 tahun. Dashboard empat tab memberi setiap peran tampilannya sendiri atas data yang sama, dengan ringkasan eksekutif, analitik, grafik keterkaitan KPI, dan peta semua kegiatan yang punya lokasi. Laporan tersedia bulanan, triwulanan, semesteran, tahunan, dan akhir tahap, dalam format PDF, Word, atau Excel. Backend-nya sudah di produksi, dan frontend-nya sudah dikemas untuk deploy dengan cara yang sama. Saya membangun kedua sisinya antara Mei dan Juli 2026, dan cakupannya tumbuh jauh melampaui spesifikasi awal.
 
-### Dari localStorage, ke API, ke API lambat — tanpa menyentuh komponen dua kali
+## Di balik layar
 
-Context data frontend awalnya didukung `localStorage` untuk membuka blokir kerja UI selagi backend masih dibangun, sengaja dirancang dengan antarmuka yang sama seperti yang akan diekspos API nyata nantinya. Ketika backend siap, hanya implementasi context yang berubah — bukan 200+ komponen yang mengonsumsinya. Seiring jumlah kategori master data bertambah, mengambil semuanya secara eager pada setiap pemuatan halaman menjadi boros, sehingga context di-refaktor kedua kalinya menjadi model lambat per-kategori (`useMasterCategories()`), menggunakan kembali disiplin "jaga antarmuka tetap identik" dari migrasi pertama.
-
-## Hasil
-
-Arsitektur kelas produksi, dengan backend di-deploy dan image Docker-nya dipublikasikan ke GHCR pada setiap push ke main di balik gerbang kerentanan dependensi pip-audit. Sistem telah tumbuh jauh melampaui cakupan awalnya — 82 commit backend dan 145 commit frontend dalam kurang lebih tujuh minggu, mencakup 9 aplikasi Django, ~29 model database, dan 225 file sumber frontend (~29.300 baris) mencakup seluruh kerangka monitoring IKN: 24 KPI di 5 tahapan, 8 prinsip, dan 6 aspek, sepanjang peta jalan 23 tahun. Modul pelaporan menghasilkan laporan bulanan, triwulanan, semester, tahunan, dan akhir-tahapan sebagai PDF, DOCX, atau Excel sesuai permintaan, dan dashboard Control Tower langsung — ringkasan eksekutif, analitik bulanan/aspek, graf relasi KPI, dan peta Leaflet ter-geocode — memberikan setiap peran tampilan yang sesuai izin dari data yang sama.
+- Peran `super_admin, admin, deputi_pp, eselon_1, eselon_2, guest` tersusun dalam list `ROLE_HIERARCHY`; `User.has_min_role()` membandingkan posisinya. Permission class seperti `IsSuperAdmin` dan `CanApproveRO` membungkus satu perbandingan itu.
+- `TriwulanProgress` membawa `ReviewStatus` (Draft, Submitted, Need Revision, Approved) dengan peta `VALID_TRANSITIONS`. `transition_to()` memvalidasi perpindahan dan menulis baris `ReviewHistory`. `is_editable` hanya bernilai true saat Draft.
+- `ReportingWindow`, `PerencanaanWindow`, dan `RencanaOperasionalWindow`, ditambah `ReportingWindowExtension` untuk pengecualian per unit. Pemeriksaan di `reporting_window/services.py` melempar `ValidationError` dari serializer dan view.
+- SSO Keycloak: backend menukar auth code antar-server dan menerbitkan pasangan SimpleJWT sendiri, jadi frontend tidak butuh library OIDC. `apps/users/oidc.py` menghapus diakritik, memetakan awalan jabatan ke awalan unit, dan menilai kemiripan kata untuk menemukan `UnitOrganisasi` dan `UnitKerja`.
+- Master data pindah dari primary key bigint ke UUID dengan migrasi maju di tempat untuk database yang sudah berjalan, lalu dibersihkan dari inkonsistensi riwayat migrasi.
+- Model `Isu` dan `TindakLanjut` dengan many-to-many `unit_pembantu`. `BulkMixin` menyediakan `bulk_validate` (uji coba) dan `bulk_commit` (atomik) dengan resolusi foreign key per kategori.
+- `AuditMixin` menambahkan `created_by`, `updated_by`, dan timestamp di banyak model; `AuditModelViewSetMixin` mengisinya otomatis.
+- `MasterDataContext` di frontend awalnya memakai localStorage, lalu pindah ke API dengan antarmuka yang sama, lalu dibuat lazy dengan `useMasterCategories()`.
+- Peta Leaflet dimuat lewat `next/dynamic` dengan `ssr: false`. Grafik KPI memakai React Flow. Laporan memakai WeasyPrint, python-docx, dan openpyxl.
+- CI menerbitkan image backend ke GHCR setiap push ke main, dengan gerbang `pip-audit`.
+- 9 Django app, sekitar 29 model, 30 route frontend, 225 file sumber frontend, sekitar 9.760 baris Python dan 29.300 baris TypeScript, 82 commit backend dan 145 commit frontend sejak 20 Mei 2026.

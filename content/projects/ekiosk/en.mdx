@@ -2,40 +2,48 @@
 
 ## The problem
 
-IKN's smart city initiative deploys physical information kiosks in public areas across Nusantara, each running a custom Flutter app that displays government content — maps, announcements, transport schedules. Without a central management layer, updating what any kiosk shows requires touching each device individually, which doesn't scale as the fleet grows. Operators also had no visibility into whether a kiosk was running, had crashed, or had fallen out of sync.
+IKN's smart city program puts information kiosks in public places across Nusantara. Each one runs an app that shows government content: maps, announcements and transport schedules. With no central control, changing what a kiosk shows meant touching that device. That doesn't scale as more kiosks go up. Operators also couldn't tell whether a kiosk was running, had crashed, or was showing old content.
 
-Separately, IKN operates a BRT (bus rapid transit) fleet. A prior in-house Go service tracked bus GPS positions in memory, with no persistence, no historical analytics, and a race-condition-prone shared state — and no way to tell riders or operators when a bus would actually arrive.
+IKN also runs a bus rapid transit fleet. An earlier in-house service tracked bus positions in memory only. It kept no history, and it couldn't tell riders or operators when the next bus would arrive. Two teams needed tools: content staff managing kiosk playlists, and transport staff watching the fleet.
 
-Two operator groups depend on this system: non-technical content staff managing kiosk playlists and media, and transport/IT staff monitoring fleet health, GPS tracking, and ETA accuracy.
+## What I built
 
-## The approach
+### Kiosks report in, and the server works out their state
 
-### Heartbeat-driven kiosk status
+Every kiosk checks in every five minutes with what it's playing, where it is, and how much storage and memory it has left. From that check-in, the server works out whether the kiosk is operational, stale, disconnected or in maintenance. Each playlist carries a fingerprint that changes when its content changes. A kiosk reports the fingerprint it last loaded, so the server knows at once whether that device is behind. Operators build playlists by dragging media into order, and changes reach the kiosks on their own.
 
-Each physical kiosk pings the server every five minutes with its current state — playlist hash, GPS coordinates, free storage, free memory, app version. Status (OPERATIONAL / STALE / DISCONNECTED / MAINTENANCE) is computed live from that heartbeat on every API read rather than stored as a column, keeping the data model simple and always current. Content sync avoids diffing entirely: each playlist computes a deterministic SHA-256 hash of its ordered items on every save, and kiosks report the hash they last synced, so the server can tell instantly — in O(1) — whether a device is stale.
+### Arrival times learned from the buses' own history
 
-### From one dashboard to two products
+A background service reads every bus's GPS position about every five seconds and places it on its route. For arrival times, I didn't assume a fixed speed. Each night, a job studies past trips and learns how long each stretch between stops usually takes, by hour and by weekday or weekend. The estimate starts from where the bus is on the road, then adds those learned times stop by stop. Where history is thin, it falls back to the timetable, then distance, then stop count, so it always gives an answer.
 
-What began as a single dashboard with a "Fleet" tab has since split into two standalone single-page apps — **eKiosk CMS** and **Fleet Management** — each with its own layout and sidebar, reachable through a shared app launcher and a cross-app switcher embedded in both topbars. Fleet Management is additionally gated behind a staff role. All of it runs on a hand-rolled design system (a token file plus inline CSS objects, no component library) rather than Tailwind, kept deliberately consistent across both apps.
+### The system grades its own predictions
 
-### Real-time GPS tracking and a statistical ETA engine
+I wanted to know whether the arrival times were any good, so the system checks itself. It samples its own predictions, then records the error the moment the bus reaches that stop. A report shows the average error and the share of arrivals within one, two or three minutes, broken down by hour and by stop. Staff can see exactly where the estimates are weakest.
 
-A long-running poller (`poll_gps_data`) hits a live GPS vendor API every ~5 seconds per vehicle, matches each position to a route graph, and buffers movement into a track-history table — its own Docker service alongside the main API. The route graph itself is a small hand-rolled directed graph, built deliberately without networkx or any data-science library, to keep the image slim.
+### Buses that change route are caught without flip-flopping
 
-ETA isn't a fixed-speed guess: it projects the vehicle's live GPS fix onto the polyline segment it's currently traveling, then walks forward through the route's stops using **learned historical travel times** — median seconds per (route, from-stop, to-stop, hour-of-day, weekday/weekend) bucket, computed nightly from trip-split GPS history with outlier trimming. Where there isn't enough learned data yet, the estimate falls back through scheduled-timetable deltas, then haversine distance over an assumed speed, then a stop-count heuristic — so it degrades gracefully instead of failing.
+Buses sometimes get reassigned or leave their scheduled route. A separate check compares each bus's recent path with every route and suggests a correction when one route is clearly the best match. My first version switched a bus after a few readings near another route. At stops shared by overlapping routes, buses flipped back and forth. Now a switch only happens after the bus visits a stop unique to the new route, or at least 80% of that route's stops. Every correction is logged.
 
-### Measuring the ETA engine against itself
+### Two apps, one sign-in
 
-The system doesn't just predict — it grades its own predictions. The poller periodically samples its ETA output into a log, then closes each prediction out the instant the bus actually crosses the target stop's geofence, recording the signed error. That feeds a dedicated accuracy report: mean absolute error, percentage within 1/2/3 minutes, broken down by hour and by stop — so it's possible to see exactly where the model is weakest, not just that it exists.
+What began as one dashboard with a fleet tab is now two separate apps, eKiosk CMS and Fleet Management, with a shared launcher and a switcher between them. Operators sign in once through IKN's single sign-on, and Fleet Management is limited to staff. Kiosks don't use that sign-in at all. They register with an ID assigned at first boot, since a kiosk has no person to log in as.
 
-### Self-correcting route detection, without oscillation
+## Result
 
-Buses sometimes get manually reassigned or drift from their scheduled route. A separate service continuously scores each vehicle's recent GPS trail against every route's polyline and proposes a correction when the best match is both close enough and clearly better than the runner-up. An early version — "N consecutive ticks near route X" — caused oscillation at stops shared between overlapping routes. The fix adds a spatial confirmation gate on top of the scoring: a correction only commits once the bus visits a stop unique to the new route, or at least 80% of its named stops. Every correction is journaled for audit.
+Both apps run in production for IKN, across 24 pages. Content staff manage kiosk playlists and see device health, with trend charts and an email alert when a kiosk goes silent. Transport staff get a live bus map, a route and stop editor, fleet schedules, a journey planner with points of interest, and reports on headways, travel times and arrival accuracy. The daily fleet report used to time out under load, so I rewrote it as a single database query. The work ran from March to July 2026. The system tracks vehicles only; it has no passenger or fare data.
 
-### Auth split by audience
+## Under the hood
 
-Dashboard operators authenticate through IKN's Keycloak SSO, which issues a JWT the frontend stores in Zustand; user fields (NIP, jabatan, direktorat) sync from Keycloak claims on every login. Flutter kiosks never touch that layer at all — they use a separate `AllowAny` registration flow, since a kiosk phoning home from a factory-assigned UUID has no user to authenticate as.
-
-## Outcome
-
-Both apps run in production, containerized via Docker Compose with GitHub Actions publishing images to GHCR. The backend has grown to 113 commits, 66 of them in the transport module alone — the busiest and most recent stretch of work covered the ETA-accuracy feedback loop, point-of-interest journey planning, and rewriting the daily fleet-analytics query from a Python loop into a single PostgreSQL query with window functions, after the original implementation started timing out gunicorn workers under load. The whole ETA and analytics layer — geometry, statistics, graph structure — runs on the Python standard library and raw SQL, with zero new heavyweight dependencies (no pandas, numpy, geopy, shapely, networkx, Celery, or Redis) added to support it.
+- Kiosk status (OPERATIONAL / STALE / DISCONNECTED / MAINTENANCE) is a model `@property` derived from `last_heartbeat`, `heartbeat_interval`, `operational_status` and the playlist hash, so it can't be filtered in the ORM. The summary endpoint filters in Python.
+- Each playlist stores a deterministic SHA-256 hash of its ordered items, recomputed on save. Sync status is an O(1) comparison.
+- Kiosk endpoints are `AllowAny`; kiosks identify by a UUID assigned at first boot. Dashboard users sign in through Keycloak via `mozilla-django-oidc`, with a JWT held in Zustand and NIP, jabatan and direktorat synced into `UserProfile` on each login.
+- `poll_gps_data` runs as its own `transport-poller` Docker service. Movement is bulk-inserted into `VehicleTrack` about every 60 seconds, only past a minimum distance.
+- `RouteGraph` is a hand-rolled directed graph with a terminal sentinel that closes the loop. It avoids a 30 MB networkx dependency.
+- `compute_segment_stats` runs nightly from host cron. It splits GPS history into trips, trims outliers above 3× the median, and stores median, p25 and p75 per (route, from-stop, to-stop, hour, weekday/weekend) bucket once at least three samples exist.
+- ETA projects the GPS fix onto the current polyline segment, then walks forward through `SegmentTravelStat` buckets. Fallbacks: timetable deltas, haversine distance over an assumed speed, stop count.
+- `EtaPredictionLog` samples at most once per vehicle and upcoming stop per 60 seconds, closed on geofence entry with signed error in seconds.
+- `route_detector` scores trails by perpendicular distance to the nearest segment, with a confidence margin over the runner-up and a spatial confirmation gate. Reverting needs several confirming ticks. Changes go to `RouteCorrectionLog`.
+- Fleet analytics is one PostgreSQL query using `LAG()`, inline haversine and `FILTER` clauses, which replaced a Python loop that timed out gunicorn workers.
+- No pandas, numpy, geopy, shapely, networkx, Celery or Redis. Statistics use the stdlib `statistics` module.
+- Frontend: React 19 and Vite, TanStack Query polling (vehicles every 5 s, performance panels every 30 s, no websockets), React Leaflet, @dnd-kit, Recharts, and a hand-rolled inline-style design system with no component library.
+- 4 Django apps, about 30 actions on `TransportViewSet`, about 7,500 lines of Python and 17,200 of JSX, 113 backend and 133 frontend commits.

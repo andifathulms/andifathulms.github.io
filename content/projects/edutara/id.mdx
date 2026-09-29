@@ -1,33 +1,51 @@
 # Edutara
 
-## Permasalahan
+## Masalahnya
 
-Otorita IKN sudah menjalankan platform pelatihan langsung untuk pegawainya dan institusi mitra — Universitas Monash, UGM, Learning Center Kementerian Keuangan, dan beberapa lainnya — dengan 266+ pengguna terdaftar. Dibangun di atas Laravel, template Blade, dan jQuery, tanpa pengujian otomatis, konvensi yang tidak konsisten, dan lisensi aset UI yang tidak terdokumentasi — risiko hukum nyata untuk platform pemerintah. Setiap perubahan membawa risiko sungguhan bagi produk langsung yang digunakan pegawai untuk pelatihan wajib, dan sistemnya memiliki bus factor tinggi: sulit distaf, sulit diubah dengan aman.
+Otorita IKN sudah punya platform pelatihan untuk pegawainya dan institusi mitra, di antaranya Monash University, UGM, dan Learning Center Kementerian Keuangan. Penggunanya lebih dari 266 orang, dan platform ini dipakai untuk pelatihan wajib. Masalahnya, platform itu rapuh. Tidak ada tes otomatis, konvensinya tidak konsisten, dan lisensi aset tampilannya tidak terdokumentasi, yang merupakan risiko hukum bagi platform pemerintah. Setiap perubahan bisa merusak sesuatu yang diandalkan orang, dan hanya sedikit developer yang bisa mengubahnya dengan aman.
 
-Permintaannya adalah re-platform penuh dengan paritas fitur 100% — tetapi di atas stack modern, teruji, dan dapat diobservasi — untuk audiens yang benar-benar beragam: pegawai negeri, staf swasta, dan mahasiswa dengan tingkat literasi teknologi yang sangat berbeda, ditambah admin institusi yang menjalankan program pelatihan mereka sendiri dan pimpinan pemerintah yang membutuhkan pelaporan kepatuhan untuk badan kepegawaian negara.
+Permintaannya adalah membangun ulang secara penuh dengan semua fitur lama tetap ada. Penggunanya beragam: ASN, pegawai swasta, dan mahasiswa dengan tingkat kenyamanan teknologi yang sangat berbeda. Admin institusi menjalankan program mereka sendiri di sana, dan pimpinan OIKN butuh laporan jam pelatihan untuk BKN.
 
-## Pendekatan
+## Yang saya bangun
 
-### API-first, sehingga tidak ada yang perlu dibangun dua kali
+### Server memeriksa setiap hak akses
 
-Backend Django REST Framework dan frontend Next.js berkomunikasi sepenuhnya melalui klien API bertipe — tidak ada logika bisnis yang diduplikasi di React. Keputusan itu berarti API yang sama dapat melayani aplikasi mobile atau integrasi mitra di masa depan tanpa menyentuh sistem inti, dan menegakkan setiap pemeriksaan permission di satu lapisan yang tidak bisa dilewati frontend yang dimanipulasi: setiap endpoint memiliki pemeriksaan sisi server sendiri, bukan tombol yang disembunyikan di UI.
+Saya memisahkan sistemnya menjadi API backend dan frontend web yang hanya berbicara lewat API itu. Tidak ada aturan bisnis di browser. Setiap endpoint memeriksa hak aksesnya sendiri, jadi peserta yang mengutak-atik halaman tetap tidak bisa menjalankan aksi admin. API yang sama nantinya bisa melayani aplikasi mobile atau sistem mitra tanpa ditulis ulang.
 
-### UUID di mana-mana, multi-tenancy per baris, bukan per database
+### Semua institusi berbagi satu database, dipisah per baris
 
-Setiap model mengekspos UUID publik untuk URL dan respons API — primary key integer internal tidak pernah bocor, menutup seluruh kelas bug "tebak ID berurutan berikutnya" secara gratis. Multi-tenancy berjalan pada foreign key `institution_id` ditambah middleware yang membatasi query ke institusi mana pun yang sedang diperankan pengguna, alih-alih database per institusi — lebih murah dijalankan dan lebih sederhana dinalar, sembari tetap menjaga data setiap institusi terisolasi.
+Setiap data punya ID publik acak di tautannya, jadi tidak ada yang bisa menelusuri data orang lain dengan menebak nomor urut. Semua institusi berbagi satu database. Setiap baris milik satu institusi, dan setiap request dibatasi ke institusi yang sedang diwakili pengguna. Saya memilih cara ini karena lebih murah dijalankan dan lebih mudah dipahami daripada satu database per institusi, dan data setiap institusi tetap terpisah.
 
-### Engine kuis yang dibangun sebagai state machine eksplisit
+### Percobaan kuis menyimpan soal saat dimulai
 
-Bank soal dan segmen terpisah dari percobaan tertentu mana pun. Begitu peserta memulai kuis, soal-soal di-snapshot ke percobaan tersebut — mengubah bank soal setelahnya tidak akan pernah diam-diam merusak percobaan yang sudah dinilai. Penilaian berjalan per segmen dengan ambang kelulusan independennya sendiri, sehingga peserta harus lulus setiap segmen, bukan sekadar rata-rata di antaranya.
+Saat peserta memulai kuis, sistem menyalin soal-soalnya ke percobaan itu. Kalau admin mengubah bank soal kemudian, nilai yang sudah keluar tidak ikut berubah. Kuis dibagi menjadi beberapa segmen, dan setiap segmen punya batas lulusnya sendiri. Peserta harus lulus di semua segmen, jadi segmen yang kuat tidak bisa menutupi segmen yang lemah.
 
-### Tugas yang tidak terblokir oleh penilaian
+### Penilaian tidak pernah menghambat peserta
 
-Tugas yang disubmit langsung ditandai selesai untuk keperluan progres; penilaian sesungguhnya — terima, tolak, nilai — terjadi secara asinkron dan tidak pernah menahan penyelesaian kelas peserta, sesuai dengan cara alur persetujuan klien sendiri sudah bekerja. Sertifikat dan laporan mengikuti filosofi asinkron yang sama: pembuatan PDF berjalan sebagai job latar belakang sehingga render yang lambat tidak pernah memblokir permintaan, dan setiap sertifikat yang diterbitkan membawa kode QR yang tertaut ke halaman validasi publik tanpa login.
+Tugas yang sudah dikumpulkan langsung dihitung selesai untuk progres kelas. Pengajar menilainya belakangan, dan bisa menahan nilai sampai institusi siap merilisnya. Tugas yang terlambat ditandai, tapi tetap diterima. Ini sesuai dengan cara persetujuan yang sudah berjalan di OIKN. Sertifikat dibuat di latar begitu peserta mencapai 100%. Setiap sertifikat punya kode QR yang membuka halaman publik untuk memeriksa keasliannya tanpa login.
 
-### Membangun skema pelaporan mendahului kebutuhan
+### Laporan yang disiapkan untuk sumber data yang belum ada
 
-Laporan kepatuhan klien — jam pelatihan per pegawai, dapat difilter berdasarkan hierarki institusi — hari ini hanya memiliki satu sumber data nyata: Edutara sendiri. Ia tetap dibangun di atas skema ternormalisasi dan bertanda sumber sejak hari pertama, karena OIKN berencana suatu saat menarik catatan pelatihan dari platform mitra. Itu adalah over-build yang disengaja, dibuat secara eksplisit alih-alih ditemukan sebagai scope creep yang menyakitkan nanti.
+Pimpinan butuh jam pelatihan per pegawai, bisa difilter per institusi, kedeputian, direktorat, dan jabatan. Saat ini Edutara satu-satunya sumber datanya. OIKN berencana menarik data dari platform mitra kelak, jadi saya membangun laporan ini dengan struktur yang menandai sumber setiap catatan. Menambah mitra nanti cukup dengan menambah konektor.
 
-## Hasil
+## Hasilnya
 
-Edutara dirilis sebagai sistem teruji dan digerbangi CI, bukan prototipe: suite unit pytest dan Vitest/RTL, suite end-to-end Playwright penuh yang menjalankan seluruh stack Docker dengan data seed, dan gerbang cakupan yang ditegakkan di CI. Model peran itu sendiri dirancang ulang di tengah pembangunan begitu penggunaan nyata memperjelas di mana batas spesifikasi awal tidak berlaku — peran Teacher menggantikan pemisahan Manajer/Staf, tingkat operator-platform baru diperkenalkan di bawah Superadmin, dan akses institusi berpindah dari hanya-undangan menjadi undangan-atau-permintaan-dengan-persetujuan. Dua fitur — testimoni yang disubmit peserta dan permintaan bergabung institusi mandiri — dirilis tanpa persyaratan yang sesuai di spesifikasi awal, ditambahkan karena masuk akal begitu platform inti sudah berjalan. Dari 124 commit, sebagian besar pembangunan — 109 commit — mendarat hanya dalam dua hari, dengan pass pengerasan deployment terakhir beberapa hari kemudian: 12 aplikasi Django, 43 model, dan platform multi-peran penuh (peserta, institusi, superadmin) dengan engine kuis dari nol, bukan demo CRUD.
+Edutara adalah build yang teruji, dengan pemeriksaan otomatis di setiap perubahan: unit test di backend dan frontend, ambang coverage, dan rangkaian tes end-to-end yang menyalakan seluruh sistem dengan data contoh. Setup produksinya siap untuk server OIKN sendiri. Peralihan dari platform lama belum terjadi. Saya membangunnya antara akhir Juni dan awal Juli 2026, sebagian besar dalam dua hari pertama. Selama pengerjaan, saya merancang ulang perannya: satu peran Teacher menggantikan dua peran, ada tingkat operator platform di bawah Superadmin, dan pengguna bisa mengajukan diri untuk bergabung ke institusi. Saya juga menambahkan testimoni peserta, yang tidak diminta di spesifikasi.
+
+## Langkah berikutnya
+
+- Menggantikan platform lama di produksi. Stack barunya sudah siap, tapi peralihannya masih tertunda.
+- Menghubungkan platform mitra pertama ke laporan jam pelatihan.
+
+## Di balik layar
+
+- Backend Django REST Framework dan frontend Next.js App Router lewat typed API client. Setiap endpoint punya permission class DRF sendiri.
+- Setiap model memakai UUID di URL dan respons; primary key integer tidak pernah keluar dari server.
+- Multi-tenancy di tingkat baris: foreign key `institution_id` ditambah middleware yang membatasi kueri ke institusi aktif pengguna.
+- Mesin kuis adalah state machine percobaan dengan 10 model. Soal di-snapshot per percobaan; penilaian per segmen dengan ambang masing-masing. Tipe soal pilihan ganda dan pilihan ganda multi-poin, dengan batas waktu dan tinjauan pembahasan.
+- Sembilan tipe materi tampil di satu course player dua panel: PDF, video, embed video, teks, gambar, tautan eksternal, unduhan file, kuis, dan tugas.
+- Sertifikat dirender dengan WeasyPrint dan `qrcode` di job Celery. File disajikan lewat pre-signed URL berbatas waktu dari storage kompatibel S3.
+- Laporan jam pelatihan (FR-28) berbasis NIP pegawai dengan field `source` dan abstraksi konektor, mode kumulatif dan rentang tanggal, serta ekspor Excel.
+- SSO Keycloak OIDC diadaptasi dari panduan React, Vite, dan localStorage ke App Router dengan sesi cookie httpOnly.
+- CI menjalankan lint, typecheck, pytest, Vitest dengan Testing Library, ambang coverage, dan tes end-to-end Playwright di atas stack Docker lengkap. Image rilis di-build ke GHCR untuk deploy pull-and-run di VM.
+- 12 Django app, 43 model, 23 ViewSet, sekitar 8.600 baris Python dan 10.900 baris TypeScript, 25 file tes backend dan 32 frontend, 124 commit antara 29 Juni dan 5 Juli 2026, 109 di antaranya dalam dua hari pertama.

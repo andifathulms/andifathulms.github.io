@@ -1,7 +1,17 @@
 {
   "slug": "ekiosk",
   "title": "eKiosk IKN",
-  "tagline": "Two web control rooms for Nusantara: digital kiosk content management and real-time BRT fleet tracking with predictive ETAs",
+  "tagline": "Two control rooms for Nusantara: kiosk content management and live bus tracking with arrival times that grade themselves",
+  "glance": {
+    "for": "IKN content staff running kiosks and transport staff running buses",
+    "result": "Both apps in production, with measured accuracy for every arrival estimate"
+  },
+  "skills": [
+    "Real-time GPS tracking",
+    "Arrival time prediction",
+    "Device fleet monitoring",
+    "Smart city services"
+  ],
   "categoryTags": [
     "Government",
     "Smart City",
@@ -22,6 +32,7 @@
   "role": "Fullstack Developer",
   "timeframe": "Mar – Jul 2026",
   "liveUrl": "https://ekiosk.ikn.go.id",
+  "access": "internal",
   "githubUrl": [
     "https://github.com/thdoikn/ekiosk-cms",
     "https://github.com/thdoikn/ekiosk-frontend-cms"
@@ -32,20 +43,50 @@
   "metrics": [
     {
       "value": "2",
-      "label": "Control rooms: kiosk CMS + fleet"
+      "label": "control rooms: kiosk content and bus fleet"
     },
     {
-      "value": "0",
-      "label": "Heavy deps in the ETA engine"
+      "value": "~5 s",
+      "label": "between live bus position readings"
     },
     {
-      "value": "~24.7K",
-      "label": "Lines across both apps"
+      "value": "1/2/3 min",
+      "label": "arrival accuracy bands, by hour and stop"
     },
     {
-      "value": "246",
-      "label": "Commits across two repos"
+      "value": "24",
+      "label": "pages across the two apps"
     }
   ],
-  "access": "internal"
+  "id": {
+    "tagline": "Dua ruang kendali untuk Nusantara: konten kios dan pelacakan bus live dengan estimasi kedatangan yang menilai dirinya sendiri",
+    "glance": {
+      "for": "Staf konten pengelola kios dan staf transportasi pengelola bus IKN",
+      "result": "Kedua aplikasi di produksi, dengan akurasi terukur untuk setiap estimasi kedatangan"
+    },
+    "skills": [
+      "Pelacakan GPS real-time",
+      "Prediksi waktu kedatangan",
+      "Pemantauan armada perangkat",
+      "Layanan kota cerdas"
+    ],
+    "metrics": [
+      {
+        "value": "2",
+        "label": "ruang kendali: konten kios dan armada bus"
+      },
+      {
+        "value": "~5 dtk",
+        "label": "jeda pembacaan posisi bus live"
+      },
+      {
+        "value": "1/2/3 mnt",
+        "label": "rentang akurasi kedatangan, per jam dan halte"
+      },
+      {
+        "value": "24",
+        "label": "halaman di kedua aplikasi"
+      }
+    ]
+  }
 }

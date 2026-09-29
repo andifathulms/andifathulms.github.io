@@ -1,7 +1,17 @@
 {
   "slug": "aksara",
   "title": "Aksara",
-  "tagline": "Knowledge management platform for Indonesia's new-capital authority — a searchable home for OIKN's regulations, reports, and studies with an internal submit-and-approve workflow behind it",
+  "tagline": "A searchable library for Otorita IKN's knowledge, where the server checks every reader's access across three levels",
+  "glance": {
+    "for": "The public, OIKN staff, and the people who review knowledge",
+    "result": "Deployed for OIKN in about two and a half weeks, built solo"
+  },
+  "skills": [
+    "Access control",
+    "Approval workflows",
+    "Full-text search",
+    "Government services"
+  ],
   "categoryTags": [
     "Government",
     "Knowledge Platform",
@@ -22,27 +32,58 @@
   "role": "Fullstack Developer",
   "timeframe": "Jul 2026",
   "liveUrl": "https://aksara.ikn.go.id",
+  "access": "public",
   "githubUrl": null,
   "heroImage": "/images/projects/aksara/hero.webp",
   "order": 1,
   "featured": true,
   "metrics": [
     {
-      "value": "~2.5 wks",
-      "label": "Scaffold to deployed staging"
+      "value": "10",
+      "label": "Eselon-1 units sharing one library"
+    },
+    {
+      "value": "3",
+      "label": "access levels checked on the server"
     },
     {
       "value": "66",
-      "label": "API endpoints, OpenAPI-documented"
+      "label": "documented API endpoints, shared with mobile"
     },
     {
       "value": "156",
-      "label": "Backend tests on the riskiest logic"
-    },
-    {
-      "value": "43",
-      "label": "OIKN work units modelled"
+      "label": "backend tests on access and public codes"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Perpustakaan pengetahuan Otorita IKN yang bisa dicari, dengan server memeriksa akses setiap pembaca di tiga tingkat",
+    "glance": {
+      "for": "Publik, staf OIKN, dan para pemeriksa pengetahuan",
+      "result": "Ter-deploy untuk OIKN dalam sekitar dua setengah minggu, dikerjakan sendiri"
+    },
+    "skills": [
+      "Kontrol akses",
+      "Alur persetujuan",
+      "Pencarian teks penuh",
+      "Layanan pemerintahan"
+    ],
+    "metrics": [
+      {
+        "value": "10",
+        "label": "unit Eselon-1 dalam satu perpustakaan"
+      },
+      {
+        "value": "3",
+        "label": "tingkat akses diperiksa di server"
+      },
+      {
+        "value": "66",
+        "label": "endpoint API terdokumentasi, dipakai juga mobile"
+      },
+      {
+        "value": "156",
+        "label": "tes backend untuk akses dan kode publik"
+      }
+    ]
+  }
 }

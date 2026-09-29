@@ -1,7 +1,17 @@
 {
   "slug": "edutara",
   "title": "Edutara",
-  "tagline": "Government-grade learning platform re-built from scratch — courses, quizzes, graded assignments, and verifiable certificates",
+  "tagline": "A rebuilt learning platform for OIKN and partner institutions, with segmented quizzes and QR-verifiable certificates",
+  "glance": {
+    "for": "Civil servants, partner institutions, students and OIKN leadership",
+    "result": "Tested and deployment-ready; switch from the old platform still pending"
+  },
+  "skills": [
+    "Learning management systems",
+    "Multi-tenant access control",
+    "Automated testing",
+    "Government services"
+  ],
   "categoryTags": [
     "Government",
     "Education",
@@ -28,20 +38,51 @@
   "featured": false,
   "metrics": [
     {
-      "value": "12",
-      "label": "Django apps in a multi-role LMS"
+      "value": "266+",
+      "label": "users on the platform it replaces"
     },
     {
-      "value": "43",
-      "label": "Database models"
+      "value": "9",
+      "label": "material types in one course player"
     },
     {
-      "value": "~19.5K",
-      "label": "Lines of Python + TS"
+      "value": "3",
+      "label": "panels for learners, institutions and admins"
     },
     {
-      "value": "124",
-      "label": "Commits, 109 in first 2 days"
+      "value": "7 days",
+      "label": "from start of build to deployment-ready"
     }
-  ]
+  ],
+  "id": {
+    "tagline": "Platform pembelajaran OIKN dan institusi mitra yang dibangun ulang, dengan kuis bersegmen dan sertifikat terverifikasi QR",
+    "glance": {
+      "for": "ASN, institusi mitra, mahasiswa, dan pimpinan OIKN",
+      "result": "Teruji dan siap deploy; peralihan dari platform lama masih tertunda"
+    },
+    "skills": [
+      "Sistem manajemen pembelajaran",
+      "Kontrol akses multi-tenant",
+      "Pengujian otomatis",
+      "Layanan pemerintahan"
+    ],
+    "metrics": [
+      {
+        "value": "266+",
+        "label": "pengguna di platform yang digantikan"
+      },
+      {
+        "value": "9",
+        "label": "tipe materi dalam satu course player"
+      },
+      {
+        "value": "3",
+        "label": "panel untuk peserta, institusi, dan admin"
+      },
+      {
+        "value": "7 hari",
+        "label": "dari awal pengerjaan sampai siap deploy"
+      }
+    ]
+  }
 }

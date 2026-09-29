@@ -1,39 +1,46 @@
+# JDIH OIKN
+
 ## The problem
 
-OIKN (Otorita Ibu Kota Nusantara) is a new government body that issues its own legal instruments — regulations, decrees, MoUs, and more. Before this system, legal documents were scattered across email threads and local drives, the public had no way to find official OIKN regulations, there was no controlled review process, access to sensitive documents was enforced informally with no audit trail, and the annual reporting mandated by Peraturan Kepala OIKN No. 14 Tahun 2025 had to be assembled by hand.
+Otorita IKN is a new government body, and it issues its own legal instruments: regulations, decrees, cooperation agreements and more. Before this system, those documents sat in email threads and on local drives. The public had no way to find an official OIKN regulation. There was no controlled review, so anyone with server access could publish anything. Access to sensitive documents was handled informally, with no record of who saw what. The yearly activity report required by OIKN Head Regulation No. 14 of 2025 was assembled by hand.
 
-JDIH (Jaringan Dokumentasi dan Informasi Hukum) is a nationally mandated legal information network. OIKN needed a compliant implementation covering both a public-facing portal and an internal editorial workflow.
+JDIH is Indonesia's national legal information network, and every agency must run a compliant portal. OIKN needed one with a public side for citizens and a controlled workflow for its Directorate of Law.
 
-## The approach
+## What I built
 
-### A role hierarchy that grew to match the org chart
+### Roles that follow the legal directorate
 
-The original plan called for four roles. In production it became five: `superadmin`, `admin_jdih` (Direktorat Hukum), `admin_anggota`, `walidata`, `registered`. The nuance that justified the split — `admin_jdih` can approve documents even though it sits below `superadmin`, while `admin_anggota`, despite also being "admin," can create and edit but never approve. Every admin endpoint declares an explicit permission class (`IsAdminOrAbove`, `IsWalidata`, `IsSuperAdmin`) from a single `permissions.py` rather than checking roles inline, and the frontend mirrors the same boundary — the document review route is gated to `admin_jdih`, `walidata`, and `superadmin`, explicitly excluding `admin_anggota`.
+The plan had four roles. In practice it needed five, to match how the directorate works. Legal directorate admins and data stewards can approve documents, and data stewards also handle access requests. Other admins can create and edit documents, but can never approve them. This split came with single sign-on, when it became clear who signs off in the real organisation. Every admin action declares which roles may use it, and the review page is closed to anyone who can't approve.
 
-### Three-tier access control enforced at the download endpoint, not the UI
+### Access tiers checked at the download
 
-Documents are classified open, restricted, or closed. Restricted documents require an access request that a walidata officer approves, with an optional expiry. A `/accesses/check/` endpoint lets the frontend show the right call-to-action — download, request access, or a login prompt — without ever leaking the document URL to someone who shouldn't have it, and every access and download is written to an audit trail.
+Every document is open, restricted or closed. Restricted documents still appear in search, with a button to request access. A data steward approves the request, with an optional expiry date. Before showing a button, the page asks the server what this person may do: download, request access, or log in. The file link is never sent to someone who can't open it, and every access and download is logged.
 
-### An AI feature matured in three stages: ship, harden, govern
+### AI summaries that never leave the server
 
-Document summarization shipped first against the Gemini Flash API (v1.8.0) to prove the feature was worth building. By v1.9.0 it was rebuilt as a fully offline pipeline — `pdfplumber` extracts PDF text, `sumy` and `nltk` produce an extractive plain-language summary, a keyword-weighted classifier assigns the legal domain — because sending government legal documents to a third-party cloud API is a compliance risk a JDIH system can't take on. That would have been a reasonable place to stop, but a quiet month of further work (never given a version bump in the in-app changelog) added a governance layer on top: a `RingkasanEvalRun` model, a human-correction ("gold summary") editor for staff, a legalese-to-plain-language glossary pass, and a weekly scheduled quality evaluation feeding an `evaluate_ai_summaries` benchmark command — turning the summarizer from a one-shot generator into something that catches its own quality drift over time.
+I first shipped document summaries through an outside AI service, to prove the feature was worth building. A day later I rebuilt the pipeline to run fully on OIKN's own server, because sending government legal documents to a third-party service is a compliance risk. It pulls the text from each PDF, picks the key sentences into a plain-language summary, and tags the legal field. Over the following month I added a way to check its quality. Staff can write a corrected summary for any document, and a weekly job compares the output against those corrections to catch drift.
 
-### Automated legal relationship detection
+### A map of which rules change which
 
-A Celery task scans published document titles for Indonesian legal citation patterns — "mencabut Perka No. 14 Tahun 2022" — resolves the referenced document, and creates a `RelationCandidate` for admin review. Confirmed relationships render as a navigable regulatory tree at `/pohon-peraturan`, showing which documents repeal, amend, or implement each other.
+A background job reads new document titles for legal citation phrases, such as "revoking Regulation No. 14 of 2022". It finds the document being cited and proposes a link for an admin to confirm. Confirmed links form a public tree showing which regulations revoke, amend or implement each other.
 
-### Statistics that never touch a live COUNT query
+### Statistics computed overnight
 
-Both the admin dashboard and a public-facing `/statistik` page (a 365-day activity heatmap, trending document types, top legal domains by engagement) read from pre-aggregated tables refreshed nightly by Celery Beat rather than computing anything live against a growing document corpus. A fallback added later reads straight from the activity log if the nightly table hasn't populated yet, so the dashboard never shows a hard zero.
+The admin dashboard and the public statistics page never count documents live. A nightly job fills summary tables, so both pages stay fast as the collection grows. The public page shows a year-long activity heatmap, trending document types and the most-read legal fields. If the nightly table is still empty, the dashboard reads the activity log so it never shows a false zero.
 
-### Dual authentication without session conflicts
+## Result
 
-OIKN staff authenticate through Keycloak SSO; the OIDC backend maps department, NIP, and name claims directly onto JDIH user records. External and public users use ordinary email-and-password with JWT. The two coexist because Keycloak is used purely as an authentication step that mints a JWT for the frontend — the Keycloak session itself never leaves the server.
+JDIH OIKN is in production. The Directorate of Law uses it to draft, review and publish documents, and the public portal serves open documents to anyone. Staff sign in through OIKN's single sign-on, and outside users sign in with email and password. Past the mandate, I added bookmarks, notifications when an access request changes, moderated star ratings shown on the homepage, and shareable search filters with a CSV export of up to 2,000 rows. I built it between March and June 2026. The last logged release is v1.10.0 in May, and the quality checks for the summaries shipped in June.
 
-### Trust-building features beyond the mandate
+## Under the hood
 
-Past what Perka 14/2025 strictly required: verified users can bookmark documents for later reference; an in-app notification system with an unread badge tells users when their access request status changes; a moderated 1–5 star rating system surfaces approved testimonials on the homepage; and faceted, URL-shareable document search exports up to 2,000 rows to CSV for offline analysis.
-
-## Outcome
-
-Version 1.10.0 is the last release logged in the in-app changelog, but real commit history — 100 backend and 91 frontend commits on `main`, independently verified — runs a full month past that, through 24 June 2026, spanning roughly sixteen weeks total. The system now covers 7 Django apps, 25 database models, 90 API endpoints, 9 named Celery tasks, and 76 frontend source files (~15,800 lines). Early commit messages were loose; a consistent `type(scope): message` convention took over from mid-April and held through the entire AI governance build-out — a small but real signal of process maturing alongside the feature set. Active in production for OIKN's Directorate of Law staff, with the public portal serving open documents to any visitor.
+- Roles: `superadmin`, `admin_jdih`, `admin_anggota`, `walidata`, `registered`. `admin_jdih` approves through a `can_approve` property. Permission classes such as `IsAdminOrAbove`, `IsWalidata` and `IsSuperAdmin` live in one `permissions.py`.
+- Access tiers `terbuka` / `terbatas` / `tertutup` are enforced at the download endpoint. `/accesses/check/` returns the right call to action without exposing the file. A Celery task expires stale access grants.
+- Summaries started on Gemini Flash (v1.8.0) and moved offline in v1.9.0: `pdfplumber` extraction, extractive summaries with `sumy` and `nltk`, and a keyword-weighted legal-domain classifier.
+- Quality loop: a `RingkasanEvalRun` model, gold-summary fields and editor, a legalese-to-plain-language glossary pass, a `weekly_ai_eval` task, and an `evaluate_ai_summaries` benchmark command. Superadmins can regenerate stale summaries with a Redis-backed progress bar.
+- `detect_relations` matches citation patterns such as "mencabut Perka No. 14 Tahun 2022" and creates a `RelationCandidate`. Confirmed relations render at `/pohon-peraturan`.
+- `refresh_statistik_harian` fills `StatistikHarian` and `StatistikDokumen` nightly through Celery Beat, with an `ActivityLog` fallback.
+- Keycloak OIDC via `mozilla-django-oidc` maps department, NIP and name claims. The OIDC session stays server-side and mints a JWT for the frontend; public users use SimpleJWT with email and password.
+- Cooperation agreements (PKS and MoU) have two party names and no document number, so they use a conditional serializer and a separate slug path.
+- Search uses a PostgreSQL `SearchVectorField` with a GIN index. `sync_berita_ikn` imports news from the IKN portal, deduplicated by external ID.
+- 7 Django apps, 25 models, 90 URL patterns, 9 named Celery tasks, 36 frontend routes, 76 frontend source files, about 15,800 lines of frontend code, 100 backend and 91 frontend commits from 7 March to 24 June 2026.

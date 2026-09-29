@@ -2,33 +2,47 @@
 
 ## The problem
 
-OIKN's six operational budget units (satker) each have expenditure data locked inside Kemenkeu's SAKTI system. Every time the Biro POKS planning team needed figures — for Power BI reports, executive reviews, or quarterly submissions — someone had to manually log into SAKTI, download an Excel file per satker, and stitch the results together. No historical trend, no centralised view, no way to connect the numbers to other tools without manual re-entry.
+Otorita IKN has six budget units, called satker, and each one's budget and spending data lives in SAKTI, the Ministry of Finance's system. Whenever the planning bureau needed figures for a report, an executive review or Power BI, someone logged into SAKTI, downloaded an Excel file for each unit, and stitched them together by hand.
 
-| Before | After |
-|--------|-------|
-| Manual download every time | Automated daily pipeline at 02:00 WIB |
-| Data scattered in Excel files | Centralised MySQL database with history |
-| No trend visibility | Queryable time-series from first sync |
-| No quick visualisation | React dashboard with budget vs. disbursement charts |
+That meant no history and no single view. Nobody could see how spending moved over time. Every other tool that needed the numbers got them by copying and pasting. The data team wanted the figures collected automatically, kept over time, and shown in one place.
 
-## The approach
+## What I built
 
-### Simulating SAKTI's unusual token mechanism
+### A nightly pipeline that fetches every unit
 
-The real SAKTI API uses a strict single-use Bearer token pattern: every response includes a new token, the previous one becomes immediately invalid, and a separate `resetToken` endpoint bootstraps the first token. Rather than blocking development on real credentials, I built a complete simulation of this in a Django `mock_sakti` app — an in-memory token store with UUID rotation that mirrors SAKTI's actual response structure. Switching to production only requires changing two environment variables.
+A scheduled job runs every night at 02:00 WIB. It pulls six kinds of SAKTI data for every active unit, in parallel, and saves them to a database. The list of units comes from the database when the job starts. An administrator adds or switches off a unit in the admin panel, and the next run follows. Nothing about the units is hardcoded. Every run is safe to repeat, because saving the same record twice updates it and never duplicates it.
 
-### Airflow with dynamic task mapping per satker
+### I simulated SAKTI so work never waited on access
 
-The `sakti_daily_sync` DAG queries the `Satker` table at runtime and uses Airflow's `.expand()` to spawn parallel fetch tasks for each active satker. Adding or deactivating a satker in the admin panel automatically changes what the pipeline fetches — nothing is hardcoded. Each task run records its status, row count, duration, and any error message in a `SyncLog` table, powering the dashboard's "Last synced" badge.
+Real SAKTI credentials weren't available yet. SAKTI's login is unusual: every response hands back a new one-time key, and the previous one stops working at once. I built a small stand-in server that behaves the same way, including expired-key responses, and serves sample data for all six data types. The whole pipeline runs against it. Moving to the real system means changing two settings, with no code changes.
 
-### DAG calls Django ORM directly
+### One place for the save logic
 
-Rather than adding an HTTP layer between Airflow and the database, DAG tasks call Django models directly by mounting the backend source into the Airflow container and setting `DJANGO_SETTINGS_MODULE`. All upsert logic lives in one place and uses Django's `update_or_create` — safe to re-run, no duplicates.
+The scheduled jobs write to the database through the same data models the web app uses. I chose this over putting a web API between them, so the rules for saving a record live in one place. The cost is that the scheduler depends on the web app's code. At six units, that trade is fine.
 
-### Known simplification: budget granularity toggle
+### A dashboard with a sync badge and Excel export
 
-`Anggaran` (budget) data in SAKTI is per-item without a date column. The granularity toggle on the trend chart approximates a time series by dividing the total budget evenly across periods. This is documented in a code comment and noted as a known simplification — the real fix would require the SAKTI `refSts` history endpoint to provide dated snapshots, which wasn't available during development.
+The dashboard has three pages. The overview shows total budget, total spending and the share absorbed, with a trend chart and a gauge. A detail page breaks one unit down by program and activity, with date filters. A management page lists the units. Each nightly run records its status, row count, duration and any error, and the dashboard shows when data was last synced. Any view can be exported to a formatted Excel file.
 
-## Outcome
+## Result
 
-Fully functional end-to-end: Airflow DAG → SAKTI client → MySQL → REST API → React dashboard → Excel export. The complete pipeline runs against the mock server in the dev environment, covering all six SAKTI endpoint types across all active satker. The production Docker stack (`docker-compose.prod.yml`) with multi-stage builds, healthchecks, and `restart: unless-stopped` is verified and ready to deploy once Kemenkeu credential provisioning (IP whitelist + API key) is complete.
+I built the platform in two days in June 2026, from an empty repository. It works end to end: nightly job, SAKTI client, database, API, dashboard and Excel export. Today it runs on the simulated SAKTI server with sample data. The production setup is ready and tested to start cleanly. Real data waits on the Ministry of Finance providing credentials. The dashboard has no login of its own in this first version, and is meant for OIKN's internal network.
+
+## What I'd do next
+
+- Connect to the real SAKTI system once credentials arrive, then deploy to OIKN's internal server.
+- Replace the budget trend estimate. SAKTI's budget data has no dates, so the chart spreads each total evenly across periods. A dated history from SAKTI would fix it.
+- Turn the failure-alert placeholder into real email or chat alerts.
+
+## Under the hood
+
+- The Airflow DAG `sakti_daily_sync` reads the `Satker` table at runtime and uses `.expand()` for dynamic task mapping. Tasks: `fetch_ref_sts`, `fetch_ref_admin_uraian`, then `fetch_data_ang`, `fetch_spp_header` and `fetch_capaian_ro` per satker, then `normalize_and_load` and `log_sync_result`.
+- DAG tasks import Django models directly: the backend source is mounted into the Airflow container with `DJANGO_SETTINGS_MODULE` set. Upserts use `update_or_create`.
+- The `mock_sakti` Django app keeps an in-memory token store with UUID rotation, mirrors SAKTI's single-use Bearer tokens and the `resetToken` bootstrap endpoint, and serves deterministic JSON fixtures.
+- `SaktiClient` splits token state (`auth.py`) from request flow (`client.py`) and retries with exponential backoff via `tenacity`.
+- `SyncLog` stores status, row count, duration and error per task. A `notify_failure_placeholder` hook is wired into the DAG.
+- Excel export uses `openpyxl`: bold headers, auto-width columns, currency format, frozen header row.
+- `Anggaran` rows have no date column, so the chart's granularity toggle divides the total budget evenly. A dated `refSts` history would replace it.
+- App data and Airflow metadata share one MySQL 8 container, as separate databases with separate users.
+- Five Docker services with multi-stage builds and healthchecks; `docker-compose.prod.yml` uses `restart: unless-stopped`.
+- 8 Django apps, 9 REST endpoints including health and sync status, 10 React components, about 5,000 lines of Python and JSX, 10 commits across nine phases.

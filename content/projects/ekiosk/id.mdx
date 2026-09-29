@@ -1,41 +1,49 @@
 # eKiosk IKN
 
-## Permasalahan
+## Masalahnya
 
-Inisiatif kota cerdas IKN menyebarkan kiosk informasi fisik di area publik di seluruh Nusantara, masing-masing menjalankan aplikasi Flutter kustom yang menampilkan konten pemerintahan — peta, pengumuman, jadwal transportasi. Tanpa lapisan manajemen terpusat, memperbarui konten di kiosk mana pun memerlukan sentuhan langsung ke setiap perangkat, yang tidak skalabel seiring armada berkembang. Operator juga tidak memiliki visibilitas apakah sebuah kiosk berjalan, crash, atau tidak sinkron.
+Program kota cerdas IKN menempatkan kios informasi di ruang publik di seluruh Nusantara. Setiap kios menjalankan aplikasi yang menampilkan konten pemerintah: peta, pengumuman, dan jadwal transportasi. Tanpa kendali terpusat, mengubah tampilan sebuah kios berarti harus mengurus perangkat itu satu per satu. Cara ini tidak bisa bertahan saat jumlah kios terus bertambah. Operator juga tidak tahu apakah sebuah kios menyala, macet, atau masih menampilkan konten lama.
 
-Terpisah, IKN mengoperasikan armada BRT (bus rapid transit). Layanan Go internal sebelumnya melacak posisi GPS bus di memori, tanpa persistensi, tanpa analitik historis, dan status bersama yang rentan race condition — serta tidak ada cara memberi tahu penumpang atau operator kapan bus akan benar-benar tiba.
+IKN juga mengoperasikan armada bus rapid transit. Layanan internal sebelumnya hanya menyimpan posisi bus di memori. Tidak ada riwayat, dan layanan itu tidak bisa memberi tahu penumpang atau operator kapan bus berikutnya tiba. Ada dua tim yang butuh alat: staf konten yang mengelola playlist kios, dan staf transportasi yang memantau armada.
 
-Dua kelompok operator bergantung pada sistem ini: staf konten non-teknis yang mengelola playlist dan media kiosk, serta staf transportasi/IT yang memantau kesehatan armada, pelacakan GPS, dan akurasi ETA.
+## Yang saya bangun
 
-## Pendekatan
+### Kios melapor, server yang menentukan statusnya
 
-### Status kiosk berbasis heartbeat
+Setiap kios melapor setiap lima menit: apa yang sedang diputar, di mana posisinya, serta sisa storage dan memorinya. Dari laporan itu, server menentukan apakah kios beroperasi, tertinggal, terputus, atau sedang dirawat. Setiap playlist membawa sidik jari yang berubah saat isinya berubah. Kios melaporkan sidik jari yang terakhir dimuatnya, jadi server langsung tahu apakah perangkat itu tertinggal. Operator menyusun playlist dengan menyeret media ke urutan yang diinginkan, dan perubahannya sampai ke kios dengan sendirinya.
 
-Setiap kiosk fisik mengirim ping ke server setiap lima menit dengan status saat ini — playlist hash, koordinat GPS, penyimpanan bebas, memori bebas, versi app. Status (OPERATIONAL / STALE / DISCONNECTED / MAINTENANCE) dihitung langsung dari heartbeat tersebut pada setiap pembacaan API, bukan disimpan sebagai kolom, menjaga model data tetap sederhana dan selalu terkini. Sinkronisasi konten menghindari diffing sepenuhnya: setiap playlist menghitung hash SHA-256 deterministik dari item yang diurutkan pada setiap penyimpanan, dan kiosk melaporkan hash yang terakhir disinkronkan, sehingga server dapat mengetahui secara instan — dalam O(1) — apakah perangkat sudah usang.
+### Estimasi kedatangan dari riwayat bus itu sendiri
 
-### Dari satu dashboard menjadi dua produk
+Sebuah layanan latar membaca posisi GPS setiap bus kira-kira setiap lima detik dan menempatkannya di rutenya. Untuk waktu kedatangan, saya tidak memakai kecepatan tetap. Setiap malam, sebuah job mempelajari perjalanan sebelumnya dan menghitung berapa lama biasanya setiap ruas antarhalte ditempuh, per jam dan per hari kerja atau akhir pekan. Estimasi dimulai dari posisi bus di jalan, lalu ditambah waktu tempuh hasil belajar itu halte demi halte. Kalau riwayatnya belum cukup, sistem memakai jadwal, lalu jarak, lalu jumlah halte, jadi selalu ada jawaban.
 
-Yang bermula sebagai satu dashboard dengan tab "Fleet" sejak itu terpisah menjadi dua aplikasi satu-halaman mandiri — **eKiosk CMS** dan **Fleet Management** — masing-masing dengan layout dan sidebar sendiri, dapat diakses melalui launcher aplikasi bersama dan pengalih lintas-aplikasi yang tertanam di kedua topbar. Fleet Management juga dibatasi di balik peran staf. Semuanya berjalan di atas sistem desain buatan sendiri (file token ditambah objek CSS inline, tanpa pustaka komponen) alih-alih Tailwind, dijaga tetap konsisten secara sengaja di kedua aplikasi.
+### Sistem menilai prediksinya sendiri
 
-### Pelacakan GPS real-time dan engine ETA statistik
+Saya ingin tahu apakah estimasi kedatangannya akurat, jadi sistem ini memeriksa dirinya sendiri. Sistem mengambil sampel prediksinya, lalu mencatat selisihnya begitu bus tiba di halte itu. Sebuah laporan menampilkan rata-rata selisih dan persentase kedatangan yang meleset dalam satu, dua, atau tiga menit, dirinci per jam dan per halte. Staf bisa melihat persis di mana estimasinya paling lemah.
 
-Poller yang berjalan lama (`poll_gps_data`) memanggil API vendor GPS langsung setiap ~5 detik per kendaraan, mencocokkan setiap posisi ke grafik rute, dan mem-buffer pergerakan ke tabel riwayat rute — sebagai layanan Docker tersendiri di samping API utama. Grafik rute itu sendiri adalah struktur graf berarah buatan sendiri yang kecil, sengaja dibangun tanpa networkx atau pustaka data-science apa pun, untuk menjaga image tetap ramping.
+### Bus yang pindah rute terdeteksi tanpa bolak-balik
 
-ETA bukan tebakan kecepatan tetap: ia memproyeksikan titik GPS langsung kendaraan ke segmen polyline yang sedang dilalui, lalu berjalan maju melalui perhentian rute menggunakan **waktu tempuh historis yang dipelajari** — median detik per bucket (rute, dari-perhentian, ke-perhentian, jam-hari, hari kerja/akhir pekan), dihitung setiap malam dari riwayat GPS yang dipecah per perjalanan dengan pemangkasan outlier. Jika data yang dipelajari belum cukup, estimasi jatuh kembali melalui selisih jadwal terjadwal, lalu jarak haversine dibagi kecepatan asumsi, lalu heuristik jumlah perhentian — sehingga menurun secara bertahap alih-alih gagal total.
+Bus kadang dipindahkan atau keluar dari rute jadwalnya. Sebuah pemeriksaan terpisah membandingkan lintasan terakhir setiap bus dengan semua rute, lalu menyarankan koreksi kalau satu rute jelas paling cocok. Versi pertama saya memindahkan bus setelah beberapa titik GPS berada dekat rute lain. Di halte yang dilewati beberapa rute sekaligus, bus jadi berpindah bolak-balik. Sekarang perpindahan hanya terjadi setelah bus melewati halte yang khas milik rute baru, atau minimal 80% halte rute itu. Setiap koreksi dicatat.
 
-### Mengukur engine ETA terhadap dirinya sendiri
+### Dua aplikasi, satu login
 
-Sistem ini tidak hanya memprediksi — ia menilai prediksinya sendiri. Poller secara berkala mengambil sampel output ETA-nya ke dalam log, lalu menutup setiap prediksi tepat saat bus benar-benar melintasi geofence perhentian target, mencatat galat bertanda. Itu memberi makan laporan akurasi khusus: rata-rata galat absolut, persentase dalam 1/2/3 menit, dipecah per jam dan per perhentian — sehingga bisa terlihat persis di mana model paling lemah, bukan sekadar bahwa model itu ada.
+Yang awalnya satu dashboard dengan tab armada sekarang menjadi dua aplikasi terpisah, eKiosk CMS dan Fleet Management, dengan launcher bersama dan tombol untuk berpindah di antara keduanya. Operator login sekali lewat single sign-on IKN, dan Fleet Management hanya untuk staf. Kios tidak memakai login itu sama sekali. Kios mendaftar dengan ID yang diberikan saat pertama menyala, karena tidak ada orang yang login di sana.
 
-### Deteksi rute mandiri-koreksi, tanpa osilasi
+## Hasilnya
 
-Bus terkadang dialihkan secara manual atau melenceng dari rute terjadwal. Layanan terpisah terus-menerus menilai jejak GPS terbaru setiap kendaraan terhadap polyline setiap rute dan mengusulkan koreksi ketika kecocokan terbaik cukup dekat dan jelas lebih baik dari runner-up. Versi awal — "N tick berturut-turut dekat rute X" — menyebabkan osilasi di perhentian yang dibagi antar rute yang tumpang tindih. Perbaikannya menambahkan gerbang konfirmasi spasial di atas penilaian: koreksi baru dikonfirmasi setelah bus mengunjungi perhentian yang unik untuk rute baru, atau setidaknya 80% dari perhentian bernamanya. Setiap koreksi dicatat untuk audit.
+Kedua aplikasi berjalan di produksi untuk IKN, dengan total 24 halaman. Staf konten mengelola playlist kios dan memantau kesehatan perangkat, lengkap dengan grafik tren dan email peringatan saat kios tidak melapor. Staf transportasi mendapat peta bus live, editor rute dan halte, jadwal armada, perencana perjalanan dengan titik tujuan, serta laporan jarak antarbus, waktu tempuh, dan akurasi kedatangan. Laporan armada harian dulu sering timeout saat beban tinggi, jadi saya menulis ulang menjadi satu kueri database. Pengerjaannya berlangsung dari Maret sampai Juli 2026. Sistem ini hanya melacak kendaraan; tidak ada data penumpang atau tarif.
 
-### Autentikasi terpisah per audiens
+## Di balik layar
 
-Operator dashboard terautentikasi melalui SSO Keycloak IKN, yang menerbitkan JWT yang disimpan frontend di Zustand; field pengguna (NIP, jabatan, direktorat) disinkronkan dari klaim Keycloak pada setiap login. Kiosk Flutter sama sekali tidak menyentuh lapisan itu — mereka menggunakan alur registrasi `AllowAny` terpisah, karena kiosk yang mengirim heartbeat dengan UUID yang ditetapkan pabrik tidak memiliki pengguna untuk diautentikasi.
-
-## Hasil
-
-Kedua aplikasi berjalan di produksi, dikontainerisasi via Docker Compose dengan GitHub Actions yang mempublikasikan image ke GHCR. Backend telah tumbuh menjadi 113 commit, 66 di antaranya di modul transport saja — periode kerja tersibuk dan terbaru mencakup feedback loop akurasi ETA, perencanaan perjalanan titik-tujuan, dan penulisan ulang query analitik armada harian dari loop Python menjadi satu query PostgreSQL dengan window function, setelah implementasi awal mulai menyebabkan timeout worker gunicorn di bawah beban. Seluruh lapisan ETA dan analitik — geometri, statistik, struktur graf — berjalan di atas pustaka standar Python dan SQL mentah, tanpa dependensi berat baru (tanpa pandas, numpy, geopy, shapely, networkx, Celery, atau Redis) yang ditambahkan untuk mendukungnya.
+- Status kios (OPERATIONAL / STALE / DISCONNECTED / MAINTENANCE) adalah `@property` model yang diturunkan dari `last_heartbeat`, `heartbeat_interval`, `operational_status`, dan hash playlist, jadi tidak bisa difilter lewat ORM. Endpoint ringkasan memfilternya di Python.
+- Setiap playlist menyimpan hash SHA-256 deterministik dari item-item terurutnya, dihitung ulang saat disimpan. Status sinkronisasi cukup dibandingkan dalam O(1).
+- Endpoint kios memakai `AllowAny`; kios dikenali lewat UUID yang diberikan saat boot pertama. Pengguna dashboard login lewat Keycloak dengan `mozilla-django-oidc`, JWT disimpan di Zustand, dan NIP, jabatan, serta direktorat disinkronkan ke `UserProfile` setiap login.
+- `poll_gps_data` berjalan sebagai service Docker sendiri, `transport-poller`. Pergerakan di-bulk-insert ke `VehicleTrack` kira-kira setiap 60 detik, hanya jika melewati jarak minimum.
+- `RouteGraph` adalah directed graph buatan sendiri dengan sentinel terminal yang menutup loop. Ini menghindari dependensi networkx sebesar 30 MB.
+- `compute_segment_stats` berjalan tiap malam lewat cron di host. Job ini memecah riwayat GPS menjadi perjalanan, membuang outlier di atas 3× median, dan menyimpan median, p25, dan p75 per bucket (rute, halte asal, halte tujuan, jam, hari kerja/akhir pekan) setelah ada minimal tiga sampel.
+- ETA memproyeksikan posisi GPS ke segmen polyline yang sedang dilalui, lalu berjalan maju lewat bucket `SegmentTravelStat`. Fallback: selisih jadwal, jarak haversine dibagi kecepatan asumsi, lalu jumlah halte.
+- `EtaPredictionLog` mengambil sampel paling banyak sekali per kendaraan dan halte berikutnya per 60 detik, ditutup saat bus masuk geofence dengan selisih bertanda dalam detik.
+- `route_detector` menilai lintasan dengan jarak tegak lurus ke segmen terdekat, dengan margin keyakinan terhadap rute runner-up dan gerbang konfirmasi spasial. Kembali ke rute jadwal butuh beberapa tick konfirmasi. Perubahan dicatat di `RouteCorrectionLog`.
+- Analitik armada adalah satu kueri PostgreSQL dengan `LAG()`, haversine inline, dan klausa `FILTER`, menggantikan loop Python yang membuat worker gunicorn timeout.
+- Tanpa pandas, numpy, geopy, shapely, networkx, Celery, atau Redis. Statistik memakai modul stdlib `statistics`.
+- Frontend: React 19 dan Vite, polling TanStack Query (kendaraan setiap 5 detik, panel kinerja setiap 30 detik, tanpa websocket), React Leaflet, @dnd-kit, Recharts, dan design system inline-style buatan sendiri tanpa library komponen.
+- 4 Django app, sekitar 30 action di `TransportViewSet`, sekitar 7.500 baris Python dan 17.200 baris JSX, 113 commit backend dan 133 commit frontend.

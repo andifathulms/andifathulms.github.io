@@ -1,7 +1,17 @@
 {
   "slug": "dashboard-sakti",
   "title": "Dashboard SAKTI",
-  "tagline": "Automated budget monitoring platform pulling Kemenkeu expenditure data into a centralised OIKN dashboard",
+  "tagline": "A nightly pipeline and dashboard that replaces OIKN's manual budget downloads for all six of its budget units",
+  "glance": {
+    "for": "OIKN's planning bureau and data team",
+    "result": "Working end to end on simulated data, waiting on Ministry credentials"
+  },
+  "skills": [
+    "Data pipelines",
+    "API integration",
+    "Budget reporting",
+    "Government services"
+  ],
   "categoryTags": [
     "Government",
     "Data Platform",
@@ -20,27 +30,58 @@
   "role": "Fullstack Developer",
   "timeframe": "Jun 2026",
   "liveUrl": "https://dataintegrator.ikn.go.id",
+  "access": "internal",
   "githubUrl": null,
   "heroImage": "/images/projects/dashboard-sakti/hero.webp",
   "order": 7,
   "featured": false,
   "metrics": [
     {
+      "value": "6",
+      "label": "budget units synced every night"
+    },
+    {
+      "value": "6",
+      "label": "kinds of SAKTI data fetched per run"
+    },
+    {
+      "value": "02:00",
+      "label": "WIB nightly sync, no manual downloads"
+    },
+    {
       "value": "2 days",
-      "label": "Empty repo to working platform"
-    },
-    {
-      "value": "7",
-      "label": "Airflow ETL tasks per run"
-    },
-    {
-      "value": "9",
-      "label": "REST endpoints"
-    },
-    {
-      "value": "~5K",
-      "label": "Lines of Python + JSX"
+      "label": "from empty repository to working pipeline"
     }
   ],
-  "access": "internal"
+  "id": {
+    "tagline": "Pipeline malam dan dashboard yang menggantikan unduhan anggaran manual di keenam satker OIKN",
+    "glance": {
+      "for": "Biro perencanaan dan tim data OIKN",
+      "result": "Berjalan penuh dengan data simulasi, menunggu kredensial dari Kemenkeu"
+    },
+    "skills": [
+      "Pipeline data",
+      "Integrasi API",
+      "Pelaporan anggaran",
+      "Layanan pemerintahan"
+    ],
+    "metrics": [
+      {
+        "value": "6",
+        "label": "satker disinkronkan setiap malam"
+      },
+      {
+        "value": "6",
+        "label": "jenis data SAKTI diambil per job"
+      },
+      {
+        "value": "02.00",
+        "label": "WIB sinkronisasi malam, tanpa unduh manual"
+      },
+      {
+        "value": "2 hari",
+        "label": "dari repositori kosong sampai pipeline berjalan"
+      }
+    ]
+  }
 }

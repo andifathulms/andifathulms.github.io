@@ -2,40 +2,46 @@
 
 ## The problem
 
-Indonesia is building an entirely new capital city from scratch across five development stages spanning 2022 to 2045. Dozens of government work units run concurrent activities — infrastructure, governance, environment, social programmes — each with its own budget, targets, and quarterly milestones. Without a centralised system, coordinators had no cross-unit progress view, quarterly reporting was manual and fragmented, budget-versus-realisation gaps couldn't be detected until reviews were already late, the 23-year roadmap (the Indikasi Program matrix) had no digital home, and there was no formal trail of who approved or rejected a report and why. Reporting deadlines weren't enforced either — units could submit or edit data outside the official reporting window.
+Indonesia is building a new capital from scratch, in five stages from 2022 to 2045. Dozens of government work units run activities at the same time, in infrastructure, governance, environment and social programs. Each has its own budget, targets and quarterly milestones.
 
-Target users span a six-level role hierarchy: unit kerja members who report activity progress, reviewers and approvers at admin and deputi level, and administrators who manage master data and system-wide scheduling.
+Before E-Monev, coordinators had no single view of progress across units. Quarterly reports were put together by hand. A gap between budget and spending often surfaced only when a review was already late. The 23-year roadmap had no digital home. Nobody could say, from records, who approved or rejected a report and why. Units could also submit or change figures after the reporting period had closed.
 
-## The approach
+## What I built
 
-### An ordered role hierarchy, not a bitmask
+### Six roles, ranked in one list
 
-Six roles — `super_admin, admin, deputi_pp, eselon_1, eselon_2, guest` — sit in an explicit `ROLE_HIERARCHY` list, and every permission check reduces to `user.has_min_role(min_role)`, a single list-position comparison. Permission classes like `IsSuperAdmin` or `CanApproveRO` are thin wrappers around that one comparison, so adding a new gated action anywhere in the system is a one-line permission class, not a fresh ad-hoc check.
+There are six roles, from super admin down to guest, with deputy and echelon levels between them. I put them in one ranked list. Every permission check asks one question: is this person's role at least this high? Adding a new protected action takes one line. The same ranking drives both the API and which pages the browser shows.
 
-### Review status as a state machine, not a status flag
+### Quarterly reports move through fixed steps
 
-Quarterly progress (`TriwulanProgress`) carries a `ReviewStatus` — Draft, Submitted, Need Revision, Approved — governed by a `VALID_TRANSITIONS` map and a `transition_to()` method that validates the move and writes a `ReviewHistory` row (from-status, to-status, actor, note) on every change. Whether an entry is still editable is derived directly from its status, which is what drives the frontend's edit-lock UI. The result is a fully queryable audit trail of every submit, approve, reject, and reopen — not something reconstructed after the fact from application logs. (An earlier separate approval pipeline for Operational Plans was later removed deliberately, once it became clear the real approval gate belongs at the Triwulan level — one workflow, not two competing ones.)
+Each activity gets a quarterly progress report with planned and actual figures and evidence files. A report moves from draft to submitted, then to approved or sent back for revision. Only allowed moves are possible, and each one records who made it, when and why. A report can only be edited while it's a draft, so the page locks it once it's submitted. Operational plans once had their own approval step. I removed it, because the real approval happens at the quarterly report, and two review queues meant twice the work.
 
-### Deadlines enforced where they can't be bypassed
+### Deadlines the server enforces
 
-`ReportingWindow`, `PerencanaanWindow`, and `RencanaOperasionalWindow` models let admins define open/close schedules, including per-unit deadline extensions. The validation lives in `reporting_window/services.py` and is called from the serializers and views themselves — a write outside the active window raises a `ValidationError` server-side regardless of what the frontend shows, so the dashboard banners are UX sugar on top of a rule that can't be routed around by calling the API directly.
+Administrators set when reporting and planning windows open and close, and can extend a deadline for one unit. The server checks the window on every write. Late changes are refused even if someone calls the system directly. The banners on the dashboard only tell people what the server already enforces.
 
-### SSO with automatic org-unit resolution
+### Sign-in that finds your unit for you
 
-Keycloak sends raw job-title strings — "DIREKTUR DATA DAN KECERDASAN BUATAN" — that need to resolve to a specific unit kerja record, and the Keycloak schema itself couldn't be changed to embed IDs. A normalisation and fuzzy word-overlap scorer runs on every login: it strips diacritics, maps title prefixes to org-unit prefixes, and scores word overlap to find the right match, without any manual user-to-org assignment step.
+Staff sign in through IKN's single sign-on. It sends job titles as plain text, like "Direktur Data dan Kecerdasan Buatan", and it couldn't be changed to send unit IDs. I wrote a matcher that cleans up the title and scores word overlap to find the right work unit on every login. Nobody has to assign people to units by hand.
 
-### Migrating live data to UUID primary keys
+### Problems and imports with structure
 
-All master-data models originally used auto-increment bigint keys. Moving them to UUIDs — to remove implicit ordering and make cross-environment data merges safe — meant writing a real forward-migration path for databases that were already deployed and populated, not just a fresh-install migration, along with cleanup for the migration-history inconsistencies that surfaced on already-provisioned databases along the way.
+Early on, problems with an activity went into one free-text notes field. I gave them their own records. An activity can have many issues, each with a status, the units helping, and a trail of follow-up actions. Bulk imports got the same care: an admin uploads a spreadsheet, sees every error without anything being saved, then saves it all at once.
 
-### Structured problems instead of a text field, validated imports instead of blind ones
+## Result
 
-Early activity tracking had no real place to record recurring problems beyond a single free-text field. `Isu` (issue) and `TindakLanjut` (follow-up) are now their own models — one activity can carry many issues, each with its own status, assisting units, and follow-up trail. Master-data bulk import got the same rigor: a two-step `bulk_validate` / `bulk_commit` flow lets an admin dry-run an Excel or CSV upload, resolve foreign keys, and review every error before anything actually writes to the database.
+E-Monev covers the full IKN monitoring framework: 24 KPIs across five stages, eight principles and six aspects, over the 23-year roadmap. A four-tab dashboard gives each role its own view of the same data, with an executive summary, analytics, a KPI relationship graph and a map of every geolocated activity. Reports come out monthly, quarterly, by semester, yearly and at the end of each stage, as PDF, Word or Excel. The backend is in production, and the frontend is packaged to deploy the same way. I built both sides between May and July 2026, and the scope grew well past the original spec.
 
-### From localStorage, to an API, to a lazy API — without touching components twice
+## Under the hood
 
-The frontend's data context started out backed by `localStorage` to unblock UI work while the backend was still being built, deliberately designed with the same interface the real API would eventually expose. When the backend was ready, only the context implementation changed — not the ~200+ components consuming it. As the number of master-data categories grew, eagerly fetching all of them on every page load became wasteful, so the context was refactored a second time into a lazy, per-category model (`useMasterCategories()`), reusing the same "keep the interface identical" discipline from the first migration.
-
-## Outcome
-
-Production-grade architecture, with the backend deployed and its Docker image published to GHCR on every push to main behind a pip-audit dependency-vulnerability gate. The system has grown well past its original scope — 82 backend commits and 145 frontend commits across roughly seven weeks, spanning 9 Django apps, ~29 database models, and 225 frontend source files (~29,300 lines) covering the full IKN monitoring framework: 24 KPIs across 5 tahapan, 8 prinsip, and 6 aspek, spanning the 23-year roadmap. The reporting module generates monthly, quarterly, semester, annual, and end-of-stage reports as PDF, DOCX, or Excel on demand, and a live Control Tower dashboard — executive summary, monthly/aspek analytics, KPI relations graph, and a geolocated Leaflet map — gives every role a permission-appropriate view of the same underlying data.
+- Roles `super_admin, admin, deputi_pp, eselon_1, eselon_2, guest` sit in a `ROLE_HIERARCHY` list; `User.has_min_role()` compares positions. Permission classes such as `IsSuperAdmin` and `CanApproveRO` wrap that one comparison.
+- `TriwulanProgress` carries a `ReviewStatus` (Draft, Submitted, Need Revision, Approved) with a `VALID_TRANSITIONS` map. `transition_to()` validates the move and writes a `ReviewHistory` row. `is_editable` is true only in Draft.
+- `ReportingWindow`, `PerencanaanWindow` and `RencanaOperasionalWindow`, plus `ReportingWindowExtension` for per-unit overrides. Checks in `reporting_window/services.py` raise `ValidationError` from serializers and views.
+- Keycloak SSO: the backend exchanges the auth code server-to-server and issues its own SimpleJWT pair, so the frontend needs no OIDC library. `apps/users/oidc.py` strips diacritics, maps title prefixes to unit prefixes and scores word overlap to resolve `UnitOrganisasi` and `UnitKerja`.
+- Master data moved from bigint to UUID primary keys with an in-place forward migration for deployed databases, then a cleanup of migration-history inconsistencies.
+- `Isu` and `TindakLanjut` models with a `unit_pembantu` many-to-many. `BulkMixin` exposes `bulk_validate` (dry run) and `bulk_commit` (atomic) with foreign-key resolution per category.
+- `AuditMixin` adds `created_by`, `updated_by` and timestamps across models; `AuditModelViewSetMixin` fills them in.
+- The frontend `MasterDataContext` started on localStorage, moved to the API behind the same interface, then became lazy with `useMasterCategories()`.
+- Leaflet maps load through `next/dynamic` with `ssr: false`. The KPI graph uses React Flow. Reports use WeasyPrint, python-docx and openpyxl.
+- CI publishes the backend image to GHCR on every push to main behind a `pip-audit` gate.
+- 9 Django apps, about 29 models, 30 frontend routes, 225 frontend source files, about 9,760 lines of Python and 29,300 of TypeScript, 82 backend and 145 frontend commits since 20 May 2026.

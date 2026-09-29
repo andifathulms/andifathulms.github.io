@@ -2,6 +2,16 @@
   "slug": "daily-taqwa",
   "title": "Daily Taqwa",
   "tagline": "Tamper-resistant prayer attendance system for ~2,000 OIKN government employees at Masjid Negara IKN",
+  "glance": {
+    "for": "OIKN employees, plus HR and mosque administrators",
+    "result": "In production, with check-ins only through the native mobile app"
+  },
+  "skills": [
+    "Geofencing",
+    "Single sign-on",
+    "Concurrency control",
+    "Government services"
+  ],
   "categoryTags": [
     "Government",
     "Internal Tool",
@@ -21,6 +31,7 @@
   "role": "Fullstack Developer",
   "timeframe": "Apr – Jun 2026",
   "liveUrl": "https://dailytaqwa.kotacerdas.id/login",
+  "access": "internal",
   "githubUrl": "https://github.com/thdoikn/daily-taqwa.git",
   "heroImage": "/images/projects/daily-taqwa/hero.webp",
   "order": 1.5,
@@ -32,16 +43,46 @@
     },
     {
       "value": "~500",
-      "label": "Concurrent check-ins targeted"
+      "label": "check-ins in five minutes, designed for"
     },
     {
-      "value": "9",
-      "label": "Django apps"
+      "value": "5",
+      "label": "daily prayers tracked per employee"
     },
     {
-      "value": "85",
-      "label": "Commits over ~12 weeks"
+      "value": "4",
+      "label": "leaderboards, including dawn prayer and directorate"
     }
   ],
-  "access": "internal"
+  "id": {
+    "tagline": "Sistem presensi salat anti-manipulasi untuk ~2.000 pegawai OIKN di Masjid Negara IKN",
+    "glance": {
+      "for": "Pegawai OIKN, serta admin SDM dan pengelola masjid",
+      "result": "Berjalan di produksi, presensi hanya lewat aplikasi mobile native"
+    },
+    "skills": [
+      "Geofencing",
+      "Single sign-on",
+      "Kendali konkurensi",
+      "Layanan pemerintahan"
+    ],
+    "metrics": [
+      {
+        "value": "~2.000",
+        "label": "pegawai OIKN yang dilayani"
+      },
+      {
+        "value": "~500",
+        "label": "presensi dalam lima menit, sesuai rancangan"
+      },
+      {
+        "value": "5",
+        "label": "waktu salat dicatat per pegawai"
+      },
+      {
+        "value": "4",
+        "label": "papan peringkat, termasuk Subuh dan direktorat"
+      }
+    ]
+  }
 }

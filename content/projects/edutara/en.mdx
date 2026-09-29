@@ -2,32 +2,50 @@
 
 ## The problem
 
-Otorita IKN already ran a live training platform for its employees and partner institutions — Monash University, UGM, Kementerian Keuangan's Learning Center, and several others — with 266+ registered users. It was built on Laravel, Blade templates, and jQuery, with no automated tests, inconsistent conventions, and undocumented UI asset licensing, a real legal exposure for a government platform. Every change carried real risk to a live product real employees depended on for mandatory training, and the system had a high bus factor: hard to staff, hard to change safely.
+Otorita IKN already ran a training platform for its employees and partner institutions, including Monash University, UGM and the Ministry of Finance's Learning Center. It had more than 266 registered users, and people used it for mandatory training. It was also fragile. There were no automated tests, the conventions were inconsistent, and the licences for its interface assets weren't documented, which is a legal risk for a government platform. Every change risked breaking something people depended on, and few developers could work on it safely.
 
-The ask was a full re-platform with 100% feature parity — but on a modern, tested, observable stack — for a genuinely mixed audience: civil servants, private-sector staff, and university students with very different levels of tech literacy, plus institution admins running their own training programs and government leadership who need compliance reporting for the civil service agency.
+The ask was a full rebuild that kept every existing feature. The audience is mixed: civil servants, private-sector staff and university students with very different comfort with technology. Institution admins run their own programs on it, and OIKN leadership needs training-hours reports for the national civil service agency.
 
-## The approach
+## What I built
 
-### API-first, so nothing has to be rebuilt twice
+### The server checks every permission
 
-A Django REST Framework backend and a Next.js frontend talk entirely over a typed API client — no business logic duplicated in React. That decision means the same API can serve a future mobile app or partner integration without touching the core system, and it enforces every permission check at the one layer a tampered frontend can't bypass: every endpoint has its own server-side check, not a UI-hidden button.
+I split the system into a backend API and a separate web frontend that talks only to that API. No business rules live in the browser. Every endpoint checks its own permissions, so a learner who tampers with the page still can't reach an admin action. The same API can later serve a mobile app or a partner system without a rewrite.
 
-### UUIDs everywhere, multi-tenancy by row, not by database
+### Every institution shares one database, kept apart by row
 
-Every model exposes a public UUID for URLs and API responses — internal integer primary keys never leak, closing off a whole class of "guess the next sequential ID" bugs for free. Multi-tenancy runs on an `institution_id` foreign key plus middleware that scopes queries to whichever institution a user is currently acting as, rather than a database per institution — cheaper to run and simpler to reason about, while still keeping each institution's data isolated.
+Every record has a random public ID in its links, so nobody can step through other people's records by counting. Institutions share one database. Each row belongs to an institution, and every request is scoped to the institution the user is acting for. I chose this because it is cheaper to run and easier to reason about than a database per institution, and each institution's data still stays separate.
 
-### A quiz engine built as an explicit state machine
+### Quiz attempts keep the questions they started with
 
-Question banks and segments are separate from any specific attempt. The moment a learner starts a quiz, the questions are snapshotted onto that attempt — editing a question bank afterward can never silently corrupt an already-graded attempt. Scoring runs per segment with its own independent pass threshold, so a learner has to clear every segment, not just average across them.
+When a learner starts a quiz, the system copies the questions onto that attempt. If an admin edits the question bank later, grades already given can't change. Quizzes are split into segments, and each segment has its own pass mark. A learner has to pass every segment, so a strong section can't hide a weak one.
 
-### Assignments that don't block on grading
+### Grading never blocks a learner
 
-A submitted assignment is immediately marked done for progress purposes; the actual grading — accept, reject, score — happens asynchronously and never holds up a learner's course completion, matching how the client's own approval workflows already worked. Certificates and reports follow the same async philosophy: PDF generation runs as a background job so a slow render never blocks a request, and every issued certificate carries a QR code linking to a no-login public validation page.
+A submitted assignment counts as done for course progress straight away. The teacher grades it later, and can hold grades back until the institution releases them. Late work is flagged, never refused. This matches how OIKN's own approvals already work. Certificates are generated in the background the moment a learner reaches 100%. Each one has a QR code that opens a public page where anyone can check it without logging in.
 
-### Building the reporting schema ahead of need
+### A report built for sources that don't exist yet
 
-The client's compliance report — training hours per employee, filterable by institutional hierarchy — only has one real data source today: Edutara itself. It was still built on a normalized, source-tagged schema from day one, because OIKN plans to eventually pull training records from partner platforms. That's a deliberate over-build, made explicitly rather than discovered as painful scope creep later.
+Leadership needs training hours per employee, filtered by institution, office, directorate and position. Today Edutara is the only source of that data. OIKN plans to pull records from partner platforms later, so I built the report on a structure where every record is tagged with its source. Adding a partner later means adding a connector.
 
-## Outcome
+## Result
 
-Edutara shipped as a tested, CI-gated system, not a prototype: pytest and Vitest/RTL unit suites, a full Playwright end-to-end suite that spins up the whole Docker stack with seed data, and a coverage gate enforced in CI. The role model itself was redesigned mid-build once real usage clarified where the original spec's boundaries didn't hold — a Teacher role replaced a Manager/Staff split, a new platform-operator tier was introduced beneath Superadmin, and institution access moved from invite-only to invite-or-request-with-approval. Two features — learner-submitted testimonials and self-service institution join requests — shipped with no corresponding requirement in the original spec, added because they made sense once the core platform was working. Across 124 commits, the bulk of the build — 109 commits — landed in just two days, with a final deployment-hardening pass a few days later: 12 Django apps, 43 models, and a full multi-role platform (learner, institution, superadmin) with a from-scratch quiz engine, not a CRUD demo.
+Edutara is a tested build with automated checks on every change: unit tests on both sides, a coverage gate, and a full end-to-end suite that starts the whole system with sample data. The production setup is ready for OIKN's own servers. The switch from the old platform hasn't happened yet. I built it between late June and early July 2026, most of it in the first two days. During the build I redesigned the roles: one Teacher role replaced two, a platform operator tier now sits below Superadmin, and people can ask to join an institution. I also added learner testimonials, which the spec didn't ask for.
+
+## What I'd do next
+
+- Replace the old platform in production. The new stack is ready, but the switch is still pending.
+- Connect the first partner platform to the training-hours report.
+
+## Under the hood
+
+- Django REST Framework backend and a Next.js App Router frontend over a typed API client. Every endpoint has its own DRF permission class.
+- Every model exposes a UUID in URLs and responses; integer primary keys never leave the server.
+- Multi-tenancy is row-level: an `institution_id` foreign key plus middleware that scopes queries to the user's active institution.
+- The quiz engine is an explicit attempt state machine with 10 models. Questions are snapshotted per attempt; scoring is per segment with independent thresholds. Question types are multiple choice and multi-point multiple choice, with timed attempts and explanation review.
+- Nine material types render in one two-panel course player: PDF, video, embedded video, rich text, image, external link, file download, quiz and assignment.
+- Certificates render with WeasyPrint and `qrcode` in Celery jobs. Files are served through pre-signed, time-limited URLs from S3-compatible storage.
+- The training-hours report (FR-28) keys on employee NIP with a `source` field and a connector abstraction, with cumulative and date-range modes and Excel export.
+- Keycloak OIDC SSO was adapted from a React, Vite and localStorage guide to App Router with httpOnly-cookie sessions.
+- CI runs lint, typecheck, pytest, Vitest with Testing Library, a coverage gate, and Playwright end-to-end tests against the full Docker stack. Release images build to GHCR for a pull-and-run VM deploy.
+- 12 Django apps, 43 models, 23 ViewSets, about 8,600 lines of Python and 10,900 of TypeScript, 25 backend and 32 frontend test files, 124 commits between 29 June and 5 July 2026, 109 of them in the first two days.

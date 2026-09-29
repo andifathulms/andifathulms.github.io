@@ -1,7 +1,17 @@
 {
   "slug": "emonev",
   "title": "E-Monev IKN",
-  "tagline": "Government platform monitoring Nusantara's construction progress across a 23-year development roadmap",
+  "tagline": "A monitoring platform for Nusantara's 23-year build, tracking every unit's quarterly progress against 24 national KPIs",
+  "glance": {
+    "for": "Otorita IKN work units, reviewers, deputies and administrators",
+    "result": "Backend in production; one reviewed record of progress across all units"
+  },
+  "skills": [
+    "Approval workflows",
+    "Role-based access control",
+    "Government reporting",
+    "Data dashboards"
+  ],
   "categoryTags": [
     "Government",
     "Data Platform",
@@ -22,6 +32,7 @@
   "role": "Fullstack Developer",
   "timeframe": "May – Jul 2026",
   "liveUrl": "https://emonev.ikn.go.id",
+  "access": "internal",
   "githubUrl": [
     "https://github.com/thdoikn/emonevp2e-backend",
     "https://github.com/thdoikn/emonevp2e-frontend"
@@ -31,21 +42,51 @@
   "featured": false,
   "metrics": [
     {
+      "value": "23 years",
+      "label": "of roadmap, 2022 to 2045, in one place"
+    },
+    {
       "value": "24",
-      "label": "KPIs across a 2022–2045 roadmap"
+      "label": "KPIs tracked across five development stages"
+    },
+    {
+      "value": "5",
+      "label": "report cadences, each as PDF, Word or Excel"
     },
     {
       "value": "6",
-      "label": "Role levels, deputi to guest"
-    },
-    {
-      "value": "227",
-      "label": "Commits (82 back + 145 front)"
-    },
-    {
-      "value": "~39K",
-      "label": "Lines of app code"
+      "label": "role levels, from super admin to guest"
     }
   ],
-  "access": "internal"
+  "id": {
+    "tagline": "Platform pemantauan pembangunan Nusantara selama 23 tahun, melacak progres triwulan setiap unit terhadap 24 KPI",
+    "glance": {
+      "for": "Unit kerja, reviewer, deputi, dan administrator Otorita IKN",
+      "result": "Backend di produksi; satu catatan progres terverifikasi untuk semua unit"
+    },
+    "skills": [
+      "Alur persetujuan",
+      "Kontrol akses berbasis peran",
+      "Pelaporan pemerintahan",
+      "Dashboard data"
+    ],
+    "metrics": [
+      {
+        "value": "23 tahun",
+        "label": "peta jalan, 2022 sampai 2045, di satu tempat"
+      },
+      {
+        "value": "24",
+        "label": "KPI dipantau di lima tahap pembangunan"
+      },
+      {
+        "value": "5",
+        "label": "periode laporan, masing-masing PDF, Word, atau Excel"
+      },
+      {
+        "value": "6",
+        "label": "tingkat peran, dari super admin sampai tamu"
+      }
+    ]
+  }
 }
