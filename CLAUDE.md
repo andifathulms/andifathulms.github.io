@@ -118,6 +118,12 @@ content/
   equivalents). `meta.json` carries `glance`, `skills`, impact-first `metrics`,
   and an `id` block with the Indonesian versions of those fields plus the
   tagline. Run `npm run lint:voice -- <slug>` after editing.
+- **New or updated project facts arrive as `PORTFOLIO_CONTEXT.md` (schema
+  `portfolio-context/v2`)**, exported from each project's own repo with
+  `docs/portfolio-intake/EXPORT_PROMPT.md`. Turn them into site copy with the
+  `portfolio-intake` skill (`/portfolio-intake <slug>`, or no slug for all
+  pending). Never write case-study copy from a context that fails
+  `npm run check:context -- <slug>`.
 - Build the case study page component to read whatever projects exist in
   `content/projects/` and generate routes dynamically.
 

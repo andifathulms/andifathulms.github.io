@@ -196,6 +196,15 @@ sentence by sentence.
   pair. The decisions, the review and the result are mine." Don't repeat it as
   a badge on every project.
 
+## Where the facts come from
+
+New and updated projects arrive as a `PORTFOLIO_CONTEXT.md` fact sheet
+(schema `portfolio-context/v2`, spec in
+`docs/portfolio-intake/EXPORT_PROMPT.md`). The `portfolio-intake` skill in
+`.claude/skills/` maps it onto `meta.json` and the two MDX files using the
+rules in this file. Its section 5 is the only source of numbers, and nothing
+from its section 9 is published.
+
 ## Voice pass checklist
 
 Run this for each project, one project per commit:

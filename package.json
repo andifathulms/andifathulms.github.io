@@ -8,7 +8,8 @@
     "build": "node node_modules/next/dist/bin/next build",
     "start": "next start",
     "lint": "eslint",
-    "lint:voice": "node scripts/voice-lint.mjs"
+    "lint:voice": "node scripts/voice-lint.mjs",
+    "check:context": "node scripts/check-context.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",

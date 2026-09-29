@@ -44,6 +44,12 @@ export interface ProjectMeta {
    * component always reads `project.tagline` and gets the page's language.
    */
   id?: LocalizedCopy;
+  /**
+   * Which PORTFOLIO_CONTEXT.md this copy was last built from. Written by the
+   * portfolio-intake skill; `check-context.mjs --pending` compares it with the
+   * context's `generated` date.
+   */
+  source?: { schema: string; generated: string };
 }
 
 type LocalizedCopy = Partial<Pick<ProjectMeta, 'tagline' | 'glance' | 'skills' | 'metrics'>>;
