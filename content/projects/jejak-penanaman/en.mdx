@@ -1,37 +1,52 @@
+# Jejak Penanaman
+
 ## The problem
 
-IKN Nusantara hosts recurring tree-planting ceremonies involving both government employees and the general public. Before this system, attendance was tracked manually with paper forms and spreadsheets — no way to verify that participants were actually on-site, no central record of who attended which event, no documentation of species planted, and no photographic evidence.
+Otorita IKN runs tree-planting events in Nusantara, the new capital, for its own employees and for the public. Attendance used to live on paper forms and spreadsheets. Nobody could tell whether a participant was actually on site. There was no central record of who came to which event, no log of which species went into the ground, and no photos.
 
-Two distinct user types needed the same system: IKN government employees who authenticate via Keycloak SSO, and members of the public who register with an email address — plus walk-up participants at open events who have no account at all. Admins needed to manage events, set geofenced locations, track registrations, and export attendance reports.
+Three kinds of people had to fit into one system. Employees sign in with their government account. Members of the public register with an email address. At open events, some people simply walk up with no account at all. Admins needed to create events, place them on a map, track registrations and export attendance reports.
 
-## The approach
+## What I built
 
-### Geofenced selfie check-in
+### Check-in needs a selfie taken at the site
 
-Attendance submission requires both a selfie and GPS coordinates within a configurable radius (50–5000m) of the event pin. The geofence is checked twice: client-side with a Haversine calculation for immediate feedback ("you are 340m away"), and server-side in the attendance submission view to prevent API-level spoofing, using the same formula against the event's stored coordinates.
-
-The `CameraCapture` component uses the browser MediaDevices API, draws the captured frame to a hidden canvas, and compresses it to max 1024px / JPEG 0.7 before upload — keeping selfies under 1 MB even on high-resolution phone cameras. iOS Safari requires `getUserMedia()` to be triggered by a direct user gesture, so camera activation is wired to a button click, not page load.
+To check in, a participant takes a selfie and shares their location. It has to fall inside a radius the admin sets for each event, from 50 to 5,000 metres around a pin on the map. The phone checks the distance first and tells the participant how far away they are. The server checks it again, so nobody can fake a check-in by calling the API directly. Photos are compressed on the phone to stay under 1 MB.
 
 ### Every photo carries its own proof
 
-Selfies and plant photos get a timestamp-and-GPS overlay burned directly into the canvas before upload — date and time in WITA, coordinates to 7 decimal places — and the same GPS data is embedded into the JPEG's EXIF metadata client-side via `piexifjs`. No server-side image processing is involved; the proof travels with the file itself.
+Before upload, the phone stamps each selfie and plant photo with the date, the local time in WITA and GPS coordinates to seven decimal places. The same location is also written into the photo's metadata. The server does no image processing at all. The proof travels with the file, so a photo downloaded later still shows where and when it was taken.
 
-### Three ways in, one attendance model
+### One attendance record, three ways in
 
-IKN employees authenticate via Keycloak OIDC, whose claims arrive genuinely messy — names in ALL CAPS, organisational units split inconsistently across several claim fields — normalised by a custom `OIDCAuthenticationBackend`. Public participants register with email and get an auto-generated password via SendGrid. For open public events, a third path skips accounts entirely: an anonymous registration endpoint creates a lightweight guest user on the fly so a walk-up participant isn't blocked by the auth flow, without weakening the permission model for anyone else.
+Employees sign in through the government's single sign-on. Their names and work units arrive in inconsistent formats, so I clean them up on login. Public participants register by email and receive a generated password. At open events, a walk-up participant can check in without registering. The system creates a lightweight guest account on the spot, and permissions for everyone else stay the same.
 
-### Plant species tracking
+### I added plant records halfway through
 
-Each attendance record links to multiple flora species planted, with per-species quantity, sapling age in months, and photos — added mid-project, outside the original PRD, to support IKN's reforestation biodiversity records without breaking the existing data model. A personal "Jejak Hijau" view lets a participant see everything they've planted across every event they've attended, with a photo lightbox.
+Species tracking wasn't in the original spec. I added it mid-project to support IKN's reforestation records, without breaking the existing data. Each check-in can list several species, with a count, the sapling's age in months and photos. A personal "Jejak Hijau" page shows a participant everything they have planted across every event.
 
-### QR tickets that scale to per-institution quotas
+### Public events get tickets and per-institution quotas
 
-Public events generate a unique `JP-YYMMDD-NNN` ticket code per registration, assigned atomically to avoid collisions, and admins scan them at the gate with the browser's camera via `html5-qrcode`, with audio feedback per scan result. What started as one flat quota per event grew into opt-in segmentation: an event can split its quota by government institution, each with its own nullable cap (null = unlimited) and its own list of available t-shirt sizes — registration validation resolves the participant's institution and enforces that institution's specific rules, while simpler events keep working exactly as before. Twibbon selfie overlays — branded IKN frames — composite client-side over the captured photo and download as shareable images.
+Public events issue a QR ticket per registration. Admins scan tickets at the gate with a phone camera, and each result plays a sound. Quotas started as one number per event. When government institutions asked for their own allocations, I made per-institution quotas and t-shirt sizes an option on each event. Simpler events keep a single quota. Participants can also take a selfie in a branded IKN frame and download it to share.
 
-### Attendance that bends for real-world connectivity, without going soft
+### Admins can fix what the field breaks
 
-Attendance isn't fully immutable. Admins can force-create a record on a participant's behalf — including overriding the timestamp via a time picker — for the on-site connectivity failures that inevitably happen at an outdoor event, and can add plant photos to an existing record after the fact. Above the admin/participant split sits a superadmin role that manages other admins, promotes public users to employee status (locking their organisational fields so a future SSO login can't silently overwrite a manual correction), and searches, filters, and deletes across the full user base.
+Outdoor events lose signal. Admins can record attendance on a participant's behalf, set the time it happened, and add plant photos to an existing record later. A superadmin role manages the admins and can promote a public user to employee status. That locks the user's unit details, so a later sign-in can't overwrite the correction.
 
-## Outcome
+## Result
 
-Deployed to production and used in real IKN tree-planting events since mid-2026. 78 commits across roughly three months, spanning 5 Django apps, 13 models, ~90 API endpoints, and 28 frontend pages. The system handles internal events (SSO-only, no registration) and public events (open registration, per-institution quotas, QR tickets, guest walk-ins) through a single codebase, with admin dashboards breaking down attendance by directorate and department for internal reporting.
+Jejak Penanaman is in production and has been used at IKN tree-planting events since mid-2026. I built it between April and July 2026, and production was running by June. One codebase handles two kinds of event. Internal events are sign-in only, with no registration. Public events have registration, quotas, QR tickets and walk-up guests. Admin dashboards break attendance down by directorate and deputy office, with a ranked table for internal reporting. The app has 28 screens across the participant and admin sides.
+
+## Under the hood
+
+- Django REST Framework API with a React (Vite) single-page app and JWT access and refresh tokens. Three Docker Compose services: PostgreSQL, Django on Gunicorn, and React on Nginx.
+- Geofence: a Haversine distance check on the client for instant feedback ("you are 340m away"), repeated in the attendance submission view against the event's stored coordinates.
+- `CameraCapture` uses the MediaDevices API, draws the frame to a hidden canvas and compresses it to a maximum of 1024px at JPEG quality 0.7. iOS Safari only allows `getUserMedia()` from a direct user gesture, so the camera starts on a button tap, never on page load.
+- Photo stamps are drawn onto the canvas before upload. GPS is written into EXIF on the client with `piexifjs`.
+- Employee sign-in is Keycloak OIDC through `mozilla-django-oidc` and a custom `OIDCAuthenticationBackend` that fixes ALL-CAPS names and work units split across several claim fields. The OIDC config is served by a backend endpoint at app boot, so one Docker image works in dev and prod without a rebuild.
+- Public registration emails go out through SendGrid. A self-service password reset uses a time-limited emailed token.
+- Guest check-in ("absen tanpa login") is an anonymous registration endpoint that creates a guest user on demand.
+- Ticket codes follow `JP-YYMMDD-NNN` and are assigned atomically to avoid collisions. The gate scanner uses `html5-qrcode`; tickets render with `qrcode.react` and download through `html2canvas`.
+- Per-institution segmentation is opt-in through `institution_enabled` and `tshirt_enabled` flags on `Event`. Each `EventInstitution` row has a nullable quota (null means unlimited) and its own list of sizes.
+- A default twibbon frame applies to every event unless the event has its own. Frames are composited on the client with canvas.
+- The admin event form uses `react-leaflet` with a draggable pin and a radius slider.
+- 5 Django apps (`accounts`, `events`, `attendance`, `flora`, `twibbon`), 13 models, about 90 API URL patterns and 28 frontend pages. About 11,200 lines of JSX/JS and 3,400 lines of Python, 78 commits from 1 April to 3 July 2026.

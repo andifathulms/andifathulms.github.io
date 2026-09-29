@@ -1,7 +1,17 @@
 {
   "slug": "wa-scrum-bot",
   "title": "WA Daily Scrum Bot",
-  "tagline": "WhatsApp bot that monitors a team group chat and sends escalating standup reminders with a weekly leaderboard",
+  "tagline": "A WhatsApp bot that chases missing standup reports for a 14-person team and flags tasks stuck for days",
+  "glance": {
+    "for": "A 14-person software team at Otorita IKN",
+    "result": "Runs every working day for the team's WhatsApp standups"
+  },
+  "skills": [
+    "Chat automation",
+    "Job scheduling",
+    "Text matching",
+    "Containerised deployment"
+  ],
   "categoryTags": [
     "Internal Tool",
     "Automation",
@@ -26,19 +36,50 @@
   "metrics": [
     {
       "value": "14",
-      "label": "Team members monitored"
+      "label": "team members monitored every working day"
     },
     {
-      "value": "8",
-      "label": "Daily cron jobs"
+      "value": "4",
+      "label": "reminder checks a day, each one firmer"
     },
     {
       "value": "3",
-      "label": "Self-service chat commands"
+      "label": "days before a stuck task is flagged"
     },
     {
-      "value": "25",
-      "label": "Commits over 18 days"
+      "value": "3",
+      "label": "self-service chat commands"
     }
-  ]
+  ],
+  "id": {
+    "tagline": "Bot WhatsApp yang menagih laporan standup tim 14 orang dan menandai tugas yang macet berhari-hari",
+    "glance": {
+      "for": "Tim software 14 orang di Otorita IKN",
+      "result": "Berjalan setiap hari kerja untuk standup WhatsApp tim"
+    },
+    "skills": [
+      "Otomasi chat",
+      "Penjadwalan job",
+      "Pencocokan teks",
+      "Deploy berbasis container"
+    ],
+    "metrics": [
+      {
+        "value": "14",
+        "label": "anggota tim dipantau setiap hari kerja"
+      },
+      {
+        "value": "4",
+        "label": "pengecekan pengingat sehari, makin tegas"
+      },
+      {
+        "value": "3",
+        "label": "hari sebelum tugas macet ditandai"
+      },
+      {
+        "value": "3",
+        "label": "perintah chat swalayan"
+      }
+    ]
+  }
 }

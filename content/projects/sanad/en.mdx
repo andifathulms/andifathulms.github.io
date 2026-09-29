@@ -1,33 +1,53 @@
+# Sanad
+
 ## The problem
 
-The Hadith corpus is the second most important body of text in Islam after the Quran, but it's much harder to study analytically. Existing sites are good readers but offer almost nothing for the questions serious students actually ask: who narrated this hadith, and how reliable was each person in the chain? Where do two different chains for the "same" hadith converge or diverge? Which narrators sit at the center of the whole transmission network? A hard constraint shapes the whole product: the platform never issues its own religious verdicts. Arabic text is shown exactly as sourced, and every reliability grade is attributed to a classical scholar, never asserted by the app.
+For Muslims, the hadith, the recorded sayings of the Prophet Muhammad ﷺ, are the second most important body of text after the Quran. Students and researchers ask the same questions of each one. Who passed it on, and how reliable was each person in that chain? Where do two chains for the same hadith meet or split? Which narrators sit at the centre of the whole network?
 
-## The approach
+Sites such as sunnah.com are good readers, but they offer almost nothing for these questions. Sanad is for Muslim students, general readers and Islamic-studies researchers who want to read a hadith with its chain and its grading in view.
 
-### A split-brain architecture built for precomputation
+One rule shapes the whole product. The app never issues its own religious verdicts. Arabic text is shown exactly as sourced, and every reliability grade is attributed to the classical scholar who gave it.
 
-A Django/DRF API owns all data and heavy computation; a separate Next.js frontend is a pure presentation layer talking to it over REST. Hadith analytics — counts, similarity, centrality — are expensive over a corpus of tens of thousands of rows, but the corpus itself is essentially static. So the design pushes everything into management commands and Celery jobs that populate materialized tables, and request-time handlers only ever read precomputed rows. That's the core performance decision the rest of the system builds on.
+## What I built
 
-### Extracting chains that were never structured to begin with
+### I compute the analytics ahead of time
 
-The source dataset ships hadith text but no structured narrator graph. Rather than hand-transcribe chains, a heuristic parser segments the isnad region of each Arabic matn using transmission verbs — حدثنا ("narrated to us"), عن ("from") — and pulls out narrator names to build a teacher-to-student edge graph. This is explicitly framed as a structural heuristic, not a scholarly authority, with provenance disclaimers surfaced in the UI rather than presented as settled fact. Getting it right was the hardest problem in the build: a long tail of commits fights text-parsing artifacts — stronger name cleaning so chains actually carry narrators instead of stray matn fragments, dropping fragment narrators, collapsing unnamed (mubham) narrators into a sentinel rather than inventing an identity for them.
+Counting words, comparing texts and ranking narrators is heavy work across tens of thousands of hadith. The collection itself barely changes. So I run all of it in advance, in background jobs, and store the results. When someone opens a page, the server only reads rows that already exist. Everything else in the system builds on that decision.
 
-### The right renderer for the right graph size
+### Chains are pulled out of the Arabic text
 
-A single hadith's chain is a handful of nodes, so it renders in React Flow for rich per-node interactivity. The global narrator network is hundreds of nodes and up — React Flow doesn't scale to that — so it renders on a D3-force canvas instead. That split was written into the spec from the start rather than discovered as a performance problem after the fact.
+The source dataset has the hadith text but no structured list of narrators. I wrote a parser that finds the chain in each Arabic text by its transmission phrases, such as "narrated to us" and "from", and pulls out the names. From those names it builds a network of teacher and student links. The app labels this as a structural estimate and shows where it came from. Clean names took many rounds of fixes. Fragments of text that aren't names are dropped. Unnamed narrators (mubham) are grouped under one placeholder, and the app never invents an identity for them.
 
-### Integrity as an architectural rule, not a UI feature
+### Each graph size gets its own renderer
 
-Grades always carry attribution to the scholar who issued them; narrators default to "not yet assessed" rather than a color that could be misread as a verdict; unnamed narrators collapse into a sentinel instead of being invented. These aren't one-off polish passes — they show up as recurring, deliberate commits throughout the build, including a dedicated pass to unify the grading color palette after an earlier version's colors carried unintended implications.
+One hadith's chain is a handful of people. It renders as an interactive graph, and clicking a narrator opens their profile. The whole narrator network runs to hundreds of people and more, which is too many for that tool. So it renders on a canvas with a force layout, with search, focus and a shortest-path finder between any two narrators. I wrote that split into the spec from the start.
 
-### Shipping finished backend work that had no frontend yet
+### Every grade names its source
 
-Partway through, it became clear the backend had six working analytics endpoints with no surface for a user to actually reach them. A full sprint pivoted from building new systems to exposing the ones that already worked — the grade-distribution explorer, the word-frequency tool, the corpus dashboard, the parallel-narrations panel, and the centrality leaderboard all landed in that single wave, rather than being built and shipped incrementally as they were finished.
+Each grade shows the scholar who issued it, and a hadith can carry grades from several scholars side by side. Narrators without an assessment show "not yet assessed" in a neutral colour that can't be read as a verdict. I reworked the grade colours once, after an early palette gave some colours meanings they shouldn't have had.
 
-### AI scoped down to what could ship honestly
+### I gave finished backend work a screen
 
-The original plan called for embedding-based semantic topic search. What shipped instead is a curated topic browser over real, uncapped counts — no OpenAI dependency, no embeddings infrastructure. A pragmatic call to ship real value the corpus actually supports rather than add cost and complexity for a feature that would have been harder to keep honest.
+Midway through, I found six analytics endpoints that worked but had no page. I spent the next sprint building screens for them. The grade-distribution explorer, the word-frequency tool, the corpus dashboard, the parallel-narrations panel and the narrator ranking all shipped in that wave.
 
-## Outcome
+## Result
 
-86 commits, solo, over an intense five-day build — about 5,100 lines of frontend TypeScript and 3,800 lines of backend Python, spanning 19 Django models and roughly 30 REST endpoints across 18 frontend route pages. The shipped feature set outgrew the original spec: models like `HadithGrading`, `WordFrequencyHadith`, `NarratorStats`, `BookGradeStats`, and a full `Collection`/`ReadingHistory` personal layer weren't in the original schema. A complete production pipeline exists — GitHub Actions builds backend and frontend images to GHCR on every push to `main`, with CI running lint, migration checks, and tests — but the corpus depends on running the ingestion pipeline locally, so this is best described as production-ready and staged for launch rather than a live public service yet.
+Sanad is feature-complete and staged for launch, but not public yet. Its data depends on an ingestion pipeline I run locally. Readers get the Arabic text with vowel marks, English and Indonesian translations side by side, grade badges, a focus mode and resume-reading. Signed-in users get bookmarks, collections and reading history. Any hadith can be exported as an image card to share. The original plan had AI topic search. I shipped a curated topic browser over full counts, with no paid AI service behind it. I built Sanad in five days in June 2026, and it grew well past its original spec.
+
+## What I'd do next
+
+- Launch it publicly. The build and release pipeline is ready.
+- Add semantic search over embeddings, which I deferred.
+
+## Under the hood
+
+- A Django 5.0 and DRF API owns the data and computation. A separate Next.js 14 App Router frontend talks to it over REST. SimpleJWT handles auth.
+- PostgreSQL with `pg_trgm` trigram search for text similarity and fuzzy name search.
+- Precomputed tables `WordFrequencyHadith`, `NarratorStats` and `BookGradeStats` are filled by management commands and Celery jobs, with Redis as the broker and cache.
+- Chain extraction segments the isnad using transmission verbs such as حدثنا ("narrated to us") and عن ("from"). Arabic normalisation and Arabic-to-Latin transliteration are hand-written, with no `camel_tools`.
+- NetworkX computes centrality, shortest paths and ego networks. Centrality became an approximation for speed, in the same fix that removed a Django `distinct()` bug.
+- Per-hadith chains render in React Flow. The global network renders on a D3-force canvas.
+- Models added beyond the original schema: `HadithGrading` (several scholars per hadith), `Topic`/`HadithTopic`, `Collection`/`CollectionItem` and `ReadingHistory`.
+- Data: Arabic and English text from the open fawazahmed0/hadith-api dataset, and Indonesian translations from the gadingnst API. The target books are the six canonical collections plus the Muwatta and Riyadh al-Salihin.
+- CI runs Ruff, a migration check and pytest on the backend, and typecheck, lint and build on the frontend. GitHub Actions publishes images to GHCR on every push to `main`.
+- 19 models, about 30 REST routes, 18 route pages and 14 management commands. About 5,100 lines of TypeScript and 3,800 lines of Python, 86 commits from 25 to 29 June 2026.

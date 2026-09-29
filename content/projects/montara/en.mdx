@@ -2,30 +2,54 @@
 
 ## The problem
 
-IKN Nusantara's construction program spans dozens of contractors building infrastructure at once, and the people tracking it fall into groups with genuinely different needs and different levels of trust. Contractors need to report physical and financial progress on the projects they own. PPK (the government contracting officer) needs to approve or reject what contractors submit — but only for projects under their scope, with an audit trail, because these are government commitments. Compliance staff and executives need aggregate, trustworthy dashboards without wading through raw project data. Nobody had a system that enforced *who* could change *what*, with a real approval workflow and an audit log — which is the whole difference between a monitoring platform and a shared spreadsheet.
+Nusantara, Indonesia's new capital, is being built by many contractors at the same time. The people who track that work need different things, and they are trusted with different things. Contractors report physical and financial progress on their own projects. The contracting officer, the PPK, approves or rejects those reports, but only for projects in their scope. They need an audit trail, because these are government commitments. The compliance team and executives want dashboards they can trust without reading every project's raw data.
 
-## The approach
+Before Montara, this ran through spreadsheets and email. Nothing enforced who could change what, and nothing recorded who approved it.
 
-### Frontend as the source of truth, backend as translation
+## What I built
 
-Rather than designing a database schema from the spec and building both sides in parallel, the frontend was built first — a fully working Next.js prototype running entirely against `localStorage`, with every role, permission rule, and workflow state machine actually implemented and exercised, not mocked. It went through a formal senior-level audit with tracked remediation items before any backend existed. Only then did the Django backend get built, as a faithful server-side re-implementation of the exact data model and business rules the frontend had already validated. When the original spec and the working frontend disagreed, the frontend won — a deliberate, documented policy, not an accident of sequencing. That's also why the backend build was fast: 20 commits in a single day, because the domain problem had already been solved and proven, not designed under time pressure.
+### I built the frontend first and made it the source of truth
 
-### Approval requests, not a status field
+I built a complete working prototype in the browser before any server existed. Every role, permission rule and workflow ran end to end, with data saved in the browser. It then went through a formal code review, and I worked through the items it raised. Only after that did I build the backend, as a server-side copy of rules that were already proven. The old spec had four roles and left contractors out. The prototype had five, with contractors as users. Where the two disagreed, I wrote down that the prototype wins.
 
-Instead of a single `draft → submitted → approved` state sitting directly on a project, every mutation — create, update, progress submission, delete — is modeled as its own `ApprovalRequest` entity, with the project's status derived from the latest request. That separation makes it possible to have a full audit trail of who proposed what and who decided it, independent of the entity being changed, and it lets PPK or a super-admin bypass the queue entirely for their own direct edits — an intentional shortcut, logged distinctly rather than hidden.
+### Every change is a request someone approves
 
-### Concurrency without table locks
+A project doesn't carry a single status that flips from draft to approved. Every change is filed as its own approval request, whether it creates a project, edits it, reports progress or deletes it. The project's status comes from its latest request. That gives a full record of who proposed each change and who decided it. The PPK and the super-admin can edit directly, and those edits are logged separately so they stay visible.
 
-Every project carries a revision counter captured when an approval request is filed and re-validated at the moment of approval. A stale approval — one where the project changed after the request was submitted — is rejected server-side rather than silently overwriting newer data. No table-wide locking required.
+### Stale approvals are rejected
 
-### Archiving that respects government record-keeping
+Each project keeps a revision number. When someone files a request, the request records that number. At approval time the server checks it again. If the project changed in between, the approval is rejected and the newer data stays. This works without locking any tables.
 
-Deleting a project doesn't just flip a flag. It cascades to close all open issues, recording their prior state so a restore can undo it, and a permanent delete previews the full blast radius — per-entity-type counts — before anything is actually destroyed, given how consequential that action is for a government record.
+### Deleting a project can be undone until the last step
 
-### Real-time notifications and a real BIM viewer
+Archiving a project closes its open issues and remembers what state they were in, so a restore puts them back. A permanent delete first shows how many records of each kind it will remove. For a government record, the people deleting it should see that before anything is gone.
 
-The frontend prototype originally recomputed notifications from scratch on every render. The backend deliberately upgraded that to a persisted notifications table populated transactionally on triggering events, with Celery and Redis handling overdue-detection sweeps and scheduled aggregation. On the BIM side, the spec had left the 3D viewer as an open, undecided question — the backend resolved it by implementing real Autodesk Platform Services token exchange rather than shipping only the frontend's simulated viewer as final.
+### The backend improves on the prototype in two places
 
-## Outcome
+The prototype recalculated notifications every time a screen drew. On the server, I store each notification when the event that triggers it happens. Background workers check for overdue projects and prepare scheduled summaries. The spec had also left the 3D building-model viewer as an open question. I resolved it by connecting the viewer to Autodesk Platform Services. The labelled simulated viewer stays for projects without a model.
 
-The system sits past the integration milestone, pre-production-launch: eight role-gated dashboards (summary, map, budget, progress, risk, compliance, portfolio, contractor performance) with CSV/PDF export, five roles enforced both client- and server-side, a full approval-request workflow with resubmission tracking, and an archive-restore-permanent-delete lifecycle modeled on real record-retention concerns. The frontend carries 111+ tests across its own Vitest suite, including cross-role isolation and resubmission-pipeline integration tests. Across the two repositories: 53 frontend commits over six weeks building and hardening the prototype, then 20 backend commits in a single concentrated day translating that validated design into Django — 37 models, 11 domain apps, and a typed API surface wired up behind a feature flag so the system can still fall back to its original prototype mode during cutover.
+## Result
+
+Montara is a private system, past its integration milestone and before production launch. It has eight dashboards, each limited by role: summary, map, budget, progress, risk, compliance, portfolio and contractor performance, with CSV and PDF export. Five roles are enforced in the browser and again on the server. The approval workflow follows a rejected request through resubmission. The frontend has at least 111 automated tests, including checks that one role can't see another role's data. I built the prototype over about six weeks from late May 2026 and the backend on 5 July. The frontend now talks to the server behind a switch, so it can fall back to prototype mode during the cutover.
+
+## What I'd do next
+
+- Add a test suite to the backend. Today the automated tests cover the frontend only.
+- Finish the cutover so the app runs on the server alone.
+- Build versioned document management, which I left out of this phase.
+
+## Under the hood
+
+- Frontend: Next.js App Router, React 18, TypeScript, shadcn/Radix UI, Tailwind CSS v4, react-hook-form, Leaflet and Recharts. The prototype ran entirely on `localStorage`.
+- The prototype's `types.ts` and `businessRules.ts` became the contract for the Django models and DRF permission classes, so the two sides can't drift apart.
+- Roles: `contractor`, `ppk`, `mki`, `executive` and `super_admin`. PPK approval rights are limited to an explicit per-project scope. Client-side checks are for the interface; the server is the security boundary.
+- `ApprovalRequest` types are `CREATE`, `UPDATE`, `PROGRESS_UPDATE` and `DELETE`. `Project.approvalStatus` is derived from the latest request. Rejections require a comment.
+- Optimistic concurrency uses a `revision` integer on `Project`, captured when the request is filed and re-validated on approval.
+- Progress is tracked against a planned S-curve, with submission windows, no-regression checks, duplicate-pending detection and a configurable reporting cadence held in a `SystemSettings` singleton.
+- Issues have status and priority transitions, follow-ups, file attachments, and escalation from the compliance team to executives.
+- Deletions write a `ProjectDeletionLog` record.
+- Notifications are rows written in the same transaction as the triggering event. Celery and Redis run overdue detection and scheduled aggregation.
+- The frontend review tracked fixes including component splitting, memoization, centralised authorisation logic, debounced autosave and cross-tab sync.
+- Backend: Django 5.1, DRF with a camelCase API, `django-filter`, `drf-spectacular` for OpenAPI docs, and PostgreSQL. 11 domain apps and 37 models.
+- 18 routed pages and about 10 test files in Vitest and Testing Library.
+- Frontend: 53 commits from 25 May to 5 July 2026, about 27,300 lines of TypeScript. Backend: 20 commits on 5 July 2026, about 4,150 lines of Python.

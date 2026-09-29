@@ -1,33 +1,47 @@
-## Permasalahan
+# Scimotion
 
-Penulisan sains memiliki celah: persamaan dan diagram diam di halaman, tetapi konsep yang mereka wakili bersifat dinamis. Pembaca bisa menghafal rumus transformasi Fourier tanpa pernah benar-benar memahami *mengapa* dekomposisi sinyal bekerja. Media sains yang ada terlalu dangkal (video pop-sains) atau terlalu dalam (makalah akademis tanpa visual). Scimotion menargetkan non-spesialis yang penasaran — pelajar, pembelajar mandiri, profesional dari bidang berdekatan — yang menginginkan kedalaman konseptual nyata dan kemampuan untuk memanipulasi hal yang sedang mereka coba pahami.
+## Masalahnya
 
-## Pendekatan
+Tulisan sains menaruh persamaan dan diagram diam di halaman, padahal gagasan di baliknya bergerak. Pembaca bisa hafal rumus transformasi Fourier tanpa pernah melihat kenapa memecah sinyal menjadi gelombang itu berhasil. Media sains kebanyakan berada di salah satu ujung. Video sains populer terlalu dangkal, sementara makalah akademik mendalam tapi tanpa visual.
 
-### MDX sebagai content layer, dengan taksonomi yang ditegakkan compiler
+Scimotion dibuat untuk non-spesialis yang penasaran: pelajar, pembelajar mandiri, dan profesional dari bidang yang berdekatan. Mereka ingin memahami gagasannya secara utuh, sekaligus ingin mengubah masukannya dan melihat apa yang terjadi.
 
-Artikel adalah file `.mdx` dengan frontmatter YAML, dibaca saat build time oleh `gray-matter` untuk daftar artikel yang sepenuhnya statis tanpa database. Seiring taksonomi bidang tumbuh dari 4 menjadi 8 — memisahkan Biologi dari Kedokteran, menambahkan Kimia, Bumi & Iklim, dan Astronomi & Kosmologi sebagai bidang kelas satu — menjaga warna, deskripsi, dan logika slug tetap sinkron di beranda, direktori bidang, dan setiap badge menjadi risiko nyata. Solusinya adalah menjadikan `lib/topics.ts` satu-satunya sumber kebenaran, bertipe map `Record<Topic, …>`, sehingga bidang baru tidak akan pernah ter-compile hingga setiap map mendeskripsikannya secara lengkap — mengubah masalah disiplin dokumentasi menjadi sesuatu yang ditegakkan sistem tipe.
+## Yang saya bangun
 
-### Batas antara filesystem dan browser bundle
+### Setiap artikel dipasangkan dengan animasi yang bisa dikendalikan
 
-Karena situs dirilis sebagai static export, import `fs` yang nyasar hingga ke kode client akan merusak build. `lib/topics.ts` sengaja dijaga bebas dari akses filesystem apa pun, sementara `lib/articles.ts` — yang membaca direktori konten — tidak pernah diimpor oleh komponen client. Batas itu didokumentasikan langsung dalam file agar perubahan di masa depan tidak meruntuhkannya kembali.
+Setiap artikel menjelaskan satu gagasan lewat teks dan persamaan, berdampingan dengan animasi yang bisa diputar, dijeda, diulang, dan diatur pembaca. Ada simulasi gerak Brown, bandul, dan eksperimen celah ganda. Ada tampilan langkah demi langkah untuk binary search dan rumus Euler, serta tampilan data untuk Teorema Limit Pusat dan diagram Hubble. Setiap animasi baru berjalan saat masuk ke layar, jadi tidak ada yang berjalan tanpa dilihat. Kebanyakan artikel punya satu widget utama dan satu widget kecil yang menjawab pertanyaan yang muncul dari widget pertama.
 
-### Learning path sebagai lapisan pengurutan terpisah
+### Animasi sainsnya saya tulis sendiri
 
-`lib/paths.ts` mendefinisikan 9 urutan bacaan terkurasi dan berurutan, setiap artikel hanya termasuk dalam satu path sehingga navigasi prev/next tetap tidak ambigu. Urutannya sendiri disengaja dan dijelaskan dalam komentar kode — misalnya, mengapa kinetika mendahului asam-basa, karena Ka adalah konstanta kesetimbangan yang baru masuk akal setelah dasar kinetika.
+Semua kode simulasi dan gambarnya saya tulis sendiri. Library animasi hanya saya pakai untuk detail halaman, seperti kartu yang muncul dan pola titik di beranda. Dengan begitu, ukuran halaman tetap bisa diperkirakan. Simulasi fisika juga berperilaku sama setiap kali, karena tidak ada library yang ikut mengatur frame-nya.
 
-### Komponen animasi mandiri, dipicu hanya saat terlihat
+### Sembilan jalur belajar menjadikan artikel sebuah silabus
 
-Setiap widget interaktif adalah komponen React client yang mandiri di bawah `components/animations/`, tidak berbagi state global — masing-masing mengelola lifecycle play/pause/reset-nya sendiri secara independen. Hook Intersection Observer bersama memicu setiap animasi hanya ketika pembaca menggulir ke dalamnya, sehingga tidak ada yang berjalan di luar layar membakar siklus. Satu registry memetakan nama widget ke komponen agar MDX dapat merujuknya berdasarkan nama.
+Saya mengelompokkan artikel ke dalam sembilan jalur baca berurutan, seperti Calculus & Transforms dan Planet Earth. Setiap artikel masuk ke tepat satu jalur, jadi "sebelumnya" dan "berikutnya" selalu jelas artinya. Urutannya punya alasan. Kinetika datang sebelum asam dan basa, karena konstanta asam adalah konstanta kesetimbangan yang butuh dasar kinetika lebih dulu.
 
-### Tidak ada library animasi untuk sains itu sendiri
+### Menambah bidang tidak bisa meninggalkan situs setengah jadi
 
-Semua logika animasi — menggambar canvas, pembaruan path SVG, loop `requestAnimationFrame` — ditulis tangan. Framer Motion hanya digunakan untuk chrome UI: entrance kartu, spring hover, hero dot-grid beranda — tidak pernah untuk visualisasi sains interaktif itu sendiri. Ini adalah constraint yang disengaja untuk menjaga ukuran bundle dapat diprediksi dan rendering deterministik; simulasi fisika seharusnya tidak mewarisi perilaku penjadwalan dari library animasi tujuan umum.
+Perpustakaannya tumbuh dari empat bidang menjadi delapan. Saya memisahkan Biologi dari Kedokteran, lalu menambahkan Kimia, Bumi & Iklim, serta Astronomi & Kosmologi. Setiap bidang punya warna, deskripsi, dan halaman yang harus selalu sinkron. Semuanya saya simpan di satu daftar bertipe, jadi build akan gagal sampai bidang baru dijelaskan lengkap di semua tempat.
 
-### Re-platforming tanpa merusak yang sudah berfungsi
+### Hosting saya pindahkan ke situs statis di GitHub Pages
 
-Target deployment berpindah dari Vercel ke static export GitHub Pages penuh di tengah jalan, yang berarti menambahkan `output: 'export'`, `trailingSlash: true`, dan base path `/scimotion` dengan jalan keluar untuk domain kustom di masa depan. Beberapa rute perlu ditandai `force-static`, dan CI kini menjalankan gerbang type-check dan lint sebelum publikasi, sehingga regresi tertangkap sebelum dirilis, bukan sesudahnya.
+Di tengah jalan, saya memindahkan situs dari Vercel ke ekspor statis di GitHub Pages. Artinya situs harus disajikan dari sub-path, dan beberapa route perlu ditandai sepenuhnya statis. Setiap publikasi kini menjalankan pengecekan tipe dan lint lebih dulu, jadi kesalahan berhenti sebelum sampai ke situs.
 
-## Hasil
+## Hasilnya
 
-146 commit selama kurang lebih lima minggu, sebagian besar terkonsentrasi dalam sembilan hari pembangunan aktif. Yang dimulai sebagai proof of concept 5 artikel menjadi pustaka sungguhan: 86 artikel di 8 bidang, didukung 172 komponen animasi yang dikode tangan — simulasi canvas gerak Brown, pendulum, dan eksperimen celah ganda, visualizer step-through SVG untuk binary search dan rumus Euler, widget data untuk Central Limit Theorem dan diagram Hubble — kurang lebih dua widget per artikel. Setiap artikel dilengkapi kuis pilihan ganda, callout key-takeaway, dan daftar isi otomatis; semuanya dirangkai oleh 9 learning path terkurasi, sistem tag, dan pencarian teks penuh. Perubahan palet di tengah pembangunan menggantikan tema gelap navy dingin awal dengan yang lebih hangat setelah implementasi pertama terasa steril untuk konten sains — perubahan yang menyentuh setiap komponen bersama, bukan sekadar file konfigurasi. Langsung di `andifathulms.github.io/scimotion`.
+Scimotion sudah live dan gratis dibaca. Awalnya hanya proof of concept berisi lima artikel. Sekarang ada 86 artikel di 8 bidang, dari matematika sampai kedokteran, dengan 172 animasi yang ditulis tangan. Setiap artikel punya kuis pilihan ganda, poin-poin penting, dan daftar isinya sendiri. Pembaca bisa menjelajah per bidang, tag, atau jalur belajar, mencari di seluruh teks, atau berlangganan RSS. Di tengah pengerjaan, saya mengganti tema biru dongker yang dingin dengan tema yang lebih hangat, karena yang pertama terasa kaku untuk konten sains. Perubahan itu menyentuh setiap komponen bersama. Saya membangunnya selama sekitar lima minggu di bulan Juni dan Juli 2026, dengan sebagian besar pekerjaan di sembilan hari.
+
+## Di balik layar
+
+- Next.js 16 App Router dengan `output: 'export'`, `trailingSlash: true`, dan base path `/scimotion`. `NEXT_PUBLIC_BASE_PATH=''` mematikan base path untuk domain kustom nanti. Beberapa route ditandai `force-static`.
+- Artikel berupa MDX dengan frontmatter YAML (judul, subjudul, topik, tag, kuis, waktu baca), dibaca dengan `gray-matter` dan dirender dengan `next-mdx-remote`, `remark-math`, dan `rehype-katex`, jadi persamaan tampil tanpa JS di klien.
+- `lib/topics.ts` menyimpan bidang sebagai map `Record<Topic, …>` dan tidak pernah mengimpor `fs`. `lib/articles.ts` membaca folder konten dan tidak pernah diimpor komponen klien, jadi modul bawaan Node tidak masuk ke bundle browser. Batas ini didokumentasikan di dalam berkasnya.
+- `lib/paths.ts` mendefinisikan 9 jalur belajar.
+- Setiap widget adalah komponen klien mandiri di `components/animations/` dengan state putar, jeda, dan ulang sendiri, tanpa state global bersama. Hook Intersection Observer bersama yang memulainya. Registry `ArticleAnimations` memetakan nama ke komponen untuk MDX.
+- Widget digambar dengan canvas, SVG, dan loop `requestAnimationFrame`. Framer Motion hanya untuk elemen UI.
+- Halaman adalah server component secara default. Hanya widget, progress bar, daftar isi, tombol tema, pencarian, kuis, dan pembungkus animasi yang menjadi komponen klien.
+- Tema memakai variabel CSS dan `next-themes`, dengan mode gelap sebagai default. Ada sitemap, tag canonical dan OG, serta halaman 404 bermerek.
+- GitHub Actions menjalankan `tsc --noEmit` dan lint sebelum setiap deploy.
+- Artikel per bidang: Matematika 15, Fisika 12, Kimia 11, Ilmu Komputer 11, Bumi & Iklim 10, Biologi 10, Kedokteran 9, Astronomi & Kosmologi 8.
+- Sekitar 72.700 baris TS, TSX, dan MDX, 146 commit dari 18 Juni sampai 23 Juli 2026.

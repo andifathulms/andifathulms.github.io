@@ -1,35 +1,52 @@
+# WA Daily Scrum Bot
+
 ## The problem
 
-Scrum teams that run daily standups over WhatsApp rely on members self-reporting. Without automation, a team lead has to manually check who hasn't posted and ping them — every day, multiple times. For a 14-person team this is tedious and easy to forget, leading to reports being missed or submitted too late to be useful.
+The OIKN THD team, a 14-person software team, runs its daily standup in a WhatsApp group. Each member posts what they did yesterday and what they plan today. Without help, the team lead has to check who hasn't posted and remind them, several times a day, every day. For 14 people that is tedious and easy to forget. Reports got missed or arrived too late to be useful.
 
-The OIKN THD Team needed an automated system that monitors the group chat, sends escalating reminders through the day, and ends each day with a ranked summary — in both Indonesian and English, since reports arrive in both languages.
+The team needed something that watches the group, sends reminders that get firmer through the day, and closes each day with a ranked summary. Reports come in Indonesian and English, so it had to understand both.
 
-## The approach
+## What I built
 
-### Puppeteer-based WhatsApp automation
+### The bot drives WhatsApp Web, because there is no bot API
 
-WhatsApp has no official bot API. The standard approach is to automate the WhatsApp Web browser interface using Puppeteer — `whatsapp-web.js` wraps this and provides a Node.js event API. Running a full browser inside a Docker container required installing system Chromium, skipping Puppeteer's bundled download, and pinning the container hostname to prevent Chromium profile lock conflicts across restarts. An `entrypoint.sh` deletes stale `Singleton` lock files before starting Node — without it, any unclean container exit blocks the next startup.
+WhatsApp has no official API for group bots. The business API needs Meta's approval and costs money, which doesn't fit an internal team tool. So the bot runs WhatsApp Web in a browser inside a container. It checks four times a day, at 09:00, 10:00, 11:00 and 14:00, and each reminder is firmer than the last. It only sends a message when someone is still missing. When everyone has reported, it stays quiet.
 
-### Bilingual keyword-pair detection, with an anti-cheat pass
+### A report counts when it has both halves
 
-A message counts as a standup report if it contains known phrase pairs — `yesterday` + `today`, `kemarin` + `hari ini`, and similar bilingual combinations — making detection language-agnostic and robust to different report formats. A second pass strips those trigger keywords and flags messages with too little content remaining, catching members who game the bot with bare-keyword submissions and calling them out publicly in the group.
+A message counts as a standup report if it contains a pair of phrases, such as "yesterday" and "today", or "kemarin" and "hari ini". That works in both languages and in any format. A second check removes those keywords and looks at what's left. If almost nothing remains, the bot calls out the bare-keyword report in the group. National holidays and each member's leave dates are set in the config, so nobody gets chased on a day off.
 
-### Tracking not just *whether* someone reported, but whether their work is actually moving
+### It notices tasks that stop moving
 
-Beyond report detection, the bot tracks individual bullet items across days. `detectSection()` classifies each line as Yesterday/Today/Impediment, and a Jaccard-similarity `taskSimilarity()` check (0.7 threshold) recognises that "fix login bug" and "fixing the login bug issue" are the same task reappearing under "Today" without ever graduating to "done" — flagged once it's carried three or more days. A whitelist excludes recurring duty words (`piket`, `cuti`, `standby`) from ever being flagged, and a per-member `staleHelp` config can reframe a stuck task for an overloaded QA lead as an offer of named-helper support instead of a bare callout.
+The bot also reads each bullet point and follows it across days. It treats "fix login bug" and "fixing the login bug issue" as the same task, based on how many words they share. A task that stays under "today" for three days or more without being reported done gets flagged. Routine duties like piket, cuti and standby are never flagged. For the team's QA lead, who carries a heavy load, a stuck testing task comes with an offer of help from a named teammate.
 
-### Closing the gaming loophole in the carry state
+### Leaving a stuck task out doesn't reset it
 
-The stale-task day-count originally reset every Monday, which meant a member could dodge the flag simply by leaving a stuck task off one day's list — resetting the streak for free. The fix moved from a per-week bucket to a persistent cross-week `carry` structure where the counter only clears when the *same* task is later reported done via similarity match, not by omission. Making that safe required a matching idempotency guarantee: on every restart, the bot re-fetches the last 500 group messages and chronologically replays them to rebuild its `carry`, `ledger`, and `history` state, so a redeploy never silently loses in-progress tracking.
+At first the stuck-task count reset every Monday. A member could also dodge it by leaving the task off one day's list. I changed it so the count carries across weeks and clears only when the same task is reported done. To keep that safe across restarts, the bot rereads the last 500 group messages on startup and replays them in order. A redeploy never loses the tracking.
 
-### Gating risky features before trusting them to broadcast
+### I tested the Friday recap before letting it post
 
-The Friday weekly recap aggregates several independently fallible calculations — completion rate, an on-time consistency streak, a team-health digest, stale-task carry — any one of which could produce a wrong or embarrassing number in front of the whole team. It shipped behind a `weeklyRecapAutoSend` config flag plus a manual `SIGHUP`-triggered send, so the aggregated output could be sanity-checked against real data for a full cycle before automation was trusted to run unattended.
+The Friday recap combines a completion rate, an on-time streak, a team-health comparison with last week and the list of stuck tasks. Any one of them could put a wrong number in front of the whole team. I shipped it with automatic sending switched off and a manual send. After checking the output against a full cycle of team data, I turned automatic sending back on.
 
-### Self-service, on demand
+## Result
 
-`!mystats` lets any member query their own on-time percentage, current streak, and weekly completion rate without waiting for Friday; `!rank` posts the same consistency leaderboard on demand; `!help` advertises both from the morning kickoff message.
+The bot runs in production for the team's daily standups and monitors 14 members on working days. I built it in 18 days in June 2026. It started as report detection and reminders, then grew into task tracking, weekly analytics and self-service commands. Members type !mystats for their own on-time rate, streak and completion rate, !rank for the leaderboard, and !help for the list. State lives in plain files on a mounted volume, so a restart keeps the day's progress. I also built a React dashboard as a demo of the schedule and messages. It isn't connected to the live bot.
 
-## Outcome
+## What I'd do next
 
-Deployed and running in production on a GCP VM for the OIKN THD Team's daily standups. What began as report-detection and escalating reminders grew well past that scope — 25 commits over 18 days, more than ten of them landing in a single three-day stretch once the task-tracking and analytics layer took shape. The Friday recap is now a composite of several independently built subsystems (completion rate, consistency streaks, team-health digest, stale-task carry) rather than a single ranking, all served from flat JSON state files with no database, mounted as a Docker volume so restarts never lose a day's progress.
+- Tighten task matching. Word overlap can miss a heavily reworded task, or join two different tasks that use similar words.
+- Connect the dashboard to the live bot, which has no data API today.
+
+## Under the hood
+
+- Node.js 18 with `whatsapp-web.js` (Puppeteer and Chromium), `node-cron` for scheduling and `qrcode-terminal` for linking the phone. The session depends on a linked phone staying online and can break when WhatsApp updates its web client.
+- The Docker image is `node:18-bookworm-slim` with system Chromium. Puppeteer's bundled download is skipped and the container hostname is pinned to avoid profile-lock conflicts. An `entrypoint.sh` deletes stale Chromium `Singleton` lock files before Node starts.
+- Mid-project, WhatsApp moved contact IDs from the `@c.us` format to opaque `@lid` IDs, which broke member matching. I logged sender IDs from live messages and updated the member config.
+- Detection uses two keyword strings plus three bilingual keyword pairs.
+- `detectSection()` classifies lines as Yesterday, Today or Impediment. `parseSectionTasks()` extracts bullets. `normalizeTask()` and `taskSimilarity()` use Jaccard token overlap with a 0.7 threshold. `CONFIG.staleTask.minDays` is 3.
+- `.week-state.json` holds `reports`, `carry`, `ledger` and `history`. Daily state lives in `.bot-state.json`.
+- Eight daily cron jobs: kickoff, an 08:02 carry nudge at a two-day threshold, four checks, the end-of-day summary and the weekly recap slot. The Friday recap posts at 17:05. A Monday recap re-posts last week's stuck tasks.
+- On-time means before 09:00 WITA, over a rolling 4-week, 20-working-day window. Streaks tolerate leave days.
+- Per-member settings `staleHelp` and `stalePriority`; `weeklyRecapAutoSend` gates the recap. `SIGUSR1` fires a reminder, `SIGUSR2` prints the recap to the logs, and `SIGHUP` sends it.
+- `!mystats` replies in the group with an @mention. `!leaderboard` is an alias for `!rank`.
+- GitHub Actions builds the image to GHCR. `bot.js` is 1,166 lines and the dashboard 386. 25 commits from 10 to 28 June 2026.

@@ -1,7 +1,17 @@
 {
   "slug": "jejak-penanaman",
   "title": "Jejak Penanaman",
-  "tagline": "Geofenced selfie check-in app for IKN tree-planting events, with plant species tracking and QR ticketing",
+  "tagline": "A check-in app for IKN tree-planting events that proves each participant was on site with a geofenced selfie",
+  "glance": {
+    "for": "Otorita IKN employees, public participants and event admins",
+    "result": "In production at IKN tree-planting events since mid-2026"
+  },
+  "skills": [
+    "Geolocation",
+    "Single sign-on",
+    "Mobile web apps",
+    "Government services"
+  ],
   "categoryTags": [
     "Government",
     "Mobile Web",
@@ -21,27 +31,58 @@
   "role": "Fullstack Developer",
   "timeframe": "Apr – Jul 2026",
   "liveUrl": "https://jejakpenanaman.ikn.go.id",
+  "access": "registration",
   "githubUrl": "https://github.com/thdoikn/jejak-penanaman",
   "heroImage": "/images/projects/jejak-penanaman/hero.webp",
   "order": 6,
   "featured": false,
   "metrics": [
     {
-      "value": "~90",
-      "label": "Backend API URL patterns"
+      "value": "50–5,000 m",
+      "label": "check-in radius, set per event"
+    },
+    {
+      "value": "3",
+      "label": "ways in, including guest walk-ups"
     },
     {
       "value": "28",
-      "label": "Frontend screens"
+      "label": "screens for participants and admins"
     },
     {
-      "value": "13",
-      "label": "Django models across 5 apps"
-    },
-    {
-      "value": "78",
-      "label": "Commits over ~3 months"
+      "value": "7",
+      "label": "GPS decimal places stamped on photos"
     }
   ],
-  "access": "registration"
+  "id": {
+    "tagline": "Aplikasi absen acara penanaman pohon IKN yang membuktikan peserta hadir di lokasi lewat selfie ber-geofence",
+    "glance": {
+      "for": "Pegawai Otorita IKN, peserta umum, dan admin acara",
+      "result": "Dipakai di produksi untuk acara penanaman pohon IKN sejak pertengahan 2026"
+    },
+    "skills": [
+      "Geolokasi",
+      "Single sign-on",
+      "Aplikasi web mobile",
+      "Layanan pemerintahan"
+    ],
+    "metrics": [
+      {
+        "value": "50–5.000 m",
+        "label": "radius absen, diatur per acara"
+      },
+      {
+        "value": "3",
+        "label": "jalan masuk, termasuk tamu tanpa akun"
+      },
+      {
+        "value": "28",
+        "label": "layar untuk peserta dan admin"
+      },
+      {
+        "value": "7",
+        "label": "angka desimal GPS di setiap foto"
+      }
+    ]
+  }
 }

@@ -1,37 +1,52 @@
-## Permasalahan
+# Jejak Penanaman
 
-IKN Nusantara mengadakan upacara penanaman pohon berulang yang melibatkan pegawai pemerintah dan masyarakat umum. Sebelum sistem ini, kehadiran dilacak secara manual dengan formulir kertas dan spreadsheet — tidak ada cara untuk memverifikasi bahwa peserta benar-benar berada di lokasi, tidak ada catatan terpusat tentang siapa yang hadir di acara mana, tidak ada dokumentasi spesies yang ditanam, dan tidak ada bukti foto.
+## Masalahnya
 
-Dua jenis pengguna berbeda membutuhkan sistem yang sama: pegawai pemerintah IKN yang autentikasi via Keycloak SSO, dan masyarakat umum yang mendaftar dengan email — ditambah peserta walk-up di acara terbuka yang sama sekali tidak punya akun. Admin perlu mengelola acara, menetapkan lokasi geofence, melacak pendaftaran, dan mengekspor laporan kehadiran.
+Otorita IKN rutin menggelar acara penanaman pohon di Nusantara, untuk pegawainya sendiri dan untuk masyarakat umum. Dulu kehadiran dicatat di formulir kertas dan spreadsheet. Tidak ada yang bisa memastikan peserta memang ada di lokasi. Tidak ada catatan terpusat tentang siapa datang ke acara mana, tidak ada catatan jenis pohon yang ditanam, dan tidak ada foto.
 
-## Pendekatan
+Tiga jenis peserta harus masuk ke satu sistem. Pegawai login dengan akun pemerintah mereka. Masyarakat umum mendaftar dengan email. Di acara terbuka, sebagian orang datang begitu saja tanpa akun. Admin perlu membuat acara, menaruhnya di peta, memantau pendaftaran, dan mengekspor laporan kehadiran.
 
-### Check-in selfie dengan geofence
+## Yang saya bangun
 
-Pengajuan absensi memerlukan selfie dan koordinat GPS dalam radius yang dapat dikonfigurasi (50–5000m) dari pin acara. Geofence diperiksa dua kali: sisi client dengan perhitungan Haversine untuk umpan balik langsung ("kamu berjarak 340m"), dan sisi server di view pengajuan absensi untuk mencegah pemalsuan level API, menggunakan rumus yang sama terhadap koordinat acara yang tersimpan.
+### Absen butuh selfie di lokasi acara
 
-Komponen `CameraCapture` menggunakan API MediaDevices browser, menggambar frame yang ditangkap ke canvas tersembunyi, dan mengompresnya ke maks 1024px / JPEG 0.7 sebelum unggah — menjaga selfie di bawah 1 MB bahkan di kamera ponsel resolusi tinggi. iOS Safari memerlukan `getUserMedia()` dipicu oleh gestur pengguna langsung, sehingga aktivasi kamera terikat ke klik tombol, bukan pemuatan halaman.
+Untuk absen, peserta mengambil selfie dan membagikan lokasinya. Lokasi itu harus berada di dalam radius yang diatur admin untuk setiap acara, antara 50 sampai 5.000 meter dari pin di peta. Ponsel mengecek jaraknya lebih dulu dan memberi tahu peserta seberapa jauh ia dari lokasi. Server mengecek sekali lagi, jadi absen tidak bisa dipalsukan lewat API. Foto dikompres di ponsel supaya ukurannya di bawah 1 MB.
 
 ### Setiap foto membawa buktinya sendiri
 
-Selfie dan foto tanaman mendapat overlay timestamp-dan-GPS yang dibakar langsung ke canvas sebelum unggah — tanggal dan waktu dalam WITA, koordinat hingga 7 desimal — dan data GPS yang sama disematkan ke metadata EXIF JPEG di sisi client via `piexifjs`. Tidak ada pemrosesan gambar di sisi server; buktinya melekat pada file itu sendiri.
+Sebelum diunggah, ponsel mencetak tanggal, jam WITA, dan koordinat GPS sampai tujuh angka desimal di setiap selfie dan foto tanaman. Lokasi yang sama juga ditulis ke metadata foto. Server tidak mengolah gambar sama sekali. Buktinya ikut di dalam file, jadi foto yang diunduh belakangan tetap menunjukkan kapan dan di mana foto itu diambil.
 
-### Tiga jalan masuk, satu model kehadiran
+### Satu catatan kehadiran, tiga jalan masuk
 
-Pegawai IKN autentikasi via Keycloak OIDC, yang klaimnya datang benar-benar berantakan — nama dalam HURUF BESAR, unit organisasi terpecah tidak konsisten di beberapa field klaim — dinormalisasi oleh `OIDCAuthenticationBackend` kustom. Peserta publik mendaftar dengan email dan menerima kata sandi yang dibuat otomatis via SendGrid. Untuk acara publik terbuka, jalur ketiga melewati akun sepenuhnya: endpoint registrasi anonim membuat pengguna tamu ringan secara on-the-fly sehingga peserta walk-up tidak terhalang alur autentikasi, tanpa melemahkan model permission bagi siapa pun.
+Pegawai login lewat single sign-on pemerintah. Nama dan unit kerja mereka datang dalam format yang tidak seragam, jadi saya merapikannya saat login. Peserta umum mendaftar dengan email dan menerima kata sandi yang dibuat otomatis. Di acara terbuka, peserta yang datang langsung bisa absen tanpa mendaftar. Sistem membuat akun tamu ringan saat itu juga, dan hak akses pengguna lain tidak berubah.
 
-### Pelacakan spesies tanaman
+### Catatan tanaman saya tambahkan di tengah jalan
 
-Setiap catatan absensi dapat dikaitkan dengan beberapa spesies flora yang ditanam, dengan kuantitas per spesies, usia bibit dalam bulan, dan foto — ditambahkan di tengah proyek, di luar PRD awal, untuk mendukung catatan keanekaragaman hayati penghijauan IKN tanpa merusak model data yang ada. Tampilan "Jejak Hijau" pribadi memungkinkan peserta melihat semua yang telah mereka tanam di seluruh acara yang pernah dihadiri, dengan lightbox foto.
+Pencatatan spesies tidak ada di spesifikasi awal. Saya menambahkannya di tengah proyek untuk mendukung data penghijauan IKN, tanpa merusak data yang sudah ada. Setiap absen bisa mencatat beberapa spesies, lengkap dengan jumlah, umur bibit dalam bulan, dan fotonya. Halaman pribadi "Jejak Hijau" menampilkan semua yang pernah ditanam seorang peserta di semua acara.
 
-### Tiket QR yang berskala ke kuota per instansi
+### Acara publik punya tiket dan kuota per instansi
 
-Acara publik menghasilkan kode tiket unik `JP-YYMMDD-NNN` per pendaftaran, ditetapkan secara atomik untuk menghindari tabrakan, dan admin memindainya di pintu masuk dengan kamera browser via `html5-qrcode`, dengan umpan balik audio per hasil scan. Yang dimulai sebagai satu kuota datar per acara berkembang menjadi segmentasi opt-in: sebuah acara dapat membagi kuotanya per instansi pemerintah, masing-masing dengan batas nullable sendiri (null = tanpa batas) dan daftar ukuran kaos yang tersedia sendiri — validasi pendaftaran menyelesaikan instansi peserta dan menegakkan aturan khusus instansi tersebut, sementara acara yang lebih sederhana tetap berfungsi seperti sebelumnya. Overlay selfie twibbon — bingkai bermerek IKN — di-composite di sisi client di atas foto yang diambil dan diunduh sebagai gambar yang dapat dibagikan.
+Acara publik menerbitkan tiket QR untuk setiap pendaftaran. Admin memindai tiket di pintu masuk dengan kamera ponsel, dan setiap hasil pindaian mengeluarkan bunyi. Awalnya kuota hanya satu angka per acara. Ketika instansi pemerintah mulai meminta jatah sendiri, saya membuat kuota dan ukuran kaos per instansi sebagai opsi di setiap acara. Acara yang lebih sederhana tetap memakai satu kuota. Peserta juga bisa berfoto dengan bingkai twibbon IKN, lalu mengunduhnya untuk dibagikan.
 
-### Kehadiran yang fleksibel untuk konektivitas dunia nyata, tanpa jadi longgar
+### Admin bisa membereskan kendala di lapangan
 
-Absensi tidak sepenuhnya tidak dapat diubah. Admin dapat membuat catatan secara paksa atas nama peserta — termasuk menimpa timestamp via pemilih waktu — untuk kegagalan konektivitas di lokasi yang pasti terjadi di acara luar ruangan, dan dapat menambahkan foto tanaman ke catatan yang ada setelahnya. Di atas pemisahan admin/peserta ada peran superadmin yang mengelola admin lain, mempromosikan pengguna publik menjadi status pegawai (mengunci field organisasi mereka sehingga login SSO di masa depan tidak dapat diam-diam menimpa koreksi manual), serta mencari, memfilter, dan menghapus di seluruh basis pengguna.
+Di acara luar ruang, sinyal sering hilang. Admin bisa mencatat kehadiran atas nama peserta, mengatur jam kehadirannya, dan menambahkan foto tanaman ke catatan yang sudah ada. Peran superadmin mengelola para admin dan bisa mengubah status pengguna umum menjadi pegawai. Data unit kerjanya lalu dikunci, supaya login berikutnya tidak menimpa koreksi itu.
 
-## Hasil
+## Hasilnya
 
-Di-deploy ke produksi dan digunakan dalam acara penanaman pohon IKN nyata sejak pertengahan 2026. 78 commit selama sekitar tiga bulan, mencakup 5 aplikasi Django, 13 model, ~90 endpoint API, dan 28 halaman frontend. Sistem menangani acara internal (khusus SSO, tanpa pendaftaran) dan acara publik (pendaftaran terbuka, kuota per instansi, tiket QR, walk-in tamu) melalui satu codebase, dengan dashboard admin yang memecah kehadiran berdasarkan direktorat dan kedeputian untuk pelaporan internal.
+Jejak Penanaman sudah berjalan di produksi dan dipakai di acara penanaman pohon IKN sejak pertengahan 2026. Saya membangunnya antara April dan Juli 2026, dan versi produksinya sudah jalan sejak Juni. Satu codebase menangani dua jenis acara. Acara internal hanya lewat login, tanpa pendaftaran. Acara publik punya pendaftaran, kuota, tiket QR, dan tamu yang datang langsung. Dashboard admin memecah kehadiran per direktorat dan kedeputian, lengkap dengan tabel peringkat untuk laporan internal. Aplikasinya punya 28 layar untuk peserta dan admin.
+
+## Di balik layar
+
+- API Django REST Framework dengan single-page app React (Vite), memakai token JWT akses dan refresh. Tiga service Docker Compose: PostgreSQL, Django di Gunicorn, dan React di Nginx.
+- Geofence: pengecekan jarak Haversine di klien untuk umpan balik instan ("kamu berjarak 340m"), diulang di view pengiriman absen terhadap koordinat acara yang tersimpan.
+- `CameraCapture` memakai MediaDevices API, menggambar frame ke canvas tersembunyi, lalu mengompresnya ke maksimal 1024px dengan kualitas JPEG 0,7. iOS Safari hanya mengizinkan `getUserMedia()` dari gestur pengguna, jadi kamera menyala saat tombol ditekan, tidak saat halaman dimuat.
+- Cap foto digambar di canvas sebelum diunggah. GPS ditulis ke EXIF di sisi klien dengan `piexifjs`.
+- Login pegawai memakai Keycloak OIDC lewat `mozilla-django-oidc` dan `OIDCAuthenticationBackend` kustom yang merapikan nama berhuruf kapital semua dan unit kerja yang tersebar di beberapa field klaim. Konfigurasi OIDC diambil dari endpoint backend saat aplikasi dibuka, jadi satu image Docker bisa dipakai di dev dan prod tanpa build ulang.
+- Email pendaftaran publik dikirim lewat SendGrid. Reset kata sandi mandiri memakai token berbatas waktu yang dikirim lewat email.
+- Absen tamu ("absen tanpa login") adalah endpoint pendaftaran anonim yang membuat pengguna tamu saat dibutuhkan.
+- Kode tiket berformat `JP-YYMMDD-NNN` dan diberikan secara atomik supaya tidak bentrok. Pemindai di pintu masuk memakai `html5-qrcode`; tiket dirender dengan `qrcode.react` dan diunduh lewat `html2canvas`.
+- Segmentasi per instansi bersifat opsional lewat flag `institution_enabled` dan `tshirt_enabled` di `Event`. Setiap baris `EventInstitution` punya kuota yang boleh null (null berarti tanpa batas) dan daftar ukuran kaosnya sendiri.
+- Satu bingkai twibbon bawaan berlaku di semua acara, kecuali acara itu punya bingkai sendiri. Bingkai digabungkan di sisi klien dengan canvas.
+- Form acara di admin memakai `react-leaflet` dengan pin yang bisa digeser dan slider radius.
+- 5 Django app (`accounts`, `events`, `attendance`, `flora`, `twibbon`), 13 model, sekitar 90 pola URL API, dan 28 halaman frontend. Sekitar 11.200 baris JSX/JS dan 3.400 baris Python, 78 commit dari 1 April sampai 3 Juli 2026.

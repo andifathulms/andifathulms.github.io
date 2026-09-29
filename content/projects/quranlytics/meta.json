@@ -1,7 +1,17 @@
 {
   "slug": "quranlytics",
   "title": "Quranlytics",
-  "tagline": "Quran reader with a full analysis layer — word/root frequency, structural patterns, and semantic search across 6,236 verses",
+  "tagline": "A Quran reader where anyone can check word counts and numerical claims across all 6,236 verses",
+  "glance": {
+    "for": "Quran readers, students and da'wah writers who want to check claims",
+    "result": "Built in 14 days; open source, not yet live at a public URL"
+  },
+  "skills": [
+    "Natural language processing",
+    "Semantic search",
+    "Arabic text processing",
+    "Data pipelines"
+  ],
   "categoryTags": [
     "Personal Project",
     "Web App",
@@ -29,19 +39,50 @@
   "metrics": [
     {
       "value": "6,236",
-      "label": "Verses, full Quran ingested"
+      "label": "verses across all 114 surahs"
     },
     {
-      "value": "~77K",
-      "label": "Words with morphology"
+      "value": "~50,000",
+      "label": "words linked to their Arabic root"
     },
     {
-      "value": "~16.8K",
-      "label": "Lines of Python + TS"
+      "value": "~1,650",
+      "label": "distinct roots to explore"
     },
     {
-      "value": "121",
-      "label": "Commits over 14 days"
+      "value": "3",
+      "label": "claim statuses: verified, disputed, refuted"
     }
-  ]
+  ],
+  "id": {
+    "tagline": "Pembaca Al-Qur'an tempat siapa pun bisa mengecek jumlah kata dan klaim angka di 6.236 ayat",
+    "glance": {
+      "for": "Pembaca, pelajar, dan penulis dakwah yang ingin mengecek klaim",
+      "result": "Dibangun dalam 14 hari; open source, belum live di alamat publik"
+    },
+    "skills": [
+      "Pemrosesan bahasa alami",
+      "Pencarian semantik",
+      "Pengolahan teks Arab",
+      "Pipeline data"
+    ],
+    "metrics": [
+      {
+        "value": "6.236",
+        "label": "ayat dari seluruh 114 surah"
+      },
+      {
+        "value": "~50.000",
+        "label": "kata yang terhubung ke akar Arabnya"
+      },
+      {
+        "value": "~1.650",
+        "label": "akar kata untuk dijelajahi"
+      },
+      {
+        "value": "3",
+        "label": "status klaim: terverifikasi, diperdebatkan, terbantahkan"
+      }
+    ]
+  }
 }

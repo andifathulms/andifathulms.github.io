@@ -1,7 +1,17 @@
 {
   "slug": "montara",
   "title": "Montara",
-  "tagline": "Construction monitoring platform tracking every IKN infrastructure project through a five-role approval workflow",
+  "tagline": "Construction monitoring for IKN where every change to a project is approved by the right officer and logged",
+  "glance": {
+    "for": "Contractors, contracting officers, compliance staff and executives at IKN",
+    "result": "Working full-stack system, past integration and awaiting production launch"
+  },
+  "skills": [
+    "Approval workflows",
+    "Role-based access control",
+    "Audit trails",
+    "Government services"
+  ],
   "categoryTags": [
     "Government",
     "Platform",
@@ -28,20 +38,51 @@
   "featured": false,
   "metrics": [
     {
-      "value": "18",
-      "label": "Routed pages"
+      "value": "8",
+      "label": "role-gated dashboards with CSV and PDF export"
     },
     {
-      "value": "37",
-      "label": "Models across 11 Django apps"
+      "value": "5",
+      "label": "roles, each with its own rights"
+    },
+    {
+      "value": "4",
+      "label": "kinds of change that need approval"
     },
     {
       "value": "111+",
-      "label": "Frontend tests"
-    },
-    {
-      "value": "~31.5K",
-      "label": "Lines of code"
+      "label": "automated frontend tests"
     }
-  ]
+  ],
+  "id": {
+    "tagline": "Pemantauan konstruksi IKN tempat setiap perubahan proyek disetujui pejabat yang berwenang dan tercatat",
+    "glance": {
+      "for": "Kontraktor, PPK, tim kepatuhan, dan pimpinan di IKN",
+      "result": "Sistem full-stack yang sudah terintegrasi dan menunggu peluncuran produksi"
+    },
+    "skills": [
+      "Alur persetujuan",
+      "Kontrol akses berbasis peran",
+      "Jejak audit",
+      "Layanan pemerintahan"
+    ],
+    "metrics": [
+      {
+        "value": "8",
+        "label": "dashboard per peran dengan ekspor CSV dan PDF"
+      },
+      {
+        "value": "5",
+        "label": "peran dengan hak masing-masing"
+      },
+      {
+        "value": "4",
+        "label": "jenis perubahan yang perlu disetujui"
+      },
+      {
+        "value": "111+",
+        "label": "tes otomatis di frontend"
+      }
+    ]
+  }
 }

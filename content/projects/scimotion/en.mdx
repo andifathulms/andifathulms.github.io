@@ -1,33 +1,47 @@
+# Scimotion
+
 ## The problem
 
-Science writing has a gap: equations and diagrams sit flat on the page, but the concepts they represent are dynamic. A reader can memorize the Fourier transform formula without ever grasping why decomposing a signal works. Existing science media either goes too shallow (pop-sci videos) or too deep (academic papers with no visuals). Scimotion targets curious non-specialists — students, self-learners, professionals from adjacent fields — who want real conceptual depth and the ability to manipulate the thing they're trying to understand.
+Science writing puts equations and diagrams flat on the page, but the ideas behind them move. A reader can memorise the Fourier transform formula and never see why breaking a signal into waves works. Most science media sits at one of two ends. Pop-science videos stay shallow, and academic papers go deep with no visuals.
 
-## The approach
+Scimotion is for curious non-specialists: students, self-learners and professionals from nearby fields. They want the whole idea, and they want to change the inputs and watch what happens.
 
-### MDX as the content layer, with a compiler-enforced taxonomy
+## What I built
 
-Articles are `.mdx` files with YAML frontmatter, read at build time by `gray-matter` for a fully static article listing with zero database. As the field taxonomy grew from 4 to 8 — splitting Biology out of Medicine, adding Chemistry, Earth & Climate, and Astronomy & Cosmology as first-class fields — keeping colors, descriptions, and slug logic in sync across the homepage, the field directory, and every badge became a real risk. The fix was making `lib/topics.ts` the single source of truth, typed as `Record<Topic, …>` maps, so a new field simply won't compile until every map fully describes it — turning a documentation-discipline problem into one the type system enforces.
+### Every article pairs text with an animation you control
 
-### A boundary between the filesystem and the browser bundle
+Each article explains one idea in prose and equations, next to animations the reader can play, pause, reset and adjust. There are simulations of Brownian motion, a pendulum and the double-slit experiment. There are step-through views of binary search and Euler's formula, and data views of the Central Limit Theorem and the Hubble diagram. Each animation starts when it scrolls into view, so nothing runs off-screen. Most articles have a main widget plus a smaller one that answers the question the first one raises.
 
-Because the site ships as a static export, a stray `fs` import reaching client code breaks the build. `lib/topics.ts` is deliberately kept free of any filesystem access, while `lib/articles.ts` — which does read the content directory — never gets imported by a client component. That boundary is documented in-file specifically so a future change doesn't collapse it back together.
+### I wrote the science animations by hand
 
-### Learning paths as a separate ordering layer
+All the simulation and drawing code is my own. I use an animation library only for page details, like card entrances and the dot-grid on the homepage. That keeps the page size predictable. It also means a physics simulation behaves the same way every time, because no library is scheduling its frames.
 
-`lib/paths.ts` defines 9 curated, ordered reading sequences, each article belonging to exactly one path so prev/next navigation stays unambiguous. The ordering itself is intentional and explained in code comments — for instance, why kinetics precedes acids and bases, since Ka is an equilibrium constant that only makes sense after the kinetics groundwork.
+### Nine learning paths turn the articles into a syllabus
 
-### Self-contained animation components, triggered only when visible
+I grouped the articles into nine ordered reading paths, such as Calculus & Transforms and Planet Earth. Each article belongs to exactly one path, so "previous" and "next" always mean one thing. The order has reasons behind it. Kinetics comes before acids and bases, because the acid constant is an equilibrium constant that needs the kinetics groundwork first.
 
-Every interactive widget is a self-contained React client component under `components/animations/`, sharing zero global state — each manages its own play/pause/reset lifecycle independently. A shared Intersection Observer hook fires each animation only once the reader scrolls into it, so nothing runs off-screen burning cycles. A single registry maps widget names to components for MDX to reference by name.
+### Adding a field can't leave the site half-updated
 
-### No animation library for the science itself
+The library grew from four fields to eight. I split Biology out of Medicine and added Chemistry, Earth & Climate, and Astronomy & Cosmology. Each field has a colour, a description and pages that must stay in sync. I keep them all in one typed list, so the build fails until a new field is fully described everywhere.
 
-All animation logic — canvas drawing, SVG path updates, `requestAnimationFrame` loops — is hand-written. Framer Motion is used only for UI chrome: card entrances, hover springs, the homepage dot-grid hero — never for the interactive science visualizations themselves. That's a deliberate constraint to keep bundle size predictable and rendering deterministic; a physics simulation shouldn't inherit the scheduling behavior of a general-purpose animation library.
+### I moved hosting to a static site on GitHub Pages
 
-### Re-platforming without breaking what already worked
+Partway through, I moved the site from Vercel to a static export on GitHub Pages. That meant serving it from a sub-path and marking several routes as fully static. Every publish now runs a type check and lint first, so a mistake stops before it goes live.
 
-The deployment target moved from Vercel to a fully static GitHub Pages export partway through, which meant adding `output: 'export'`, `trailingSlash: true`, and a `/scimotion` base path with an escape hatch for a future custom domain. Several routes needed to be marked `force-static`, and CI now runs a type-check and lint gate before publishing, so a regression is caught before it ships rather than after.
+## Result
 
-## Outcome
+Scimotion is live and free to read. It started as a five-article proof of concept. It now has 86 articles across 8 fields, from mathematics to medicine, with 172 hand-coded animations. Every article has a multiple-choice quiz, key takeaways and its own table of contents. Readers can browse by field, tag or learning path, search the full text, or follow the RSS feed. Midway through, I replaced a cold navy theme with a warmer one, because the first felt sterile for science. That change touched every shared component. I built it over about five weeks in June and July 2026, with most of the work on nine days.
 
-146 commits over roughly five weeks, most of it concentrated into nine active building days. What started as a 5-article proof of concept became a genuine library: 86 articles across 8 fields, backed by 172 hand-coded animation components — canvas simulations of Brownian motion and a pendulum and the double-slit experiment, SVG step-through visualizers for binary search and Euler's formula, data widgets for the Central Limit Theorem and the Hubble diagram — roughly two widgets per article. Every article ships with a multiple-choice quiz, key-takeaway callouts, and an auto-generated table of contents; the whole thing is threaded together by 9 curated learning paths, a tag system, and full-text search. A mid-build palette pivot replaced an initially cold navy dark theme with a warmer one after the first implementation felt sterile for science content — a change that touched every shared component, not just a config file. Live at `andifathulms.github.io/scimotion`.
+## Under the hood
+
+- Next.js 16 App Router with `output: 'export'`, `trailingSlash: true` and a `/scimotion` base path. `NEXT_PUBLIC_BASE_PATH=''` switches the base path off for a future custom domain. Several routes are marked `force-static`.
+- Articles are MDX with YAML frontmatter (title, subtitle, topic, tags, quiz, read time), read with `gray-matter` and rendered with `next-mdx-remote`, `remark-math` and `rehype-katex`, so equations render without client JS.
+- `lib/topics.ts` holds the fields as `Record<Topic, …>` maps and never imports `fs`. `lib/articles.ts` reads the content directory and is never imported by a client component, so Node built-ins stay out of the browser bundle. The boundary is documented in the file.
+- `lib/paths.ts` defines the 9 learning paths.
+- Each widget is a self-contained client component in `components/animations/` with its own play, pause and reset state and no shared global state. A shared Intersection Observer hook starts it. An `ArticleAnimations` registry maps names to components for MDX.
+- Widgets are drawn with canvas, SVG and `requestAnimationFrame` loops. Framer Motion covers UI chrome only.
+- Pages are server components by default. Only the widgets, progress bar, table of contents, theme toggle, search, quiz and motion wrappers are client components.
+- Theming uses CSS variables and `next-themes`, dark by default. Sitemap, canonical and OG tags, and a branded 404.
+- GitHub Actions runs `tsc --noEmit` and lint before each deploy.
+- Articles per field: Mathematics 15, Physics 12, Chemistry 11, Computer Science 11, Earth & Climate 10, Biology 10, Medicine 9, Astronomy & Cosmology 8.
+- About 72,700 lines of TS, TSX and MDX, 146 commits from 18 June to 23 July 2026.

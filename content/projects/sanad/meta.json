@@ -1,7 +1,17 @@
 {
   "slug": "sanad",
   "title": "Sanad",
-  "tagline": "Hadith reader and analysis platform — interactive narrator-chain graphs, corpus analytics, and honest scholar-attributed grading",
+  "tagline": "A hadith reader that draws each narrator chain as a graph and credits every grade to its scholar",
+  "glance": {
+    "for": "Muslim students, general readers and Islamic-studies researchers",
+    "result": "Feature-complete in five days and staged for launch"
+  },
+  "skills": [
+    "Graph analysis",
+    "Arabic text processing",
+    "Data pipelines",
+    "Data visualisation"
+  ],
   "categoryTags": [
     "Personal Project",
     "Web App",
@@ -28,20 +38,51 @@
   "featured": false,
   "metrics": [
     {
-      "value": "19",
-      "label": "Django models"
+      "value": "3",
+      "label": "languages side by side: Arabic, English, Indonesian"
     },
     {
-      "value": "~30",
-      "label": "REST endpoints"
+      "value": "0",
+      "label": "religious verdicts issued by the app"
     },
     {
-      "value": "14",
-      "label": "Ingestion & graph commands"
+      "value": "6",
+      "label": "finished analytics tools given their own screens"
     },
     {
-      "value": "86",
-      "label": "Commits in ~5 days"
+      "value": "~5 days",
+      "label": "to a feature-complete build"
     }
-  ]
+  ],
+  "id": {
+    "tagline": "Pembaca hadis yang menggambar setiap sanad sebagai graf dan menyandarkan setiap derajat kepada ulamanya",
+    "glance": {
+      "for": "Pelajar Muslim, pembaca umum, dan peneliti studi Islam",
+      "result": "Fitur lengkap dalam lima hari dan siap diluncurkan"
+    },
+    "skills": [
+      "Analisis graf",
+      "Pengolahan teks Arab",
+      "Pipeline data",
+      "Visualisasi data"
+    ],
+    "metrics": [
+      {
+        "value": "3",
+        "label": "bahasa berdampingan: Arab, Inggris, Indonesia"
+      },
+      {
+        "value": "0",
+        "label": "penilaian keagamaan dari aplikasi sendiri"
+      },
+      {
+        "value": "6",
+        "label": "alat analitik yang diberi layar sendiri"
+      },
+      {
+        "value": "~5 hari",
+        "label": "sampai semua fitur lengkap"
+      }
+    ]
+  }
 }

@@ -1,7 +1,17 @@
 {
   "slug": "scimotion",
   "title": "Scimotion",
-  "tagline": "Interactive science library — 86 articles across 8 fields, each pairing clear explanation with a live, controllable animation",
+  "tagline": "An interactive science library of 86 articles, each explained next to animations the reader can control",
+  "glance": {
+    "for": "Students, self-learners and curious readers from nearby fields",
+    "result": "Live and free, grown from 5 articles to 86 across 8 fields"
+  },
+  "skills": [
+    "Interactive visualisation",
+    "Technical writing",
+    "Content architecture",
+    "Static site generation"
+  ],
   "categoryTags": [
     "Personal Project",
     "Content",
@@ -20,6 +30,7 @@
   "role": "Designer & Developer",
   "timeframe": "Jun – Jul 2026",
   "liveUrl": "https://andifathulms.github.io/scimotion/",
+  "access": "public",
   "githubUrl": null,
   "heroImage": "/images/projects/scimotion/hero.webp",
   "order": 10,
@@ -27,20 +38,50 @@
   "metrics": [
     {
       "value": "86",
-      "label": "Illustrated science articles"
+      "label": "illustrated articles, each with a quiz"
     },
     {
       "value": "172",
-      "label": "Interactive animations"
+      "label": "hand-coded interactive animations"
     },
     {
       "value": "8",
-      "label": "Fields, math to medicine"
+      "label": "fields, from mathematics to medicine"
     },
     {
-      "value": "~72.7K",
-      "label": "Lines of TS/TSX/MDX"
+      "value": "9",
+      "label": "curated learning paths"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Perpustakaan sains interaktif berisi 86 artikel, masing-masing dijelaskan bersama animasi yang bisa dikendalikan pembaca",
+    "glance": {
+      "for": "Pelajar, pembelajar mandiri, dan pembaca penasaran dari bidang lain",
+      "result": "Live dan gratis, tumbuh dari 5 artikel menjadi 86 di 8 bidang"
+    },
+    "skills": [
+      "Visualisasi interaktif",
+      "Penulisan teknis",
+      "Arsitektur konten",
+      "Situs statis"
+    ],
+    "metrics": [
+      {
+        "value": "86",
+        "label": "artikel bergambar, masing-masing dengan kuis"
+      },
+      {
+        "value": "172",
+        "label": "animasi interaktif yang ditulis tangan"
+      },
+      {
+        "value": "8",
+        "label": "bidang, dari matematika sampai kedokteran"
+      },
+      {
+        "value": "9",
+        "label": "jalur belajar yang dikurasi"
+      }
+    ]
+  }
 }

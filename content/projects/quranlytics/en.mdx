@@ -1,29 +1,47 @@
+# Quranlytics
+
 ## The problem
 
-Existing Quran apps — Quran.com, Tanzil, eQuran — are built for reading: clean typography, audio, translations. None of them let an ordinary reader interrogate the text itself, like verifying whether the word "day" really appears 365 times, or finding every verse that mentions both mercy and punishment, without manual concordance work. Everyday readers who encounter numerical or linguistic "miracle" claims online have no way to check them, and da'wah content creators who want to cite specific patterns have no tooling built for that. Quranlytics is a reader and an analysis layer on top of the same data, so exploration never requires leaving the app.
+Quran apps such as Quran.com, Tanzil and eQuran are built for reading. They have clean typography, audio and translations. None of them let an ordinary reader question the text itself. Does the word for "day" appear 365 times? Which verses mention both mercy and punishment? Answering that used to mean manual concordance work.
 
-## The approach
+Two groups feel the gap. Everyday readers and students meet numerical or linguistic "miracle" claims online and have no way to check them. Da'wah content creators want to cite specific patterns, such as word counts or repeated refrains, without scholarly tooling. Quranlytics puts a reader and an analysis layer on the same data, so exploring never means leaving the app.
 
-### Materialized stats, never computed live
+## What I built
 
-Word, root, and phrase counts are never run against the ~77,000-word table on a user request. Management commands precompute them ahead of time into Postgres materialized tables backed by a 24-hour Redis cache, so the core interaction — click a claim, see it verified instantly — stays fast even though counting a root across 6,236 verses is not a cheap operation to do live.
+### I count everything ahead of time
 
-### Stitching two data sources for real morphology
+Counting a root across 6,236 verses and about 77,000 words is too slow to do on every click. I precompute the word, root and phrase counts and store them, with a cache in front. When a reader opens a claim, the numbers are already there. The core interaction, click a claim and see it checked, stays instant.
 
-The Quran.com API gives verse text and translations but no root or lemma morphology. The Quranic Arabic Corpus provides that, keyed by word position, so ingestion pulls both and joins them one-to-one by `surah:verse:word` position. About 50,000 of 77,000 words carry a resolvable trilateral root; the rest are particles and proper nouns spanning roughly 1,650 distinct roots. An early version of the morphology parser had a real bug — pulling lemma and root from clitic (prefix/suffix) segments instead of the actual word stem — caught and fixed with a dedicated test once the wrong data surfaced.
+### Two sources, joined word by word
 
-### Local embeddings instead of a hosted API
+Quran.com's data has verse text and translations but no word roots. The Quranic Arabic Corpus has the roots, keyed by each word's position. I pull both and join them word by word on that position. About 50,000 of the 77,000 words resolve to a three-letter root, across roughly 1,650 distinct roots. The rest are particles and proper nouns. An early parser read roots from prefixes and suffixes when it should have read the word stem. I fixed it and added a test once the wrong data showed up.
 
-Semantic search runs on `sentence-transformers`, a multilingual model executed locally in-container to embed each verse from its English and Indonesian translations, stored via `pgvector` for similarity search and KMeans theme clustering. No per-query API cost, and it works fully offline — a deliberate departure from the original plan to use a hosted embeddings API, since the dataset is static and computed once rather than queried live against a changing corpus.
+### Search runs on a model inside the app
 
-### An "honest" verifier instead of a confident one
+The original plan used a hosted AI service for semantic search. I run an open multilingual model inside the app's own container. It embeds each verse from its English and Indonesian translations, finds related verses and groups them into themes. The text never changes, so I compute this once. There is no cost per search, and it works offline.
 
-Popular numerical claims about the Quran circulate constantly online, often presented as simply true. The numeric-claim verifier instead reports a three-way status — Verified, Disputed, or Refuted — consistent with the project's own scope limit: no automated claims about what a pattern proves, present the data and let the reader interpret it.
+### The claim checker gives one of three answers
 
-### Public analysis, personal state layered on top
+Popular numerical claims about the Quran spread online as plain fact. The checker gives each one a status: Verified, Disputed or Refuted. This follows the project's scope rule. The app shows the data and makes no claim about what a pattern proves. The reader draws the conclusion.
 
-JWT authentication and per-user state — bookmarks, notes, reading progress, streaks — sit alongside fully public reading and analytics endpoints. Anonymous users get complete reading and analysis; an account only adds personalization on top, never gates the core feature set.
+### Anyone can use every tool without an account
 
-## Outcome
+Reading and every analysis tool are public. Signing in adds bookmarks, notes, reading progress and streaks on top. An account never unlocks a core feature.
 
-121 commits, solo, over 14 days from an empty repository — about 6,900 lines of backend Python across 6 Django apps and 9,900 lines of frontend TypeScript, with 26 merge commits across roughly 28 feature branches even as a single-author project. The full dataset covers all 114 surahs and 6,236 verses, with morphology resolved for around 50,000 of 77,000 words. More than half the commit history is work that fell outside the original plan: tajwīd color-coding, ḥifẓ memorization mode, continuous recitation with a reciter picker, khatmah completion planning, a chiastic structure viewer with color-matched mirrored verse pairs, and two entirely new curated explorers — the 99 Names of Allah and a Prophets-of-the-Quran index — plus a community layer (discoveries, voting, public profiles, PNG export) that wasn't planned until a later phase. A production deploy pipeline exists via GitHub Actions and GHCR, but the system isn't live at a public URL yet.
+## Result
+
+I built Quranlytics alone in 14 days, from an empty repository on 24 June to 7 July 2026. It covers all 114 surahs and 6,236 verses. About half the work went into features outside the original plan. These include tajwīd colour-coding, a ḥifẓ memorisation mode, continuous recitation with a choice of reciter, and khatmah completion planning. I also added a chiastic structure viewer that colour-matches mirrored verse pairs, explorers for the 99 Names of Allah and the 25 named prophets, and a community layer for sharing discoveries. The code is public on GitHub and the deploy pipeline is ready. The app is not live at a public URL yet.
+
+## Under the hood
+
+- Backend: Django 5.0 and DRF with SimpleJWT, across 6 apps (`quran`, `analytics`, `semantic`, `users`, `community`, `common`).
+- Frontend: Next.js 14.2 App Router, React 18.3, strict TypeScript 5.5 and Tailwind CSS 3.4. The only dependency beyond the core is `html-to-image` for PNG export. Charts and UI components are hand-built.
+- Management commands `compute_stats` and `build_frequency_cache` fill PostgreSQL tables. Redis caches results for 24 hours.
+- Ingestion joins Quran.com and QAC data 1:1 on `surah:verse:word`, throttles to the source API's limits and retries on HTTP 429.
+- The morphology fix takes lemma, root and part of speech from the stem, never the clitic segments.
+- Quran.com changed the Sahih International translation ID from 131 to 20 and stopped returning `verse_key`, so translations are now mapped by position.
+- Arabic search normalisation was unified once, then fixed three more times: a leading ال, definite-article words in co-occurrence, and bare lemmas in examples.
+- Semantic layer: `sentence-transformers` on CPU `torch`, vectors in `pgvector`, and KMeans for theme clusters. ML dependencies live in a separate `ml.txt`, so the base app and CI run without them.
+- Other tools: a word-frequency heatmap across all 114 surahs, a root explorer with a morphology tree, co-occurrence search, a hapax legomena finder, paired-surah symmetry, verse-length charts and a refrain explorer.
+- GitHub Actions runs tests on every push and publishes images to GHCR. Sentry runs in production.
+- About 35 REST endpoints and 20 top-level routes. About 6,900 lines of Python and 9,900 lines of TypeScript, 121 commits with 26 merge commits across about 28 feature branches.

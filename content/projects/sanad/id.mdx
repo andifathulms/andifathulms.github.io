@@ -1,33 +1,53 @@
-## Permasalahan
+# Sanad
 
-Korpus Hadis adalah kumpulan teks terpenting kedua dalam Islam setelah Al-Quran, tetapi jauh lebih sulit dipelajari secara analitis. Situs yang ada adalah pembaca yang baik tetapi hampir tidak menawarkan apa pun untuk pertanyaan yang benar-benar diajukan pelajar serius: siapa yang meriwayatkan hadis ini, dan seberapa dapat dipercaya setiap orang dalam sanadnya? Di mana dua sanad berbeda untuk hadis yang "sama" bertemu atau berpisah? Perawi mana yang berada di pusat seluruh jaringan periwayatan? Satu batasan keras membentuk seluruh produk: platform tidak pernah mengeluarkan vonis keagamaannya sendiri. Teks Arab ditampilkan persis seperti sumbernya, dan setiap tingkat kesahihan dilekatkan pada ulama klasik, tidak pernah diklaim oleh aplikasi.
+## Masalahnya
 
-## Pendekatan
+Bagi umat Islam, hadis, yaitu sabda Nabi Muhammad ﷺ yang tercatat, adalah kumpulan teks terpenting kedua setelah Al-Qur'an. Pelajar dan peneliti mengajukan pertanyaan yang sama untuk setiap hadis. Siapa saja yang meriwayatkannya, dan seberapa terpercaya setiap orang dalam sanadnya? Di mana dua sanad untuk hadis yang sama bertemu atau berpisah? Perawi mana yang berada di pusat seluruh jaringan periwayatan?
 
-### Arsitektur split-brain yang dibangun untuk pra-komputasi
+Situs seperti sunnah.com enak dipakai untuk membaca, tapi hampir tidak membantu menjawab pertanyaan-pertanyaan itu. Sanad dibuat untuk pelajar Muslim, pembaca umum, dan peneliti studi Islam yang ingin membaca hadis sambil melihat sanad dan penilaiannya.
 
-API Django/DRF memiliki semua data dan komputasi berat; frontend Next.js terpisah adalah lapisan presentasi murni yang berbicara dengannya melalui REST. Analitik hadis — hitungan, kemiripan, sentralitas — mahal terhadap korpus puluhan ribu baris, tetapi korpusnya sendiri pada dasarnya statis. Maka desainnya mendorong semuanya ke perintah manajemen dan job Celery yang mengisi tabel termaterialisasi, dan handler saat request hanya pernah membaca baris pra-terhitung. Itulah keputusan performa inti yang menjadi fondasi sistem lainnya.
+Satu aturan membentuk seluruh produk. Aplikasi ini tidak pernah mengeluarkan penilaian keagamaannya sendiri. Teks Arab ditampilkan persis seperti sumbernya, dan setiap derajat hadis disandarkan kepada ulama klasik yang memberikannya.
 
-### Mengekstrak sanad yang sejak awal tidak terstruktur
+## Yang saya bangun
 
-Dataset sumber menyediakan teks hadis tetapi tanpa graf perawi terstruktur. Alih-alih mentranskripsi sanad secara manual, parser heuristik mensegmentasi region isnad dari setiap matn Arab menggunakan kata kerja periwayatan — حدثنا ("meriwayatkan kepada kami"), عن ("dari") — dan mengambil nama perawi untuk membangun graf edge guru-ke-murid. Ini secara eksplisit dibingkai sebagai heuristik struktural, bukan otoritas keilmuan, dengan disclaimer provenansi ditampilkan di UI alih-alih disajikan sebagai fakta yang settled. Membuatnya benar adalah masalah tersulit dalam pembangunan: rangkaian panjang commit melawan artefak parsing teks — pembersihan nama yang lebih kuat agar sanad benar-benar membawa perawi bukan fragmen matn yang nyasar, membuang perawi fragmen, meruntuhkan perawi tak bernama (mubham) menjadi sentinel alih-alih mengarang identitas untuk mereka.
+### Analitik saya hitung di awal
 
-### Renderer yang tepat untuk ukuran graf yang tepat
+Menghitung kata, membandingkan teks, dan mengurutkan perawi adalah pekerjaan berat untuk puluhan ribu hadis. Sementara itu, koleksinya sendiri hampir tidak pernah berubah. Jadi saya menjalankan semuanya lebih dulu lewat proses latar dan menyimpan hasilnya. Saat seseorang membuka halaman, server hanya membaca data yang sudah jadi. Seluruh sistem dibangun di atas keputusan ini.
 
-Sanad satu hadis adalah segelintir node, sehingga dirender di React Flow untuk interaktivitas per-node yang kaya. Jaringan perawi global berjumlah ratusan node ke atas — React Flow tidak skalabel ke jumlah itu — sehingga dirender di canvas D3-force sebagai gantinya. Pemisahan itu ditulis dalam spesifikasi sejak awal, bukan ditemukan sebagai masalah performa belakangan.
+### Sanad diambil dari teks Arabnya
 
-### Integritas sebagai aturan arsitektural, bukan fitur UI
+Dataset sumbernya berisi teks hadis tanpa daftar perawi yang terstruktur. Saya menulis parser yang menemukan sanad di setiap teks Arab dari frasa periwayatannya, seperti "telah menceritakan kepada kami" dan "dari", lalu mengambil nama-namanya. Dari nama itu terbentuk jaringan hubungan guru dan murid. Aplikasi memberi label bahwa ini perkiraan struktural dan menunjukkan asal datanya. Nama yang bersih butuh banyak putaran perbaikan. Potongan teks yang bukan nama dibuang. Perawi yang tidak disebut namanya (mubham) dikumpulkan di bawah satu penanda, dan aplikasi tidak pernah mengarang identitas mereka.
 
-Tingkat kesahihan selalu membawa atribusi ke ulama yang mengeluarkannya; perawi secara default "belum dinilai" alih-alih warna yang bisa disalahartikan sebagai vonis; perawi tak bernama diruntuhkan menjadi sentinel alih-alih diciptakan. Ini bukan sentuhan akhir satu kali — muncul sebagai commit berulang dan disengaja sepanjang pembangunan, termasuk pass khusus untuk menyatukan palet warna grading setelah warna versi sebelumnya membawa implikasi yang tidak diinginkan.
+### Setiap ukuran graf punya cara tampil sendiri
 
-### Merilis kerja backend yang selesai tetapi belum punya frontend
+Sanad satu hadis hanya berisi segelintir orang. Sanad itu tampil sebagai graf interaktif, dan klik pada seorang perawi membuka profilnya. Jaringan seluruh perawi berisi ratusan orang atau lebih, terlalu banyak untuk alat yang sama. Jadi jaringan itu digambar di canvas dengan tata letak berbasis gaya, lengkap dengan pencarian, fokus, dan pencari jalur terpendek antara dua perawi. Pembagian ini sudah saya tulis di spesifikasi sejak awal.
 
-Di tengah jalan, menjadi jelas bahwa backend memiliki enam endpoint analitik yang berfungsi tanpa permukaan bagi pengguna untuk benar-benar menjangkaunya. Satu sprint penuh berpindah dari membangun sistem baru menjadi mengekspos yang sudah berfungsi — explorer distribusi grade, alat frekuensi kata, dashboard korpus, panel parallel-narrations, dan leaderboard sentralitas semuanya mendarat dalam satu gelombang itu, alih-alih dibangun dan dirilis bertahap seiring selesainya.
+### Setiap derajat hadis menyebut sumbernya
 
-### AI diturunkan cakupannya ke yang bisa dirilis secara jujur
+Setiap derajat menampilkan ulama yang memberikannya, dan satu hadis bisa memuat penilaian beberapa ulama berdampingan. Perawi yang belum dinilai ditandai "belum dinilai" dengan warna netral yang tidak bisa dibaca sebagai vonis. Saya pernah merombak warna derajat sekali, setelah palet awal memberi makna yang tidak semestinya pada beberapa warna.
 
-Rencana awal meminta pencarian topik semantik berbasis embedding. Yang dirilis alih-alih adalah topic browser terkurasi atas hitungan nyata yang tidak dibatasi — tanpa dependensi OpenAI, tanpa infrastruktur embedding. Keputusan pragmatis untuk merilis nilai nyata yang benar-benar didukung korpus alih-alih menambah biaya dan kompleksitas untuk fitur yang akan lebih sulit dijaga kejujurannya.
+### Pekerjaan backend yang sudah jadi saya beri layar
 
-## Hasil
+Di tengah jalan, saya menemukan enam endpoint analitik yang sudah berfungsi tapi belum punya halaman. Sprint berikutnya saya pakai untuk membangun layarnya. Penjelajah sebaran derajat, alat frekuensi kata, dashboard korpus, panel riwayat yang sejalan, dan peringkat perawi semuanya rilis di gelombang itu.
 
-86 commit, solo, selama pembangunan lima hari yang intens — sekitar 5.100 baris TypeScript frontend dan 3.800 baris Python backend, mencakup 19 model Django dan kurang lebih 30 endpoint REST di 18 halaman rute frontend. Kumpulan fitur yang dirilis melampaui spesifikasi awal: model seperti `HadithGrading`, `WordFrequencyHadith`, `NarratorStats`, `BookGradeStats`, dan lapisan personal `Collection`/`ReadingHistory` penuh tidak ada dalam skema awal. Pipeline produksi lengkap ada — GitHub Actions membangun image backend dan frontend ke GHCR pada setiap push ke `main`, dengan CI menjalankan lint, pemeriksaan migrasi, dan test — tetapi korpus bergantung pada menjalankan pipeline ingestion secara lokal, sehingga ini paling tepat digambarkan sebagai siap produksi dan menunggu peluncuran, bukan layanan publik yang sudah langsung.
+## Hasilnya
+
+Fitur Sanad sudah lengkap dan siap diluncurkan, tapi belum dibuka untuk publik. Datanya masih bergantung pada pipeline impor yang saya jalankan secara lokal. Pembaca mendapat teks Arab berharakat, terjemahan Inggris dan Indonesia berdampingan, lencana derajat, mode fokus, dan fitur lanjut membaca. Pengguna yang login mendapat bookmark, koleksi, dan riwayat bacaan. Setiap hadis bisa diekspor sebagai kartu gambar untuk dibagikan. Rencana awalnya memuat pencarian topik berbasis AI. Yang saya rilis adalah penjelajah topik terkurasi dengan hitungan lengkap, tanpa layanan AI berbayar. Saya membangun Sanad dalam lima hari di bulan Juni 2026, dan hasilnya jauh melampaui spesifikasi awal.
+
+## Langkah berikutnya
+
+- Meluncurkannya untuk publik. Pipeline build dan rilisnya sudah siap.
+- Menambah pencarian semantik berbasis embedding, yang saya tunda.
+
+## Di balik layar
+
+- API Django 5.0 dan DRF memegang data dan komputasi. Frontend Next.js 14 App Router terpisah berbicara dengannya lewat REST. Autentikasi memakai SimpleJWT.
+- PostgreSQL dengan pencarian trigram `pg_trgm` untuk kemiripan teks dan pencarian nama yang toleran salah ketik.
+- Tabel hasil hitung `WordFrequencyHadith`, `NarratorStats`, dan `BookGradeStats` diisi oleh management command dan job Celery, dengan Redis sebagai broker dan cache.
+- Ekstraksi sanad memotong bagian isnad memakai kata kerja periwayatan seperti حدثنا ("telah menceritakan kepada kami") dan عن ("dari"). Normalisasi Arab dan transliterasi Arab ke Latin ditulis sendiri, tanpa `camel_tools`.
+- NetworkX menghitung sentralitas, jalur terpendek, dan ego network. Sentralitas dijadikan perkiraan demi kecepatan, dalam perbaikan yang sama dengan bug `distinct()` di Django.
+- Sanad per hadis dirender dengan React Flow. Jaringan global dirender di canvas D3-force.
+- Model yang ditambahkan di luar skema awal: `HadithGrading` (beberapa ulama per hadis), `Topic`/`HadithTopic`, `Collection`/`CollectionItem`, dan `ReadingHistory`.
+- Data: teks Arab dan Inggris dari dataset terbuka fawazahmed0/hadith-api, terjemahan Indonesia dari API gadingnst. Kitab yang disasar adalah Kutubus Sittah ditambah Al-Muwaththa' dan Riyadhus Shalihin.
+- CI menjalankan Ruff, pengecekan migrasi, dan pytest di backend, serta typecheck, lint, dan build di frontend. GitHub Actions menerbitkan image ke GHCR setiap ada push ke `main`.
+- 19 model, sekitar 30 route REST, 18 halaman, dan 14 management command. Sekitar 5.100 baris TypeScript dan 3.800 baris Python, 86 commit dari 25 sampai 29 Juni 2026.

@@ -1,7 +1,17 @@
 {
   "slug": "doserx",
   "title": "DoseRx",
-  "tagline": "Weight-based medication dose calculator covering 92 drugs across four calculator modes, built for bedside clinical use as an offline PWA",
+  "tagline": "A bedside dose calculator for 92 drugs that rounds each dose to tablets and syrups Indonesian pharmacies sell",
+  "glance": {
+    "for": "A practising doctor, on a phone at the bedside and on desktop",
+    "result": "Live, installable and offline, with 92 drugs and four calculators"
+  },
+  "skills": [
+    "Healthcare software",
+    "Offline-first PWAs",
+    "Calculation engines",
+    "Mobile-first UX"
+  ],
   "categoryTags": [
     "Personal Project",
     "Healthcare",
@@ -19,6 +29,7 @@
   "role": "Developer",
   "timeframe": "Jun – Jul 2026",
   "liveUrl": "https://andifathulms.github.io/doserx/",
+  "access": "public",
   "githubUrl": null,
   "heroImage": "/images/projects/doserx/hero.webp",
   "order": 8,
@@ -26,20 +37,50 @@
   "metrics": [
     {
       "value": "92",
-      "label": "Drugs across 16 categories"
+      "label": "drugs, each with dose range and caps"
+    },
+    {
+      "value": "16",
+      "label": "therapeutic drug categories"
     },
     {
       "value": "4",
-      "label": "Dose calculators + history"
+      "label": "calculators: preset, custom, powder, infusion"
     },
     {
-      "value": "~5K",
-      "label": "Lines of TypeScript"
-    },
-    {
-      "value": "39",
-      "label": "Commits over ~3.5 weeks"
+      "value": "¼",
+      "label": "smallest tablet fraction the app suggests"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Kalkulator dosis untuk 92 obat yang membulatkan dosis ke tablet dan sirup yang dijual apotek Indonesia",
+    "glance": {
+      "for": "Dokter praktik, lewat ponsel di samping pasien dan desktop",
+      "result": "Live, bisa dipasang, dan jalan offline, dengan 92 obat dan empat kalkulator"
+    },
+    "skills": [
+      "Perangkat lunak kesehatan",
+      "PWA offline-first",
+      "Mesin perhitungan",
+      "UX mobile-first"
+    ],
+    "metrics": [
+      {
+        "value": "92",
+        "label": "obat, lengkap dengan rentang dan batas dosis"
+      },
+      {
+        "value": "16",
+        "label": "kategori terapi obat"
+      },
+      {
+        "value": "4",
+        "label": "kalkulator: preset, kustom, puyer, infus"
+      },
+      {
+        "value": "¼",
+        "label": "pecahan tablet terkecil yang disarankan"
+      }
+    ]
+  }
 }

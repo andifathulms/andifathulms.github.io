@@ -1,29 +1,47 @@
-## Permasalahan
+# Quranlytics
 
-Aplikasi Quran yang ada — Quran.com, Tanzil, eQuran — dibangun untuk membaca: tipografi bersih, audio, terjemahan. Tidak satu pun memungkinkan pembaca biasa menginterogasi teksnya sendiri, seperti memverifikasi apakah kata "hari" benar-benar muncul 365 kali, atau menemukan setiap ayat yang menyebut rahmat dan azab sekaligus, tanpa kerja konkordansi manual. Pembaca sehari-hari yang menemukan klaim "mukjizat" numerik atau linguistik secara online tidak memiliki cara untuk memeriksanya, dan kreator konten dakwah yang ingin mengutip pola tertentu tidak memiliki tooling yang dibangun untuk itu. Quranlytics adalah pembaca sekaligus lapisan analisis di atas data yang sama, sehingga eksplorasi tidak pernah memerlukan keluar dari aplikasi.
+## Masalahnya
 
-## Pendekatan
+Aplikasi Al-Qur'an seperti Quran.com, Tanzil, dan eQuran dibuat untuk membaca. Tipografinya rapi, ada audio, ada terjemahan. Tapi tidak satu pun yang membiarkan pembaca biasa menelusuri teksnya sendiri. Apakah kata "hari" muncul 365 kali? Ayat mana saja yang menyebut rahmat dan azab sekaligus? Untuk menjawabnya, orang harus membuka konkordansi secara manual.
 
-### Statistik termaterialisasi, tidak pernah dihitung langsung
+Ada dua kelompok yang merasakan celah ini. Pembaca sehari-hari dan pelajar sering menemukan klaim "mukjizat" angka atau bahasa di internet, tanpa cara untuk mengeceknya. Kreator konten dakwah ingin mengutip pola tertentu, seperti jumlah kata atau pengulangan kalimat, tanpa perlu alat riset akademik. Quranlytics menaruh pembaca dan lapisan analisis di atas data yang sama, jadi menjelajah tidak pernah berarti keluar dari aplikasi.
 
-Hitungan kata, root, dan frasa tidak pernah dijalankan terhadap tabel ~77.000 kata pada permintaan pengguna. Perintah manajemen menghitungnya lebih dulu ke tabel termaterialisasi Postgres yang didukung cache Redis 24 jam, sehingga interaksi inti — klik klaim, lihat verifikasinya seketika — tetap cepat meski menghitung satu root di 6.236 ayat bukan operasi murah untuk dilakukan secara langsung.
+## Yang saya bangun
 
-### Menjahit dua sumber data untuk morfologi nyata
+### Semua hitungan saya siapkan di awal
 
-API Quran.com memberikan teks ayat dan terjemahan tetapi tanpa morfologi root/lemma. Quranic Arabic Corpus menyediakan itu, berkunci posisi kata, sehingga ingestion menarik keduanya dan menggabungkannya satu-ke-satu berdasarkan posisi `surah:ayat:kata`. Sekitar 50.000 dari 77.000 kata membawa root trilateral yang dapat diselesaikan; sisanya adalah partikel dan kata benda khusus yang mencakup kurang lebih 1.650 root berbeda. Versi awal parser morfologi memiliki bug nyata — mengambil lemma dan root dari segmen klitik (awalan/akhiran) alih-alih stem kata sesungguhnya — tertangkap dan diperbaiki dengan test khusus setelah data yang salah muncul.
+Menghitung satu akar kata di 6.236 ayat dan sekitar 77 ribu kata terlalu lambat kalau dilakukan setiap kali diklik. Saya menghitung frekuensi kata, akar, dan frasa lebih dulu lalu menyimpannya, dengan cache di depannya. Saat pembaca membuka sebuah klaim, angkanya sudah tersedia. Interaksi utamanya, klik klaim lalu lihat hasil pengecekannya, tetap instan.
 
-### Embedding lokal alih-alih API hosted
+### Dua sumber, digabung kata demi kata
 
-Pencarian semantik berjalan pada `sentence-transformers`, model multibahasa yang dijalankan lokal di dalam container untuk meng-embed setiap ayat dari terjemahan Inggris dan Indonesianya, disimpan via `pgvector` untuk pencarian kemiripan dan clustering tema KMeans. Tanpa biaya API per-kueri, dan berfungsi sepenuhnya offline — penyimpangan yang disengaja dari rencana awal menggunakan API embedding hosted, karena dataset bersifat statis dan dihitung sekali alih-alih dikueri langsung terhadap korpus yang berubah.
+Data Quran.com berisi teks ayat dan terjemahan, tapi tanpa akar kata. Quranic Arabic Corpus punya akar katanya, dengan kunci posisi setiap kata. Saya mengambil keduanya dan menggabungkannya kata demi kata berdasarkan posisi itu. Sekitar 50 ribu dari 77 ribu kata punya akar tiga huruf, tersebar di kira-kira 1.650 akar yang berbeda. Sisanya partikel dan nama diri. Parser awal saya mengambil akar dari awalan dan akhiran kata, padahal seharusnya dari kata dasarnya. Saya memperbaikinya dan menambah tes begitu data yang salah itu ketahuan.
 
-### Verifier yang "jujur" alih-alih yang percaya diri
+### Pencarian berjalan dengan model di dalam aplikasi
 
-Klaim numerik populer tentang Al-Quran beredar terus-menerus secara online, sering disajikan sebagai kebenaran begitu saja. Verifier klaim numerik sebaliknya melaporkan status tiga arah — Terverifikasi, Diperdebatkan, atau Terbantahkan — konsisten dengan batasan cakupan proyek sendiri: tidak ada klaim otomatis tentang apa yang dibuktikan suatu pola, sajikan datanya dan biarkan pembaca menafsirkan.
+Rencana awalnya memakai layanan AI pihak ketiga untuk pencarian semantik. Saya menjalankan model multibahasa terbuka di dalam container aplikasi sendiri. Model itu membuat embedding setiap ayat dari terjemahan Inggris dan Indonesianya, mencari ayat yang berkaitan, dan mengelompokkannya ke dalam tema. Teksnya tidak pernah berubah, jadi semua ini cukup dihitung sekali. Tidak ada biaya per pencarian, dan fiturnya jalan tanpa internet.
 
-### Analisis publik, state personal berlapis di atasnya
+### Pengecek klaim memberi satu dari tiga jawaban
 
-Autentikasi JWT dan state per-pengguna — bookmark, catatan, progres membaca, streak — berdampingan dengan endpoint membaca dan analitik yang sepenuhnya publik. Pengguna anonim mendapat membaca dan analisis lengkap; akun hanya menambahkan personalisasi di atasnya, tidak pernah membatasi kumpulan fitur inti.
+Klaim angka tentang Al-Qur'an banyak beredar di internet seolah sudah pasti benar. Pengecek memberi setiap klaim satu status: Terverifikasi, Diperdebatkan, atau Terbantahkan. Ini mengikuti batas lingkup proyek. Aplikasi menampilkan datanya dan tidak menyimpulkan apa yang dibuktikan sebuah pola. Kesimpulannya diserahkan kepada pembaca.
 
-## Hasil
+### Semua alat bisa dipakai tanpa akun
 
-121 commit, solo, selama 14 hari dari repositori kosong — sekitar 6.900 baris Python backend di 6 aplikasi Django dan 9.900 baris TypeScript frontend, dengan 26 merge commit di kurang lebih 28 feature branch meski merupakan proyek satu penulis. Dataset lengkap mencakup seluruh 114 surah dan 6.236 ayat, dengan morfologi terselesaikan untuk sekitar 50.000 dari 77.000 kata. Lebih dari separuh riwayat commit adalah kerja yang berada di luar rencana awal: pewarnaan tajwīd, mode hafalan ḥifẓ, murottal berkelanjutan dengan pemilih qari, perencanaan penyelesaian khatmah, penampil struktur chiastic dengan pasangan ayat cermin berwarna serasi, dan dua explorer kurasi yang sama sekali baru — 99 Asmaul Husna dan indeks Nabi-Nabi dalam Al-Quran — plus lapisan komunitas (discoveries, voting, profil publik, ekspor PNG) yang tidak direncanakan hingga fase belakangan. Pipeline deploy produksi ada via GitHub Actions dan GHCR, tetapi sistem belum langsung di URL publik.
+Membaca dan semua alat analisis terbuka untuk umum. Login hanya menambahkan bookmark, catatan, progres bacaan, dan streak. Akun tidak pernah membuka fitur inti.
+
+## Hasilnya
+
+Saya membangun Quranlytics sendirian dalam 14 hari, dari repositori kosong pada 24 Juni sampai 7 Juli 2026. Isinya mencakup seluruh 114 surah dan 6.236 ayat. Sekitar separuh pekerjaannya berupa fitur di luar rencana awal. Di antaranya pewarnaan tajwid, mode hafalan, murattal berkelanjutan dengan pilihan qari, dan perencanaan khatam. Saya juga menambahkan penampil struktur kiastik yang mewarnai pasangan ayat yang saling bercermin, penjelajah Asmaul Husna dan 25 nabi yang disebut namanya, serta lapisan komunitas untuk berbagi temuan. Kodenya terbuka di GitHub dan pipeline deploy-nya sudah siap. Aplikasinya belum live di alamat publik.
+
+## Di balik layar
+
+- Backend: Django 5.0 dan DRF dengan SimpleJWT, terbagi di 6 app (`quran`, `analytics`, `semantic`, `users`, `community`, `common`).
+- Frontend: Next.js 14.2 App Router, React 18.3, TypeScript 5.5 mode strict, dan Tailwind CSS 3.4. Satu-satunya dependensi di luar inti adalah `html-to-image` untuk ekspor PNG. Grafik dan komponen UI dibuat sendiri.
+- Management command `compute_stats` dan `build_frequency_cache` mengisi tabel PostgreSQL. Redis menyimpan cache hasilnya selama 24 jam.
+- Proses impor menggabungkan data Quran.com dan QAC 1:1 pada `surah:verse:word`, membatasi laju sesuai batas API sumber, dan mencoba ulang saat mendapat HTTP 429.
+- Perbaikan morfologi mengambil lemma, akar, dan kelas kata dari stem, tidak dari segmen klitik.
+- Quran.com mengganti ID terjemahan Sahih International dari 131 ke 20 dan berhenti mengirim `verse_key`, jadi terjemahan kini dipetakan berdasarkan posisi.
+- Normalisasi pencarian Arab disatukan sekali, lalu diperbaiki tiga kali lagi: ال di awal kata, kata berawalan ال di pencarian kemunculan bersama, dan lemma polos di contoh.
+- Lapisan semantik: `sentence-transformers` di `torch` versi CPU, vektor di `pgvector`, dan KMeans untuk klaster tema. Dependensi ML dipisah di `ml.txt`, jadi aplikasi dasar dan CI bisa jalan tanpanya.
+- Alat lain: heatmap frekuensi kata di 114 surah, penjelajah akar dengan pohon morfologi, pencarian kemunculan bersama, pencari hapax legomena, simetri pasangan surah, grafik panjang ayat, dan penjelajah pengulangan kalimat.
+- GitHub Actions menjalankan tes di setiap push dan menerbitkan image ke GHCR. Sentry aktif di produksi.
+- Sekitar 35 endpoint REST dan 20 route utama. Sekitar 6.900 baris Python dan 9.900 baris TypeScript, 121 commit dengan 26 merge commit dari sekitar 28 branch fitur.

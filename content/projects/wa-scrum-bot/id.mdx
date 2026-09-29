@@ -1,35 +1,52 @@
-## Permasalahan
+# WA Daily Scrum Bot
 
-Tim scrum yang menjalankan standup harian via WhatsApp mengandalkan anggota untuk melapor sendiri. Tanpa otomasi, team lead harus mengecek secara manual siapa yang belum posting dan mengingatkan mereka — setiap hari, beberapa kali. Untuk tim 14 orang ini melelahkan dan mudah terlupakan, menyebabkan laporan terlewat atau dikirim terlambat.
+## Masalahnya
 
-Tim OIKN THD membutuhkan sistem otomatis yang memantau group chat, mengirimkan pengingat yang semakin mendesak sepanjang hari, dan mengakhiri setiap hari dengan ringkasan berperingkat — dalam bahasa Indonesia dan Inggris, karena laporan datang dalam kedua bahasa.
+Tim OIKN THD, tim software beranggotakan 14 orang, menjalankan standup harian di grup WhatsApp. Setiap anggota menulis apa yang dikerjakan kemarin dan apa rencananya hari ini. Tanpa bantuan, team lead harus mengecek siapa yang belum menulis lalu mengingatkannya, beberapa kali sehari, setiap hari. Untuk 14 orang, ini melelahkan dan gampang terlupa. Akibatnya ada laporan yang terlewat atau datang terlalu telat untuk berguna.
 
-## Pendekatan
+Tim ini butuh sesuatu yang memantau grup, mengirim pengingat yang makin tegas sepanjang hari, dan menutup setiap hari dengan ringkasan berperingkat. Laporan datang dalam bahasa Indonesia dan Inggris, jadi keduanya harus dikenali.
 
-### Otomasi WhatsApp berbasis Puppeteer
+## Yang saya bangun
 
-WhatsApp tidak memiliki API bot resmi. Pendekatan standar adalah mengotomasi antarmuka WhatsApp Web browser menggunakan Puppeteer — `whatsapp-web.js` membungkus ini dan menyediakan API event Node.js. Menjalankan browser penuh di dalam container Docker memerlukan instalasi Chromium sistem, melewati unduhan bawaan Puppeteer, dan menetapkan hostname container untuk mencegah konflik lock profil Chromium antar restart. `entrypoint.sh` menghapus file lock `Singleton` yang basi sebelum memulai Node — tanpa ini, exit container yang tidak bersih memblokir startup berikutnya.
+### Bot menjalankan WhatsApp Web, karena tidak ada API untuk bot
 
-### Deteksi pasangan kata kunci bilingual, dengan pass anti-cheat
+WhatsApp tidak punya API resmi untuk bot grup. API bisnisnya butuh persetujuan Meta dan berbayar, jadi tidak cocok untuk alat internal tim. Karena itu bot menjalankan WhatsApp Web di browser di dalam container. Bot mengecek empat kali sehari, pukul 09.00, 10.00, 11.00, dan 14.00, dan setiap pengingat lebih tegas dari sebelumnya. Pesan hanya dikirim kalau masih ada yang belum melapor. Kalau semua sudah melapor, bot diam.
 
-Pesan dihitung sebagai laporan standup jika mengandung pasangan frasa yang diketahui — `yesterday` + `today`, `kemarin` + `hari ini`, dan kombinasi bilingual serupa — membuat deteksi agnostik bahasa dan kuat terhadap format laporan yang berbeda. Pass kedua menghapus kata kunci pemicu tersebut dan menandai pesan dengan konten tersisa yang terlalu sedikit, menangkap anggota yang mengakali bot dengan submission kata-kunci telanjang dan memanggil mereka secara publik di grup.
+### Laporan dihitung kalau kedua bagiannya ada
 
-### Melacak bukan hanya *apakah* seseorang melapor, tapi apakah pekerjaannya benar-benar bergerak
+Sebuah pesan dianggap laporan standup kalau memuat pasangan frasa, misalnya "kemarin" dan "hari ini", atau "yesterday" dan "today". Cara ini jalan di kedua bahasa dan untuk format apa pun. Pengecekan kedua membuang kata kunci itu dan melihat sisanya. Kalau hampir tidak ada isinya, bot menegur laporan yang hanya berisi kata kunci itu di grup. Hari libur nasional dan tanggal cuti setiap anggota diatur di konfigurasi, jadi tidak ada yang dikejar-kejar saat libur.
 
-Di luar deteksi laporan, bot melacak item bullet individual lintas hari. `detectSection()` mengklasifikasikan setiap baris sebagai Yesterday/Today/Impediment, dan pemeriksaan `taskSimilarity()` berbasis Jaccard-similarity (ambang 0.7) mengenali bahwa "fix login bug" dan "fixing the login bug issue" adalah tugas yang sama yang muncul kembali di bawah "Today" tanpa pernah naik menjadi "selesai" — ditandai setelah bertahan tiga hari atau lebih. Whitelist mengecualikan kata tugas rutin (`piket`, `cuti`, `standby`) agar tidak pernah ditandai, dan konfigurasi `staleHelp` per anggota dapat membingkai ulang tugas macet untuk QA lead yang kelebihan beban sebagai tawaran dukungan helper bernama, bukan panggilan telanjang.
+### Bot mengenali tugas yang jalan di tempat
 
-### Menutup celah akal-akalan dalam state carry
+Bot juga membaca setiap poin tugas dan mengikutinya dari hari ke hari. "fix login bug" dan "fixing the login bug issue" dianggap tugas yang sama, berdasarkan berapa banyak kata yang sama. Tugas yang tetap berada di bagian "hari ini" selama tiga hari atau lebih tanpa pernah dilaporkan selesai akan ditandai. Tugas rutin seperti piket, cuti, dan standby tidak pernah ditandai. Untuk QA lead tim yang bebannya berat, tugas testing yang macet disertai tawaran bantuan dari rekan yang disebut namanya.
 
-Hitungan hari tugas macet awalnya reset setiap Senin, yang berarti anggota bisa menghindari flag hanya dengan menghilangkan tugas macet dari daftar satu hari — mereset streak secara gratis. Perbaikannya berpindah dari bucket per-minggu ke struktur `carry` lintas-minggu yang persisten, di mana counter hanya bersih ketika tugas yang *sama* kemudian dilaporkan selesai lewat pencocokan similarity, bukan karena dihilangkan. Membuat ini aman memerlukan jaminan idempotensi yang sepadan: pada setiap restart, bot mengambil ulang 500 pesan grup terakhir dan memutarnya secara kronologis untuk membangun ulang state `carry`, `ledger`, dan `history`-nya, sehingga redeploy tidak pernah diam-diam kehilangan pelacakan yang sedang berjalan.
+### Melewatkan tugas yang macet tidak mereset hitungannya
 
-### Menggerbang fitur berisiko sebelum dipercaya untuk broadcast
+Awalnya hitungan tugas macet direset setiap Senin. Anggota juga bisa menghindarinya dengan tidak menulis tugas itu sehari saja. Saya mengubahnya supaya hitungan terbawa lintas minggu dan baru hilang saat tugas yang sama dilaporkan selesai. Supaya tetap aman saat restart, bot membaca ulang 500 pesan terakhir di grup ketika menyala, lalu memutarnya kembali secara berurutan. Deploy ulang tidak pernah menghilangkan pelacakannya.
 
-Rekap mingguan Jumat mengagregasi beberapa kalkulasi yang masing-masing berpotensi salah — completion rate, streak konsistensi tepat waktu, digest kesehatan tim, carry tugas macet — yang mana pun bisa menghasilkan angka yang salah atau memalukan di depan seluruh tim. Fitur ini dirilis di balik flag konfigurasi `weeklyRecapAutoSend` ditambah pengiriman manual yang dipicu `SIGHUP`, sehingga output agregat bisa diperiksa kewarasannya terhadap data nyata selama satu siklus penuh sebelum otomasi dipercaya berjalan tanpa pengawasan.
+### Rekap Jumat saya uji dulu sebelum dikirim otomatis
 
-### Swalayan, sesuai permintaan
+Rekap Jumat menggabungkan tingkat penyelesaian, rentetan tepat waktu, perbandingan kesehatan tim dengan minggu lalu, dan daftar tugas yang macet. Salah satu saja bisa menampilkan angka yang keliru di depan seluruh tim. Saya merilisnya dengan pengiriman otomatis dimatikan dan tombol kirim manual. Setelah hasilnya saya cek terhadap data tim selama satu siklus penuh, pengiriman otomatis saya nyalakan lagi.
 
-`!mystats` memungkinkan anggota mana pun menanyakan persentase tepat waktu, streak saat ini, dan completion rate mingguan mereka sendiri tanpa menunggu hari Jumat; `!rank` memposting leaderboard konsistensi yang sama sesuai permintaan; `!help` mengiklankan keduanya dari pesan kickoff pagi.
+## Hasilnya
 
-## Hasil
+Bot ini berjalan di produksi untuk standup harian tim dan memantau 14 anggota setiap hari kerja. Saya membangunnya dalam 18 hari di bulan Juni 2026. Awalnya hanya mendeteksi laporan dan mengirim pengingat, lalu berkembang menjadi pelacakan tugas, analitik mingguan, dan perintah mandiri. Anggota bisa mengetik !mystats untuk melihat persentase tepat waktu, rentetan, dan tingkat penyelesaiannya sendiri, !rank untuk papan peringkat, dan !help untuk daftar perintah. Data tersimpan di berkas biasa pada volume yang di-mount, jadi restart tidak menghapus progres hari itu. Saya juga membuat dashboard React sebagai demo jadwal dan pesan. Dashboard itu tidak terhubung ke bot yang berjalan.
 
-Di-deploy dan berjalan di produksi di VM GCP untuk standup harian Tim OIKN THD. Yang dimulai sebagai deteksi laporan dan pengingat eskalasi berkembang jauh melampaui cakupan itu — 25 commit selama 18 hari, lebih dari sepuluh di antaranya mendarat dalam satu rentang tiga hari begitu lapisan pelacakan tugas dan analitik terbentuk. Rekap Jumat kini adalah komposit dari beberapa subsistem yang dibangun secara independen (completion rate, streak konsistensi, digest kesehatan tim, carry tugas macet) alih-alih satu peringkat tunggal, semuanya disajikan dari file state JSON datar tanpa database, di-mount sebagai volume Docker sehingga restart tidak pernah kehilangan progres satu hari.
+## Langkah berikutnya
+
+- Memperketat pencocokan tugas. Kemiripan kata bisa melewatkan tugas yang ditulis ulang dengan kata yang jauh berbeda, atau menyatukan dua tugas berbeda yang kata-katanya mirip.
+- Menghubungkan dashboard ke bot yang berjalan, yang saat ini belum punya API data.
+
+## Di balik layar
+
+- Node.js 18 dengan `whatsapp-web.js` (Puppeteer dan Chromium), `node-cron` untuk penjadwalan, dan `qrcode-terminal` untuk menautkan ponsel. Sesi bergantung pada ponsel tertaut yang tetap online dan bisa rusak saat WhatsApp memperbarui klien web-nya.
+- Image Docker memakai `node:18-bookworm-slim` dengan Chromium sistem. Unduhan Chromium bawaan Puppeteer dilewati dan hostname container dipatok supaya tidak terjadi bentrok kunci profil. `entrypoint.sh` menghapus berkas kunci `Singleton` Chromium yang tertinggal sebelum Node berjalan.
+- Di tengah proyek, WhatsApp mengganti ID kontak dari format `@c.us` ke ID `@lid` yang tidak terbaca, sehingga pencocokan anggota rusak. Saya mencatat ID pengirim dari pesan yang masuk lalu memperbarui konfigurasi anggota.
+- Deteksi memakai dua string kata kunci ditambah tiga pasangan kata kunci dwibahasa.
+- `detectSection()` mengelompokkan baris ke Yesterday, Today, atau Impediment. `parseSectionTasks()` mengambil poin-poinnya. `normalizeTask()` dan `taskSimilarity()` memakai kemiripan token Jaccard dengan ambang 0,7. `CONFIG.staleTask.minDays` bernilai 3.
+- `.week-state.json` menyimpan `reports`, `carry`, `ledger`, dan `history`. State harian ada di `.bot-state.json`.
+- Delapan cron job harian: kickoff, pengingat tugas terbawa pukul 08.02 dengan ambang dua hari, empat pengecekan, ringkasan akhir hari, dan slot rekap mingguan. Rekap Jumat terkirim pukul 17.05. Rekap Senin mengirim ulang tugas macet minggu lalu.
+- Tepat waktu berarti sebelum pukul 09.00 WITA, dalam jendela bergulir 4 minggu atau 20 hari kerja. Rentetan tidak putus karena hari cuti.
+- Pengaturan per anggota `staleHelp` dan `stalePriority`; `weeklyRecapAutoSend` mengatur rekap. `SIGUSR1` memicu pengingat, `SIGUSR2` mencetak rekap ke log, dan `SIGHUP` mengirimnya.
+- `!mystats` membalas di grup dengan @mention. `!leaderboard` adalah alias untuk `!rank`.
+- GitHub Actions membangun image ke GHCR. `bot.js` berisi 1.166 baris dan dashboard 386 baris. 25 commit dari 10 sampai 28 Juni 2026.
