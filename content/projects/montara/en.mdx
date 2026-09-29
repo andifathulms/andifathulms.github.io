@@ -30,7 +30,7 @@ The prototype recalculated notifications every time a screen drew. On the server
 
 ## Result
 
-Montara is a private system, past its integration milestone and before production launch. It has eight dashboards, each limited by role: summary, map, budget, progress, risk, compliance, portfolio and contractor performance, with CSV and PDF export. Five roles are enforced in the browser and again on the server. The approval workflow follows a rejected request through resubmission. The frontend has at least 111 automated tests, including checks that one role can't see another role's data. I built the prototype over about six weeks from late May 2026 and the backend on 5 July. The frontend now talks to the server behind a switch, so it can fall back to prototype mode during the cutover.
+Montara is a private system, past its integration milestone and before production launch. It has eight dashboards, each limited by role: summary, map, budget, progress, risk, compliance, portfolio and contractor performance, with CSV and PDF export. Five roles are enforced in the browser and again on the server. The approval workflow follows a rejected request through resubmission. Automated frontend tests check, among other things, that one role can't see another role's data. I built the prototype over about six weeks from late May 2026 and the backend on 5 July. The frontend now talks to the server behind a switch, so it can fall back to prototype mode during the cutover.
 
 ## What I'd do next
 
@@ -51,5 +51,5 @@ Montara is a private system, past its integration milestone and before productio
 - Notifications are rows written in the same transaction as the triggering event. Celery and Redis run overdue detection and scheduled aggregation.
 - The frontend review tracked fixes including component splitting, memoization, centralised authorisation logic, debounced autosave and cross-tab sync.
 - Backend: Django 5.1, DRF with a camelCase API, `django-filter`, `drf-spectacular` for OpenAPI docs, and PostgreSQL. 11 domain apps and 37 models.
-- 18 routed pages and about 10 test files in Vitest and Testing Library.
+- 18 routed pages. At least 111 automated frontend tests in about 10 test files, in Vitest and Testing Library.
 - Frontend: 53 commits from 25 May to 5 July 2026, about 27,300 lines of TypeScript. Backend: 20 commits on 5 July 2026, about 4,150 lines of Python.

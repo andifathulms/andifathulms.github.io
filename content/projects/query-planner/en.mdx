@@ -24,7 +24,7 @@ The classic plan search throws away a candidate as soon as a cheaper one appears
 
 ### I checked it against real Postgres
 
-A copy of Postgres compiled to run in the browser serves as the test reference. The same data goes into both engines, and 33 tests check that my planner picks the same plan shape. Where the two disagree, I documented the cause in the app instead of tuning it away. A separate test checks that every possible plan for a query returns the same result, which is what catches executor bugs.
+A copy of Postgres compiled to run in the browser serves as the test reference. The same data goes into both engines, and tests check that my planner picks the same plan shape. Where the two disagree, I documented the cause in the app instead of tuning it away. A separate test checks that every possible plan for a query returns the same result, which is what catches executor bugs.
 
 ### A data detail almost hid the effect
 

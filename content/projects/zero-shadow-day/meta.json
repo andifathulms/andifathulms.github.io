@@ -38,7 +38,7 @@
   "metrics": [
     {
       "value": "75/76",
-      "label": "dates matching BMKG's official tables exactly"
+      "label": "official BMKG dates matched exactly"
     },
     {
       "value": "38",
@@ -68,7 +68,7 @@
     "metrics": [
       {
         "value": "75/76",
-        "label": "tanggal cocok persis dengan tabel resmi BMKG"
+        "label": "tanggal resmi BMKG yang cocok persis"
       },
       {
         "value": "38",

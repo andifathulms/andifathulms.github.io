@@ -45,10 +45,6 @@
       "label": "every memory figure measured, never estimated"
     },
     {
-      "value": "328",
-      "label": "test assertions behind a hash-quality gate"
-    },
-    {
       "value": "3",
       "label": "runtime dependencies, no sketch libraries"
     }
@@ -73,10 +69,6 @@
       {
         "value": "Byte asli",
         "label": "setiap angka memori diukur, bukan diperkirakan"
-      },
-      {
-        "value": "328",
-        "label": "assertion tes di balik gerbang kualitas hash"
       },
       {
         "value": "3",

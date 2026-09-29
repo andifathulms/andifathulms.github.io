@@ -51,7 +51,7 @@
     },
     {
       "value": "8",
-      "label": "presets, each claim checked by a test"
+      "label": "presets, each showing one diff behaviour"
     }
   ],
   "id": {
@@ -81,7 +81,7 @@
       },
       {
         "value": "8",
-        "label": "preset, klaimnya diperiksa oleh tes"
+        "label": "preset, masing-masing menunjukkan satu perilaku diff"
       }
     ]
   }

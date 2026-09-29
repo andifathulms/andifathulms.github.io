@@ -51,8 +51,8 @@
       "label": "deploy time after moving data import out"
     },
     {
-      "value": "15",
-      "label": "API endpoints serving precomputed summaries"
+      "value": "75 years",
+      "label": "of a city's weather in one heatmap"
     }
   ],
   "id": {
@@ -81,8 +81,8 @@
         "label": "waktu deploy setelah impor data dipisah"
       },
       {
-        "value": "15",
-        "label": "endpoint API untuk ringkasan yang sudah dihitung"
+        "value": "75 tahun",
+        "label": "cuaca satu kota dalam satu heatmap"
       }
     ]
   }

@@ -41,15 +41,15 @@
     },
     {
       "value": "< 16 ms",
-      "label": "to re-plan and re-run a four-table join"
+      "label": "to re-plan and re-run a four-way join"
     },
     {
-      "value": "33",
-      "label": "tests matching plan shapes against real Postgres"
+      "value": "8",
+      "label": "distinct visualisations, all hand-built"
     },
     {
-      "value": "255",
-      "label": "candidate cells kept for an eight-table join"
+      "value": "0",
+      "label": "network requests; nothing leaves the browser"
     }
   ],
   "id": {
@@ -71,15 +71,15 @@
       },
       {
         "value": "< 16 ms",
-        "label": "untuk merencanakan ulang join empat tabel"
+        "label": "untuk merencanakan ulang dan menjalankan join empat arah"
       },
       {
-        "value": "33",
-        "label": "tes mencocokkan bentuk rencana dengan Postgres"
+        "value": "8",
+        "label": "visualisasi berbeda, semuanya dibuat sendiri"
       },
       {
-        "value": "255",
-        "label": "sel kandidat disimpan untuk join delapan tabel"
+        "value": "0",
+        "label": "permintaan jaringan; tidak ada yang keluar dari browser"
       }
     ]
   }

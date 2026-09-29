@@ -49,8 +49,8 @@
       "label": "cited tunings, each with its caveat"
     },
     {
-      "value": "132",
-      "label": "tests measuring pitch, partials and strikes"
+      "value": "5",
+      "label": "bundled melodies, public-domain or my own"
     }
   ],
   "id": {
@@ -79,8 +79,8 @@
         "label": "laras bersumber, masing-masing dengan catatannya"
       },
       {
-        "value": "132",
-        "label": "tes yang mengukur nada, parsial, dan pukulan"
+        "value": "5",
+        "label": "melodi bawaan, domain publik atau karya saya"
       }
     ]
   }

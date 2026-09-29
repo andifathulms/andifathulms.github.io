@@ -30,7 +30,7 @@ Di prototipe, notifikasi dihitung ulang setiap kali layar digambar. Di server, s
 
 ## Hasilnya
 
-Montara adalah sistem privat yang sudah melewati tahap integrasi dan belum diluncurkan ke produksi. Ada delapan dashboard yang dibatasi per peran: ringkasan, peta, anggaran, progres, risiko, kepatuhan, portofolio, dan kinerja kontraktor, lengkap dengan ekspor CSV dan PDF. Lima peran ditegakkan di browser dan sekali lagi di server. Alur persetujuan mengikuti permintaan yang ditolak sampai diajukan ulang. Frontend punya sedikitnya 111 tes otomatis, termasuk tes yang memastikan satu peran tidak bisa melihat data peran lain. Saya membangun prototipenya selama sekitar enam minggu sejak akhir Mei 2026, lalu backend-nya pada 5 Juli. Kini frontend terhubung ke server lewat sebuah sakelar, jadi masih bisa kembali ke mode prototipe selama masa peralihan.
+Montara adalah sistem privat yang sudah melewati tahap integrasi dan belum diluncurkan ke produksi. Ada delapan dashboard yang dibatasi per peran: ringkasan, peta, anggaran, progres, risiko, kepatuhan, portofolio, dan kinerja kontraktor, lengkap dengan ekspor CSV dan PDF. Lima peran ditegakkan di browser dan sekali lagi di server. Alur persetujuan mengikuti permintaan yang ditolak sampai diajukan ulang. Tes otomatis di frontend memeriksa, antara lain, bahwa satu peran tidak bisa melihat data peran lain. Saya membangun prototipenya selama sekitar enam minggu sejak akhir Mei 2026, lalu backend-nya pada 5 Juli. Kini frontend terhubung ke server lewat sebuah sakelar, jadi masih bisa kembali ke mode prototipe selama masa peralihan.
 
 ## Langkah berikutnya
 
@@ -51,5 +51,5 @@ Montara adalah sistem privat yang sudah melewati tahap integrasi dan belum dilun
 - Notifikasi berupa baris yang ditulis dalam transaksi yang sama dengan kejadian pemicunya. Celery dan Redis menjalankan deteksi keterlambatan dan agregasi terjadwal.
 - Review frontend mencatat perbaikan seperti pemecahan komponen, memoization, logika otorisasi yang dipusatkan, autosave dengan debounce, dan sinkronisasi antartab.
 - Backend: Django 5.1, DRF dengan API camelCase, `django-filter`, `drf-spectacular` untuk dokumentasi OpenAPI, dan PostgreSQL. 11 domain app dan 37 model.
-- 18 halaman dan sekitar 10 berkas tes di Vitest dan Testing Library.
+- 18 halaman. Sedikitnya 111 tes otomatis frontend di sekitar 10 berkas tes, dengan Vitest dan Testing Library.
 - Frontend: 53 commit dari 25 Mei sampai 5 Juli 2026, sekitar 27.300 baris TypeScript. Backend: 20 commit pada 5 Juli 2026, sekitar 4.150 baris Python.

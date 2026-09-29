@@ -52,8 +52,8 @@
       "label": "regions with a published risk profile"
     },
     {
-      "value": "39",
-      "label": "test points the browser engine must match"
+      "value": "6",
+      "label": "curated historical disasters, Aceh 2004 to Cianjur 2022"
     }
   ],
   "id": {
@@ -82,8 +82,8 @@
         "label": "wilayah dengan profil risiko terbuka"
       },
       {
-        "value": "39",
-        "label": "titik uji yang wajib cocok di browser"
+        "value": "6",
+        "label": "bencana bersejarah pilihan, Aceh 2004 hingga Cianjur 2022"
       }
     ]
   }

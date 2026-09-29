@@ -46,10 +46,6 @@
     {
       "value": "6",
       "label": "shareable scenarios from everyday Git trouble"
-    },
-    {
-      "value": "186",
-      "label": "tests, including checks that old history stays intact"
     }
   ],
   "id": {
@@ -76,10 +72,6 @@
       {
         "value": "6",
         "label": "skenario masalah Git sehari-hari yang bisa dibagikan"
-      },
-      {
-        "value": "186",
-        "label": "tes, termasuk pemeriksaan bahwa riwayat lama tetap utuh"
       }
     ]
   }
