@@ -60,7 +60,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
 
   return (
     <div className="border-t border-line mt-16 pt-10">
-      <p className="font-mono text-meta text-accent uppercase tracking-wider mb-6">{label}</p>
+      <p className="font-mono text-xs text-text-subtle uppercase tracking-widest mb-6">{label}</p>
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -90,7 +90,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
               </div>
             </button>
             {shot.caption && (
-              <figcaption className="font-mono text-meta text-text-subtle mt-2 px-0.5">
+              <figcaption className="mt-2.5 px-0.5 text-sm text-text-muted">
                 {shot.caption}
               </figcaption>
             )}
@@ -103,7 +103,7 @@ export default function ScreenshotGallery({ screenshots, label }: Props) {
         <button
           onClick={() => setShowAll((v) => !v)}
           aria-expanded={showAll}
-          className="mt-5 min-h-touch font-mono text-meta text-accent hover:text-gold border border-line hover:border-edge-accent px-4 py-2 rounded transition-colors"
+          className="mt-6 inline-flex min-h-touch items-center gap-2 rounded-control border border-edge px-4 py-2 text-sm text-cream transition-colors hover:border-edge-strong"
         >
           {showAll
             ? `${t('gallery_show_less')} ↑`

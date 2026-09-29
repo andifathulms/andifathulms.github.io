@@ -6,12 +6,16 @@
  * globals.css does the work, so the paper version can't drift from the page.
  * Hidden from the printed output itself.
  */
-export default function PrintButton({ label }: { label: string }) {
+export default function PrintButton({ label, variant = 'button' }: { label: string; variant?: 'button' | 'quiet' }) {
   return (
     <button
       type="button"
       onClick={() => window.print()}
-      className="print-hide min-h-touch inline-flex items-center gap-2 rounded-control border border-edge px-4 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold"
+      className={
+        variant === 'quiet'
+          ? 'print-hide inline-flex min-h-touch items-center gap-1.5 text-xs text-text-subtle transition-colors hover:text-cream'
+          : 'print-hide min-h-touch inline-flex items-center gap-2 rounded-control border border-edge px-4 py-2 text-sm text-text-muted transition-colors hover:border-edge-accent hover:text-gold'
+      }
     >
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path

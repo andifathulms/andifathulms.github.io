@@ -131,7 +131,12 @@ export default async function CaseStudyPage({
               <span className="text-text-subtle">/ {tw(`type_${project.problemShape}`)}</span>
             )}
           </Link>
-          <span className="font-mono text-xs text-text-subtle">{t('min_read', { min: readingMinutes })}</span>
+          {/* Print sits here, out of the way: it's for the reader who forwards
+              a case study, not a call to action. */}
+          <span className="flex items-center gap-4">
+            <span className="font-mono text-xs text-text-subtle">{t('min_read', { min: readingMinutes })}</span>
+            <PrintButton label={ta('print')} variant="quiet" />
+          </span>
         </nav>
 
         <header className="mb-10 max-w-4xl">
@@ -275,7 +280,6 @@ export default async function CaseStudyPage({
               {t('cta_cv')}
               <span aria-hidden="true">↓</span>
             </a>
-            <PrintButton label={ta('print')} />
           </div>
         </section>
 
