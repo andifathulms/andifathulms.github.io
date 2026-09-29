@@ -50,7 +50,9 @@ const BANNED = {
     { re: /\bnot just\b|\bnot merely\b/gi, max: 0, why: 'not-X-but-Y' },
     { re: /\brather than\b/gi, max: 1, why: 'not-X-but-Y' },
     { re: /\binstead of\b/gi, max: 1, why: 'not-X-but-Y' },
-    { re: /\bcommits?\b|\blines of (code|python|typescript|ts)\b/gi, max: 0, why: 'effort metric in visible copy' },
+    // Counted commits and lines are effort metrics. The bare word is fine —
+    // the Git rebase simulator is about commits.
+    { re: /~?\d[\d,.]*\+?\s+commits?\b|\blines of (code|python|typescript|ts)\b|~?\d[\d,.]*k?\s+lines\b/gi, max: 0, why: 'effort metric in visible copy' },
   ],
   id: [
     { re: /\bsecara jujur\b|\bjujur\b/gi, max: 0, why: 'self-grading' },
@@ -60,7 +62,7 @@ const BANNED = {
     { re: /\balih-alih\b/gi, max: 1, why: 'not-X-but-Y' },
     { re: /\bdikodekan secara keras\b/gi, max: 0, why: 'calque — write "di-hardcode"' },
     { re: /\b(adapun|yang mana|dalam rangka)\b/gi, max: 0, why: 'bureaucratic register' },
-    { re: /\bcommit\b|\bbaris kode\b/gi, max: 0, why: 'effort metric in visible copy' },
+    { re: /~?\d[\d.,]*\+?\s+commit\b|\bbaris kode\b/gi, max: 0, why: 'effort metric in visible copy' },
   ],
 };
 
