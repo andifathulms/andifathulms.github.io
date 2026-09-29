@@ -140,7 +140,8 @@ function lintMdx(slug, locale, warn) {
   const xNotY = headingsVisible.filter((h) => /,\s*(not|bukan)\s/i.test(h) || /:\s/.test(h));
   if (xNotY.length) warn(`${locale}: heading reads as a reveal — "${xNotY[0]}"`);
 
-  const counts = prose(visible).match(CODE_COUNT) || [];
+  // A year ("the 2026 tables") isn't a count.
+  const counts = (prose(visible).match(CODE_COUNT) || []).filter((m) => !/^(19|20)\d\d\s/.test(m));
   if (counts.length) warn(`${locale}: codebase count in the visible story — "${counts[0]}" (move it to ${HEADINGS[locale].hood})`);
 
   const code = (stripFences(visible).match(/`[^`]+`/g) || []).length;
