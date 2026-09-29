@@ -4,7 +4,7 @@
   "tagline": "A searchable library for Otorita IKN's knowledge, where the server checks every reader's access across three levels",
   "glance": {
     "for": "The public, OIKN staff, and the people who review knowledge",
-    "result": "Is live at aksara.ikn.go.id, built solo since July 2026"
+    "result": "Live at aksara.ikn.go.id, built solo since July 2026"
   },
   "skills": [
     "Access control",
@@ -42,7 +42,7 @@
   "metrics": [
     {
       "value": "43",
-      "label": "government units sharing one document library"
+      "label": "organizational units documents are filed under"
     },
     {
       "value": "10",
@@ -61,7 +61,7 @@
     "tagline": "Perpustakaan pengetahuan Otorita IKN yang bisa dicari, dengan server memeriksa akses setiap pembaca di tiga tingkat",
     "glance": {
       "for": "Publik, staf OIKN, dan para pemeriksa pengetahuan",
-      "result": "Sudah live di aksara.ikn.go.id, dikerjakan sendiri sejak Juli 2026"
+      "result": "Sudah live di aksara.ikn.go.id, dibangun sendiri sejak Juli 2026"
     },
     "skills": [
       "Kontrol akses",
@@ -72,7 +72,7 @@
     "metrics": [
       {
         "value": "43",
-        "label": "unit pemerintahan yang berbagi satu perpustakaan"
+        "label": "unit organisasi tempat dokumen dikelompokkan"
       },
       {
         "value": "10",
