@@ -1,7 +1,17 @@
 {
   "slug": "congestion-lab",
   "title": "Congestion Lab",
-  "tagline": "Shows, packet by packet, how the internet decides how fast to send data — and why your video call stutters the moment someone in the house starts a download",
+  "tagline": "A packet-by-packet simulator showing why your video call stutters when someone at home starts a download",
+  "glance": {
+    "for": "Networking students, engineers and teachers",
+    "result": "Live in two languages, checked against four published results before every deploy"
+  },
+  "skills": [
+    "Network simulation",
+    "Discrete-event modelling",
+    "Data visualization",
+    "Scientific validation"
+  ],
   "categoryTags": [
     "Personal Project",
     "Networking",
@@ -20,6 +30,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/tcp-congestion/en/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/tcp-congestion",
   "heroImage": "/images/projects/congestion-lab/hero.webp",
   "order": 30,
@@ -27,20 +38,50 @@
   "metrics": [
     {
       "value": "5",
-      "label": "Congestion algorithms from their RFCs"
+      "label": "congestion control algorithms, one shared sender"
     },
     {
       "value": "4",
-      "label": "Analytic oracles gating the deploy"
+      "label": "published results checked before every deploy"
+    },
+    {
+      "value": "9",
+      "label": "shareable scenarios, each showing one effect"
     },
     {
       "value": "288k",
-      "label": "Packets/run simulated, flat heap"
-    },
-    {
-      "value": "0",
-      "label": "Charting libraries — SVG hand-written"
+      "label": "packets simulated in about half a second"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Simulator per paket yang menunjukkan kenapa panggilan video tersendat saat ada yang mulai mengunduh di rumah",
+    "glance": {
+      "for": "Mahasiswa jaringan, engineer, dan pengajar",
+      "result": "Live dalam dua bahasa, dicek dengan empat hasil riset sebelum setiap deploy"
+    },
+    "skills": [
+      "Simulasi jaringan",
+      "Pemodelan discrete-event",
+      "Visualisasi data",
+      "Validasi ilmiah"
+    ],
+    "metrics": [
+      {
+        "value": "5",
+        "label": "algoritma congestion control, satu pengirim bersama"
+      },
+      {
+        "value": "4",
+        "label": "hasil riset dicek sebelum setiap deploy"
+      },
+      {
+        "value": "9",
+        "label": "skenario yang bisa dibagikan, masing-masing satu efek"
+      },
+      {
+        "value": "288 ribu",
+        "label": "paket disimulasikan dalam sekitar setengah detik"
+      }
+    ]
+  }
 }

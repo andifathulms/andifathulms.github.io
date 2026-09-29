@@ -1,7 +1,17 @@
 {
   "slug": "angklung-simulator",
   "title": "Angklung Simulator",
-  "tagline": "A browser angklung that models the instrument's real constraint — one angklung plays exactly one note, so a song has to be shared across a room of people — with every sound computed from a physical model of a bamboo tube, not played back from a recording",
+  "tagline": "A browser angklung that shares a song across a room of players, every note computed from bamboo physics",
+  "glance": {
+    "for": "People curious about angklung, and music and culture teachers",
+    "result": "Live in two languages, with every note synthesised and measured by tests"
+  },
+  "skills": [
+    "Audio synthesis",
+    "Constraint solving",
+    "Cultural heritage",
+    "Test-driven development"
+  ],
   "categoryTags": [
     "Personal Project",
     "Music & Audio",
@@ -20,15 +30,58 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/angklung-simulator/id/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/angklung-simulator",
   "heroImage": "/images/projects/angklung-simulator/hero.webp",
   "order": 31,
   "featured": false,
   "metrics": [
-    { "value": "0", "label": "Sampled audio — every note synthesised" },
-    { "value": "3", "label": "Techniques from one resonator model" },
-    { "value": "132", "label": "Tests — pitch/partials/onsets measured" },
-    { "value": "3", "label": "Runtime deps, no audio or DSP library" }
+    {
+      "value": "0",
+      "label": "audio files, every note synthesised"
+    },
+    {
+      "value": "3",
+      "label": "playing techniques from one bamboo model"
+    },
+    {
+      "value": "3",
+      "label": "cited tunings, each with its caveat"
+    },
+    {
+      "value": "132",
+      "label": "tests measuring pitch, partials and strikes"
+    }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Angklung di browser yang membagi satu lagu ke banyak pemain, dengan setiap nada dihitung dari fisika bambu",
+    "glance": {
+      "for": "Orang yang penasaran dengan angklung, serta guru musik dan budaya",
+      "result": "Live dalam dua bahasa, setiap nada disintesis dan diukur oleh tes"
+    },
+    "skills": [
+      "Sintesis audio",
+      "Pemecahan kendala",
+      "Warisan budaya",
+      "Pengembangan berbasis tes"
+    ],
+    "metrics": [
+      {
+        "value": "0",
+        "label": "berkas audio, setiap nada disintesis"
+      },
+      {
+        "value": "3",
+        "label": "teknik permainan dari satu model bambu"
+      },
+      {
+        "value": "3",
+        "label": "laras bersumber, masing-masing dengan catatannya"
+      },
+      {
+        "value": "132",
+        "label": "tes yang mengukur nada, parsial, dan pukulan"
+      }
+    ]
+  }
 }

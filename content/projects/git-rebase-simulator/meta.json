@@ -1,7 +1,17 @@
 {
   "slug": "git-rebase-simulator",
   "title": "Git Rebase Simulator",
-  "tagline": "A safe sandbox to practise the scariest parts of Git — rebase, hard reset, force-push — and watch what actually happens to your commits, with real content-addressed hashes",
+  "tagline": "A safe sandbox for practising rebase, hard reset and force-push, where commit ids change as in Git",
+  "glance": {
+    "for": "Developers who use Git daily but don't trust rebase, and their teachers",
+    "result": "Live and open source, checked against the real Git program"
+  },
+  "skills": [
+    "Developer education",
+    "Version control internals",
+    "Data visualization",
+    "Test oracles"
+  ],
   "categoryTags": [
     "Personal Project",
     "Developer Tool",
@@ -19,6 +29,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/git-rebase-visualizer/en/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/git-rebase-visualizer",
   "heroImage": "/images/projects/git-rebase-simulator/hero.webp",
   "order": 20,
@@ -26,20 +37,50 @@
   "metrics": [
     {
       "value": "17",
-      "label": "Git commands, real content-addressed hashes"
+      "label": "Git commands you can practise safely"
     },
     {
       "value": "9",
-      "label": "Scenarios verified against the real git binary"
+      "label": "scenarios checked against real Git"
+    },
+    {
+      "value": "6",
+      "label": "shareable scenarios from everyday Git trouble"
     },
     {
       "value": "186",
-      "label": "Tests, append-only store invariants"
-    },
-    {
-      "value": "~5 hrs",
-      "label": "Git object model + oracle, one sitting"
+      "label": "tests, including checks that old history stays intact"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Sandbox aman untuk berlatih rebase, hard reset, dan force-push, dengan id commit yang berubah seperti di Git",
+    "glance": {
+      "for": "Developer yang memakai Git tiap hari tapi belum percaya rebase, serta pengajarnya",
+      "result": "Live dan open source, dicek terhadap program Git yang asli"
+    },
+    "skills": [
+      "Edukasi developer",
+      "Internal version control",
+      "Visualisasi data",
+      "Test oracle"
+    ],
+    "metrics": [
+      {
+        "value": "17",
+        "label": "perintah Git yang bisa dilatih dengan aman"
+      },
+      {
+        "value": "9",
+        "label": "skenario dicek terhadap Git asli"
+      },
+      {
+        "value": "6",
+        "label": "skenario masalah Git sehari-hari yang bisa dibagikan"
+      },
+      {
+        "value": "186",
+        "label": "tes, termasuk pemeriksaan bahwa riwayat lama tetap utuh"
+      }
+    ]
+  }
 }

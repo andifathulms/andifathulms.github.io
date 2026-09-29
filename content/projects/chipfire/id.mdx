@@ -2,34 +2,54 @@
 
 ## Masalahnya
 
-Chain Reaction adalah permainan grid yang populer dengan puluhan klon di browser — dan hampir semuanya salah dalam dua hal. Pertama, aturannya sendiri: saat sebuah sel mencapai kapasitas, ia seharusnya *mengurangi* massa kritisnya, bukan mengosongkan ke nol. Sebagian besar implementasi mengosongkannya, yang tetap terlihat seperti permainan yang berfungsi tetapi diam-diam menjadi permainan yang berbeda — bug yang tidak pernah menampakkan dirinya. Kedua, arsitektur: setiap versi online mengandalkan backend — lobby, matchmaker, server otoritatif, dan tagihan hosting di baliknya. Biaya itulah yang membuat sebagian besar game kecil tidak pernah punya mode online sama sekali.
+Chain Reaction adalah permainan grid yang cukup terkenal, dengan puluhan tiruan di browser. Kebanyakan salah di dua hal. Yang pertama adalah aturannya sendiri. Saat sebuah sel mencapai kapasitasnya, isinya seharusnya dikurangi sebesar kapasitas itu, dan sisanya tetap tinggal. Kebanyakan versi malah mengosongkannya. Permainannya masih terlihat wajar, tapi sebenarnya sudah jadi permainan lain, dan tidak ada yang sadar.
 
-Chipfire dibangun untuk dua audiens sekaligus. Untuk pemain: permainan cepat yang bisa dimainkan offline, dipelajari dalam dua menit, dan dimainkan melawan teman di perangkat lain — tanpa akun, tanpa instalasi. Untuk pembaca teknis, ini adalah demonstrasi bahwa "multiplayer tanpa backend" adalah jawaban nyata atas kendala nyata, sekaligus undangan untuk bertanya bagaimana caranya.
+Yang kedua adalah mode multipemain. Setiap versi online butuh lobi, sistem pencari lawan, dan server permainan, lengkap dengan tagihan hosting-nya. Biaya itulah yang membuat kebanyakan game kecil tidak pernah punya mode online.
 
-## Pendekatannya
+Chipfire dibuat untuk dua kelompok. Pemain mendapat game cepat yang bisa dipelajari dalam dua menit dan dimainkan melawan teman di perangkat lain, tanpa akun. Pembaca teknis mendapat contoh yang berjalan dari multipemain tanpa backend sama sekali.
 
-### Satu properti menopang segalanya: determinisme
+## Yang saya bangun
 
-`applyMove(state, move)` adalah fungsi murni yang menghasilkan keluaran identik byte-per-byte di perangkat mana pun, browser mana pun, kapan pun — tanpa clock, tanpa `Math.random`, tanpa floating point di mana pun, hanya bilangan bulat, termasuk dalam penilaian AI. Satu properti itu memberi empat fitur sekaligus: karena rangkaian langkah yang sama selalu menghasilkan permainan yang sama, **sebuah permainan *adalah* daftar langkahnya**. Replay, undo, kode permainan yang bisa dibagikan, dan sinkronisasi peer-to-peer semuanya muncul secara gratis. Tidak ada data turunan yang pernah disimpan atau dikirim sebagai sumber kebenaran.
+### Langkah yang sama selalu menghasilkan permainan yang sama
 
-### Tanpa server — dan tanpa wasit juga
+Saya membuat mesin aturannya sepenuhnya bisa ditebak. Mesin ini hanya memakai bilangan bulat, tanpa jam, dan keacakan hanya berasal dari seed yang tersimpan di dalam permainan. Perangkat apa pun, di browser apa pun, menghasilkan hasil yang sama dari langkah yang sama. Jadi sebuah permainan cukup disimpan sebagai daftar langkahnya. Replay, undo, kode permainan yang bisa dibagikan, dan sinkronisasi online semuanya lahir dari sifat itu. Tidak ada data lain yang disimpan atau dikirim sebagai sumber kebenaran.
 
-Dalam permainan peer-to-peer, setiap browser memegang salinan permainannya sendiri. Hanya langkah dan hash 32-bit dari posisi hasilnya yang melintasi jaringan — tidak pernah posisinya sendiri. Kedua sisi menjalankan fungsi murni yang sama atas langkah yang sama dan membandingkan hash setiap giliran. Ketidakcocokan berarti kedua pemain diam-diam telah menyimpang ke permainan yang berbeda — kegagalan terburuk yang mungkin terjadi — sehingga aplikasi **langsung berhenti, mengatakannya, dan menawarkan untuk membangun ulang dari daftar langkah**. Ia tidak pernah diam-diam menentukan pemenang.
+### Dua browser saling memeriksa setiap giliran
 
-### Para pemain adalah server signaling
+Dalam permainan online, setiap browser menyimpan salinan permainannya sendiri. Yang dikirim hanya langkah dan sidik jari pendek dari posisi papan. Kedua sisi menjalankan langkah yang sama lalu membandingkan sidik jarinya setiap giliran. Kalau berbeda, berarti kedua pemain sudah berada di dua permainan yang berlainan. Aplikasi langsung berhenti, memberi tahu kedua pemain, dan menawarkan untuk membangun ulang dari daftar langkah. Aplikasi tidak pernah diam-diam memilih pemenang.
 
-Dua browser di balik router rumah tidak bisa saling menemukan, dan WebRTC sengaja membiarkan jabat tangan pertama itu tidak ditentukan. Chipfire menyajikannya sebagai kode terkompresi yang bisa disalin-tempel: satu kode dikirim lewat WhatsApp, satu kode dibalas, dan kanal pun terbuka — tanpa infrastruktur apa pun dan tanpa sesuatu yang bisa dibatasi atau dimatikan.
+### Pemain sendiri yang mempertemukan perangkatnya
 
-### Urutan adalah aturan, bukan kebetulan
+Dua browser di balik router rumah tidak bisa saling menemukan. Biasanya ada server yang memperkenalkan keduanya. Saya mengubah perkenalan itu menjadi kode pendek yang bisa ditempel. Kita mengirim satu kode lewat WhatsApp, teman membalas dengan satu kode, dan permainan tersambung. Tidak ada infrastruktur yang perlu dibayar, dibatasi, atau bisa dimatikan.
 
-Kaskade diselesaikan melalui antrean FIFO eksplisit dengan urutan pemindaian tetap — tidak pernah rekursi, yang akan meledakkan stack justru pada rantai panjang yang membuat permainan menarik, dan tidak pernah iterasi atas `Set` atau kunci objek, sumber divergensi antar-perangkat yang paling mungkin dan yang tidak pernah muncul dalam pengujian satu mesin. Massa kritis sebuah sel diturunkan dari satu fungsi ketetanggaan, tidak pernah di-hardcode per sel — itulah yang membuat papan heksagonal atau wrap-around menjadi tambahan di kemudian hari, bukan penulisan ulang.
+### Rantai ledakan diproses dengan urutan tetap
 
-### Jujur tentang apa yang tidak berhasil
+Sebuah cascade diproses satu sel demi satu sel dari antrean, dengan urutan pemindaian yang sama di setiap perangkat. Dua browser yang memproses sel dengan urutan berbeda akan pelan-pelan tidak sinkron, dan bug seperti itu tidak akan pernah muncul di satu mesin. Kapasitas sebuah sel adalah jumlah tetangganya, dibaca dari satu fungsi. Dengan begitu, papan heksagonal atau papan yang tepinya menyambung bisa ditambahkan nanti tanpa banyak perubahan.
 
-Sekitar 10–20% koneksi — jaringan korporat yang ketat, konfigurasi NAT tertentu — tidak bisa membangun jalur peer langsung tanpa server relay berbayar, yang akan melanggar premis tanpa-backend. Alih-alih menyembunyikannya di balik spinner tanpa akhir, Chipfire mendeteksi kegagalan itu dengan cepat, menjelaskannya dengan lugas, dan menawarkan permainan lokal langsung di tempat.
+### Koneksi yang gagal dijelaskan
 
-## Hasil
+Sekitar 10 sampai 20% koneksi, di jaringan kantor yang ketat dan sebagian router rumah, tidak bisa menyambungkan dua perangkat secara langsung tanpa server relay berbayar. Relay akan merusak ide tanpa backend. Jadi Chipfire mendeteksi kegagalan itu dengan cepat, menjelaskannya dalam bahasa yang mudah dipahami, dan langsung menawarkan permainan lokal.
 
-Live dan ter-deploy di GitHub Pages, dijaga oleh typecheck, lint, dan seluruh test suite — termasuk simulasi 3.000 permainan dan kesepakatan lintas-instance yang dijalankan di *setiap* deploy, karena determinisme adalah properti yang menopang segalanya. Permainan hotseat untuk 2–4 pemain, lawan AI yang menjalankan minimax dengan alpha-beta pruning di Web Worker, permainan peer-to-peer lewat kode salin-tempel, penonton replay, kode permainan yang bisa dibagikan, dan tutorial interaktif yang pelajarannya diuji dalam test suite semuanya lengkap dan bisa dimainkan.
+## Hasilnya
 
-Dibangun sendiri dan spec-first, dari direktori kosong hingga situs ter-deploy dalam waktu kurang dari 24 jam — sekitar 6.700 baris TypeScript di 66 berkas, mesin deterministik 984 baris, AI 300 baris, dan 70 tes, di atas tiga dependensi runtime (`next`, `react`, `react-dom`) dan nol layanan backend.
+Chipfire sudah live dalam bahasa Indonesia dan Inggris. Kita bisa bermain bergantian di satu perangkat untuk 2 sampai 4 orang, melawan AI dengan tiga tingkat kesulitan, atau melawan teman secara online lewat kode yang ditempel. Ada juga penampil replay, kode permainan yang bisa dibagikan, pratinjau langkah, dan tutorial lima pelajaran. Setiap deploy lebih dulu memainkan 3.000 permainan simulasi untuk membuktikan mesinnya konsisten. Saya membangunnya dalam waktu kurang dari 24 jam pada 2 dan 3 Agustus 2026, dari spesifikasi tertulis sampai situs ter-deploy.
+
+## Langkah berikutnya
+
+- Menambahkan kode QR untuk kode koneksi, supaya ponsel bisa tersambung dengan memindai.
+- Menambahkan layanan pencari lawan opsional di atas alur tempel kode, yang tetap menjadi jalur yang selalu berfungsi.
+
+## Di balik layar
+
+- `applyMove(state, move)` murni: tanpa `Date`, tanpa `Math.random` (generator ber-seed disimpan di state), tanpa float, termasuk di penilaian AI.
+- Cascade memakai antrean FIFO eksplisit dengan urutan pemindaian tetangga yang tetap. Tanpa rekursi, yang bisa meluap di rantai panjang, dan tanpa iterasi atas `Set` atau key objek. `Uint8Array` berisi penanda posisi dipakai sebagai pengganti `Set`.
+- Deteksi desync menukar hash FNV-1a 32-bit dari seluruh state setiap giliran. Ukuran papan dan seed ikut dalam offer; setelah itu hanya langkah yang dikirim.
+- Signalling memakai offer `RTCPeerConnection` yang dikompresi dengan `CompressionStream` (deflate-raw) menjadi kode yang bisa ditempel. Dua server STUN publik Google hanya dipakai untuk menemukan alamat. Tidak ada relay TURN. Signalling lewat broker PeerJS (M5) dan encoding QR masih belum dikerjakan.
+- AI memakai minimax dengan alpha-beta pruning dan iterative deepening di Web Worker, dengan anggaran waktu dan jam yang di-inject. Penilaiannya mencakup keunggulan orb dan sel, kontrol sudut dan tepi, serta kerentanan. Tingkat kesulitan mencari di kedalaman 1, 3, dan 6, dilemahkan hanya dengan noise ber-seed.
+- Pratinjau langkah menjalankan langkah asli di mesin asli pada salinan sementara (`lib/engine/preview.ts`).
+- Mesin mengeluarkan event `place`, `explode`, `convert`, `eliminate`, dan `win` yang berurutan dalam gelombang. Renderer memutarnya ulang dan menghormati `prefers-reduced-motion`.
+- Pelajaran tutorial memakai posisi papan asli yang hasilnya diverifikasi di tes. Setiap warna pemain dipasangkan dengan susunan orb yang berbeda, jadi warna tidak pernah jadi satu-satunya penanda.
+- Namanya diganti dari Rantai ke Chipfire setelah mekanismenya dikenali sebagai chip-firing game (model abelian sandpile). Kedua key `localStorage` dimigrasikan dengan fallback lama.
+- Bug Tailwind yang hanya muncul di production menghilangkan warna pemain karena `lib/` tidak masuk jalur pemindaian class.
+- CI menjalankan typecheck, lint, seluruh tes (termasuk simulasi 3.000 permainan dan kecocokan antar-instance), lalu mengecek hasil export untuk `.nojekyll` dan rute bahasa.
+- Dependensi runtime: `next`, `react`, `react-dom`. Mesin 984 baris, AI 300 baris, jaringan 404 baris. Sekitar 6.700 baris TypeScript di 66 berkas, 70 tes di 15 berkas, 26 commit.

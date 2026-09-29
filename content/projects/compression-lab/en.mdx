@@ -2,34 +2,47 @@
 
 ## The problem
 
-Almost every explanation of data compression teaches a handful of algorithms and implies there's a single "entropy floor" they all approach. That's wrong, and the wrongness is the interesting part: entropy isn't a property of a text, it's a property of a text *under a model*. Condition on the previous character and the cost drops; condition on two and it drops again — but each step down costs something to describe, and that description has to ship with the data. Total size is code stream plus model description, and that total has a minimum at some model order that moves depending on how long the text is.
+Most explanations of data compression teach three algorithms and imply there is one "entropy floor" they all approach. That picture is wrong in an interesting way. How cheaply a text can be stored depends on how much the compressor remembers. If it looks at the previous letter, the cost drops. Look at two letters and it drops again. But each step makes the model bigger, and the model has to be stored with the data.
 
-Existing explainers hide this because they never count the model's own cost. This app makes the trade-off visible: paste a longer piece of text and the optimal model order visibly moves. That single moment is the entire argument, delivered without a paragraph of explanation.
+So the true size is the compressed text plus the model, and there is a sweet spot that moves with the length of the text. Existing explainers never count the model, so they never show that trade-off. I built Compression Lab for students, self-taught engineers and anyone who half-remembers Huffman coding from a course.
 
-## The approach
+## What I built
 
-### A pure engine, separated hard from the UI
+### One chart carries the whole argument
 
-The compression engine imports nothing — no React, no DOM, no randomness, no clock — and runs unmodified under a plain Node test runner. That separation is what makes the numbers testable independently of anything that draws them, which is the whole basis for trusting what the interface claims.
+The central chart plots six levels of model memory as descending steps. Against them it plots the rate each compressor achieves, the model's own size as a rising curve, and the total as a third curve with its lowest point marked. Paste a longer text and that lowest point moves right. That one moment makes the argument without a paragraph of explanation.
 
-### Every coder has a working decoder, and it's tested
+### The model's size is measured byte by byte
 
-Decompression isn't a user-facing feature, but a coder without a decoder is unverified, and this app's entire claim is that its numbers are real. Round-trip tests cover the empty string, a single character, a repeated character, an all-distinct-characters string, text outside the standard Unicode range, and every bundled sample text.
+I wrote code that saves each model as real bytes and code that reads it back. Tests check that a decoder given only the compressed text and those model bytes rebuilds the original exactly, at every level. The model cost on screen is the length of those bytes. If it were an estimate, the lowest point on the chart would be made up.
 
-### Model cost is measured, never estimated
+### Every compressor can undo its work
 
-A real byte-level serializer writes the statistical model to bytes, and a matching deserializer reads it back; the test suite asserts that a decoder given only the compressed stream and those model bytes reproduces the original text exactly, for every coder at every model order. The number shown in the interface for "model cost" is literally the length of that serialized byte array — if this were a formula or an approximation, the minimum on the app's central chart would be fiction rather than a measurement.
+Nobody uses the app to decompress. But a compressor without a matching decompressor is unproven, and the app's claim is that its numbers are correct. So each of the three compressors has a decoder, and the tests round-trip awkward inputs: an empty string, a single character, characters outside the basic Unicode range and every bundled sample.
 
-### Traces, not re-simulation
+### The pictures replay the real calculation
 
-Each coder emits a trace record alongside its compressed output — the Huffman merge sequence, the LZ77 window search steps, the arithmetic coder's interval state at every symbol. The views render that trace directly and never re-run the algorithm to produce a picture, so the visualization and the computation can't drift apart from each other over time.
+Each compressor records what it did as it runs: the order Huffman merged symbols, where the sliding window found matches, and the interval at every step of arithmetic coding. The views draw that record and never run the algorithm a second time. Your own text is also tinted letter by letter by how many bits it costs, so structure appears as you raise the model's memory.
 
-### An honest idealization on top of real integer arithmetic
+### A four-language test that reports both outcomes
 
-A textbook floating-point implementation of arithmetic coding breaks after roughly fifteen symbols, so the engine runs on integer registers with proper renormalization and underflow handling. The zooming interval a user watches on screen is a real-number idealization of that integer state — the trace carries both representations, and the interface states plainly which one is being shown where.
+The app compares the same UN human rights declaration in English, Indonesian, German and Finnish. The idea being tested: languages that build words from stacked affixes hide extra repetition that pattern matching can find. Indonesian gained the most. Finnish, the most affix-heavy of the four, did not. The page reports both results and says four texts can't settle the question.
 
-## Outcome
+## Result
 
-Live: the central chart plots conditional entropy at six model orders as descending steps, each coder's actually-achieved rate against them, the model's own description cost as a rising curve, and total size as a third curve with a visible, moving minimum. A parallel-corpus comparison runs the same measurement across four languages of one source text and reports a result that partly contradicts its own hypothesis — Indonesian shows the widest advantage from pattern-matching compression over a naive model, but the most grammatically complex of the four languages does not — and the interface states both findings rather than picking the one that tells a cleaner story.
+Compression Lab is live, with a separate page that explains the method. The whole engine is my own code: the frequency models, Huffman coding, arithmetic coding and the sliding-window compressor. It uses no compression, statistics or chart library. Recomputing all six levels takes about 14 milliseconds on my machine, inside a 16-millisecond budget, so the charts update as you type. Nothing you paste leaves the browser. I built it over two days, 2 and 3 September 2026.
 
-Sole author, 41 commits over a two-day concentrated build, ~9,800 lines of code, 64 tests. Two runtime dependencies — React and React DOM — with the frequency models, Huffman coding, an integer arithmetic range coder, and LZ77 with a hash-chain match finder all written from scratch; no compression, entropy, or charting library anywhere in the dependency tree, because importing one would defeat the point of the project. A full recompute across all six model orders and three coders lands under 16 milliseconds so typing needs no debounce, and nothing typed into it ever leaves the browser.
+## Under the hood
+
+- `src/engine/` imports nothing: no React, no DOM, no `Math.random`, no `Date`. It runs unmodified under a plain Node test runner.
+- Model orders 0 to 5, static and adaptive, with three coders: Huffman (canonical codes), an integer arithmetic range coder, and LZ77 with a hash-chain match finder. All are round-trip tested, including text outside the Basic Multilingual Plane.
+- `serialiseModel` / `deserialiseModel` define a real byte format. Model cost in the UI is `modelBytes.length * 8`. Adaptive model cost isn't zero: counts are free, but the alphabet and symbol count are transmitted. An order-3 adaptive description is about a fiftieth of the static one.
+- A floating-point `[0,1)` arithmetic coder breaks after about fifteen symbols, so the engine uses integer registers with renormalization and underflow handling. The zooming view is the idealised real-number interval, with a renormalization track and bit ledger underneath.
+- At 32 bits, floor division drifted 1.54 bits high on a 10,000-symbol order-4 text. I widened the registers to 48 bits and left the tolerance alone.
+- A `Map<string, Map<string, number>>` model measured 250 ms for a 10,000-character recompute. Counts are now interned integers, built for all six orders in one pass and cached by input. Above 50,000 characters the app recomputes on idle and says so.
+- The performance test asserts p90 under 16 ms locally (14.4 ms measured) and acts as a 32 ms regression guard on CI, where a shared runner measured 17.0 ms.
+- Parallel corpus, LZ77 advantage over H₀ in bits per symbol: Indonesian 0.851, English 0.636, Finnish 0.340.
+- Samples are bundled with Vite's `?raw` import; anything in `public/` would be a runtime request. Typed text is kept out of URL state; a separate copy-link action exists.
+- Six hand-drawn SVG views, one `requestAnimationFrame` loop for the interval zoom. A 200,000-character paste still scrolls because the text surface is virtualised.
+- Out of scope: LZW, BWT, PPM, ANS, DEFLATE, binary input, file upload and leaderboards.
+- Runtime dependencies are `react` and `react-dom`. Bundle 94 KB gzipped JS plus 7 KB CSS against a 200 KB budget. 64 tests in 12 files, about 9,800 lines, 41 commits.

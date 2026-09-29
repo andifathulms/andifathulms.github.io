@@ -2,33 +2,53 @@
 
 ## Masalahnya
 
-Kontrol kongesti TCP mengatur kecepatan hampir setiap koneksi internet, dan ia diajarkan sebagai gambar — "gigi gergaji" — yang kebanyakan orang tak pernah lihat dihasilkan. Empat konsekuensi praktis yang disasar proyek ini secara langsung:
+Setiap koneksi internet memutuskan, berkali-kali dalam sedetik, seberapa cepat ia boleh mengirim data. Keputusan itu menjelaskan masalah sehari-hari: kenapa panggilan video tersendat saat ada orang di rumah mulai mengunduh, atau kenapa server yang jauh terasa lambat di jaringan yang cepat. Biasanya ini diajarkan lewat satu gambar, garis bergerigi yang tidak pernah kita lihat proses terbentuknya.
 
-- **Orang menyalahkan bandwidth untuk masalah latensi.** Pertumbuhan window terjadi sekali per perjalanan bolak-balik, jadi server sejauh 300 ms pulih dari paket yang hilang enam kali lebih lambat daripada yang 50 ms pada bandwidth identik. Itu tak terlihat tanpa simulator.
-- **"Slow start" salah nama** — ia menggandakan window tiap perjalanan bolak-balik: lambat memulai, lalu meledak. Namanya mengajarkan kebalikan dari perilakunya.
-- **Bufferbloat tak terlihat.** Buffer router berlebihan berarti kehilangan kini terjadi lama setelah antrean penuh, jadi algoritma berbasis-kehilangan menambahkan *detik* latensi tanpa menjatuhkan apa pun. Ini mekanisme di balik "panggilannya jadi buruk saat unduhan dimulai".
-- **Keadilan diasumsikan alih-alih dipahami.** Konvergensi AIMD ke bagian yang setara adalah properti geometris terbukti yang gagal dengan cara-cara spesifik yang bisa diprediksi.
+Ada empat hal yang tetap tersembunyi tanpa simulator. Server yang berjarak 300 ms pulih dari paket yang hilang enam kali lebih lambat daripada server berjarak 50 ms, dengan bandwidth yang sama. "Slow start" ternyata menggandakan kecepatan setiap putaran. Buffer router yang terlalu besar menambah jeda sampai hitungan detik tanpa kehilangan satu paket pun. Dan berbagi jalur secara adil hanya berhasil dalam kondisi tertentu. Congestion Lab dibuat untuk mahasiswa jaringan, engineer yang tahu istilahnya tapi belum melihat mekanismenya, dan para pengajarnya.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Gigi gergaji itu emergen, tak pernah digambar
+### Setiap paket disimulasikan, kurvanya mengikuti
 
-Keputusan sentral: paket individual dijadwalkan ke clock virtual, diserialisasi ke tautan, diantrekan, dijatuhkan, dan diakui — dan kurva window adalah apa pun yang *dilakukan* algoritma sebagai respons. Tak ada kurva yang dihasilkan dari formula. Simulator yang menggambar bentuk yang diharapkannya tak pernah bisa mengejutkan Anda, dan seluruh nilai proyek ada pada hasil mengejutkannya yang bisa dipercaya.
+Saya membangun simulator yang mengirim paket satu per satu lewat jalur virtual. Paket mengantre di router, dibuang saat antrean penuh, lalu dikonfirmasi penerimanya. Kecepatan kirim yang terlihat adalah hasil reaksi algoritmanya. Tidak ada kurva yang berasal dari rumus. Simulator yang menggambar bentuk yang sudah diharapkan tidak akan pernah memberi kejutan, padahal kejutan itulah inti proyek ini.
 
-### Ketepatan dibawa oracle analitik, bukan dengan melihatnya
+### Hasil riset menentukan boleh tidaknya deploy
 
-Simulator yang salah tetap menghasilkan gigi gergaji yang meyakinkan. Maka empat prediksi terbitan independen — persamaan throughput Mathis, utilisasi-vs-ukuran-buffer, ketidakadilan RTT, dan konvergensi keadilan AIMD — ditegaskan sebagai *sapuan* (bukan titik tunggal) dan **menjaga deploy.** Simulator yang berhenti mereproduksi Mathis tak bisa dikirim. Konservasi paket (`terkirim = terkirimkan + terjatuh + dalam penerbangan`) ditegaskan di tiap kejadian di tiap suite, dan mesinnya deterministik hingga waktu integer-nanodetik dengan timestamp sama dipecah oleh nomor urut eksplisit — karena float di penjadwal mengakumulasi kesalahan yang tak akan reproduksi, dan perbandingan algoritma hanya bermakna jika ia identik byte-per-byte di mana pun.
+Simulator yang salah tetap bisa menggambar garis bergerigi yang meyakinkan, jadi saya tidak memercayainya hanya dengan melihat. Empat hasil independen dari literatur riset diperiksa di berbagai rentang pengaturan, dan kalau gagal, deploy diblokir. Keempatnya mencakup throughput saat ada paket hilang, pemakaian jalur dibanding ukuran buffer, keunggulan server yang dekat, dan cara dua pengirim menuju bagian yang sama besar. Dua di antaranya sudah lolos sebelum saya membuat satu layar pun. Aturannya: kalau pemeriksaan gagal, simulatornya yang salah, dan toleransinya tidak diubah.
 
-### Satu kerangka pengirim; kontrol kongesti sebagai plugin
+### Lima algoritma memakai satu pengirim
 
-Setiap algoritma mengimplementasikan antarmuka empat-metode yang sama (`onAck`, `onLoss`, `onTimeout`, `canSend`) — tak ada `if (algorithm === 'cubic')` di pengirim dan tak ada pengirim yang bercabang per algoritma, jadi tampilan perbandingan mengukur *algoritma*, bukan implementasi. Run 60 detik 100 Mbps kira-kira setengah juta paket, jadi field panas jejak hidup di typed array dan simulasi berjalan di Web Worker, di-benchmark di M0 sebelum UI ada: 288k paket dalam ~0,5 s dengan pertumbuhan heap datar.
+Saya mengimplementasikan lima algoritma congestion control dari spesifikasi resminya: Tahoe, Reno/NewReno, CUBIC, Vegas, dan BBR v1. Semuanya terpasang di pengirim yang sama, jadi perbandingannya hanya mengukur algoritmanya. Di jalur yang panjang dan cepat, awalnya semua algoritma terlihat sama karena pemulihan paket hilang menjadi hambatannya. Karena itu saya menambahkan selective acknowledgement, yang tidak ada di rencana awal, supaya perbandingannya bermakna.
 
-### Di mana model menolak, dan di mana realitas mengejutkannya
+### Empat grafik berbagi satu sumbu waktu
 
-Mekanisme yang tak bisa dimodelkan setia dicatat sebagai celah dan ditampilkan di tempat ia memengaruhi hasil, alih-alih ditebak. Dan sebuah fenomena nyata *membalik* sebuah oracle — di atas DropTail deterministik model menunjukkan efek fase Floyd–Jacobson yang kuat, cukup tajam untuk membalik bias RTT yang diharapkan — jadi alih-alih melonggarkan oracle, skenario keadilan dipindah ke RED dan efek fase ditegaskan secara eksplisit. Ketika oracle gagal, simulatornya yang salah; toleransi tak pernah dilebarkan.
+Tampilan utamanya menumpuk jendela pengiriman, antrean router, throughput, dan waktu bolak-balik pada satu sumbu waktu. Membaca lurus ke bawah di titik mana pun menunjukkan alasan pengirim bertindak seperti itu. Halaman bufferbloat menjalankan unduhan yang sama lewat buffer dalam dan lewat antrean yang dirancang untuk membatasi jeda: throughput-nya hampir sama, sedangkan jedanya berbeda sepuluh kali lipat. Setelah setiap simulasi, situs menuliskan temuannya dalam kalimat sederhana, dalam bahasa Indonesia atau Inggris, lengkap dengan sumbernya.
 
-## Hasil
+### Batas modelnya ditunjukkan
 
-Live dan publik, dwibahasa (Indonesia default), aksesibel (grafik yang bisa dinavigasi keyboard dengan pembacaan `aria-live`, ringkasan prosa untuk pembaca layar), sepenuhnya statis. Tampilan khasnya adalah **jejak empat-seri** — congestion window, kedalaman antrean bottleneck, throughput terhadap garis kapasitas, dan RTT berbagi satu sumbu-x dengan penyejajaran vertikal persis, sehingga bacaan lurus ke bawah di tiap saat menunjukkan mengapa window melakukan yang dilakukannya. Ditambah perbandingan algoritma di Tahoe, Reno/NewReno, CUBIC, Vegas, dan BBR v1 (masing-masing mengutip RFC-nya di kode dan UI); **demonstrasi bufferbloat** — aliran yang sama di atas buffer DropTail dalam versus CoDel, throughput nyaris tak beda sementara RTT beda satu orde besaran; analisis keadilan dengan indeks Jain dan diagram fase Chiu-Jain; lapisan temuan bahasa-lugas yang mengubah run selesai menjadi kalimat terkutip; dan sembilan skenario terkurasi, semuanya bisa dibagikan lewat URL.
+Beberapa perilaku tidak bisa dimodelkan dengan setia di sini. Saya mencatatnya sebagai celah dan menampilkannya di tempat celah itu memengaruhi hasil. Ada satu hasil yang mengejutkan saya. Dengan antrean sederhana yang membuang paket saat penuh, waktu kedatangan paket kadang membalik keunggulan server yang dekat. Pemeriksaan keadilan saya pindahkan ke antrean yang membuang paket secara acak, dan efek mengejutkan itu tetap punya tesnya sendiri.
 
-Dibangun sendiri dalam satu hari ~10 jam — ~12.100 baris TypeScript dengan inti simulasi ~3.600 baris, 148 tes di balik empat oracle penjaga-deploy, di atas tiga dependensi runtime dan **tanpa pustaka simulasi atau charting** (penjadwal dan plot SVG tulisan-tangan *itulah* proyeknya). Ia menyatakan dengan lugas bahwa ia memodelkan algoritma terbitan dan tak mengklaim paritas dengan stack kernel Linux.
+## Hasilnya
+
+Congestion Lab sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris. Ada sembilan skenario pilihan, masing-masing menunjukkan satu efek yang punya nama, dan setiap simulasi bisa dibagikan lewat tautan tanpa akun atau server. Simulatornya mengolah 288.000 paket dalam sekitar setengah detik di thread latar. Tidak ada pustaka simulasi atau grafik yang dipakai. Audit aksesibilitas otomatis tidak menemukan pelanggaran di lima halamannya saat itu, dalam kedua bahasa. Saya membangunnya dalam sekitar 10 jam pada 6 Agustus 2026, dengan 148 tes.
+
+## Langkah berikutnya
+
+- Menjalankan ulang audit aksesibilitas otomatis pada tahap desain terakhir, yang baru dicek secara manual.
+- Memperbarui entri pertama di daftar celah model yang sudah usang, karena masih menyebut selective acknowledgement belum ada.
+
+## Di balik layar
+
+- Mesin discrete-event di `lib/sim/` (~3.600 baris): jam virtual, priority queue, serialisasi link, disiplin antrean, pengirim dan penerima, serta buku besar paket.
+- `(config, seed) → SimTrace` identik per byte di mesin mana pun: waktu dalam nanodetik integer, tanpa `Date`, tanpa keacakan tanpa seed, dan timestamp yang sama diurutkan dengan nomor urut monoton eksplisit.
+- Konservasi paket (`sent = delivered + dropped + in flight`) diverifikasi di setiap event pada setiap test suite.
+- Keempat oracle: throughput Mathis et al. 1997, utilisasi terhadap ukuran buffer dan BDP, rasio ketidakadilan RTT pada Reno, dan konvergensi AIMD Chiu & Jain 1989. Sebelum ada UI, Mathis cocok dalam 13% di 5 laju kehilangan × 4 RTT, dan ukuran buffer dalam 1% di 9 ukuran buffer.
+- Setiap algoritma mengimplementasikan `onAck`, `onLoss`, `onTimeout`, dan `canSend`. Tidak ada `if (algorithm === 'cubic')` di pengirim. Pengirim CBR berlaju tetap dipakai sebagai acuan.
+- SACK mengikuti RFC 2018 dan RFC 6675, bisa diatur per flow lewat `sackEnabled`, dan mati untuk Tahoe.
+- Disiplin antrean: DropTail, RED, dan CoDel. Pada DropTail yang deterministik, efek fase Floyd–Jacobson membalik bias RTT, jadi oracle keadilan berjalan di RED dan efek fase diverifikasi di `tests/oracles/rtt-unfairness.test.ts`.
+- Simulasi 60 detik di 100 Mbps berisi sekitar setengah juta paket. Field yang sering dipakai disimpan di typed array dengan tabel samping dan hidrasi malas; simulasi berjalan di Web Worker dengan anggaran event. Benchmark di M0: 288 ribu paket dalam ~0,5 detik dengan heap yang tidak bertambah.
+- `MODEL_GAPS` di `lib/sim/engine.ts`: tanpa RACK atau Tail Loss Probe, tanpa delayed ACK, tanpa HyStart, ACK tidak pernah mengantre atau hilang, segmen selalu satu MSS, dan batas bawah RTO 200 ms (Linux), bukan 1 detik seperti RFC 6298.
+- `lib/analysis/insight.ts` menyusun kalimat temuan dalam kedua bahasa. Keadilan diukur dengan indeks Jain dari waktu ke waktu dan diagram fase Chiu-Jain.
+- `TraceChart` mengukur container-nya dan menyatakan jarak dalam piksel perangkat, setelah label 11px ternyata tampil sekitar 4px di ponsel dalam viewBox tetap 1000 unit.
+- `bund` (3,0:1) dan `sediment` (2,9:1) lolos kontras untuk garis tapi tidak untuk teks, jadi ditambahkan varian `-ink` yang aman untuk teks.
+- Nol pelanggaran axe-core di kelima rute dalam kedua bahasa pada M6. 6 rute × 2 bahasa, 148 tes di 18 berkas, ~12.100 baris TypeScript, 34 commit, tiga dependensi runtime.

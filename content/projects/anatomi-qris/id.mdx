@@ -2,30 +2,51 @@
 
 ## Masalahnya
 
-Dua celah, disatukan oleh satu objek. Orang memindai puluhan ribu kode QR dan belum pernah melihat bagaimana satu dibangun — penjelas yang ada berhenti di "ini bitstream, ini matriksnya" dan memperlakukan koreksi galat Reed-Solomon, pemilihan mask, dan interleaving sebagai kotak hitam bahkan di tutorial yang ditujukan untuk developer. Terpisah, QRIS — standar pembayaran QR nasional Indonesia, tertempel di setiap meja warung — bukan token yang buram: ia adalah payload berstruktur jelas yang menyebut nama merchant, akuisitor, dan sebuah checksum, tetapi setiap parser QRIS yang ada membuang struktur itu sebagai tabel lalu berhenti di situ.
+Kita memindai kode QR setiap hari, tapi hampir tidak pernah melihat bagaimana satu kode dibuat. Penjelasan yang beredar di internet berhenti di "ini bitstream, ini matriksnya". Koreksi galat dan masking tetap jadi kotak hitam, bahkan di tutorial untuk developer.
 
-Produk ini adalah pertemuan antara keduanya: pilih "nama merchant" di pohon payload dan kotak hitam spesifik yang membawa byte-byte itu menyala di matriksnya. Belum ada yang menghubungkan kedua lapisan itu, karena melakukannya membutuhkan encoder yang mengingat ke mana setiap bit pergi.
+Di Indonesia ada celah kedua. QRIS, standar pembayaran QR nasional, tertempel di meja kasir hampir setiap warung. Isi di balik stiker itu adalah teks biasa yang bisa dibaca, berisi nama merchant, penyedia pembayaran, dan checksum. Parser QRIS yang ada menampilkan teks itu sebagai tabel, lalu selesai.
 
-## Pendekatannya
+Saya ingin menyambungkan keduanya. Pilih "nama merchant" di data pembayaran, dan kotak hitam yang membawa huruf-huruf itu langsung menyala di kodenya. Aplikasi ini dibuat untuk dua pembaca sekaligus: orang awam yang penasaran, dan developer yang ingin memeriksa setiap angka dengan tangan.
 
-### Peta provenans adalah arsitekturnya
+## Yang saya bangun
 
-Encoder-nya tak hanya mengembalikan matriks — ia mengembalikan matriks plus catatan lengkap tentang mengapa setiap modul berwarna seperti itu: codeword mana dan bit ke berapa dari codeword itu, atau pola fungsi mana, plus apakah mask membaliknya. Setiap fitur dalam aplikasi ini adalah pembacaan dari satu struktur itu. Penyorotan bidang payload, atribusi kerusakan, urutan animasi, dan perbandingan mask semuanya didapat gratis darinya — dan ia dibangun serta diuji sebelum ada antarmuka apa pun, sehingga tak ada tampilan yang sempat menghitung ulang geometrinya sendiri lalu diam-diam melenceng dari kesepakatan dengan yang lain.
+### Encoder yang mengingat letak setiap bit
 
-### Tampilannya menggambar catatan komputasi itu sendiri, bukan rekonstruksi ulang
+Saya menulis encoder QR sendiri supaya ia bisa mencatat setiap langkahnya. Untuk setiap kotak, encoder mencatat kenapa kotak itu gelap atau terang: byte dan bit mana yang dibawanya, atau pola tetap mana yang memilikinya, dan apakah mask membaliknya. Semua fitur membaca dari catatan yang sama. Sorotan isian, pelacakan kerusakan, urutan animasi, dan perbandingan mask berasal dari situ. Catatan ini saya bangun dan uji sebelum ada satu layar pun, jadi tidak ada tampilan yang menghitung tata letaknya sendiri lalu berbeda dari yang lain.
 
-Encoding Reed-Solomon menghasilkan jejak lengkap dari setiap langkah pembagian panjang — suku utama, kelipatan generator, sisa sebelum dan sesudah — dan tampilan pembagian hanya menggambar array itu. Encoder-nya selalu menilai kedelapan kandidat mask meski tujuh di antaranya kalah, sehingga galeri mask tak pernah bisa tak sepakat dengan pemenangnya. Tampilan dan komputasinya adalah objek yang sama, jadi keduanya tak bisa melenceng.
+### Layarnya menampilkan perhitungan yang sebenarnya
 
-### Kebenarannya dijaga gerbang terhadap implementasi rujukan, bukan diasumsikan
+Saat menambahkan koreksi galat, encoder menyimpan setiap langkah pembagian panjangnya. Tampilan pembagian menggambar langkah-langkah itu, sehingga pembaca bisa memeriksa satu baris dengan pensil. Encoder juga menilai kedelapan pola mask, walaupun hanya satu yang menang. Galeri mask menampilkan kedelapannya beserta skor penaltinya, jadi selalu cocok dengan pemenangnya.
 
-Sebuah tes oracle menuntut matriks yang identik byte demi byte terhadap pustaka QR independen di seluruh versi, level koreksi galat, mode, dan pola mask yang didukung aplikasi, dan ia menghalangi deploy di CI. Di mana keduanya benar-benar tak sepakat — sebuah kasus terdokumentasi pada satu aturan penalti, di mana pembulatan pustaka rujukan berbeda dari spesifikasi yang diterbitkan — aplikasi ini mengikuti spesifikasinya, dan ketidaksepakatan itu diuji *untuk* dipertahankan alih-alih disembunyikan, sehingga perbedaannya tak bisa diam-diam kedaluwarsa.
+### Setiap kode dicek oleh pustaka independen
 
-### Privasi adalah arsitektural, bukan sekadar pernyataan kebijakan
+Sebuah tes membandingkan hasil saya kotak demi kotak dengan pustaka QR independen. Cakupannya versi 1 sampai 15, keempat tingkat koreksi galat, ketiga mode teks, dan kedelapan mask. Kalau gagal, deploy diblokir. Keduanya berbeda di satu tempat. Untuk satu aturan penalti, pustaka itu membulatkan ke atas, sedangkan spesifikasi ISO membulatkan ke bawah, dan itu bisa mengubah mask pemenang. Saya mengikuti spesifikasi, dan ada tes yang mencatat perbedaan ini supaya tidak terlupakan.
 
-Orang menempelkan payload pembayaran sungguhan ke aplikasi ini. Tak ada satu pun permintaan jaringan saat runtime — tanpa analitik, tanpa pelaporan galat, bahkan favicon disematkan sebagai data URI setelah sebuah tes browser menangkap 404 pada permintaan favicon terpisah, karena 404 tetaplah sebuah permintaan yang sekarang digagalkan oleh pemindai saat build. Teks yang diketik terserialisasi ke URL agar bisa ditautkan, tetapi payload QRIS yang ditempel tak pernah begitu, dan aksi salin-tautan menghilang sepenuhnya selagi payload pembayaran sungguhan dimuat, sehingga identitas merchant tak bisa ikut terbawa dalam tautan yang dibagikan tanpa sengaja.
+### Kode pembayaran yang ditempel tetap di perangkat
 
-## Hasil
+Orang menempelkan kode pembayaran asli ke aplikasi ini. Selama dipakai, aplikasi tidak mengirim permintaan jaringan apa pun: tanpa analitik, tanpa pelaporan error, dan font ikut dalam halaman. Pemeriksaan saat build akan gagal kalau ada bagian hasil build yang bisa memanggil jaringan. Teks yang diketik masuk ke URL supaya tautannya bisa dibagikan. Kode QRIS yang ditempel tidak pernah masuk ke URL, dan tombol salin tautan hilang selama kode itu dimuat.
 
-Live dan publik: sebuah pipeline sembilan tahap yang bisa digeser di mana matriksnya tak pernah bergerak atau berubah ukuran — menggeser slider tahap sampai tepat di tengah antara "penempatan" dan "mask" menunjukkan penjelajahan penempatan bit selesai dan masking setengah diterapkan, karena jejak encoder itu sendiri yang menggerakkan animasinya alih-alih rekonstruksi ulang yang diatur waktunya dengan tangan. Sebuah lab kerusakan membiarkan Anda menyikat matriksnya atau menggeser slider derau dan menyaksikan koreksi galat menemukan serta memperbaiki kerusakan itu secara langsung, lalu gagal secara terlihat dan menjelaskan kegagalannya begitu Anda melewati kapasitas koreksinya — terjangkau dalam satu gestur, dan momen puncak aplikasi ini.
+## Hasilnya
 
-Penulis tunggal, 44 commit dalam sekitar 28 jam di dua hari, ~8.600 baris kode, 84 tes. Lima dependensi runtime — React dan tiga paket font yang di-hosting sendiri — dengan encoder QR, decoder, dan parser payload EMVCo semuanya ditulis dari nol; satu-satunya pustaka QR dalam proyek ini adalah rujukan khusus pengembangan yang dipakai untuk membuktikan mesin buatan sendiri sepakat dengannya. `encode()` selesai dalam kurang dari 8 milidetik bahkan pada ukuran simbol terbesar yang didukung, sehingga mengetik menghitung ulang seluruh matriks pada tiap ketukan tombol tanpa debounce dan tanpa worker.
+Anatomi QRIS sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris. Aplikasi ini menelusuri sembilan tahap, dari teks yang diketik sampai kode yang rusak, lewat slider yang bisa digeser. Kodenya tidak pernah bergeser atau berubah ukuran, jadi di tengah dua tahap kita melihat keduanya setengah jadi. Di lab kerusakan, kita bisa menghapus kotak-kotak dan melihat koreksi galat memperbaikinya secara langsung. Kalau melewati batasnya, kodenya gagal di depan mata, lengkap dengan alasannya. Saya membangunnya dalam sekitar 28 jam selama dua hari pada September 2026, dengan 84 tes.
+
+## Langkah berikutnya
+
+- Menuntaskan tahap penyempurnaan untuk teks, penggunaan keyboard, tampilan mobile, dan skor Lighthouse, yang menurut catatan proyek belum sepenuhnya selesai.
+
+## Di balik layar
+
+- Encoder mengembalikan peta provenans: untuk setiap modul, indeks codeword dan bit, atau pola fungsi, ditambah penanda apakah mask membaliknya. Ada juga peta kebalikannya (codeword ke koordinat modul, byte payload ke codeword). Satu tes men-decode hanya codeword yang disorot untuk membuktikan pemetaannya.
+- Encoding Reed-Solomon menghasilkan `divisionTrace` (suku utama, kelipatan generator, sisa sebelum dan sesudah), yang langsung digambar oleh tampilan Division.
+- `src/engine/` murni: tanpa React, tanpa DOM, tanpa keacakan, tanpa jam. Kodenya jalan apa adanya di `node --test`.
+- `encode()` untuk simbol versi 15 selesai di bawah 8 ms, jadi setiap ketikan meng-encode ulang tanpa debounce dan tanpa worker. Caranya: tabel log/antilog GF(256) yang dihitung di awal, `Uint8Array` di jalur utama, dan array modul datar per baris.
+- Matriks terbesar berukuran 77×77, yaitu 5.929 modul SVG. Satu pointer listener di grup matriks melakukan hit-test dengan membagi koordinat dengan ukuran modul. React memasang rect sekali saja; sebuah painter mengubah warna isian dan menyimpan warna terakhir setiap modul.
+- Tes oracle menuntut matriks yang identik per byte dengan `qrcode` untuk versi 1–15, tingkat EC L/M/Q/H, mode numerik, alfanumerik, dan byte, kedua sisi setiap batas versi, dan kedelapan mask. Tes ini jalan di CI dan memblokir deploy.
+- Perbedaan di aturan 4: `qrcode` memakai `ceil(|pct − 50| / 5)`, sedangkan ISO/IEC 18004 Tabel 11 (dan ZXing) memakai floor. Pada 51,7% modul gelap, spesifikasi memberi penalti 0 dan `qrcode` memberi 10. Oracle memaksa setiap mask dan menuntut kecocokan di kedelapannya, lalu mengecek aturan 1–3 dengan fungsi penalti milik `qrcode` sendiri.
+- Lensa QRIS aktif saat input terbaca sebagai payload EMVCo Merchant-Presented Mode yang valid: diawali `000201` dan diakhiri CRC16 yang valid di tag 63. Parser TLV, CRC16, dan kamus tag ditulis sendiri, dengan tabel 85 kode kategori merchant.
+- `qrcode` dan `jsqr` hanya jadi devDependencies, dan ada tes yang gagal kalau salah satunya di-import dari `src/`. Dependensi runtime: React, React DOM, dan tiga paket `@fontsource`.
+- `scripts/check-bundle.mjs` memindai hasil build untuk API jaringan dan URL tak terduga. Favicon di-inline sebagai data URI setelah tes browser menemukan 404 di `/favicon.ico`.
+- Tujuh tampilan (Matrix, Bitstream, Division, Interleave, MaskGallery, PayloadTree, DamageLab), tujuh contoh bawaan, 86 token desain CSS, dan dua berkas teks datar untuk bahasa Indonesia dan Inggris. Bundle sekitar 83 KB gzip dari anggaran 250 KB.
+- Tombol perbaikan di lab kerusakan menyimpan snapshot kerusakan saat ditekan dan mempertahankan yang tidak bisa diperbaiki decoder. Sebelumnya, kerusakan dari slider noise dihitung ulang setiap kali dibaca, sehingga tombol itu tampak tidak berfungsi di jalur utama.
+- Yang sengaja tidak dibuat: mode Kanji, versi 16–40, pemindaian kamera, QR bergaya, dan konversi QRIS statis ke dinamis.
+- 84 tes di 13 berkas, sekitar 8.600 baris kode sumber, 44 commit antara 2 dan 3 September 2026.

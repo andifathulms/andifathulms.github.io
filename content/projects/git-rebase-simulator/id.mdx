@@ -2,31 +2,54 @@
 
 ## Masalahnya
 
-Rebase adalah operasi Git yang paling ditakuti pengembang, dan ketakutan itu beralasan: ia rutin salah dijelaskan sebagai "memindahkan commit ke basis baru". Ia tidak memindahkan apa pun. Ia menulis commit *baru* dengan id *baru* dan meninggalkan yang asli tetap ada di repositori, tanpa referensi. Hampir setiap kepanikan "pekerjaan saya hilang" — dan obatnya, reflog — bermula dari satu kesalahpahaman itu.
+Rebase adalah perintah Git yang paling ditakuti developer, dan ketakutan itu beralasan. Rebase biasanya dijelaskan sebagai "memindahkan commit ke base baru". Padahal tidak ada yang dipindahkan. Rebase menulis commit baru dengan id baru, dan commit aslinya tetap ada di repositori tanpa ada yang menunjuknya. Hampir setiap kepanikan "pekerjaan saya hilang", beserta obatnya, yaitu reflog, berawal dari salah paham yang satu itu.
 
-Visualiser yang ada benar-benar bagus (Learn Git Branching ditautkan dengan menonjol, bukan disaingi), tetapi semuanya berbagi tiga kekurangan: **id commit palsu** (`C1`, `C2` — `C3` yang di-rebase tetap *terlihat seperti* `C3`, jadi notasinya menghapus pelajarannya); **tak ada yang menunjukkan apa yang ditinggalkan** (commit yatim menjadi tak terlihat, jadi langkah pemulihan tak pernah diajarkan); dan **tanpa isi berkas, maka tanpa konflik nyata** — padahal justru di situlah rebase menyakitkan.
+Alat visual yang bagus sudah ada, dan Learn Git Branching yang paling dikenal. Saya menautkannya dari situs ini. Tapi alat-alat yang saya lihat punya tiga celah yang sama. Mereka memakai id palsu seperti C1 dan C2, jadi commit yang sudah di-rebase tetap terlihat sama. Mereka menyembunyikan commit yang tertinggal, jadi tidak ada yang belajar cara memulihkannya. Dan tidak ada isi berkas, sehingga tidak ada konflik, padahal di situlah rebase paling menyakitkan. Simulator ini untuk developer yang memakai Git setiap hari tapi belum percaya pada rebase, dan untuk orang yang mengajarkannya.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Modelkan object store dengan jujur, dan pelajarannya muncul gratis
+### Simulatornya bekerja seperti cara Git menyimpan data
 
-Alih-alih menganimasikan diagram dan menarasikan apa yang "akan" dilakukan Git, aplikasi mengimplementasikan model data Git dan membiarkan visualisasi membacanya. Empat keputusan menopang semuanya:
+Saya mengimplementasikan model penyimpanan Git sendiri, lalu gambarnya membaca dari model itu. Setiap id commit dihitung dari isi commit tersebut, termasuk parent-nya. Jadi saat rebase memberi sebuah commit parent baru, id-nya berubah sendiri di layar. Commit hanya pernah ditambahkan, tidak pernah diubah atau dihapus, kecuali kita menjalankan pembersihan. Setelah setiap perintah di setiap tes, ada pemeriksaan yang memastikan tidak ada yang berubah atau hilang dari yang sudah ada sebelumnya.
 
-- **Object store bersifat append-only.** Objek dibuat, tak pernah dimutasi, tak pernah dihapus kecuali oleh `gc` eksplisit. Setiap operasi adalah "buat objek, pindahkan ref". Sebuah asersi bersama berjalan setelah *setiap* perintah di *setiap* tes: tiap objek yang ada sebelumnya harus tetap ada dan identik byte-per-byte sesudahnya. Kode yang memutasi commit di sini bukan sekadar punya bug — ia mengajarkan kebalikan dari kebenaran.
-- **Hash dihitung, tak pernah ditetapkan.** Hash selalu hash dari serialisasi kanonik objek. Karena hash sebuah commit mencakup induknya, mengubah induk mengubah hash — jadi rebase menghasilkan id yang jelas berbeda *secara otomatis*, tanpa special-case. SHA-1 ditulis tangan (99 baris, diperiksa terhadap vektor RFC 3174) alih-alih memakai `SubtleCrypto` yang async dan hanya-browser, yang akan membuat mesin tidak murni dan tak teruji di Node.
-- **Mesinnya murni:** `(state, command) → { state, events }`, dengan timestamp dari clock virtual di dalam state. Sepenuhnya teruji di Node, dan deterministik.
-- **Sesi adalah daftar baris perintah, bukan snapshot.** Memutar ulang baris-baris itu membangun kembali repositori byte-per-byte, jadi URL berbagi meng-encode skripnya — dan tak pernah bisa berselisih dengan apa yang sebenarnya dilakukan perintah.
+### Commit yang tertinggal tetap terlihat
 
-### Diuji terhadap yang asli
+Setelah rebase atau hard reset, commit lama tetap tampil, berwarna abu-abu dan tanpa branch yang menunjuknya. Panel reflog mencatat setiap kali sebuah branch atau HEAD berpindah, beserta penyebabnya. Satu klik membuat branch di commit yang hilang, sama seperti cara memperbaikinya di Git yang asli.
 
-Mode kegagalan paling berisiko bagi alat pengajaran adalah *salah tapi masuk akal*. Maka sebuah skrip pengembangan memanggil biner `git` sungguhan di sembilan skenario (dua terhadap bare repo sungguhan, sehingga `push` diperiksa terhadap aturan fast-forward Git sendiri) dan merekam strukturnya. Suite menegaskan *struktur* — hubungan induk, posisi ref, objek mana yang baru versus dipakai ulang, kesamaan tree — tak pernah kesamaan hash literal, yang akan tidak jujur, karena Git sungguhan juga melipat timestamp dan identitas penulis (UI menyatakan ini dengan lugas alih-alih mengklaim paritas).
+### Berkas asli menghasilkan konflik asli
 
-### Perintah tak didukung gagal dengan lantang, disebut namanya
+Setiap commit membawa isi berkas yang sebenarnya. Saat rebase tidak bisa diterapkan dengan bersih, muncul konflik three-way dengan penanda milik Git sendiri, dan kita bisa melanjutkan, melewati, atau membatalkannya seperti di Git. Tampilan perbandingan menjalankan merge dan rebase dari titik awal yang sama secara berdampingan. Riwayatnya terlihat berbeda, tapi isi berkas akhirnya identik, dan ada tes yang memeriksanya.
 
-`pull` ditolak dengan sengaja — ia menyembunyikan separuh pekerjaannya yang menulis ulang riwayat — dengan pesan yang menyebut `fetch` plus `merge`/`rebase`. Sama untuk `--rebase-merges` dan me-revert merge tanpa `-m`. Jawaban salah yang percaya diri adalah keluaran terburuk yang bisa diberikan proyek ini.
+### Saya mengeceknya terhadap Git yang asli
 
-## Hasil
+Alat belajar yang keliru tapi meyakinkan akan membuat orang salah paham soal rebase dengan penuh percaya diri. Jadi saya menulis skrip yang menjalankan program Git asli lewat sembilan skenario, dua di antaranya terhadap repositori bare yang berperan sebagai remote, lalu merekam hasilnya. Tes membandingkan bentuk riwayatnya: parent, posisi branch, dan objek mana yang baru. Tes tidak membandingkan id commit, karena Git asli ikut memasukkan waktu dan identitas penulis. Situsnya menyebutkan hal itu.
 
-Live dan publik, berlisensi MIT, offline setelah muat pertama. Ketik `rebase main` dan id tujuh-karakter berubah di depan mata Anda — karena induknya berubah, bukan karena label ditukar. Commit yatim tetap terlihat di papan, diabukan dan tak bertali; panel reflog mendaftar setiap pergerakan ref beserta penyebabnya dan memulihkan yatim dalam satu klik. Isi berkas nyata menghasilkan konflik three-way nyata dengan penanda Git sendiri serta `--continue`/`--abort`/`--skip`. Tampilan perbandingan menunjukkan merge vs rebase berdampingan — bentuk riwayat berbeda, tree akhir identik — yang sekaligus payoff pengajaran dan asersi tes. Ditambah rebase interaktif, remote `origin` tersimulasi, dan enam skenario terkurasi.
+### Perintah yang tidak didukung ditolak dengan jelas
 
-Dibangun sendiri — ~11.700 baris sumber, 17 perintah Git, 186 tes, tiga dependensi runtime dan tanpa pustaka Git, hashing, atau graph-layout. Data yang tak biasa: implementasi model objek Git lengkap dengan oracle biner-nyata, dibangun dalam satu sesi ~5 jam terhadap spesifikasi yang ditulis lebih dulu.
+Simulator ini menolak pull dengan sadar, karena pull menyembunyikan separuh pekerjaannya yang menulis ulang riwayat. Pesan error-nya menyarankan fetch lalu merge atau rebase. Beberapa opsi lanjutan ditolak dengan cara yang sama. Jawaban salah yang terdengar yakin adalah hal terburuk yang bisa diberikan alat belajar.
+
+## Hasilnya
+
+Git Rebase Simulator sudah live dan open source dengan lisensi MIT, dalam bahasa Inggris dan Indonesia, dan bisa dipakai offline setelah dimuat pertama kali. Simulator ini mendukung 17 perintah Git, termasuk interactive rebase dan remote simulasi untuk push, fetch, dan force-push. Enam skenario siap pakai, misalnya hard reset yang tidak disengaja atau force-push yang berbahaya, bisa dibagikan lewat tautan. Saya membangunnya dalam sekitar lima jam pada 5 Agustus 2026, dari spesifikasi tertulis, dengan 186 tes.
+
+## Langkah berikutnya
+
+- Membangun tampilan konflik berdampingan dari spesifikasi, yang menunjukkan versi dasar, versi kita, dan versi mereka. Saat ini konflik tampil sebagai penanda mentah Git di editor berkas.
+
+## Di balik layar
+
+- Mesinnya murni: `(state, command) → { state, events }`, tanpa React, DOM, `Date`, atau `Math.random`. Timestamp berasal dari jam virtual di dalam state.
+- Object store bersifat append-only; `gc` satu-satunya cara menghapus. Invariannya dijalankan setelah setiap perintah di setiap tes: setiap objek sebelumnya harus tetap ada dan identik per byte.
+- Hash adalah SHA-1 dari serialisasi kanonis setiap objek, mengikuti format loose-object Git. Id blob dan tree sama persis dengan Git asli (dicek terhadap `git ls-tree`); id commit berbeda karena timestamp dan identitas penulis.
+- SHA-1 ditulis sendiri di `lib/hash/sha1.ts` (99 baris), dicek dengan vektor uji RFC 3174. `SubtleCrypto` bersifat async dan hanya ada di browser, sehingga mesinnya jadi tidak murni dan tidak bisa diuji di Node.
+- Sebuah sesi adalah daftar baris perintah. Memutarnya ulang membangun store yang identik per byte, jadi URL yang dibagikan menyimpan skripnya.
+- `pnpm fixtures:record` (`scripts/record-fixtures.mjs`) memanggil binary `git` asli. Skrip ini hanya untuk pengembangan dan tidak pernah jalan di CI atau build browser.
+- Ditolak dengan menyebut namanya: `pull`, `--rebase-merges`, merge base criss-cross, revert merge tanpa `-m`, membuang commit yang sudah ada di upstream berdasarkan patch-id, dan banyak remote.
+- Bagian yang ditulis sendiri: parser `gitrevisions` (`HEAD~3`, `HEAD^2`, `ref@{n}`, hash pendek), three-way merge atas array baris di `lib/git/merge3.ts`, dan tata letak lajur `git log --graph` yang deterministik di `lib/layout/lanes.ts`, diuji dengan snapshot.
+- Reachability dihitung ulang dari nol di setiap perubahan, tanpa refcount, jadi tampilan orphan tidak bisa melenceng.
+- Interactive rebase mendukung `pick`, `reword`, `squash`, `fixup`, `drop`, dan pengurutan ulang, bisa diputar ulang sebagai `rebase -i --todo=pick:<oid>,squash:<oid>,…`.
+- Animasi cangkok digerakkan oleh event `commits-replaced` dari mesin (pasangan id lama ke baru), tidak pernah ditebak dari bentuk graf.
+- Perintah: `add`, `commit`, `branch`, `checkout`/`switch`, `merge`, `rebase`, `cherry-pick`, `reset`, `revert`, `tag`, `diff`, `log`, `status`, `reflog`, `gc`, `push`, `fetch`.
+- Nama awalnya Cangkok. Domain committer `cangkok.local` dipertahankan, karena ikut masuk ke setiap hash commit dan mengubahnya akan membatalkan semua fixture yang sudah direkam.
+- PRD menyebut bahasa Indonesia sebagai bahasa utama; aplikasi yang dirilis memakai bahasa Inggris sebagai default di `/en/`, bahasa Indonesia di `/id/`, dan ada tes keselarasan kedua bahasa.
+- Dependensi runtime: `next`, `react`, `react-dom`. Tanpa pustaka Git, hashing, tata letak graf, animasi, atau state. 4 rute × 2 bahasa, static export sekitar 2,0 MB. 186 tes di 21 berkas, sekitar 11.700 baris, 32 commit.

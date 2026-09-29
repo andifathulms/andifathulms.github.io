@@ -1,7 +1,17 @@
 {
   "slug": "anatomi-qris",
   "title": "Anatomi QRIS",
-  "tagline": "An interactive explainer that takes any text — including a real QRIS payment code — and shows exactly how it turns into a QR matrix, down to selecting a field in the payload and watching the specific black squares carrying those bytes light up",
+  "tagline": "An explainer that builds QR codes step by step and lights up the squares behind each QRIS field",
+  "glance": {
+    "for": "Curious Indonesians and developers learning how QR codes work",
+    "result": "Live, with every code checked against an independent QR library"
+  },
+  "skills": [
+    "Interactive explainers",
+    "Error-correcting codes",
+    "Data visualization",
+    "Privacy by design"
+  ],
   "categoryTags": [
     "Personal Project",
     "Finance Tool",
@@ -19,15 +29,58 @@
   "role": "Solo Developer",
   "timeframe": "Sep 2026",
   "liveUrl": "https://andifathulms.github.io/anatomi-qris/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/anatomi-qris",
   "heroImage": "/images/projects/anatomi-qris/hero.webp",
   "order": 43,
   "featured": false,
   "metrics": [
-    { "value": "9", "label": "Pipeline stages, scrubbable as one continuous transformation" },
-    { "value": "84", "label": "Tests, including byte-identical agreement with a reference QR library" },
-    { "value": "5,929", "label": "SVG modules rendered at version 15, one shared pointer listener" },
-    { "value": "0", "label": "Runtime network requests, enforced by a build-time scan" }
+    {
+      "value": "9",
+      "label": "stages on one draggable slider"
+    },
+    {
+      "value": "0",
+      "label": "network requests while you use it"
+    },
+    {
+      "value": "1–15",
+      "label": "QR versions matched against a reference library"
+    },
+    {
+      "value": "< 8 ms",
+      "label": "to rebuild the largest code per keystroke"
+    }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Penjelas interaktif yang membangun kode QR langkah demi langkah dan menyorot kotak di balik setiap isian QRIS",
+    "glance": {
+      "for": "Orang awam yang penasaran dan developer yang ingin paham kode QR",
+      "result": "Live, dan setiap kode dicek dengan pustaka QR independen"
+    },
+    "skills": [
+      "Penjelas interaktif",
+      "Kode koreksi galat",
+      "Visualisasi data",
+      "Privasi sejak desain"
+    ],
+    "metrics": [
+      {
+        "value": "9",
+        "label": "tahap dalam satu slider yang bisa digeser"
+      },
+      {
+        "value": "0",
+        "label": "permintaan jaringan selama dipakai"
+      },
+      {
+        "value": "1–15",
+        "label": "versi QR dicocokkan dengan pustaka rujukan"
+      },
+      {
+        "value": "< 8 ms",
+        "label": "untuk membangun ulang kode terbesar per ketikan"
+      }
+    ]
+  }
 }

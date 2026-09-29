@@ -1,7 +1,17 @@
 {
   "slug": "congklak",
   "title": "Congklak",
-  "tagline": "A browser congklak that lets you pick which region's rules you play by — each ruleset cited to its source — against a friend, the computer, or someone on another device",
+  "tagline": "Congklak in the browser where you choose which region's rules to play, each ruleset cited to its sources",
+  "glance": {
+    "for": "Indonesian players, newcomers, and anyone curious where the rules come from",
+    "result": "Live, with three cited regional rulesets and online play without a server"
+  },
+  "skills": [
+    "Cultural heritage",
+    "Game AI",
+    "Peer-to-peer networking",
+    "Data-driven rules"
+  ],
   "categoryTags": [
     "Personal Project",
     "Game",
@@ -21,6 +31,7 @@
   "role": "Solo Developer",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/congklak/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/congklak",
   "heroImage": "/images/projects/congklak/hero.webp",
   "order": 18,
@@ -28,20 +39,50 @@
   "metrics": [
     {
       "value": "3",
-      "label": "Cited regional rulesets, 5 sources"
+      "label": "regional rulesets you can switch between"
+    },
+    {
+      "value": "5",
+      "label": "cited sources, each with a confidence level"
     },
     {
       "value": "98",
-      "label": "Seeds conserved after every event"
-    },
-    {
-      "value": "120",
-      "label": "Tests + per-ruleset game simulation"
+      "label": "seeds counted after every move"
     },
     {
       "value": "0",
-      "label": "Backend — P2P over WebRTC"
+      "label": "game servers needed for online play"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Congklak di browser tempat pemain memilih aturan daerah mana yang dipakai, setiap aturan disertai sumbernya",
+    "glance": {
+      "for": "Pemain Indonesia, pendatang baru, dan siapa pun yang penasaran asal aturannya",
+      "result": "Live, dengan tiga aturan daerah bersumber dan main online tanpa server"
+    },
+    "skills": [
+      "Warisan budaya",
+      "AI permainan",
+      "Jaringan peer-to-peer",
+      "Aturan berbasis data"
+    ],
+    "metrics": [
+      {
+        "value": "3",
+        "label": "set aturan daerah yang bisa dipilih"
+      },
+      {
+        "value": "5",
+        "label": "sumber dikutip, masing-masing dengan tingkat keyakinan"
+      },
+      {
+        "value": "98",
+        "label": "biji dihitung setelah setiap langkah"
+      },
+      {
+        "value": "0",
+        "label": "server permainan untuk main online"
+      }
+    ]
+  }
 }

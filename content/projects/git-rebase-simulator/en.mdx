@@ -2,31 +2,54 @@
 
 ## The problem
 
-Rebase is the Git operation developers fear most, and the fear is earned: it's routinely misexplained as "moving commits onto a new base". It doesn't move anything. It writes *new* commits with *new* ids and leaves the originals sitting in the repository, unreferenced. Almost every "I lost my work" panic — and its cure, the reflog — follows from that one misunderstanding.
+Rebase is the Git command developers fear most, and the fear is earned. It is usually explained as "moving commits onto a new base". It doesn't move anything. It writes new commits with new ids and leaves the originals in the repository, with nothing pointing at them. Almost every "I lost my work" panic, and its cure, the reflog, comes from that one misunderstanding.
 
-Existing visualisers are genuinely good (Learn Git Branching is linked prominently, not competed with), but they share three omissions: **fake commit ids** (`C1`, `C2` — a rebased `C3` still *looks like* `C3`, so the notation erases the lesson); **nothing shows what was left behind** (orphaned commits go invisible, so the recovery move never gets taught); and **no file content, therefore no real conflicts** — which is exactly where rebase hurts.
+Good visual tools exist, and Learn Git Branching is the best known. I link to it from the site. But the tools I looked at share three gaps. They use fake ids like C1 and C2, so a rebased commit still looks like the same commit. They hide commits that were left behind, so nobody learns how to recover them. And they have no file content, so there are no conflicts, which is exactly where rebase hurts. The simulator is for developers who use Git daily but don't trust rebase, and for people who teach it.
 
-## The approach
+## What I built
 
-### Model the object store honestly, and the lessons emerge for free
+### The simulator works the way Git stores data
 
-Rather than animating a diagram and narrating what Git "would" do, the app implements Git's data model and lets the visualisation read off it. Four decisions carry the whole thing:
+I implemented Git's own storage model and let the drawing read from it. Every commit id is calculated from the commit's content, including its parent. So when a rebase gives a commit a new parent, its id changes on screen by itself. Commits are only ever added, never edited or deleted, unless you run cleanup. After every command in every test, a check confirms that nothing that existed before has changed or gone.
 
-- **The object store is append-only.** Objects are created, never mutated, never deleted except by explicit `gc`. Every operation is "create objects, move refs". A shared assertion runs after *every* command in *every* test: each object present before must still be present and byte-identical after. Code that mutates a commit here doesn't just have a bug — it teaches the opposite of the truth.
-- **Hashes are computed, never assigned.** A hash is always the hash of the object's canonical serialization. Because a commit's hash covers its parent, changing the parent changes the hash — so rebase produces visibly different ids *automatically*, with no special-casing. SHA-1 is hand-written (99 lines, checked against the RFC 3174 vectors) rather than using the async, browser-only `SubtleCrypto`, which would have made the engine impure and untestable in Node.
-- **The engine is pure:** `(state, command) → { state, events }`, with timestamps from a virtual clock in state. Fully testable in Node, and deterministic.
-- **A session is a list of command lines, not a snapshot.** Replaying the lines rebuilds the repository byte-for-byte, so a shared URL encodes the script — and can never disagree with what the commands actually do.
+### Left-behind commits stay on the board
 
-### Tested against the real thing
+After a rebase or a hard reset, the old commits stay visible, greyed out and with no branch pointing at them. A reflog panel lists every time a branch or HEAD moved, and what moved it. One click creates a branch at a lost commit, which is the same fix you would use in real Git.
 
-The riskiest failure mode for a teaching tool is being *plausibly wrong*. So a development script shells out to the actual `git` binary across nine scenarios (two against a real bare repo, so `push` is checked against Git's own fast-forward rule) and records the structure. The suite asserts *structure* — parent relationships, ref positions, which objects are new versus reused, tree equality — never literal hash equality, which would be dishonest, since real Git also folds in timestamps and author identity (the UI states this plainly rather than claiming parity).
+### Real files make real conflicts
 
-### Unsupported commands fail loudly, by name
+Each commit carries actual file content. When a rebase can't apply cleanly, you get a three-way conflict with Git's own markers, and you continue, skip or abort as in Git. A comparison view runs merge and rebase from the same start, side by side. The histories look different, but the final files are identical, and a test checks that.
 
-`pull` is refused on purpose — it hides the half of its job that rewrites history — with an error naming `fetch` plus `merge`/`rebase`. Same for `--rebase-merges` and reverting a merge without `-m`. A confident wrong answer is the worst output this project could give.
+### I checked it against real Git
 
-## Outcome
+A teaching tool that is plausibly wrong would train people to misunderstand rebase with confidence. So I wrote a script that runs the real Git program through nine scenarios, two against a bare repository acting as a remote, and records the results. The tests compare the shape of the history: parents, branch positions and which objects are new. They don't compare commit ids, because real Git mixes in the time and author. The site says so.
 
-Live and public, MIT-licensed, offline after first load. Type `rebase main` and the seven-character ids change in front of you — because the parent changed, not because a label was swapped. Orphaned commits stay visible on the board, greyed and unstrung; the reflog panel lists every ref movement with its cause and recovers an orphan in one click. Real file content produces real three-way conflicts with Git's own markers and `--continue`/`--abort`/`--skip`. A comparison view shows merge vs. rebase side by side — different history shapes, identical final trees — which is both the teaching payoff and a test assertion. Plus interactive rebase, a simulated `origin` remote, and six curated scenarios.
+### Unsupported commands say so by name
 
-Built solo — ~11,700 lines of source, 17 Git commands, 186 tests, three runtime dependencies and no Git, hashing, or graph-layout library. The unusual data point: a complete Git object-model implementation with a real-binary test oracle, built in a single ~5-hour sitting against a spec written first.
+The simulator refuses pull on purpose, because pull hides the half of its job that rewrites history. Its error message tells you to use fetch followed by merge or rebase. A few advanced options are refused the same way. A confident wrong answer is the worst thing a teaching tool can give.
+
+## Result
+
+The Git Rebase Simulator is live and open source under the MIT licence, in English and Indonesian, and works offline after the first load. It supports 17 Git commands, including interactive rebase and a simulated remote for push, fetch and force-push. Six ready-made scenarios, such as an accidental hard reset or a dangerous force-push, can be shared by link. I built it in about five hours on 5 August 2026, from a written spec, with 186 tests.
+
+## What I'd do next
+
+- Build the side-by-side conflict view from the spec, showing the base, your version and theirs. Today conflicts appear as Git's raw markers in the file editor.
+
+## Under the hood
+
+- The engine is pure: `(state, command) → { state, events }`, with no React, DOM, `Date` or `Math.random`. Timestamps come from a virtual clock in state.
+- The object store is append-only; `gc` is the only deletion. The invariant runs after every command in every test: every prior object must still exist, byte-identical.
+- Hashes are the SHA-1 of each object's canonical serialisation, mirroring Git's loose-object format. Blob and tree ids match real Git exactly (checked against `git ls-tree`); commit ids differ because of timestamps and author identity.
+- SHA-1 is hand-written in `lib/hash/sha1.ts` (99 lines), checked against the RFC 3174 vectors. `SubtleCrypto` is async and browser-only, which would have made the engine impure and untestable in Node.
+- A session is a list of command lines. Replaying them rebuilds the store byte-for-byte, so a shared URL encodes the script.
+- `pnpm fixtures:record` (`scripts/record-fixtures.mjs`) shells out to the real `git` binary. It is development-only and never runs in CI or the browser build.
+- Refused by name: `pull`, `--rebase-merges`, criss-cross merge bases, reverting a merge without `-m`, dropping already-upstream commits by patch-id, and multiple remotes.
+- Hand-written parts: the `gitrevisions` parser (`HEAD~3`, `HEAD^2`, `ref@{n}`, short hashes), three-way merge over line arrays in `lib/git/merge3.ts`, and deterministic `git log --graph` lane layout in `lib/layout/lanes.ts`, snapshot-tested.
+- Reachability is recomputed from scratch on every change, never refcounted, so the orphan view can't drift.
+- Interactive rebase supports `pick`, `reword`, `squash`, `fixup`, `drop` and reorder, replayable as `rebase -i --todo=pick:<oid>,squash:<oid>,…`.
+- The graft animation is driven by the engine's `commits-replaced` event (old-to-new id pairs), never inferred from the graph shape.
+- Commands: `add`, `commit`, `branch`, `checkout`/`switch`, `merge`, `rebase`, `cherry-pick`, `reset`, `revert`, `tag`, `diff`, `log`, `status`, `reflog`, `gc`, `push`, `fetch`.
+- Originally named Cangkok (Indonesian for grafting). The committer domain `cangkok.local` stays, because it is folded into every commit hash and changing it would invalidate the recorded fixtures.
+- The PRD said Indonesian first; the shipped app defaults to English at `/en/`, with Indonesian at `/id/` and a locale-parity test.
+- Runtime dependencies: `next`, `react`, `react-dom`. No Git, hashing, graph-layout, animation or state library. 4 routes × 2 locales, about 2.0 MB static export. 186 tests in 21 files, about 11,700 lines, 32 commits.

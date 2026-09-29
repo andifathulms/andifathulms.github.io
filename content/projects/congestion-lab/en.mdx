@@ -2,33 +2,53 @@
 
 ## The problem
 
-TCP congestion control governs the speed of essentially every internet connection, and it's taught as a picture — the "sawtooth" — that most people never see produced. Four practical consequences the project targets directly:
+Every internet connection decides, many times a second, how fast it is allowed to send. That decision explains everyday problems: why a video call stutters when someone at home starts a download, or why a distant server feels slow on a fast line. It is usually taught as one picture, a sawtooth line that most people never see being produced.
 
-- **People blame bandwidth for latency problems.** Window growth happens once per round trip, so a server 300 ms away recovers from a lost packet six times slower than one 50 ms away on identical bandwidth. That's invisible without a simulator.
-- **"Slow start" is misnamed** — it doubles the window every round trip: slow to begin, then explosive. The name teaches the opposite of the behaviour.
-- **Bufferbloat is invisible.** Oversized router buffers mean loss now happens long after the queue filled, so loss-based algorithms add *seconds* of latency without dropping anything. This is the mechanism behind "the call got bad when the download started".
-- **Fairness is assumed rather than understood.** AIMD's convergence to an equal share is a proved geometric property that fails in specific, predictable ways.
+Four things stay hidden without a simulator. A server 300 ms away recovers from a lost packet six times slower than one 50 ms away, on the same bandwidth. "Slow start" actually doubles speed every round trip. Oversized router buffers add seconds of delay without losing a packet. And sharing a link fairly works only under specific conditions. Congestion Lab is for networking students, engineers who know the words but not the mechanism, and people who teach it.
 
-## The approach
+## What I built
 
-### The sawtooth is emergent, never drawn
+### Every packet is simulated, and the curves follow
 
-The central decision: individual packets are scheduled onto a virtual clock, serialised onto a link, queued, dropped, and acknowledged — and the window curve is whatever the algorithm *did* in response. No curve is ever produced from a formula. A simulator that draws the shape it expects can never surprise you, and the project's whole value is in its surprising results being trustworthy.
+I built a simulator that sends individual packets over a virtual link. They queue at the router, get dropped when it's full, and are acknowledged. The sending speed you see is whatever the algorithm did in response. No curve comes from a formula. A simulator that draws the shape it expects can never surprise you, and the surprises are the point of this project.
 
-### Correctness carried by analytic oracles, not by looking at it
+### Published results decide whether it can ship
 
-A wrong simulator still produces a convincing sawtooth. So four independent published predictions — the Mathis throughput equation, utilisation-vs-buffer-size, RTT unfairness, and AIMD fairness convergence — are asserted as *sweeps* (not single points) and **gate the deploy.** A simulator that stops reproducing Mathis cannot ship. Packet conservation (`sent = delivered + dropped + in flight`) is asserted at every event in every suite, and the engine is deterministic to the point of integer-nanosecond time with equal timestamps broken by an explicit sequence number — because floats in a scheduler accumulate error that won't reproduce, and an algorithm comparison is only meaningful if it's byte-identical everywhere.
+A wrong simulator still draws a convincing sawtooth, so I don't trust it by eye. Four independent results from the research literature are checked across ranges of settings, and a failure blocks the deploy. These cover throughput under loss, link use against buffer size, the advantage of nearby servers, and how two senders converge to equal shares. I had two of them passing before building any screen. The rule is that when a check fails, the simulator is wrong, and the tolerance stays where it is.
 
-### One sender skeleton; congestion control as plugins
+### Five algorithms share one sender
 
-Every algorithm implements the same four-method interface (`onAck`, `onLoss`, `onTimeout`, `canSend`) — there's no `if (algorithm === 'cubic')` in the sender and no forked sender per algorithm, so the comparison view measures *algorithms*, not implementations. A 60-second 100 Mbps run is roughly half a million packets, so trace hot fields live in typed arrays and the simulation runs in a Web Worker, benchmarked at M0 before any UI existed: 288k packets in ~0.5 s with flat heap growth.
+I implemented five congestion control algorithms from their published specifications: Tahoe, Reno/NewReno, CUBIC, Vegas and BBR v1. They all plug into the same sender, so a comparison measures the algorithms and nothing else. On long, fast links every algorithm first looked the same, because loss recovery was the bottleneck. So I added selective acknowledgement, which wasn't in the plan, to make the comparison mean something.
 
-### Where the model refuses, and where reality surprised it
+### Four charts share one time axis
 
-Mechanisms that can't be modelled faithfully are recorded as gaps and shown where they affect a result, rather than guessed. And a real phenomenon *inverted* an oracle — over deterministic DropTail the model shows a strong Floyd–Jacobson phase effect sharp enough to reverse the expected RTT bias — so rather than loosen the oracle, the fairness scenarios were moved onto RED and the phase effect is asserted explicitly. When an oracle fails, the simulator is wrong; the tolerance is never widened.
+The main view stacks sending window, router queue, throughput and round-trip time on one time axis. Reading straight down at any moment shows why the sender did what it did. A bufferbloat page runs the same download over a deep buffer and over a queue built to limit delay: throughput barely changes, while delay differs by a factor of ten. After each run, the site writes its findings out in plain sentences in Indonesian or English, with sources.
 
-## Outcome
+### It shows where the model stops
 
-Live and public, bilingual (Indonesian default), accessible (keyboard-navigable chart with an `aria-live` readout, screen-reader prose summaries), fully static. Its signature view is **the four-series trace** — congestion window, bottleneck queue depth, throughput against the capacity line, and RTT sharing one x-axis with exact vertical alignment, so a straight read down at any instant shows why the window did what it did. Plus algorithm comparison across Tahoe, Reno/NewReno, CUBIC, Vegas, and BBR v1 (each citing its RFC in code and UI); the **bufferbloat demonstration** — the same flow over a deep DropTail buffer versus CoDel, throughput barely differing while RTT differs by an order of magnitude; fairness analysis with Jain's index and the Chiu-Jain phase diagram; a plain-language findings layer that turns a completed run into cited sentences; and nine curated scenarios, all shareable by URL.
+Some behaviours can't be modelled faithfully here. I list them as gaps and show them wherever they affect a result. One result surprised me. With a simple drop-when-full queue, packet timing sometimes reversed the expected advantage of nearby servers. I moved the fairness checks to a queue that drops at random and kept a test for the surprising effect.
 
-Built solo in one ~10-hour day — ~12,100 lines of TypeScript with a ~3,600-line simulation core, 148 tests behind four deploy-gating oracles, on three runtime dependencies and **no simulation or charting library** (the scheduler and the hand-written SVG plots *are* the project). It states plainly that it models the published algorithms and claims no parity with a Linux kernel stack.
+## Result
+
+Congestion Lab is live and public, in Indonesian and English. It has nine curated scenarios, each showing one named effect, and every run can be shared by link without an account or server. The simulator handles 288,000 packets in about half a second in a background thread. It uses no simulation or chart library. An automated accessibility audit found zero violations on its five pages at the time, in both languages. I built it in about 10 hours on 6 August 2026, with 148 tests.
+
+## What I'd do next
+
+- Re-run the automated accessibility audit on the final design pass, which was only checked by hand.
+- Update the stale first entry in the list of model gaps, which still says selective acknowledgement is missing.
+
+## Under the hood
+
+- Discrete-event engine in `lib/sim/` (~3,600 lines): virtual clock, priority queue, link serialisation, queue disciplines, sender and receiver, packet ledger.
+- `(config, seed) → SimTrace` is byte-identical on any machine: integer-nanosecond time, no `Date`, no unseeded randomness, and equal timestamps broken by an explicit monotonic sequence number.
+- Packet conservation (`sent = delivered + dropped + in flight`) is asserted at every event in every test suite.
+- The four oracles: Mathis et al. 1997 throughput, utilisation versus buffer size and BDP, Reno's RTT unfairness ratio, and Chiu & Jain 1989 AIMD convergence. Before any UI, Mathis matched within 13% across 5 loss rates × 4 RTTs, and buffer sizing within 1% across 9 buffer sizes.
+- Every algorithm implements `onAck`, `onLoss`, `onTimeout` and `canSend`. There is no `if (algorithm === 'cubic')` in the sender. A fixed-rate CBR sender serves as a reference.
+- SACK follows RFC 2018 and RFC 6675, configurable per flow via `sackEnabled`, off for Tahoe.
+- Queue disciplines: DropTail, RED and CoDel. Over deterministic DropTail the Floyd–Jacobson phase effect inverts the RTT bias, so fairness oracles run on RED and the phase effect is asserted in `tests/oracles/rtt-unfairness.test.ts`.
+- A 60-second 100 Mbps run is about half a million packets. Trace hot fields live in typed arrays with side tables and lazy hydration; the simulation runs in a Web Worker with an event budget. Benchmarked at M0: 288k packets in ~0.5 s with flat heap growth.
+- `MODEL_GAPS` in `lib/sim/engine.ts`: no RACK or Tail Loss Probe, no delayed ACK, no HyStart, ACKs never queue or drop, fixed one-MSS segments, and a 200 ms RTO floor (Linux) instead of RFC 6298's 1 s.
+- `lib/analysis/insight.ts` generates the findings sentences in both locales. Fairness uses Jain's index over time and a Chiu-Jain phase diagram.
+- `TraceChart` measures its container and states distances in device pixels, after 11px labels rendered at about 4px on phones inside a fixed 1000-unit viewBox.
+- `bund` (3.0:1) and `sediment` (2.9:1) pass contrast for strokes but not prose, so text-safe `-ink` variants were added.
+- Zero axe-core violations across all five routes in both locales at M6. 6 routes × 2 locales, 148 tests in 18 files, ~12,100 lines of TypeScript, 34 commits, three runtime dependencies.

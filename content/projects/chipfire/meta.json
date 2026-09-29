@@ -1,7 +1,17 @@
 {
   "slug": "chipfire",
   "title": "Chipfire",
-  "tagline": "A browser game of chain-reaction explosions — play a friend on another device with no server, no account, and no backend anywhere",
+  "tagline": "A chain-reaction grid game you can play against a friend on another device, with no server at all",
+  "glance": {
+    "for": "Casual players, and developers curious about serverless multiplayer",
+    "result": "Live, with online play over pasted codes and zero backend"
+  },
+  "skills": [
+    "Peer-to-peer networking",
+    "Deterministic simulation",
+    "Game AI",
+    "Offline-first web apps"
+  ],
   "categoryTags": [
     "Personal Project",
     "Game",
@@ -21,6 +31,7 @@
   "role": "Solo Developer & Architect",
   "timeframe": "Aug 2026",
   "liveUrl": "https://andifathulms.github.io/chipfire/id/",
+  "access": "public",
   "githubUrl": "https://github.com/andifathulms/chipfire",
   "heroImage": "/images/projects/chipfire/hero.webp",
   "order": 15,
@@ -28,20 +39,50 @@
   "metrics": [
     {
       "value": "0",
-      "label": "Backend servers — P2P over WebRTC"
+      "label": "backend servers for online play"
     },
     {
-      "value": "~6,700",
-      "label": "Lines of TypeScript, no game libraries"
+      "value": "2–4",
+      "label": "players per game on one device"
     },
     {
-      "value": "70",
-      "label": "Tests + a 3,000-game simulation"
+      "value": "3,000",
+      "label": "simulated games played before every deploy"
     },
     {
-      "value": "<24 hrs",
-      "label": "Spec-first, empty repo to deployed"
+      "value": "3",
+      "label": "AI difficulty levels"
     }
   ],
-  "access": "public"
+  "id": {
+    "tagline": "Game rantai ledakan di grid yang bisa dimainkan melawan teman di perangkat lain, tanpa server sama sekali",
+    "glance": {
+      "for": "Pemain kasual dan developer yang penasaran dengan multipemain tanpa server",
+      "result": "Live, dengan permainan online lewat kode tempel dan tanpa backend"
+    },
+    "skills": [
+      "Jaringan peer-to-peer",
+      "Simulasi deterministik",
+      "AI permainan",
+      "Aplikasi web offline-first"
+    ],
+    "metrics": [
+      {
+        "value": "0",
+        "label": "server backend untuk permainan online"
+      },
+      {
+        "value": "2–4",
+        "label": "pemain per permainan di satu perangkat"
+      },
+      {
+        "value": "3.000",
+        "label": "permainan simulasi sebelum setiap deploy"
+      },
+      {
+        "value": "3",
+        "label": "tingkat kesulitan lawan AI"
+      }
+    ]
+  }
 }

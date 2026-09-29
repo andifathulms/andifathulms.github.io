@@ -2,30 +2,51 @@
 
 ## The problem
 
-Two gaps, joined by one object. People scan tens of thousands of QR codes and have never seen one built — existing explainers stop at "here is a bitstream, here is a matrix" and treat Reed-Solomon error correction, mask selection, and interleaving as black boxes even in tutorials aimed at developers. Separately, QRIS — Indonesia's national QR payment standard, stuck to every warung counter — is not an opaque token: it's a plainly structured payload naming the merchant, the acquirer, and a checksum, but every existing QRIS parser dumps that structure as a table and stops there.
+People scan QR codes every day and have never seen one built. Online explainers stop at "here is a bitstream, here is a matrix". Error correction and masking stay black boxes, even in tutorials written for developers.
 
-The product is the join between them: select "merchant name" in the payload tree and the specific black squares carrying those bytes light up in the matrix. Nobody had connected the two layers, because doing it requires an encoder that remembers where every bit went.
+In Indonesia there is a second gap. QRIS, the national QR payment standard, is on the counter of almost every warung. The code behind the sticker is a plain, readable string that names the merchant, the payment provider and a checksum. Existing QRIS parsers show that string as a table and stop there.
 
-## The approach
+I wanted to join the two. Select "merchant name" in the payment data, and the exact black squares carrying those letters light up in the code. The app is for two readers at once: a curious Indonesian with no technical background, and a developer who wants to check every number by hand.
 
-### The provenance map is the architecture
+## What I built
 
-The encoder doesn't just return a matrix — it returns a matrix plus a complete record of why every single module is the color it is: which codeword and which bit of that codeword, or which function pattern, plus whether the mask flipped it. Every feature in the app is a read of that one structure. Payload-field highlighting, damage attribution, the animation order, and the mask comparison all come free from it — and it was built and tested before any UI existed, so no view had the chance to recompute the geometry independently and silently drift out of agreement with another.
+### The encoder remembers where every bit went
 
-### The display renders the computation's own record, not a re-enactment
+I wrote the QR encoder myself so it could keep a record as it builds. For every square it records why that square is dark or light: which byte and which bit it carries, or which fixed pattern it belongs to, and whether masking flipped it. Every feature reads from that one record. Field highlighting, damage tracking, the animation order and the mask comparison all come from it. I built and tested it before any screen existed, so no view could work out the layout on its own and drift from the others.
 
-Reed-Solomon encoding emits a full trace of every long-division step — the lead term, the generator multiple, the remainder before and after — and the division view just renders that array. The encoder always scores all eight candidate masks even though seven lose, so the mask gallery can never disagree with the winner. Display and computation are the same object, so they cannot diverge.
+### The screens show the real calculation
 
-### Correctness is gated against a reference implementation, not asserted
+When the encoder adds error correction, it keeps every step of the long division. The division view draws those steps, so a reader can check one line with a pencil. The encoder also scores all eight mask patterns, even though only one wins. The mask gallery shows all eight with their penalty scores, so it always agrees with the winner.
 
-An oracle test demands byte-identical matrices against an independent QR library across every version, error-correction level, mode, and mask pattern the app supports, and it blocks deploy in CI. Where the two genuinely disagree — a documented case in one penalty rule, where the reference library's rounding differs from the published specification — the app follows the specification, and the disagreement is tested *for* rather than hidden, so the divergence can't quietly go stale.
+### An independent library checks every code
 
-### Privacy is architectural, not a policy statement
+A test compares my output square by square with an independent QR library. It covers versions 1 to 15, all four error-correction levels, all three text modes and all eight masks, and a failure blocks the deploy. The two disagree in one place. For one penalty rule, the library rounds up where the ISO specification rounds down, which can change which mask wins. I follow the specification, and a test documents the difference so it can't go stale.
 
-People paste real payment payloads into this app. There are zero runtime network requests — no analytics, no error reporting, even the favicon inlined as a data URI after a browser test caught a 404 on a separate favicon request, because a 404 is still a request a build-time scanner now fails on. Typed text serializes to the URL for linkability, but a pasted QRIS payload never does, and the copy-link action disappears entirely while a real payment payload is loaded, so a merchant identifier can't ride along in a shared link by accident.
+### Pasted payment codes stay on your device
 
-## Outcome
+People paste real payment codes into this app. It makes no network requests while you use it: no analytics, no error reporting, and fonts ship with the page. A check at build time fails if anything in the output could call the network. Typed text goes into the URL so you can share a link. A pasted QRIS code never does, and the copy-link button disappears while one is loaded.
 
-Live and public: a nine-stage scrubbable pipeline where the matrix never moves or resizes — dragging the stage slider halfway between "place" and "mask" shows the bit-placement walk complete and the masking half-applied, because the encoder's own trace drives the animation rather than a hand-timed re-enactment. A damage lab lets you brush the matrix or drag a noise slider and watch error correction locate and repair the damage live, then fail visibly and explain the failure once you push past its correction capacity — reachable in one gesture, and the app's clearest payoff.
+## Result
 
-Sole author, 44 commits over roughly 28 hours across two days, ~8,600 lines of code, 84 tests. Five runtime dependencies — React and three self-hosted font packages — with the QR encoder, decoder, and EMVCo payload parser all written from scratch; the only QR libraries in the project are dev-only references used to prove the from-scratch engine agrees with them. `encode()` completes in under 8 milliseconds even at the largest supported symbol size, so typing recomputes the whole matrix on every keystroke with no debounce and no worker.
+Anatomi QRIS is live and public, in Indonesian and English. It walks through nine stages, from the typed text to a damaged code, on a slider you can drag. The code never moves or resizes, so halfway between two stages you see both half done. In the damage lab you scratch out squares and watch error correction repair them live. Push past its limit and it fails in front of you, with the reason. I built it in about 28 hours over two days in September 2026, with 84 tests.
+
+## What I'd do next
+
+- Close out the finishing pass on copy, keyboard use, mobile and Lighthouse scores, which the project notes list as not fully done.
+
+## Under the hood
+
+- The encoder returns a provenance map: for each module, codeword index and bit, or function pattern, plus a mask-flip flag. It also carries inverse maps (codeword to module coordinates, payload byte to codewords). A test decodes only the highlighted codewords to prove the mapping.
+- Reed-Solomon encoding emits a `divisionTrace` (lead term, generator multiple, remainder before and after), which the Division view renders directly.
+- `src/engine/` is pure: no React, no DOM, no randomness, no clock. It runs unmodified under `node --test`.
+- `encode()` for a version-15 symbol stays under 8 ms, so typing re-encodes on every keystroke with no debounce and no worker. This uses precomputed GF(256) log/antilog tables, `Uint8Array` on the hot path and a flat row-major module array.
+- The largest matrix is 77×77, 5,929 SVG modules. One pointer listener on the matrix group hit-tests by dividing coordinates by module size. React mounts the rects once; a painter mutates fills and caches each module's last fill.
+- The oracle test demands byte-identical matrices against `qrcode` across versions 1–15, EC levels L/M/Q/H, numeric, alphanumeric and byte modes, both sides of every version boundary, and all eight masks. It runs in CI and blocks deploy.
+- The rule-4 disagreement: `qrcode` uses `ceil(|pct − 50| / 5)`, while ISO/IEC 18004 Table 11 (and ZXing) use the floor. At 51.7% dark the spec charges 0 and `qrcode` charges 10. The oracle forces each mask and demands agreement on all eight, and checks rules 1–3 against `qrcode`'s own penalty functions.
+- The QRIS lens activates when the input parses as a valid EMVCo Merchant-Presented Mode payload: it opens with `000201` and ends in a validating CRC16 under tag 63. The TLV parser, CRC16 and tag dictionary are hand-written, with an 85-entry merchant category lookup.
+- `qrcode` and `jsqr` are devDependencies only, and a test fails if either is imported from `src/`. Runtime dependencies are React, React DOM and three `@fontsource` packages.
+- `scripts/check-bundle.mjs` scans the build for network APIs and unexpected URLs. The favicon is inlined as a data URI after a browser test caught a 404 on `/favicon.ico`.
+- Seven views (Matrix, Bitstream, Division, Interleave, MaskGallery, PayloadTree, DamageLab), seven bundled samples, 86 CSS design tokens, and two flat copy files for Indonesian and English. Bundle is about 83 KB gzipped against a 250 KB budget.
+- Repair in the damage lab snapshots the damage standing when pressed and keeps what the decoder couldn't fix. Earlier, noise damage was derived from the slider on every read, so the repair button looked dead on the main path.
+- Scope left out on purpose: Kanji mode, versions 16–40, camera scanning, styled QR codes, and static-to-dynamic QRIS conversion.
+- 84 tests in 13 files, about 8,600 lines of source, 44 commits between 2 and 3 September 2026.

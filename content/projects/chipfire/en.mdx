@@ -2,34 +2,54 @@
 
 ## The problem
 
-Chain Reaction is a well-known grid game with dozens of browser clones — and almost all of them get two things wrong. The first is the rule itself: when a cell reaches capacity it should *subtract* its critical mass, not empty to zero. Most implementations zero it, which still looks like a working game but is quietly a different one — a bug that never announces itself. The second is architecture: every online version reaches for a backend — a lobby, a matchmaker, an authoritative server, and the hosting bill behind them. That cost is exactly why most small games never get an online mode at all.
+Chain Reaction is a well-known grid game with dozens of browser clones. Most of them get two things wrong. The first is the rule itself. When a cell reaches capacity, it should subtract that capacity and keep the rest. Most versions empty it to zero. The game still looks fine, but it is a different game, and nobody notices.
 
-Chipfire is built for two audiences at once. For a player: a fast, offline-capable game you learn in two minutes and play against a friend on another device — no account, no install. For a technical reader, it's a demonstration that "multiplayer with no backend" is a real answer to a real constraint, and an invitation to ask how.
+The second is multiplayer. Every online version needs a lobby, a matchmaker and a game server, plus the hosting bill behind them. That cost is why most small games never get an online mode.
 
-## The approach
+Chipfire is for two kinds of people. Players get a fast game they can learn in two minutes and play against a friend on another device, with no account. Technical readers get a working example of multiplayer with no backend at all.
 
-### One property carries everything: determinism
+## What I built
 
-`applyMove(state, move)` is a pure function that produces byte-identical results on any device, any browser, any time — no clock, no `Math.random`, no floating point anywhere, integers only, including in the AI's scoring. That single property buys four features at once: because the same moves always produce the same game, **a game *is* its move list**. Replay, undo, shareable game codes, and peer-to-peer sync all fall out of it for free. Nothing derived is ever stored or sent as truth.
+### The same moves always give the same game
 
-### No server — and no referee either
+I made the rules engine fully predictable. It uses whole numbers only, no clock, and randomness only from a seed stored in the game itself. Any device, in any browser, produces the same result from the same moves. So a game is simply its list of moves. Replay, undo, shareable game codes and online sync all come from that one property. Nothing else is stored or sent as the source of truth.
 
-In peer-to-peer play each browser holds its own copy of the game. Only moves and a 32-bit hash of the resulting position cross the wire — never the position itself. Both sides run the same pure function on the same moves and compare hashes every turn. A mismatch means the players have silently drifted into different games — the worst possible failure — so the app **stops immediately, says so, and offers to rebuild from the move list**. It never quietly picks a winner.
+### Two browsers check each other every turn
 
-### The players are the signalling server
+In online play, each browser keeps its own copy of the game. Only the moves and a short fingerprint of the position travel between them. Both sides apply the same moves and compare fingerprints every turn. If they ever differ, the players have drifted into two different games. The app stops at once, tells both players, and offers to rebuild from the move list. It never quietly picks a winner.
 
-Two browsers behind home routers can't find each other, and WebRTC deliberately leaves that first handshake unspecified. Chipfire renders it as a compressed, pasteable code: one code out over WhatsApp, one code back, and the channel opens — with zero infrastructure and nothing that can be rate-limited or shut down.
+### The players do the matchmaking
 
-### Ordering is a rule, not an accident
+Two browsers behind home routers can't find each other on their own. Normally a server introduces them. I turned that introduction into a short code you can paste. You send one code over WhatsApp, your friend sends one back, and the game connects. There is no infrastructure to pay for, rate-limit or shut down.
 
-The cascade resolves through an explicit FIFO queue in a fixed scan order — never recursion, which would blow the stack on exactly the long chains that make the game interesting, and never iteration over a `Set` or object keys, the single most likely source of cross-device divergence and one that never shows up in single-machine testing. A cell's critical mass is derived from one adjacency function, never hardcoded per cell — which is what keeps hex or wrap-around boards a later addition rather than a rewrite.
+### Chains resolve in a fixed order
 
-### Honest about what doesn't work
+A cascade is processed one cell at a time from a queue, in the same scan order on every device. Two browsers that handled cells in a different order would drift apart, and that bug would never show on one machine. A cell's capacity is its number of neighbours, read from one function. That keeps hex or wrap-around boards a small addition later.
 
-Roughly 10–20% of connections — strict corporate networks, certain NAT configurations — can't establish a direct peer path without a paid relay server, which would break the no-backend premise. Rather than hide that behind an endless spinner, Chipfire detects the failure fast, explains it plainly, and offers local play right there.
+### Failed connections are explained
 
-## Outcome
+About 10 to 20% of connections, on strict office networks and some home routers, can't link two devices directly without a paid relay server. A relay would break the no-backend idea. So Chipfire detects the failure quickly, explains it in plain Indonesian, and offers local play on the spot.
 
-Live and deployed on GitHub Pages, gated on typecheck, lint, and the full test suite — including a 3,000-game simulation and cross-instance agreement run on *every* deploy, because determinism is the property everything else rests on. Hotseat play for 2–4, an AI opponent running minimax with alpha-beta pruning in a Web Worker, peer-to-peer play over pasted codes, a replay viewer, shareable game codes, and an interactive tutorial whose lessons are asserted in the test suite are all complete and playable.
+## Result
 
-Built solo and spec-first, from an empty directory to a deployed site in under 24 hours — roughly 6,700 lines of TypeScript across 66 files, a 984-line deterministic engine, a 300-line AI, and 70 tests, on three runtime dependencies (`next`, `react`, `react-dom`) and zero backend services.
+Chipfire is live, in Indonesian and English. You can play hotseat with 2 to 4 people, play an AI opponent at three difficulty levels, or play a friend online with pasted codes. It also has a replay viewer, shareable game codes, a move preview and a five-lesson tutorial. Every deploy first plays 3,000 simulated games to prove the engine agrees with itself. I built it in under 24 hours on 2 and 3 August 2026, from written spec to deployed site.
+
+## What I'd do next
+
+- Add QR codes for the connection codes, so phones can connect by scanning.
+- Add an optional matchmaking service on top of the paste flow, which stays the path that always works.
+
+## Under the hood
+
+- `applyMove(state, move)` is pure: no `Date`, no `Math.random` (a seeded generator lives in the state), no floats, including in AI scoring.
+- The cascade is an explicit FIFO queue with a fixed neighbour scan order. No recursion, which would overflow on long chains, and no iteration over a `Set` or object keys. A `Uint8Array` of positional flags stands in for a `Set`.
+- Desync detection exchanges a 32-bit FNV-1a hash of the full state every turn. Board size and seed travel with the offer; after that, only moves.
+- Signalling uses `RTCPeerConnection` offers compressed with `CompressionStream` (deflate-raw) into pasteable codes. Two public Google STUN servers handle address discovery only. There is no TURN relay. PeerJS brokered signalling (M5) and QR encoding are still outstanding.
+- The AI is minimax with alpha-beta pruning and iterative deepening in a Web Worker, on a time budget with an injected clock. It scores orb and cell advantage, corner and edge control, and vulnerability. Difficulties search depths 1, 3 and 6, weakened only by seeded noise.
+- Move preview runs the real move through the real engine on a throwaway copy (`lib/engine/preview.ts`).
+- The engine emits ordered `place`, `explode`, `convert`, `eliminate` and `win` events in waves. The renderer replays them and honours `prefers-reduced-motion`.
+- Tutorial lessons play real board positions whose stated outcomes are asserted in tests. Each player colour pairs with a distinct orb arrangement, never colour alone.
+- Renamed from Rantai to Chipfire after recognising the chip-firing game (abelian sandpile model). Both `localStorage` keys migrate with a legacy fallback.
+- A production-only Tailwind bug hid player colours because `lib/` wasn't in the class-scan path.
+- CI runs typecheck, lint, the full suite (including the 3,000-game simulation and cross-instance agreement), and checks the export for `.nojekyll` and locale routes.
+- Runtime dependencies: `next`, `react`, `react-dom`. Engine 984 lines, AI 300 lines, networking 404 lines. About 6,700 lines of TypeScript in 66 files, 70 tests in 15 files, 26 commits.

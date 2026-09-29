@@ -2,30 +2,50 @@
 
 ## Masalahnya
 
-Setiap aplikasi angklung di internet adalah soundboard: ketuk gambar bambu, dengar nada. Itu mereproduksi suaranya dan melewatkan instrumennya. Angklung sungguhan bersifat **terdistribusi** — tiap pemain memegang satu atau dua nada dan menghabiskan sebagian besar pertunjukan *menunggu* momennya, mengamati konduktor memberi isyarat angka dengan tangan. Koordinasi itulah instrumennya, dan tak ada di web yang menyimulasikannya.
+Aplikasi angklung yang saya temukan di internet semuanya berupa soundboard. Kita mengetuk gambar bambu, lalu terdengar satu nada. Suaranya ada, tapi alat musiknya hilang. Dalam ansambel angklung, setiap pemain memegang satu atau dua nada. Sebagian besar waktu dalam satu lagu dihabiskan untuk menunggu, sambil memperhatikan dirigen yang memberi isyarat angka dengan tangan. Koordinasi itulah inti alat musiknya, dan belum ada yang bisa mencobanya di web.
 
-Dua celah sekunder: tekniknya diajarkan sebagai tiga suara — *kurulung* (goyang), *centok* (tarik tajam), *tengkep* (goyang dengan satu tabung ditahan) — padahal sebenarnya tiga cara menggetarkan resonator yang sama, dan tiga berkas audio tak akan mengajarkan apa pun soal mengapa mereka berbeda. Dan **tengkep pada angklung akompanimen adalah sakelar kualitas akor**: empat tabung membunyikan dominan septim; jari kelingking pemain menahan satu dan ia menjadi trinada mayor. Itu fakta paling menarik tentang desain instrumen, dan tak ada simulator yang memodelkannya.
+Ada dua celah lain. Tiga teknik memainkan angklung biasanya diajarkan sebagai tiga bunyi: kurulung (digetarkan), centok (ditarik tajam), dan tengkep (digetarkan dengan satu tabung ditahan). Padahal ketiganya adalah tiga cara membunyikan bambu yang sama. Lalu, pada angklung akompanimen, tengkep mengubah akor. Empat tabung berbunyi sebagai akor dominan septim. Tahan satu tabung dengan kelingking, dan akornya menjadi trinada mayor. Belum ada simulator yang menunjukkan hal ini.
 
-## Pendekatannya
+## Yang saya bangun
 
-### Tabung bambu adalah bank mode resonansi, bukan rekaman
+### Setiap nada dihitung dari model tabung bambu
 
-Tiap mode adalah resonator dua-kutub yang respons impulsnya adalah sinusoid meluruh — yang secara fisik dilakukan mode yang dipukul. Tabung tertutup di simpul dan terbuka di sayatan, jadi ia berperilaku sebagai pipa terhenti: partial ganjil dominan dan tak ada yang kuat pada dua kali fundamental. **Ketiadaan itulah yang membuat tengkep bisa dibuktikan** — fundamental tabung oktaf adalah satu-satunya hal pada 2f, jadi menghilangkan tabung menghilangkan partial itu sepenuhnya. Teknik hidup seluruhnya di eksitasi, tak pernah di resonator: centok satu impuls keras; kurulung adalah untai pukulan (goyang 2–3 Hz dengan sedikit jitter berbenih agar terdengar hidup, bukan seperti tremolo mesin); tengkep memakai untai yang *sama* dan hanya berbeda pada resonator mana yang dijumlahkan. Menambah teknik berarti menambah pola, bukan cabang.
+Saya memodelkan setiap tabung sebagai sekumpulan resonansi yang berdenging lalu meredup, seperti bambu yang dipukul. Situs ini tidak memuat satu pun berkas audio, dan build akan gagal kalau ada yang masuk. Tabung angklung tertutup di satu ujung, jadi hampir tidak punya bunyi di dua kali nada dasarnya. Celah itu membuat perubahan akor bisa dibuktikan: tabung oktaf adalah satu-satunya sumber nada itu, jadi menahannya menghilangkan nada tersebut sepenuhnya. Ketiga teknik hanya berbeda di cara tabung dipukul. Centok adalah satu pukulan keras, kurulung adalah getaran yang teratur, dan tengkep adalah getaran yang sama dengan beberapa tabung dibungkam.
 
-### Suaranya diukur, bukan dinilai dengan telinga
+### Bunyinya diukur oleh tes
 
-Inti sintesis adalah fungsi murni — `(params) → Float32Array`, tanpa Web Audio, tanpa DOM, tanpa clock — yang me-render **offline di Node**, keputusan yang menjadi tumpuan seluruh proyek: pitch ditegaskan oleh FFT dalam toleransi sen, tengkep ditegaskan dua arah (partial absen saat ditahan, hadir saat tidak), centok ditegaskan sebagai tepat satu onset, dan benih yang sama me-render identik byte-per-byte. Dan yang Anda *dengar* adalah buffer yang diukur tes — lapisan Web Audio memutar array yang di-render alih-alih mengimplementasikan ulang model di node osilator, jadi tak ada dua instrumen dengan hanya satu yang teruji. Penjadwalan absolut terhadap clock audio (`startTime + eventTime`, tak pernah diakumulasi), jadi tak ada yang melenceng seberapa lama pun karya berjalan.
+Mesin suaranya saya pisahkan dari kode browser, jadi audio bisa dirender di dalam test suite. Tes mengukur tinggi nada sampai selisih beberapa cent. Tes juga memastikan nada dari tabung yang ditahan hilang saat tengkep dan muncul tanpa tengkep, serta centok menghasilkan tepat satu pukulan. Yang terdengar di browser adalah audio yang sama dengan yang diukur tes. Waktu setiap nada dihitung dari jam audio itu sendiri, jadi lagu yang panjang tidak pernah meleset.
 
-### Ensemble itulah produknya, dan ketidaklayakan diberi nama
+### Tampilan ansambel menunjukkan siapa main kapan
 
-Distribusi adalah masalah kendala kecil yang melaporkan kegagalan alih-alih menyembunyikannya: tiap nada butuh pemain yang memegang angklung itu dan bebas pada saat itu, dan ketidaklayakan kembali sebagai union terdiskriminasi bernama — *nada di luar set*, *satu pemain dibutuhkan dua kali sekaligus*, *pemain kurang* — dengan indeks nada yang melanggar terlampir, plus *saat puncak* karya sehingga ukuran ensemble minimum menjadi angka yang bisa diperiksa. Ia tak pernah memotong aransemen agar muat, dan diverifikasi terhadap oracle brute-force.
+Layar utamanya memuat sebuah melodi, satu set angklung, dan jumlah pemain. Di sana terlihat siapa memegang nada apa dan kapan setiap orang masuk. Jeda digambar sebagai ruang kosong, karena bagi pemain angklung, menunggu adalah pekerjaannya. Kita bisa memilih satu pemain dan memainkan bagiannya saja, atau menandai pemain yang absen dan melihat lagunya berantakan. Kalau sebuah lagu tidak bisa dibagi, solver menyebutkan alasannya: ada nada yang tidak ada di set, satu pemain dibutuhkan dua kali bersamaan, atau pemainnya kurang. Solver tidak pernah memotong lagu supaya muat.
 
-### Materi budaya ditangani dengan caveat yang dinyatakan
+### Sumber budaya disertai batasannya
 
-Padaeng (tuning diatonik-kromatik 1938), salendro, dan pelog degung dikirim sebagai set interval JSON yang bisa disunting, masing-masing dengan sumber dan **field caveat yang wajib** yang menyatakan di mana angkanya berhenti terverifikasi — angka salendro dan pelog adalah model struktural, bukan pengukuran — dan validator data menolak membangun jika sebuah caveat hilang. Daeng Soetigna dan Udjo Ngalagena dikreditkan di halaman, bukan di catatan kaki.
+Padaeng adalah laras diatonis-kromatis yang diciptakan Daeng Soetigna pada 1938. Laras ini hadir berdampingan dengan dua laras tradisional, salendro dan pelog degung, sebagai set interval yang bisa diubah. Setiap laras membawa sumbernya dan catatan wajib tentang sampai mana angkanya sudah terverifikasi. Angka salendro dan pelog adalah model struktural, bukan hasil pengukuran, dan build menolak jalan kalau catatannya tidak ada. Situs ini menyebut Daeng Soetigna dan Udjo Ngalagena langsung di halaman, dan mengarahkan pembaca ke Saung Angklung Udjo serta ansambel setempat.
 
-## Hasil
+## Hasilnya
 
-Live dan publik, dwibahasa, sepenuhnya statis dengan **nol berkas audio** (penjaga postbuild menggagalkan build jika satu muncul). Ia menyajikan rak (angklung bertingkat menurut pitch, mengayun pada laju goyang yang *sama* yang menggerakkan audio, pemilih teknik plus tekan-tahan); **tampilan ensemble** — muat melodi, pilih set dan jumlah pemain, lihat siapa memegang apa dan kapan mereka masuk, dengan istirahat digambar sebagai ruang karena bagi pemain angklung menunggu itulah tugasnya; pemecah distribusi dengan ketidaklayakan bernama; **laboratorium teknik** yang memaparkan untai pukulan yang memberi makan bank resonator; sakelar akor akompanimen ditampilkan sebagai tabung; perbandingan laras dengan sen yang bisa disunting dan kutipan di layar; jalur konduktor; dan halaman diagnostik di perangkat.
+Angklung Simulator sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris. Isinya rak angklung yang bergoyang, tampilan ansambel, lab teknik yang memperlihatkan pukulan yang menggerakkan bambu, perubahan akor yang digambar sebagai tabung, perbandingan laras berdampingan, dan jalur dirigen. Ada juga halaman diagnostik yang melaporkan perilaku audio di ponsel kita. Semuanya berjalan dengan tiga dependensi runtime, tanpa pustaka audio atau pengolahan suara. Saya membangunnya dalam sekitar 37 jam pada 12 dan 13 Agustus 2026, dengan 132 tes.
 
-Dibangun sendiri dalam satu build ~37 jam — ~13.100 baris TS/TSX/JSON, 132 tes, di atas **tiga dependensi runtime** dan tanpa pustaka audio, sintesis, atau DSP. Ia jujur tentang dua celah terbuka: startup audio belum diuji di iPhone sungguhan, dan timbre — yang terbukti *benar* dalam pitch, partial, dan identitas akor — belum dinilai terhadap angklung sungguhan dengan telinga.
+## Langkah berikutnya
+
+- Menjalankan sepuluh pengecekan iPhone yang sudah ditulis untuk memulai audio, yang belum dijalankan di iPhone.
+- Membandingkan warna bunyinya dengan angklung asli lewat telinga. Tinggi nada, parsial, dan akor sudah diukur, tapi apakah bunyinya mirip alat aslinya belum terverifikasi.
+- Menambahkan repertoar Sunda. Melodi bawaan saat ini berlisensi domain publik atau karya saya sendiri, dan repo mencatat apa yang dibutuhkan untuk menambah lagu tradisional.
+
+## Di balik layar
+
+- Setiap mode adalah resonator dua kutub, `y[n] = g·x[n] + 2r·cos(ω)·y[n-1] − r²·y[n-2]`, yang respons impulsnya berupa sinusoid yang meluruh. Tabungnya berperilaku seperti pipa tertutup, jadi parsial ganjil yang dominan.
+- Kurulung adalah deretan pukulan: getaran 2–3 Hz, dua pukulan per getaran, dengan jitter ber-seed pada waktu dan kekuatannya. Tengkep memakai deretan yang sama dan hanya mengubah resonator mana yang dijumlahkan. Menambah teknik berarti menambah pola, tanpa cabang baru.
+- Inti sintesisnya adalah `(params) → Float32Array`, tanpa Web Audio, DOM, React, jam, atau state tingkat modul, dan ini ditegakkan oleh `tests/synth/purity.test.ts`. Seed yang sama menghasilkan render yang identik per byte. Helper FFT dan deteksi onset ditulis sendiri di `tests/synth/helpers/dsp.ts`.
+- `lib/audio/voices.ts` memutar `Float32Array` hasil render dan tidak pernah membangun ulang modelnya dengan oscillator node. Kurulung dan tengkep dirender tetap enam detik lalu memudar saat dilepas, sebuah pendekatan yang dibatasi di lapisan audio.
+- Scheduler menghitung onset sebagai `startAudioTimeSec + eventTimeSec`, tidak pernah diakumulasi. Jam dan timer di-inject supaya logika antreannya bisa diuji di Node.
+- Kegagalan pembagian berupa discriminated union: `nada-di-luar-set`, `nada-bertumpuk-sendiri`, `pemain-kurang`, lengkap dengan indeks nada yang bermasalah. Solver juga melaporkan momen puncak lagu, jadi ukuran ansambel minimum bisa dicek. Solver diverifikasi terhadap oracle brute-force (620 baris, 56 tes).
+- Fixture perubahan akor punya toleransi 10 cent yang tidak boleh dilonggarkan. Mode tuner di lab teknik menjalankan renderer asli dan menghasilkan literal `TABUNG_MODES` untuk ditempel kembali ke kode.
+- `TuningSource.caveat` wajib dan ditegakkan oleh `data:validate`. Data: 3 laras bersumber, 5 set angklung, 5 melodi, semuanya divalidasi saat build.
+- PRD meminta klik untuk centok dan tahan untuk kurulung. Membedakan ketukan dari tahanan akan menunda setiap nada, jadi rak memakai pemilih teknik ditambah tekan-dan-tahan.
+- Warm-up merender satu buffer per slot idle supaya ponsel tidak macet. Anggaran 28 voice berasal dari `pnpm bench:voices`, yang sanggup 64 voice offline di sekitar 18× realtime.
+- Bug audio senyap punya tiga penyebab sekaligus: level output, anggaran voice, dan tidak ada cara membedakan ketiganya. Perbaikannya menambahkan pesan error audio yang terlihat, fallback Safari, dan halaman `/diagnostik`.
+- `scripts/postbuild.mjs` menggagalkan build kalau ada berkas audio. Dependensi runtime: `next`, `react`, dan `react-dom`. First Load JS 108–110 KB per halaman dari anggaran 250 KB.
+- 7 rute × 2 bahasa = 14 halaman statis. 132 tes di 11 berkas, sekitar 13.100 baris TS/TSX/JSON, 82 commit.
