@@ -29,8 +29,8 @@
     "GitHub Pages"
   ],
   "status": "active",
-  "role": "Fullstack Developer",
-  "timeframe": "Jul 2026",
+  "role": "Solo Developer",
+  "timeframe": "Jul 2026 – present",
   "liveUrl": "https://andifathulms.github.io/falak-visualizer/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/falak-visualizer",
@@ -39,20 +39,20 @@
   "featured": true,
   "metrics": [
     {
-      "value": "3",
-      "label": "crescent visibility methods compared side by side"
-    },
-    {
-      "value": "3,255",
-      "label": "points on the Indonesia visibility map"
-    },
-    {
       "value": "50",
-      "label": "historical new moons checked against JPL"
+      "label": "historical new moons matched against JPL"
     },
     {
       "value": "$0",
       "label": "hosting, everything runs in the browser"
+    },
+    {
+      "value": "28",
+      "label": "evenings where a bug flipped the date"
+    },
+    {
+      "value": "3,255",
+      "label": "points on the Indonesia visibility map"
     }
   ],
   "id": {
@@ -69,21 +69,25 @@
     ],
     "metrics": [
       {
-        "value": "3",
-        "label": "metode visibilitas hilal dibandingkan berdampingan"
-      },
-      {
-        "value": "3.255",
-        "label": "titik di peta visibilitas Indonesia"
-      },
-      {
         "value": "50",
-        "label": "bulan baru historis dicocokkan dengan JPL"
+        "label": "bulan baru historis yang cocok dengan JPL"
       },
       {
         "value": "$0",
         "label": "biaya hosting, semua jalan di browser"
+      },
+      {
+        "value": "28",
+        "label": "malam yang nyaris salah tanggal karena bug"
+      },
+      {
+        "value": "3.255",
+        "label": "titik di peta visibilitas Indonesia"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }
