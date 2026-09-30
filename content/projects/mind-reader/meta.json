@@ -23,7 +23,10 @@
     "TypeScript",
     "Vite",
     "Vitest",
-    "SVG"
+    "ESLint",
+    "GitHub Actions",
+    "GitHub Pages",
+    "Fontsource"
   ],
   "status": "active",
   "role": "Solo Developer",
@@ -36,20 +39,12 @@
   "featured": false,
   "metrics": [
     {
-      "value": "5",
-      "label": "predictors playing against you at once"
-    },
-    {
       "value": "2",
       "label": "1950s machines rebuilt from original papers"
     },
     {
       "value": "6",
       "label": "measurements of how you fail to be random"
-    },
-    {
-      "value": "< 80 ms",
-      "label": "from your press to the reveal"
     }
   ],
   "id": {
@@ -66,21 +61,17 @@
     ],
     "metrics": [
       {
-        "value": "5",
-        "label": "prediktor bermain melawan Anda sekaligus"
-      },
-      {
         "value": "2",
         "label": "mesin 1950-an dibangun ulang dari makalah asli"
       },
       {
         "value": "6",
         "label": "ukuran cara Anda gagal bersikap acak"
-      },
-      {
-        "value": "< 80 ms",
-        "label": "dari tekanan Anda sampai tebakan terbuka"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }

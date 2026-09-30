@@ -4,7 +4,7 @@
 
 Matching pennies is a game with a known best strategy: flip a fair coin. Do that and you tie at 50% against any opponent, forever. The strategy is simple, published and known to every player, and people still can't carry it out. That gap between knowing the right move and being able to make it is what this game is about.
 
-It is also a piece of computing history. In the 1950s, Bell Labs built two relay machines that predicted a player's next move: Shannon's MRM in 1953 and Hagelbarger's SEER in 1956. Their designs were published, but nobody had rebuilt them as something you could play. Single-model versions of this game already exist online, so I set a higher bar for the first version: both historical machines, their rematch, five models at once, and a portrait of how you play.
+It is also a piece of computing history. In the 1950s, Bell Labs built two relay machines that predicted a player's next move: Shannon's MRM in 1953 and Hagelbarger's SEER in 1956. Their designs were published, but nobody had rebuilt them as something you could play. Single-model versions of this game already exist online, so I set a higher bar for the first version: both historical machines, their rematch, eight models at once, and a portrait of how you play.
 
 ## What I built
 
@@ -14,34 +14,35 @@ The whole game depends on trust. If the machine could see your press before gues
 
 ### The machine only sees which way you pressed
 
-Your reaction time and where you tap would be strong clues. Using them quietly would betray the premise. Each predictor receives only the list of your past presses, with no place to pass timing or position. The limit is part of how the code is shaped, so it can't slip in later.
+Your reaction time and where you tap would be strong clues. Using them quietly would betray the premise. Each predictor receives only two lists: your past presses, and its own past guesses. There's no place to pass timing or position. The limit is part of how the code is shaped, so it can't slip in later.
 
 ### When unsure, the machine flips a coin
 
-If the five models aren't confident, the machine plays a random move, as the original 1950s machines did. That keeps it at 50% against a player who really is random, and stops anyone from reverse-engineering it. Before every deploy, a test plays 100,000 rounds against a simulated coin and requires the result to settle at 50%. If it ever fails, I don't tune it. A machine that beats a coin is seeing the future somehow, and the same bug would inflate its score against people.
+If the eight models aren't confident, the machine plays a random move, as the original 1950s machines did. That keeps it at 50% against a player who really is random, and stops anyone from reverse-engineering it. Before every deploy, a test plays 100,000 rounds against a simulated coin and requires the result to settle at 50%. If it ever fails, I don't tune it. A machine that beats a coin is seeing the future somehow, and the same bug would inflate its score against people.
 
 ### The historical machines have to replay history
 
 I rebuilt both machines from the original 1953 memorandum and 1956 paper, not from modern summaries. Where the sources leave a detail open, I wrote down my assumption, and those notes ship inside the app. A second test pits the two machines against each other for thousands of rounds and requires Shannon's simpler machine to win, as it did in the 1950s. If it doesn't, one of my reconstructions is wrong.
 
-### Five models of you, competing in public
+### Eight models of you, competing in public
 
-Five predictors play against you at once, and you can watch their weights change as the game goes on. Switch your strategy halfway and a different model takes over the vote. After a session, a portrait measures six things about how you fail to be random, including how often you switch sides, how long your streaks run, and which patterns you repeat too often.
+Eight predictors play against you at once, and you can watch their weights change as the game goes on. Switch your strategy halfway and a different model takes over the vote. After a session, a portrait measures six things about how you fail to be random, including how often you switch sides, how long your streaks run, and which patterns you repeat too often.
 
 ## Result
 
-Mind Reader is live and public. It runs the five predictors, the historical rematch, the portrait and a strategy lab where you can try tactics such as reciting digits of pi. Only an actual coin works. The machine answers within 80 milliseconds, so you never see it thinking. It reports its score and never gloats. I built it alone over eight days in September 2026.
+Mind Reader is live and public. It runs the eight predictors, the historical rematch, the portrait and a strategy lab where you can try tactics such as reciting digits of pi. Only an actual coin works. The machine answers within 80 milliseconds, so you never see it thinking. It reports its score and never gloats. I built the first version alone over about a week in early September 2026, then kept extending it through the rest of the month, adding three more predictors and the own-guesses signal each one now reads.
 
 ## Under the hood
 
 - `Referee.seal()` returns a frozen `SealedPrediction`; `resolve(seal, actual)` takes it as an argument. `src/engine/verify.ts` re-seals the session from a fresh machine fed only earlier presses.
-- Predictors implement `predict(history: readonly Move[])`. Only the mixer sees all five; predictors can't read each other.
-- The five: SEER (Hagelbarger 1956), MRM (Shannon 1953), fixed-order n-gram, variable-order backoff, and a level-k cognitive-hierarchy model for players who second-guess themselves.
-- The confidence floor is a user control. `tests/fairness.test.ts` runs 100,000 rounds against a seeded PRNG in about 8 s and blocks deploy; `tests/historical.test.ts` runs MRM against SEER through the umpire.
+- Predictors implement `predict(history: readonly Move[], own: readonly Move[])`. Only the mixer sees all eight; predictors can't read each other.
+- The eight: SEER (Hagelbarger 1956), MRM (Shannon 1953), fixed-order n-gram, variable-order backoff, a level-k cognitive-hierarchy model for players who second-guess themselves, and three more built later: context, runs and reaction models.
+- The mixer weights predictors by exponential decay (default 0.95) and falls back to the seeded PRNG below a confidence floor (default 0.52) or during a warm-up window of 12 rounds by default. `tests/fairness.test.ts` runs 100,000 rounds against a seeded PRNG in about 7.5 s and blocks deploy; `tests/historical.test.ts` runs MRM against SEER through the umpire; `tests/strength.test.ts` asserts predictors beat mild human biases without leaking future information.
 - Unresolved source details (tie behaviour, counter bounds, update-rule edges) are in `src/engine/predictors/NOTES.md`, printed in full in the Archive view.
 - Portrait statistics: Wilson score intervals on win rate, switch rate versus 50%, run lengths against the geometric expectation, conditional entropy at orders 1–5, serial correlation at lags 1–10, chi-square on n-gram frequencies.
 - `derive.ts`, `counterfactual.ts` and `verify.ts` came from an explainability pass on 5–7 September that the original spec didn't include. About 20 commits in the same window cover contrast, focus, tab order, table equivalents for every chart and reduced motion.
 - To stay under 80 ms, the next round's prediction is sealed right after each reveal. The arena and the analysis panels are separate render trees; charts update on a throttle.
 - The engine is pure and replayable from a seed, with an injected clock. Seed and config go in the URL; press history does not. Sessions export as JSON and CSV.
-- Two runtime dependencies, React 18.3 and React DOM. Vite 6, TypeScript 5.7, plain CSS, hand-written SVG for all six chart families, two in-repo Vite plugins for per-route metadata. The bundle is 93,672 bytes gzipped against a 150 KB CI budget.
-- 72 tests in 11 files. About 12,000 lines across 77 files and 64 commits from 4 to 11 September 2026.
+- Two runtime dependencies, React 18.3 and React DOM. Vite 6, TypeScript 5.7, plain CSS, hand-written SVG for all six chart families, two in-repo Vite plugins for per-route metadata, fonts self-hosted via Fontsource. The bundle is 103,963 bytes gzipped against a 150 KB (153,600-byte) CI budget.
+- Nine views: Arena, Ensemble, Portrait, Rematch, Archive, Lab, Controls, Export and Seal.
+- 77 tests in 12 files. About 7,549 lines of source and 1,082 lines of tests. 69 commits between 4 and 26 September 2026, 19 of them on the first day.

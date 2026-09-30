@@ -4,7 +4,7 @@
 
 Matching pennies adalah permainan dengan strategi terbaik yang sudah diketahui: lempar koin yang adil. Lakukan itu dan hasilnya seri 50% melawan lawan mana pun, selamanya. Strateginya sederhana, sudah dipublikasikan, dan diketahui setiap pemain, tapi orang tetap tidak bisa menjalankannya. Jarak antara tahu langkah yang benar dan mampu melakukannya itulah inti permainan ini.
 
-Permainan ini juga bagian dari sejarah komputasi. Pada 1950-an, Bell Labs membangun dua mesin relai yang menebak langkah pemain berikutnya: MRM karya Shannon pada 1953 dan SEER karya Hagelbarger pada 1956. Rancangannya dipublikasikan, tapi belum ada yang membangunnya ulang sebagai sesuatu yang bisa dimainkan. Versi permainan ini dengan satu model sudah banyak di internet, jadi saya memasang standar lebih tinggi untuk versi pertama: kedua mesin bersejarah, pertandingan ulang keduanya, lima model sekaligus, dan potret cara Anda bermain.
+Permainan ini juga bagian dari sejarah komputasi. Pada 1950-an, Bell Labs membangun dua mesin relai yang menebak langkah pemain berikutnya: MRM karya Shannon pada 1953 dan SEER karya Hagelbarger pada 1956. Rancangannya dipublikasikan, tapi belum ada yang membangunnya ulang sebagai sesuatu yang bisa dimainkan. Versi permainan ini dengan satu model sudah banyak di internet, jadi saya memasang standar lebih tinggi untuk versi pertama: kedua mesin bersejarah, pertandingan ulang keduanya, delapan model sekaligus, dan potret cara Anda bermain.
 
 ## Yang saya bangun
 
@@ -14,34 +14,35 @@ Seluruh permainan bergantung pada kepercayaan. Kalau mesin bisa melihat tekanan 
 
 ### Mesin hanya melihat arah tekanan Anda
 
-Waktu reaksi dan posisi ketukan Anda adalah petunjuk yang kuat. Memakainya diam-diam berarti mengkhianati premisnya. Setiap prediktor hanya menerima daftar tekanan Anda sebelumnya, tanpa tempat untuk mengirim waktu atau posisi. Batasan ini tertanam di bentuk kodenya, jadi tidak bisa menyelinap masuk belakangan.
+Waktu reaksi dan posisi ketukan Anda adalah petunjuk yang kuat. Memakainya diam-diam berarti mengkhianati premisnya. Setiap prediktor hanya menerima dua daftar: tekanan Anda sebelumnya, dan tebakannya sendiri sebelumnya. Tidak ada tempat untuk mengirim waktu atau posisi. Batasan ini tertanam di bentuk kodenya, jadi tidak bisa menyelinap masuk belakangan.
 
 ### Kalau ragu, mesin melempar koin
 
-Kalau kelima model tidak yakin, mesin memainkan langkah acak, seperti yang dilakukan mesin-mesin asli tahun 1950-an. Itu menahan skornya di 50% melawan pemain yang memang acak, dan mencegah siapa pun merekayasa balik mesinnya. Sebelum setiap deploy, sebuah tes memainkan 100.000 ronde melawan koin simulasi dan mewajibkan hasilnya mendekati 50%. Kalau tes itu gagal, saya tidak menyetelnya. Mesin yang bisa mengalahkan koin berarti entah bagaimana melihat masa depan, dan bug yang sama akan menggelembungkan skornya melawan manusia.
+Kalau kedelapan model tidak yakin, mesin memainkan langkah acak, seperti yang dilakukan mesin-mesin asli tahun 1950-an. Itu menahan skornya di 50% melawan pemain yang memang acak, dan mencegah siapa pun merekayasa balik mesinnya. Sebelum setiap deploy, sebuah tes memainkan 100.000 ronde melawan koin simulasi dan mewajibkan hasilnya mendekati 50%. Kalau tes itu gagal, saya tidak menyetelnya. Mesin yang bisa mengalahkan koin berarti entah bagaimana melihat masa depan, dan bug yang sama akan menggelembungkan skornya melawan manusia.
 
 ### Mesin bersejarah harus mengulang sejarah
 
 Saya membangun ulang kedua mesin dari memorandum asli 1953 dan makalah 1956, tidak dari ringkasan modern. Di bagian yang tidak dijelaskan sumbernya, saya menuliskan asumsi saya, dan catatan itu ikut dirilis di dalam aplikasi. Tes kedua mengadu kedua mesin selama ribuan ronde dan mewajibkan mesin Shannon yang lebih sederhana menang, seperti yang terjadi pada 1950-an. Kalau tidak, salah satu rekonstruksi saya keliru.
 
-### Lima model tentang Anda, bersaing terbuka
+### Delapan model tentang Anda, bersaing terbuka
 
-Lima prediktor bermain melawan Anda sekaligus, dan bobot masing-masing terlihat berubah sepanjang permainan. Ganti strategi di tengah jalan, dan model lain akan mengambil alih suara terbanyak. Setelah sesi selesai, sebuah potret mengukur enam hal tentang cara Anda gagal bersikap acak, termasuk seberapa sering Anda berpindah sisi, seberapa panjang deretan Anda, dan pola mana yang terlalu sering Anda ulang.
+Delapan prediktor bermain melawan Anda sekaligus, dan bobot masing-masing terlihat berubah sepanjang permainan. Ganti strategi di tengah jalan, dan model lain akan mengambil alih suara terbanyak. Setelah sesi selesai, sebuah potret mengukur enam hal tentang cara Anda gagal bersikap acak, termasuk seberapa sering Anda berpindah sisi, seberapa panjang deretan Anda, dan pola mana yang terlalu sering Anda ulang.
 
 ## Hasilnya
 
-Mind Reader sudah live dan terbuka untuk umum. Isinya kelima prediktor, pertandingan ulang bersejarah, potret pemain, dan lab strategi tempat Anda bisa mencoba taktik seperti melafalkan digit pi. Hanya koin asli yang berhasil. Mesin menjawab dalam 80 milidetik, jadi Anda tidak pernah melihatnya berpikir. Mesin melaporkan skornya dan tidak pernah mengejek. Saya membangunnya sendiri dalam delapan hari pada September 2026.
+Mind Reader sudah live dan terbuka untuk umum. Isinya kedelapan prediktor, pertandingan ulang bersejarah, potret pemain, dan lab strategi tempat Anda bisa mencoba taktik seperti melafalkan digit pi. Hanya koin asli yang berhasil. Mesin menjawab dalam 80 milidetik, jadi Anda tidak pernah melihatnya berpikir. Mesin melaporkan skornya dan tidak pernah mengejek. Saya membangun versi pertamanya sendiri dalam sekitar seminggu pada awal September 2026, lalu terus mengembangkannya sepanjang sisa bulan itu, menambahkan tiga prediktor lagi dan sinyal tebakan-sendiri yang kini dimiliki semuanya.
 
 ## Di balik layar
 
 - `Referee.seal()` mengembalikan `SealedPrediction` yang dibekukan; `resolve(seal, actual)` menerimanya sebagai argumen. `src/engine/verify.ts` menyegel ulang sesi dari mesin baru yang hanya diberi tekanan sebelumnya.
-- Prediktor mengimplementasikan `predict(history: readonly Move[])`. Hanya mixer yang melihat kelimanya; prediktor tidak bisa membaca satu sama lain.
-- Kelimanya: SEER (Hagelbarger 1956), MRM (Shannon 1953), n-gram orde tetap, backoff orde variabel, dan model hierarki kognitif level-k untuk pemain yang menebak-nebak dirinya sendiri.
-- Ambang keyakinan bisa diatur pengguna. `tests/fairness.test.ts` menjalankan 100.000 ronde melawan PRNG ber-seed dalam sekitar 8 detik dan memblokir deploy; `tests/historical.test.ts` mengadu MRM dan SEER lewat umpire.
+- Prediktor mengimplementasikan `predict(history: readonly Move[], own: readonly Move[])`. Hanya mixer yang melihat kedelapannya; prediktor tidak bisa membaca satu sama lain.
+- Kedelapannya: SEER (Hagelbarger 1956), MRM (Shannon 1953), n-gram orde tetap, backoff orde variabel, model hierarki kognitif level-k untuk pemain yang menebak-nebak dirinya sendiri, dan tiga lagi yang dibangun belakangan: model context, runs, dan reaction.
+- Mixer memberi bobot ke prediktor lewat peluruhan eksponensial (default 0,95) dan beralih ke PRNG ber-seed di bawah ambang keyakinan (default 0,52) atau selama jendela pemanasan 12 ronde secara default. `tests/fairness.test.ts` menjalankan 100.000 ronde melawan PRNG ber-seed dalam sekitar 7,5 detik dan memblokir deploy; `tests/historical.test.ts` mengadu MRM dan SEER lewat umpire; `tests/strength.test.ts` memastikan prediktor mengalahkan bias manusia ringan tanpa membocorkan informasi masa depan.
 - Detail sumber yang tidak terjawab (perilaku saat seri, batas penghitung, tepi aturan pembaruan) dicatat di `src/engine/predictors/NOTES.md` dan dicetak lengkap di tampilan Archive.
 - Statistik potret: interval skor Wilson untuk tingkat menang, tingkat berpindah dibanding 50%, panjang deretan dibanding ekspektasi geometrik, entropi bersyarat orde 1–5, korelasi serial lag 1–10, dan chi-square pada frekuensi n-gram.
 - `derive.ts`, `counterfactual.ts`, dan `verify.ts` lahir dari putaran keterjelasan pada 5–7 September yang tidak ada di spesifikasi awal. Sekitar 20 commit di rentang yang sama membahas kontras, fokus, urutan tab, tabel pengganti untuk setiap grafik, dan reduced motion.
 - Agar tetap di bawah 80 ms, tebakan ronde berikutnya disegel tepat setelah setiap pengungkapan. Arena dan panel analisis adalah render tree terpisah; grafik diperbarui dengan throttle.
 - Engine-nya murni dan bisa diputar ulang dari seed, dengan jam yang diinjeksi. Seed dan konfigurasi disimpan di URL; riwayat tekanan tidak. Sesi bisa diekspor sebagai JSON dan CSV.
-- Dua dependensi runtime, React 18.3 dan React DOM. Vite 6, TypeScript 5.7, CSS biasa, SVG tulisan tangan untuk keenam jenis grafik, dua plugin Vite internal untuk metadata per rute. Bundle-nya 93.672 byte gzip dari anggaran CI 150 KB.
-- 72 tes di 11 berkas. Sekitar 12.000 baris di 77 berkas dan 64 commit dari 4 sampai 11 September 2026.
+- Dua dependensi runtime, React 18.3 dan React DOM. Vite 6, TypeScript 5.7, CSS biasa, SVG tulisan tangan untuk keenam jenis grafik, dua plugin Vite internal untuk metadata per rute, font di-hosting sendiri lewat Fontsource. Bundle-nya 103.963 byte gzip dari anggaran CI 150 KB (153.600 byte).
+- Sembilan tampilan: Arena, Ensemble, Portrait, Rematch, Archive, Lab, Controls, Export, dan Seal.
+- 77 tes di 12 berkas. Sekitar 7.549 baris kode sumber dan 1.082 baris tes. 69 commit antara 4 dan 26 September 2026, 19 di antaranya pada hari pertama.
