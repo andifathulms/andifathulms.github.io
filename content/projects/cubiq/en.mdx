@@ -16,32 +16,38 @@ The clock reads the browser's high-resolution time on every frame, so a long sol
 
 I wrote a solver for each of the eight major puzzles and picked the strategy by how many positions the puzzle has.
 
-- **2×2, Pyraminx and Skewb** are small enough to precompute every position. The solver looks up the shortest solution, which is never longer than 11 moves.
-- **3×3** is solved the way people solve it (CFOP). It finds an optimal cross, pairs up the first two layers, and recognises every last-layer case from a full algorithm set. Wasted moves between stages are cancelled.
-- **4×4 and 5×5** are reduced to a 3×3 by solving the centres and pairing the edges, with parity fixes, then finished by the 3×3 solver.
-- **Megaminx** is solved layer by layer, with a small library of move sequences for the last layer.
-- **Square-1** needs two phases: first restore the shape, then the pieces. I also built a 3D view that animates its half-turn flips as solid geometry.
+- **2×2, Pyraminx and Skewb** are small enough to precompute every position; the solver looks up the shortest solution, never longer than 11 moves.
+- **3×3** is solved the way people solve it (CFOP): an optimal cross, the first two layers paired, every last-layer case recognised from a full algorithm set, with wasted moves between stages cancelled.
+- **4×4 and 5×5** reduce to a 3×3 by solving the centres and pairing the edges, with parity fixes, then finish through the 3×3 solver.
+- **Megaminx** solves layer by layer, with a small library of last-layer sequences.
+- **Square-1** needs two phases, shape then pieces, with a 3D view that animates its half-turn flips as solid geometry.
+
+### The whole app moved into the browser
+
+Every solver first ran through a Python service the user had to start locally, so the Solve Lab simply didn't work unless that service was running. I ported every solver into TypeScript running in a Web Worker, so all eight now solve client-side with no backend involved. The Python service still exists behind the optional research tab, now as the reference implementation the browser ports are checked against. With nothing left needing a server, I shipped Cubiq as a static export to GitHub Pages instead of a hosted Next.js server.
+
+### Four sections built around what a cuber is doing
+
+The app began as four separate pages named after their implementation: timer, stats, history, solvers. That split stats from history, two things a cuber wants side by side, and hid the solver suite behind a name that describes code, not a question. I merged stats and history into one Progress page and renamed the solver suite Solve Lab, still one tab per puzzle carrying a scramble over when you switch. A new Learn section adds a spaced-repetition trainer for OLL and PLL cases, and old URLs still redirect so saved links keep working.
 
 ### A model that teaches itself to solve the cube
 
 A separate Python service trains a neural network the way DeepCubeA did. It scrambles a solved cube, then learns to estimate how many moves it is from solved. A research dashboard shows training live. You can run the model on a scramble and compare its answer with the optimal one from Kociemba's solver, which I use only as a benchmark.
 
-### One workspace for every puzzle
-
-The solvers page has a tab per puzzle and keeps each scramble when you switch between them. After a timed solve, "Solve this" opens the matching solver with your scramble already filled in.
-
 ## Result
 
-Cubiq is live and free to use. It solves all eight puzzles with solvers I wrote myself. I used cubing.js only to draw the cube and scramble it, and Kociemba's solver only to measure against. Every solve is saved in the browser and can be exported. The first plan only had a cross solver, marked as possibly too hard for an early phase. I built Cubiq in about 11 weeks, from May to July 2026.
+Cubiq has been live and free to use since September 2026. It solves all eight puzzles with solvers I wrote myself, entirely in the browser. I used cubing.js only to draw the cube and scramble it, and Kociemba's solver only to measure against. Every solve is saved in the browser and can be exported. The first plan only had a cross solver, marked as possibly too hard for an early phase. I built the first version over about 11 weeks, from May to July 2026. I then returned to it through September to move every solver client-side, redesign the app around four task-based sections, and ship it as a static site with no server to keep running.
 
 ## Under the hood
 
 - cubing.js's `TwistyPlayer` references `self` at module load, so it's loaded with `dynamic(() => import(...), { ssr: false })` and mounted with `document.createElement('twisty-player')` inside a `useEffect`.
 - Turbopack broke the URLs cubing.js uses to start its Web Workers. Switching the build to Webpack unblocked it.
 - The timer renders `performance.now() - startTime`. `setInterval` only triggers re-renders and never measures time.
-- 2×2, Pyraminx and Skewb use full God's-algorithm distance tables (up to ~3.1M positions). 3×3 uses IDA* for cross, x-cross and double x-cross, an F2L pair search, and an OLL/PLL database, with move cancellation across stage boundaries.
+- 2×2, Pyraminx and Skewb use full God's-algorithm distance tables: 3,674,160, 1,866,240 and 3,149,280 positions in that order, all bounded at 11 moves. 3×3 uses IDA* for cross, x-cross and double x-cross, an F2L pair search, and an OLL/PLL database, with move cancellation across stage boundaries.
 - 4×4 and 5×5 use geometry-generated move tables. The 5×5 needed a new cross-swap macro derived by conjugation to handle one parity case.
 - Square-1 uses shape BFS, then exact piece descent. Its custom 3D view renders the puzzle as a double-sided shell and animates 180° equator flips as rigid geometry.
-- The `cubiq-ml` FastAPI service uses Autodidactic Iteration and a dual-head ResNet: a value head for moves remaining and a policy head over 18 moves. Greedy and MCTS rollouts are available. The dashboard polls training status every two seconds.
-- State lives in Zustand, persisted to localStorage with `skipHydration` to avoid SSR mismatches. Solves export and import as JSON. Deep links use `/solvers?puzzle=<id>&scramble=<alg>`.
-- 19 solver API endpoints, about 13,700 lines split between TypeScript and Python, 70 commits.
+- The `cubiq-ml` FastAPI service uses Autodidactic Iteration and a dual-head ResNet: a value head for moves remaining and a policy head over 18 moves. Greedy and MCTS rollouts are available. The dashboard polls training status every two seconds. The self-play loop once collapsed to always recommending the same move, because it picked actions deterministically when several looked equally good early in training; adding randomness to that choice fixed it.
+- State lives in Zustand, persisted to localStorage with `skipHydration` to avoid SSR mismatches. Solves export and import as JSON. Deep links now use `/lab?puzzle=<id>&scramble=<alg>` on the renamed Solve Lab.
+- Inspection alerts use the browser's `SpeechSynthesis` API for a spoken countdown; no audio files ship with the app.
+- Fonts are Bricolage Grotesque for display, Geist for UI and Martian Mono for figures.
+- 19 solver API endpoints, 100 frontend source files and 38 backend files, about 21,000 lines split between TypeScript and Python, 95 commits between 3 May and 28 September 2026.

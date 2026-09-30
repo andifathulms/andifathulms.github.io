@@ -4,7 +4,7 @@
   "tagline": "A speedcubing trainer with competition-grade timing and a solver I wrote for each of the 8 major puzzles",
   "glance": {
     "for": "Intermediate and advanced speedcubers who have outgrown csTimer",
-    "result": "Live and free, with its own solver for all 8 puzzles"
+    "result": "Live since September 2026, with its own solver for all 8 puzzles"
   },
   "skills": [
     "Search algorithms",
@@ -23,15 +23,18 @@
     "TypeScript",
     "React",
     "Tailwind CSS",
+    "Zustand",
+    "cubing.js",
     "FastAPI",
     "PyTorch",
-    "Zustand"
+    "Web Workers"
   ],
   "status": "active",
-  "role": "Fullstack Developer",
-  "timeframe": "May – Jul 2026",
+  "role": "Solo Developer",
+  "timeframe": "May – Sep 2026",
   "liveUrl": "https://andifathulms.github.io/cubiq/",
-  "githubUrl": null,
+  "access": "public",
+  "githubUrl": "https://github.com/andifathulms/cubiq",
   "heroImage": "/images/projects/cubiq/hero.webp",
   "order": 9,
   "featured": true,
@@ -41,12 +44,12 @@
       "label": "puzzles solved by solvers I wrote"
     },
     {
-      "value": "≤ 11",
-      "label": "moves, optimal, on 2×2, Pyraminx and Skewb"
+      "value": "57 OLL, 21 PLL",
+      "label": "algorithms in the spaced-repetition trainer"
     },
     {
-      "value": "~3.1M",
-      "label": "positions in the biggest precomputed puzzle"
+      "value": "≤ 11",
+      "label": "moves, optimal, on 2×2, Pyraminx and Skewb"
     },
     {
       "value": "ao5–ao100",
@@ -57,7 +60,7 @@
     "tagline": "Pelatih speedcubing dengan timer setara kompetisi dan solver buatan sendiri untuk 8 puzzle utama",
     "glance": {
       "for": "Speedcuber menengah dan mahir yang sudah tidak cukup dengan csTimer",
-      "result": "Live dan gratis, dengan solver sendiri untuk kedelapan puzzle"
+      "result": "Live sejak September 2026, dengan solver sendiri untuk kedelapan puzzle"
     },
     "skills": [
       "Algoritma pencarian",
@@ -71,17 +74,21 @@
         "label": "puzzle diselesaikan solver buatan saya"
       },
       {
-        "value": "≤ 11",
-        "label": "langkah optimal di 2×2, Pyraminx, dan Skewb"
+        "value": "57 OLL, 21 PLL",
+        "label": "algoritma di pelatih spaced-repetition"
       },
       {
-        "value": "~3,1 juta",
-        "label": "posisi di puzzle terbesar yang dihitung lebih dulu"
+        "value": "≤ 11",
+        "label": "langkah optimal di 2×2, Pyraminx, dan Skewb"
       },
       {
         "value": "ao5–ao100",
         "label": "rata-rata dihitung sesuai aturan WCA"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }

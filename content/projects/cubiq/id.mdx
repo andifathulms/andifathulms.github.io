@@ -16,32 +16,38 @@ Jam membaca waktu resolusi tinggi dari browser di setiap frame, jadi solve yang 
 
 Saya menulis solver untuk kedelapan puzzle utama dan memilih strateginya berdasarkan seberapa banyak posisi yang dimiliki puzzle itu.
 
-- **2×2, Pyraminx, dan Skewb** cukup kecil untuk dihitung semua posisinya di awal. Solver tinggal mencari solusi terpendek, yang tidak pernah lebih dari 11 langkah.
-- **3×3** diselesaikan dengan cara manusia menyelesaikannya (CFOP). Solver mencari cross yang optimal, memasangkan dua lapisan pertama, lalu mengenali setiap kasus lapisan terakhir dari set algoritma lengkap. Langkah yang terbuang di antara tahap dibatalkan.
-- **4×4 dan 5×5** direduksi menjadi 3×3 dengan menyelesaikan bagian tengah dan memasangkan edge, lengkap dengan perbaikan parity, lalu dituntaskan oleh solver 3×3.
-- **Megaminx** diselesaikan lapis demi lapis, dengan pustaka kecil urutan langkah untuk lapisan terakhir.
-- **Square-1** butuh dua fase: kembalikan bentuknya dulu, baru kepingannya. Saya juga membuat tampilan 3D yang menganimasikan putaran setengahnya sebagai geometri padat.
+- **2×2, Pyraminx, dan Skewb** cukup kecil untuk dihitung semua posisinya di awal; solver tinggal mencari solusi terpendek, tidak pernah lebih dari 11 langkah.
+- **3×3** diselesaikan dengan cara manusia menyelesaikannya (CFOP): cross yang optimal, dua lapisan pertama dipasangkan, setiap kasus lapisan terakhir dikenali dari set algoritma lengkap, dengan langkah terbuang di antara tahap dibatalkan.
+- **4×4 dan 5×5** direduksi menjadi 3×3 dengan menyelesaikan bagian tengah dan memasangkan edge, lengkap perbaikan parity, lalu dituntaskan oleh solver 3×3.
+- **Megaminx** diselesaikan lapis demi lapis, dengan pustaka kecil urutan langkah lapisan terakhir.
+- **Square-1** butuh dua fase, bentuk lalu keping, dengan tampilan 3D yang menganimasikan putaran setengahnya sebagai geometri padat.
+
+### Seluruh aplikasi pindah ke browser
+
+Setiap solver semula berjalan lewat layanan Python yang harus dijalankan pengguna secara lokal, jadi Solve Lab tidak berfungsi kalau layanan itu tidak menyala. Saya memindahkan semua solver ke TypeScript yang berjalan di Web Worker, sehingga kedelapannya kini menyelesaikan puzzle di sisi klien tanpa backend. Layanan Python-nya masih ada di balik tab riset opsional, kini sebagai implementasi rujukan yang dipakai memeriksa hasil port ke browser. Karena tidak ada lagi yang butuh server, saya merilis Cubiq sebagai static export ke GitHub Pages, bukan server Next.js yang di-hosting.
+
+### Empat bagian yang disusun sesuai kegiatan cuber
+
+Aplikasi ini semula berupa empat halaman terpisah yang dinamai sesuai implementasinya: timer, stats, history, solvers. Itu memisahkan stats dari history, dua hal yang sebenarnya ingin dilihat cuber berdampingan, dan menyembunyikan rangkaian solver di balik nama yang menjelaskan kode, bukan pertanyaan penggunanya. Saya menggabungkan stats dan history menjadi satu halaman Progress, dan mengganti nama rangkaian solver menjadi Solve Lab, tetap satu tab per puzzle yang membawa scramble saat Anda berpindah. Bagian Learn yang baru menambahkan pelatih spaced-repetition untuk kasus OLL dan PLL, dan URL lama tetap mengarahkan ulang supaya tautan yang sudah disimpan tetap berfungsi.
 
 ### Model yang belajar menyelesaikan kubus sendiri
 
 Sebuah layanan Python terpisah melatih neural network dengan cara yang dipakai DeepCubeA. Model mengacak kubus yang sudah selesai, lalu belajar menebak berapa langkah lagi menuju selesai. Dasbor riset menampilkan proses pelatihan secara langsung. Anda bisa menjalankan model pada sebuah scramble dan membandingkan jawabannya dengan solusi optimal dari solver Kociemba, yang hanya saya pakai sebagai pembanding.
 
-### Satu ruang kerja untuk semua puzzle
-
-Halaman solver punya satu tab per puzzle dan menyimpan scramble masing-masing saat Anda berpindah tab. Setelah solve dengan timer, tombol "Solve this" membuka solver yang sesuai dengan scramble Anda sudah terisi.
-
 ## Hasilnya
 
-Cubiq sudah live dan gratis dipakai. Kedelapan puzzle diselesaikan oleh solver yang saya tulis sendiri. Saya memakai cubing.js hanya untuk menggambar dan mengacak kubus, dan solver Kociemba hanya sebagai pembanding. Setiap solve tersimpan di browser dan bisa diekspor. Rencana awalnya hanya berisi solver cross, yang ditandai mungkin terlalu sulit untuk fase awal. Saya membangun Cubiq dalam sekitar 11 minggu, dari Mei sampai Juli 2026.
+Cubiq sudah live dan gratis dipakai sejak September 2026. Kedelapan puzzle diselesaikan oleh solver yang saya tulis sendiri, sepenuhnya di browser. Saya memakai cubing.js hanya untuk menggambar dan mengacak kubus, dan solver Kociemba hanya sebagai pembanding. Setiap solve tersimpan di browser dan bisa diekspor. Rencana awalnya hanya berisi solver cross, yang ditandai mungkin terlalu sulit untuk fase awal. Saya membangun versi pertamanya dalam sekitar 11 minggu, dari Mei sampai Juli 2026. Saya lalu kembali mengerjakannya sampai September untuk memindahkan semua solver ke sisi klien, mendesain ulang aplikasi ke empat bagian berbasis tugas, dan merilisnya sebagai situs statis tanpa server yang perlu dijaga tetap menyala.
 
 ## Di balik layar
 
 - `TwistyPlayer` dari cubing.js mengakses `self` saat modul dimuat, jadi komponen ini dimuat dengan `dynamic(() => import(...), { ssr: false })` dan dipasang lewat `document.createElement('twisty-player')` di dalam `useEffect`.
 - Turbopack merusak URL yang dipakai cubing.js untuk menjalankan Web Worker. Build dipindah ke Webpack supaya bisa jalan.
 - Timer menampilkan `performance.now() - startTime`. `setInterval` hanya memicu render ulang dan tidak pernah mengukur waktu.
-- 2×2, Pyraminx, dan Skewb memakai tabel jarak God's algorithm lengkap (hingga ~3,1 juta posisi). 3×3 memakai IDA* untuk cross, x-cross, dan double x-cross, pencarian pasangan F2L, serta basis data OLL/PLL, dengan pembatalan langkah di antara tahap.
+- 2×2, Pyraminx, dan Skewb memakai tabel jarak God's algorithm lengkap: 3.674.160, 1.866.240, dan 3.149.280 posisi berurutan, semuanya dibatasi 11 langkah. 3×3 memakai IDA* untuk cross, x-cross, dan double x-cross, pencarian pasangan F2L, serta basis data OLL/PLL, dengan pembatalan langkah di antara tahap.
 - 4×4 dan 5×5 memakai tabel langkah yang dibangkitkan dari geometri. 5×5 butuh macro cross-swap baru yang diturunkan lewat konjugasi untuk satu kasus parity.
 - Square-1 memakai BFS bentuk, lalu penurunan kepingan secara eksak. Tampilan 3D-nya merender puzzle sebagai cangkang dua sisi dan menganimasikan putaran ekuator 180° sebagai geometri kaku.
-- Layanan FastAPI `cubiq-ml` memakai Autodidactic Iteration dan ResNet dua kepala: value head untuk sisa langkah dan policy head untuk 18 langkah. Tersedia rollout greedy dan MCTS. Dasbor mengecek status pelatihan setiap dua detik.
-- State disimpan di Zustand dan dipersist ke localStorage dengan `skipHydration` untuk menghindari mismatch SSR. Solve bisa diekspor dan diimpor sebagai JSON. Deep link memakai `/solvers?puzzle=<id>&scramble=<alg>`.
-- 19 endpoint API solver, sekitar 13.700 baris TypeScript dan Python, 70 commit.
+- Layanan FastAPI `cubiq-ml` memakai Autodidactic Iteration dan ResNet dua kepala: value head untuk sisa langkah dan policy head untuk 18 langkah. Tersedia rollout greedy dan MCTS. Dasbor mengecek status pelatihan setiap dua detik. Perulangan self-play-nya pernah macet, selalu merekomendasikan langkah yang sama, karena memilih aksi secara deterministik saat beberapa pilihan terlihat sama baiknya di awal pelatihan; menambahkan keacakan pada pilihan itu memperbaikinya.
+- State disimpan di Zustand dan dipersist ke localStorage dengan `skipHydration` untuk menghindari mismatch SSR. Solve bisa diekspor dan diimpor sebagai JSON. Deep link kini memakai `/lab?puzzle=<id>&scramble=<alg>` di Solve Lab yang sudah berganti nama.
+- Peringatan inspeksi memakai API `SpeechSynthesis` bawaan browser untuk hitung mundur bersuara; tidak ada berkas audio yang dikirim bersama aplikasi.
+- Font-nya Bricolage Grotesque untuk display, Geist untuk UI, dan Martian Mono untuk angka.
+- 19 endpoint API solver, 100 berkas sumber frontend dan 38 berkas backend, sekitar 21.000 baris TypeScript dan Python, 95 commit antara 3 Mei dan 28 September 2026.
