@@ -1,0 +1,46 @@
+# Ruleset
+
+## The problem
+
+General sports-history sources record that a rule changed, but rarely why, on whose authority, or what it did to the numbers that came before it. Badminton's 2006 move to rally scoring invalidated match statistics either side of it. The javelin's 1986 redesign reset the world record entirely. No general source tracks this systematically, and none let a reader compare causes across sports: is a scoring rewrite in badminton driven by the same forces as one in volleyball?
+
+I built Ruleset as a reference I wanted to exist and couldn't find. The site is read-only with no accounts and no contribution flow, so the constraint is entirely evidentiary: every rule change needs a citable source, and no cause is ever guessed from what sounds plausible.
+
+## What I built
+
+### I model rule changes and record series as static content, with nothing to operate
+
+The content changes on my own schedule as I add sourced entries over time, not in response to anything a visitor does, so a server has no job to do here. The entire deploy is a Next.js build producing static files on GitHub Pages, with no database and no API route. Every factual entry lives in a YAML file with its own git history.
+
+### A record series can't be drawn as one continuous line across the change that broke it
+
+The project's central claim is that some rule changes make the numbers before and after them incomparable, so a chart that smoothed or interpolated across that point would misrepresent exactly what it exists to show. Each series is typed segments with a typed break between them, and the chart component refuses to draw a line across one. Where a series can't exist at all, like gymnastics after its 2006 scoring overhaul, the page states that plainly in place of a chart.
+
+### I split the site into a skeleton layer and a deep layer
+
+Which sports exist and when they were contested is different work from why their rules changed, with a different level of rigor behind it. Every sport that has appeared on the Olympic, Asian Games or World Games programs gets a status-only skeleton entry; 75 sports currently go further, with fully sourced rule histories. A skeleton-only sport is marked plainly as not yet researched, so it never visually passes as one that is.
+
+### Content is entered one sport at a time from its own rulebook
+
+Populating several sports at once from general knowledge is how unsourced causes and confidently wrong dates enter a project like this. Each of the 350 rule-change entries carries a citation, added sport by sport over three weeks in waves: broadcast-scoring sports, combat sports, then the World Games sports. The build itself fails if a citation resolves to nothing.
+
+### A rule change's cause is a shape on the timeline, and color is reserved for sport family
+
+With four sport families all shown on one timeline, color was the only way to tell them apart at a glance. Encoding nine different causes in additional colors would have made the board unreadable in greyscale or for a colorblind reader. Marks render as nine distinct shapes for cause, keeping color for family alone. This overrides my own first design, which had planned to color marks by cause directly.
+
+## Result
+
+Ruleset is live. It documents 350 rule changes across 75 sports researched to sourced depth, identifies 102 places where a rule change broke a record series' comparability, and cites 87 sources in its bibliography. I built it solo between September 5 and 27, 2026, entering one sport at a time against its own rulebook.
+
+## Under the hood
+
+- Next.js 14, App Router, static export (`output: 'export'`); React 18, TypeScript, Tailwind CSS, D3 v7 for the timeline and series charts, `next-mdx-remote` for MDX narrative sections, `js-yaml` parsing the YAML content layer at build time. No test framework, no CMS, no analytics, no database.
+- Each sport is a directory under `content/sports/<sport>/`: `sport.yaml` for identity and governing body, `rules.yaml` for rule-change entries (scope, adoption and effective dates, governing body, cause, trigger, citation), a `series/` folder for record data, and numbered MDX files for narrative sections.
+- `lib/series.ts` and `lib/types.ts` type a record series as ordered segments with a typed break (`reset`, `retained`, `scale-change` or `scoped`) between them; `components/SeriesChart.tsx` and `components/BreakDiagram.tsx` render each segment as an independent path, with nothing interpolating across a break.
+- `lib/timeline.ts` computes lane geometry for the cross-sport view; `components/Timeline.tsx` and `components/Mark.tsx` group rule changes into lanes by a switchable classification lens (IOC grouping, game category, or adjudication type) and shape each mark by its cause.
+- A subjective "how hard is this sport to learn" comparison (`learning.yaml`) sits structurally apart from the sourced content; every entry declares whether its basis is a rule, an observation, or a judgement, and the build fails if a claimed rule basis doesn't name a rule that belongs to that sport.
+- The build fails outright on a citation that resolves to nothing, closing off the most direct way an unsourced claim could ship.
+- Social-card images are drawn at build time by a standalone script into `public/og`; Next's own `opengraph-image` route convention produces a file GitHub Pages won't serve with the right content type under static export.
+- Deploys via GitHub Actions on push to `main`: installs dependencies, computes the base path and site origin from the repository name, builds, and marks the export with `.nojekyll` so GitHub Pages serves the `_next/` directory instead of running it through Jekyll.
+- `prefers-reduced-motion` is respected; the timeline is fixed for mobile horizontal scroll, and other chart issues were caught through direct screenshot review.
+- 254 commits over 23 days between September 5 and 27, 2026. ~43,500 lines of YAML content, ~15,700 lines of MDX narrative, and ~9,800 lines of TypeScript and TSX across 8 routes and 25 components.

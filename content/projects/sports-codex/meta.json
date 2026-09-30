@@ -1,0 +1,69 @@
+{
+  "slug": "sports-codex",
+  "title": "Ruleset",
+  "tagline": "A static site tracing why sports rules changed, and where a change breaks a record series in two",
+  "glance": {
+    "for": "Myself, and anyone comparing why sports rules actually changed",
+    "result": "Live; 350 rule changes documented, 102 record-book breaks shown"
+  },
+  "skills": [
+    "Data modeling",
+    "Data visualization",
+    "Static site architecture",
+    "Information design"
+  ],
+  "categoryTags": [
+    "Personal Project",
+    "Knowledge Platform",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "D3",
+    "TypeScript",
+    "Tailwind CSS",
+    "React",
+    "MDX",
+    "js-yaml",
+    "GitHub Actions"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/ruleset/",
+  "access": "public",
+  "githubUrl": "https://github.com/andifathulms/ruleset",
+  "heroImage": "/images/projects/sports-codex/hero.webp",
+  "order": 50,
+  "featured": false,
+  "metrics": [
+    { "value": "350", "label": "rule changes documented across all sports" },
+    { "value": "75", "label": "sports researched at sourced depth" },
+    { "value": "102", "label": "comparability breaks identified in record series" },
+    { "value": "87", "label": "sources cited in the bibliography" }
+  ],
+  "id": {
+    "tagline": "Situs statis yang melacak kenapa aturan olahraga berubah, dan di mana perubahan itu memutus deret rekor jadi dua",
+    "glance": {
+      "for": "Saya sendiri, dan siapa pun yang penasaran kenapa aturan olahraga berubah",
+      "result": "Live; 350 perubahan aturan terdokumentasi, 102 titik putus rekor ditampilkan"
+    },
+    "skills": [
+      "Pemodelan data",
+      "Visualisasi data",
+      "Arsitektur situs statis",
+      "Desain informasi"
+    ],
+    "metrics": [
+      { "value": "350", "label": "perubahan aturan terdokumentasi di semua olahraga" },
+      { "value": "75", "label": "olahraga diteliti hingga kedalaman bersumber" },
+      { "value": "102", "label": "titik putus keterbandingan pada deret rekor" },
+      { "value": "87", "label": "sumber dikutip di daftar pustaka" }
+    ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-10-01"
+  }
+}

@@ -1,0 +1,46 @@
+# Ruleset
+
+## Masalahnya
+
+Sumber sejarah olahraga pada umumnya mencatat bahwa sebuah aturan berubah, tetapi jarang mencatat kenapa, atas otoritas siapa, atau apa dampaknya pada angka-angka sebelumnya. Perpindahan bulu tangkis ke rally point pada 2006 membuat statistik pertandingan di kedua sisi perubahan itu tak lagi bisa dibandingkan. Desain ulang lembing pada 1986 mereset rekor dunia sepenuhnya. Tak ada sumber umum yang melacak ini secara sistematis, dan tak ada yang membiarkan pembaca membandingkan penyebabnya lintas olahraga: apakah perombakan sistem skor di bulu tangkis didorong oleh kekuatan yang sama dengan di bola voli?
+
+Saya membangun Ruleset sebagai referensi yang saya inginkan dan tak bisa saya temukan. Situs ini hanya untuk dibaca, tanpa akun dan tanpa alur kontribusi, jadi batasannya sepenuhnya soal bukti: setiap perubahan aturan butuh sumber yang bisa dikutip, dan tak ada penyebab yang ditebak dari apa yang terdengar masuk akal.
+
+## Yang saya bangun
+
+### Saya memodelkan perubahan aturan dan deret rekor sebagai konten statis, tanpa yang perlu dioperasikan
+
+Kontennya berubah sesuai jadwal saya sendiri seiring saya menambahkan entri bersumber dari waktu ke waktu, bukan sebagai respons atas apa pun yang dilakukan pengunjung, jadi server tak punya tugas di sini. Seluruh deploy-nya adalah build Next.js yang menghasilkan berkas statis di GitHub Pages, tanpa basis data dan tanpa API route. Setiap entri faktual hidup sebagai berkas YAML dengan riwayat git-nya sendiri.
+
+### Deret rekor tak bisa digambar sebagai satu garis menyambung melewati perubahan yang memutusnya
+
+Klaim inti proyek ini adalah bahwa sebagian perubahan aturan membuat angka sebelum dan sesudahnya tak bisa dibandingkan, jadi grafik yang menghaluskan atau menginterpolasi di titik itu akan salah merepresentasikan justru hal yang ingin ditunjukkannya dengan jelas. Tiap deret adalah segmen bertipe dengan sebuah titik putus bertipe di antaranya, dan komponen grafiknya menolak menggambar garis yang melewati titik putus itu. Di mana sebuah deret sama sekali tak bisa ada, seperti senam setelah perombakan sistem skornya pada 2006, halamannya menyatakan itu dengan jelas di tempat grafik seharusnya berada.
+
+### Saya membagi situs ini menjadi lapisan kerangka dan lapisan mendalam
+
+Olahraga apa saja yang ada dan kapan dipertandingkan adalah pekerjaan yang berbeda dari kenapa aturannya berubah, dengan tingkat kehati-hatian yang berbeda di baliknya. Setiap olahraga yang pernah masuk program Olimpiade, Asian Games, atau World Games mendapat entri kerangka berstatus saja; 75 olahraga saat ini melangkah lebih jauh, dengan sejarah aturan yang sepenuhnya bersumber. Olahraga yang masih di tahap kerangka ditandai dengan jelas sebagai belum diteliti, sehingga tak pernah tampak seolah sudah.
+
+### Konten dimasukkan satu olahraga pada satu waktu dari peraturan resminya sendiri
+
+Mengisi beberapa olahraga sekaligus dari pengetahuan umum adalah cara penyebab tak bersumber dan tanggal yang salah dengan percaya diri bisa masuk ke proyek seperti ini. Setiap satu dari 350 entri perubahan aturan membawa sebuah kutipan, dimasukkan olahraga demi olahraga selama tiga minggu dalam beberapa gelombang: olahraga bersistem skor siaran, olahraga bela diri, lalu olahraga World Games. Proses build-nya sendiri gagal jika sebuah kutipan tak cocok dengan apa pun.
+
+### Penyebab perubahan aturan adalah bentuk di linimasa, dan warna dikhususkan untuk rumpun olahraga
+
+Dengan empat rumpun olahraga yang semuanya tampil di satu linimasa, warna adalah satu-satunya cara membedakannya sekilas. Mengkodekan sembilan penyebab berbeda dalam warna tambahan akan membuat papannya sulit dibaca dalam skala abu-abu atau bagi pembaca buta warna. Penanda kini digambar sebagai sembilan bentuk berbeda untuk penyebab, menyisakan warna hanya untuk rumpun. Ini menggantikan rancangan awal saya sendiri, yang tadinya berencana mewarnai penanda langsung berdasar penyebabnya.
+
+## Hasilnya
+
+Ruleset sudah live. Situs ini mendokumentasikan 350 perubahan aturan di 75 olahraga yang diteliti hingga kedalaman bersumber, mengidentifikasi 102 titik di mana sebuah perubahan aturan memutus keterbandingan deret rekornya, dan mengutip 87 sumber di daftar pustakanya. Saya membangunnya sendirian antara 5 dan 27 September 2026, memasukkan satu olahraga pada satu waktu berdasar peraturan resminya masing-masing.
+
+## Di balik layar
+
+- Next.js 14, App Router, static export (`output: 'export'`); React 18, TypeScript, Tailwind CSS, D3 v7 untuk linimasa dan grafik deret, `next-mdx-remote` untuk bagian naratif MDX, `js-yaml` mem-parsing lapisan konten YAML saat build. Tanpa framework pengujian, tanpa CMS, tanpa analitik, tanpa basis data.
+- Setiap olahraga adalah sebuah direktori di `content/sports/<sport>/`: `sport.yaml` untuk identitas dan badan pengaturnya, `rules.yaml` untuk entri perubahan aturan (cakupan, tanggal diadopsi dan berlaku, badan pengatur, penyebab, pemicu, kutipan), sebuah folder `series/` untuk data rekor, dan berkas MDX bernomor untuk bagian naratif.
+- `lib/series.ts` dan `lib/types.ts` mengetipkan sebuah deret rekor sebagai segmen berurutan dengan titik putus bertipe (`reset`, `retained`, `scale-change`, atau `scoped`) di antaranya; `components/SeriesChart.tsx` dan `components/BreakDiagram.tsx` menggambar tiap segmen sebagai jalur independen, tanpa interpolasi yang melewati titik putus.
+- `lib/timeline.ts` menghitung geometri jalur untuk tampilan lintas-olahraga; `components/Timeline.tsx` dan `components/Mark.tsx` mengelompokkan perubahan aturan ke jalur berdasar lensa klasifikasi yang bisa dipindah (pengelompokan IOC, kategori permainan, atau tipe ajudikasi) dan membentuk tiap penanda berdasar penyebabnya.
+- Perbandingan subjektif "seberapa sulit olahraga ini dipelajari" (`learning.yaml`) berdiri terpisah secara struktural dari konten bersumber; tiap entri menyatakan apakah dasarnya adalah sebuah aturan, sebuah observasi, atau sebuah penilaian, dan proses build-nya gagal jika sebuah entri mengklaim dasar aturan yang tak menyebut aturan milik olahraga itu.
+- Proses build-nya gagal total pada kutipan yang tak cocok dengan apa pun, menutup jalan paling langsung bagi klaim tak bersumber untuk terbit.
+- Gambar kartu sosial digambar saat build oleh skrip mandiri ke `public/og`; konvensi route `opengraph-image` bawaan Next menghasilkan berkas yang tak dilayani GitHub Pages dengan tipe konten yang benar di bawah static export.
+- Di-deploy lewat GitHub Actions saat push ke `main`: memasang dependensi, menghitung base path dan asal situs dari nama repositori, membangun, dan menandai hasil ekspornya dengan `.nojekyll` agar GitHub Pages melayani direktori `_next/` alih-alih menjalankannya lewat Jekyll.
+- `prefers-reduced-motion` dihormati; linimasanya diperbaiki untuk gulir horizontal di ponsel, dan bug grafik lain ditemukan lewat peninjauan tangkapan layar langsung.
+- 254 commit dalam 23 hari antara 5 dan 27 September 2026. Sekitar 43.500 baris konten YAML, 15.700 baris naratif MDX, dan 9.800 baris TypeScript dan TSX di 8 route dan 25 komponen.
