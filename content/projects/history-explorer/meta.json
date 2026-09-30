@@ -1,0 +1,69 @@
+{
+  "slug": "history-explorer",
+  "title": "History Explorer",
+  "tagline": "A reference site ranking 419 historical states, where every figure cites a named source or shows a gap",
+  "glance": {
+    "for": "The author himself, and anyone comparing historical states",
+    "result": "Live; 419 states, 678 cited sources, gaps shown instead of guesses"
+  },
+  "skills": [
+    "Data modeling",
+    "Statistical ranking",
+    "Geospatial visualization",
+    "Static site architecture"
+  ],
+  "categoryTags": [
+    "Personal Project",
+    "Knowledge Platform",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "D3",
+    "MDX",
+    "YAML",
+    "GitHub Actions",
+    "GitHub Pages"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026 – present",
+  "liveUrl": "https://andifathulms.github.io/history-explorer/",
+  "access": "public",
+  "githubUrl": "https://github.com/andifathulms/history-explorer",
+  "heroImage": "/images/projects/history-explorer/hero.webp",
+  "order": 49,
+  "featured": false,
+  "metrics": [
+    { "value": "419", "label": "historical states described and ranked" },
+    { "value": "678", "label": "historical sources cataloged and cited" },
+    { "value": "3,176", "label": "chapters published, each citing its source" },
+    { "value": "431", "label": "succession links traced between states" }
+  ],
+  "id": {
+    "tagline": "Situs referensi yang meranking 419 kerajaan dan negara bersejarah, setiap angka mengutip sumber bernama atau menampilkan celah",
+    "glance": {
+      "for": "Saya sendiri, dan siapa pun yang membandingkan negara bersejarah",
+      "result": "Live; 419 negara, 678 sumber terkutip, celah ditampilkan bukan ditebak"
+    },
+    "skills": [
+      "Pemodelan data",
+      "Peringkat statistik",
+      "Visualisasi geospasial",
+      "Arsitektur situs statis"
+    ],
+    "metrics": [
+      { "value": "419", "label": "negara bersejarah dideskripsikan dan diranking" },
+      { "value": "678", "label": "sumber sejarah dikatalogkan dan dikutip" },
+      { "value": "3.176", "label": "bab diterbitkan, masing-masing mengutip sumbernya" },
+      { "value": "431", "label": "tautan suksesi dilacak antar negara" }
+    ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-10-01"
+  }
+}

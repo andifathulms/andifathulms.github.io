@@ -1,0 +1,46 @@
+# History Explorer
+
+## Masalahnya
+
+Siapa pun yang membandingkan dua kerajaan bersejarah akan menabrak tembok yang sama: tanya seberapa luas Kekaisaran Samanid, dan tiap situs referensi memberi angka berbeda tanpa kutipan, tanpa cara melihat dari mana angka itu berasal. Tak satu pun menunjukkan bagaimana satu negara tumbuh dari negara lain. Seorang jenderal budak Samanid, misalnya, mendirikan dinasti yang belakangan menghancurkan tuannya sendiri, dan tak ada yang membiarkan pembaca menjelajahi hubungan semacam itu sebagai sebuah struktur.
+
+Saya membangun History Explorer sebagai aplikasi bacaan untuk diri saya sendiri dulu: keberhasilannya didefinisikan sebagai saya membacanya. Masalahnya berlaku umum bagi siapa pun yang membandingkan negara bersejarah atau ingin klaim suksesi bisa dilacak balik ke sesuatu yang bisa mereka buka dan periksa sendiri. Tak ada akun dan tak ada alur kontribusi. Koreksi dilakukan dengan mengubah berkas sumber lalu men-deploy ulang.
+
+## Yang saya bangun
+
+### Saya membangunnya sebagai situs statis sepenuhnya, tanpa yang perlu dioperasikan
+
+Semuanya di-deploy gratis di GitHub Pages dan tak butuh apa pun berjalan agar tetap hidup. Konten berubah dengan mengedit berkas YAML atau MDX lalu men-deploy ulang. Setiap catatan negara dan bab dibaca sekali saat build lalu dipanggang menjadi HTML statis, dan kode pemuat kontennya dihalangi agar tak pernah sampai ke bundel browser.
+
+### Aturan larangan mengarang data ditegakkan oleh proses build itu sendiri
+
+Aturan sumber yang cuma hidup di panduan gaya berhenti bisa diverifikasi begitu sebuah proyek punya ratusan catatan. Proses build-nya gagal total jika sebuah bab tak punya sumber bernama, jika sebuah kutipan tak cocok dengan entri di daftar sumber, atau jika sebuah nilai berkode jatuh di luar kosakata yang ditetapkan. Kutipan yang menggantung terlihat seperti bukti; celah yang ditampilkan menyatakan dengan jelas bahwa belum ada yang menerbitkannya.
+
+### Saya merepresentasikan angka yang hilang sebagai tipe tersendiri, ada-atau-tidak-ada
+
+Sebuah ukuran yang hilang, seperti populasi puncak yang belum pernah dipublikasikan siapa pun, tak bisa diperlakukan sebagai nol tanpa merugikan negara yang kebetulan lebih sedikit kajiannya. Setiap angka yang bisa diukur membawa tipe yang entah ada dengan sebuah nilai atau secara eksplisit tak ada, dan sebuah peringkat berbobot hanya merata-ratakan sumbu yang punya data. Negara dengan dua angka terdokumentasi tak pernah dinilai seolah gagal di dua sumbu lainnya.
+
+### Alur suksesi berhenti di batas wilayahnya sendiri
+
+Menggambar satu garis suksesi yang menyambung di seluruh situs, katakanlah dari sebuah negara Asia Tengah ke negara Asia Tenggara, akan menegaskan urutan sejarah yang tak didukung sumber mana pun. Setiap alur suksesi dibatasi pada satu wilayah, dan sebuah wilayah baru membawa satu alur begitu ada koneksi terkutip yang menghubungkan dua negaranya sendiri. Empat belas dari 57 wilayah situs ini saat ini tak punya alur semacam itu, dan itu diperlakukan sebagai keadaan biasa, bukan sesuatu yang perlu dilengkapi.
+
+### Peringkat memakai persentil, dengan trade-off-nya dinyatakan di kode
+
+Meranking berdasar ukuran mentah membiarkan segelintir pencilan, seperti Kekaisaran Mongol, mendistorsi seluruh skala. Saya meranking berdasar persentil sebagai gantinya, yang tetap stabil dengan set rujukan yang kecil, dengan konsekuensi memampatkan perbedaan yang sebenarnya: dua kekaisaran yang bentangnya berbeda hampir dua orde besaran dalam wilayah bisa mendarat di persentil yang hampir sama. Trade-off itu ditulis langsung di kode sumber sebagai komentar, bukan dibiarkan ditemukan sendiri oleh pembaca.
+
+## Hasilnya
+
+History Explorer sudah live. Situs ini mendeskripsikan, meranking, dan melacak suksesi 419 negara bersejarah, dengan 678 sumber terkatalog di 3.176 bab, dengan 431 tautan suksesi dilacak antar negara di wilayah yang membawanya. Saya membangunnya sendirian sejak September 2026, satu wilayah pada satu waktu, membuka sebuah sumber sebelum menulis apa pun darinya.
+
+## Di balik layar
+
+- Next.js 14.2, App Router, static export (`output: 'export'`); `basePath` dibaca dari `NEXT_PUBLIC_BASE_PATH` sehingga kode yang sama melayani dev lokal dan subpath GitHub Pages tanpa percabangan.
+- `lib/content.ts` membaca dan memvalidasi setiap berkas YAML negara dan bab MDX-nya saat build lewat `gray-matter` dan paket `yaml`; tak ada yang di-fetch saat runtime, dan `server-only` menjaga kode ini tak sampai ke bundel klien.
+- `lib/gaps.ts` mendefinisikan tipe `Gapped<T>` dengan accessor `isPresent` / `value` / `renormalise`, sehingga total peringkat berbobot menyatakan dari berapa sumbu ia sebenarnya dihitung.
+- `lib/types.ts` menyimpan kosakata tertutup untuk tipe edge, institusi, dan tipe titik-balik; nilai di luar itu menggagalkan build berdasar id-nya.
+- `lib/ratings.ts` menghitung persentil per sumbu di seluruh korpus naratif plus set rujukan 49-entri berisi angka saja, pada skala absolut atau ternormalisasi-era; denominator populasi-dunia atau daratan-dunia yang hilang (6 tahun rujukan terkutip) menampilkan celah alih-alih jatuh ke absolut.
+- `lib/resumption.ts` memodelkan 6 pasangan objek-sama-dua-kali, termasuk dua Babilonia, sebagai berbeda dari edge suksesi, dengan suite ujinya sendiri di `lib/spine.test.ts` dan `lib/transfers.test.ts`.
+- Peta ekstensi-puncak memakai modul poin D3 saja (`d3-geo`, `d3-scale`, `d3-shape`, `d3-array`), menggambar ekstensi terkutip sebagai kolom diskret pada tahun sumbernya tanpa menyambungkannya, di atas 26 snapshot peta dasar bersejarah yang dipangkas (1500 SM – 1700 M) dari proyek terbuka `aourednik/historical-basemaps`.
+- CI menjalankan typecheck, 38 unit test di test runner bawaan Node, linter prosa berjenjang (`check:voice`) terhadap bab yang ditulis AI, build, dan pemeriksa tautan yang menyusuri hasil static export, sebelum `actions/deploy-pages` men-deploy.
+- 419 catatan negara dan 3.176 bab ditulis AI berdasar sumber bernama per negara, lalu ditinjau dan dikoreksi oleh saya. Metode itu diungkapkan di halaman About situs ini sendiri.
+- 1.226 commit dalam 25 hari, 3 sampai 27 September 2026. 14.129 baris TypeScript di `app/`, `components/`, dan `lib/`; 272.351 baris konten YAML dan MDX.

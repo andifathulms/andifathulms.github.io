@@ -1,0 +1,46 @@
+# History Explorer
+
+## The problem
+
+Anyone comparing two historical empires runs into the same wall: ask how large the Samanid Empire was and reference sites give different, uncited numbers, with no way to see where they came from. None of them show how one state grew out of another. A Samanid slave-general, for instance, founded the dynasty that later destroyed his own masters, and nothing lets a reader browse that kind of connection as a structure.
+
+I built History Explorer as a reading app for myself first: success was defined as me reading it. The problem generalizes to anyone comparing historical states or wanting a succession claim to trace back to something they can open and check. There are no accounts and no contribution flow. A correction happens by editing a source file and redeploying.
+
+## What I built
+
+### I ship it as a fully static site with nothing to operate
+
+The whole thing deploys for free on GitHub Pages and needs nothing running to stay up. Content changes by editing a YAML or MDX file and redeploying. Every polity record and chapter is read once at build time and baked into static HTML, and the content-loading code is barred from ever reaching the browser bundle.
+
+### The no-invented-data rule is enforced by the build itself
+
+A sourcing rule that only lives in a style guide stops being verifiable once a project has hundreds of records. The build fails outright if a chapter has no named source, if a citation doesn't resolve to an entry in the source list, or if a coded value falls outside its defined vocabulary. A dangling citation looks like evidence; a gap says plainly that nobody has published one.
+
+### I represent a missing figure as a distinct, present-or-absent type
+
+A missing measurement, like a peak population nobody has published, can't be treated as zero without punishing whichever state simply has less scholarship attached to it. Every measurable figure carries a type that is either present with a value or explicitly absent, and a weighted ranking only averages over the axes it actually has data for. A state with two documented figures is never scored as if it failed on the other two.
+
+### Succession threads stop at each region's own border
+
+Drawing one continuous line of succession across the whole site, say from a Central Asian state to a Southeast Asian one, would assert a historical sequence no source supports. Every succession thread is scoped to a single region, and a region only carries one once a cited connection joins two of its own states. Fourteen of the site's 57 regions currently have no such thread, and that's treated as an ordinary outcome, not something to fill in.
+
+### Rankings use percentile, with the tradeoff stated in the code
+
+Ranking by raw size lets a handful of outliers, like the Mongol Empire, distort the whole scale. I rank by percentile instead, which stays stable with a small reference set, at the cost of compressing real differences: two empires spanning nearly two orders of magnitude in territory can land at nearly the same percentile. That tradeoff is written directly into the source as a comment, not left for a reader to discover.
+
+## Result
+
+History Explorer is live. It describes, ranks and traces the succession of 419 historical states, drawing on 678 cataloged sources across 3,176 chapters, with 431 succession links traced between states in the regions that carry one. I've been building it solo since September 2026, one region at a time, opening a source before writing anything from it.
+
+## Under the hood
+
+- Next.js 14.2, App Router, static export (`output: 'export'`); `basePath` reads from `NEXT_PUBLIC_BASE_PATH` so the same code serves local dev and the GitHub Pages subpath with no branching.
+- `lib/content.ts` reads and validates every polity YAML file and its MDX chapters at build time via `gray-matter` and the `yaml` package; nothing is fetched at runtime, and `server-only` keeps this code out of the client bundle.
+- `lib/gaps.ts` defines a `Gapped<T>` type with `isPresent` / `value` / `renormalise` accessors, so a weighted ranking total states how many axes it was actually computed from.
+- `lib/types.ts` holds closed vocabularies for edge types, institutions and turning-point types; a value outside them fails the build by id.
+- `lib/ratings.ts` computes percentile per axis across the narrative corpus plus a 49-entry, numbers-only reference set, on an absolute or era-normalized scale; a missing world-population or world-land denominator (6 cited reference years) renders a gap instead of falling back to absolute.
+- `lib/resumption.ts` models 6 same-object-twice pairs, the two Babylons among them, as distinct from a succession edge, with its own test suite in `lib/spine.test.ts` and `lib/transfers.test.ts`.
+- Peak-extent maps use point D3 modules only (`d3-geo`, `d3-scale`, `d3-shape`, `d3-array`), drawing cited extents as discrete columns at their sourced years with nothing joining them, over 26 trimmed historical-basemap snapshots (1500 BC – AD 1700) from the open `aourednik/historical-basemaps` project.
+- CI runs typecheck, 38 unit tests on Node's built-in test runner, a ratcheted prose linter (`check:voice`) against the AI-drafted chapters, the build, and a link checker that walks the static export, before `actions/deploy-pages` deploys.
+- The 419 polity records and 3,176 chapters are AI-drafted against a named source per polity, then reviewed and corrected by me. That method is disclosed on the site's own About page.
+- 1,226 commits over 25 days, September 3 to 27, 2026. 14,129 lines of TypeScript across `app/`, `components/` and `lib/`; 272,351 lines of YAML and MDX content.
