@@ -10,7 +10,7 @@ There is a second problem underneath. Indonesia's Compilation of Islamic Law (KH
 
 ### Every share points to its source
 
-I wrote the calculation engine as a standalone Python package with no outside dependencies. Each result records the heir, the share, the rule applied and the source for that rule. I built the citation list before any logic: 34 sources, including 13 KHI articles, classical references, Qur'anic verses and hadith. Qur'an and hadith are stored as references, never reproduced text. A rule with no source fails the tests and can't ship.
+I wrote the calculation engine as a standalone Python package with no outside dependencies. Each result records the heir, the share, the rule applied and the source for that rule. I built the citation list before any logic: 35 sources, including 14 KHI articles, classical references, Qur'anic verses and hadith. Qur'an and hadith are stored as references, never reproduced text. A rule with no source fails the tests and can't ship.
 
 ### KHI and Syafi'i are two separate rule sets
 
@@ -22,7 +22,7 @@ Some family configurations have intricate sub-cases, such as certain grandfather
 
 ### The same Python engine runs in the browser
 
-The first version was a Django site with a database. Inheritance data is about as private as data gets, so I moved to a static site that never receives it. The browser downloads a Python runtime and runs the same package the server runs. Nothing leaves the device. A case can be shared because it is encoded in the link. A cold first load takes about 20 seconds, so the form works straight away while the engine loads in the background.
+The first version was a Django site with a database. Inheritance data is about as private as data gets, so I moved to a static site that never receives it. The browser downloads a Python runtime and runs the same package the server runs. Nothing leaves the device. A case can be shared because it is encoded in the link. A cold first load takes about 20 seconds, so the form works straight away while the engine loads in the background. A later pass added a guided, family-tree picker for Personal mode, drawing relationships around the deceased instead of filling a form, but sending the engine the exact same data either way.
 
 ### Tests decide whether it ships
 
@@ -30,19 +30,21 @@ The deploy runs the validation bank and the API tests. It also checks that no AI
 
 ## Result
 
-Faraid Visualizer is live and free on GitHub Pages, with no backend and no account. It shows who is blocked and by whom, each fixed share, how the remainder splits, and every citation, as text and as a diagram. KHI and classical Syafi'i pass all 61 worked examples in the validation bank, plus a separate set of cases where the two schools disagree. Professional mode exports a PDF with the full citation trail, in Indonesian or English, for notaries and court staff. I built it alone between July and August 2026.
+Faraid Visualizer is live and free on GitHub Pages, with no backend and no account. It shows who is blocked and by whom, each fixed share, how the remainder splits, and every citation, as text and as a diagram. KHI and classical Syafi'i pass all 61 worked examples in the validation bank, plus a separate set of cases where the two schools disagree. Professional mode exports a PDF with the full citation trail, in Indonesian or English, for notaries and court staff. I built it alone in two phases: the engine, the static-site move and PDF export in July and early August 2026. A later pass through September added the guided family-tree input and redesigned the derivation view.
 
 ## Under the hood
 
 - `faraid_engine` is about 2,400 lines of pure Python 3.12 using stdlib `Fraction` and `Decimal`, with no Django imports and zero third-party dependencies. Every function returns `{heir, share, rule_applied, source_id}`.
 - An eight-stage pipeline covers 17 heir relation types across five `RulesetConfig` objects. It handles hajb (blocking), furud (fixed shares), asabah (residue, split 2:1), 'aul and radd.
-- `sources.py` was the first engine commit: 13 KHI pasal, 11 classical references, 3 Qur'anic pointers, 3 hadith with narrator, 2 case-law commentaries, 2 ijma. An unknown `source_id` raises.
+- `sources.py` was the first engine commit: 14 KHI pasal, 11 classical references, 3 Qur'anic pointers, 3 hadith with narrator, 2 case-law commentaries, 2 ijma. An unknown `source_id` raises.
 - Unsupported cases raise `UnsupportedConfiguration`. Al-jadd wa al-ikhwah uses Zaid's muqasama and still raises on the akdariyya and mu'adda sub-cases.
 - `faraid_web` is a Django-free layer for validation, bilingual labels, serialisation and PDF layout, so the API is transport only. Pyodide (self-hosted, no CDN) runs the same package in the browser, and both deployments are asserted to return byte-identical results. A TypeScript port was rejected because it would mean re-earning the whole test bank in a second language.
 - Measured load: about 9 MB Python runtime, about 20 s to engine-ready cold, about 0.8 s warm, 50–100 MB RAM. The reportlab PDF renderer (about 2.9 MB) loads only on export.
 - Case state lives in the URL, and every decoded value is re-validated as hostile input. A `MAX_COUNT=50` per-heir cap stops hostile payloads from blowing up the LCM arithmetic. Malformed input returns 400; unsupported cases return 422.
 - CI order: validation bank, API contract tests, a grep of both packages for LLM or model-call imports, a check that the built site contains the engine bundle, then publish.
 - Live recalculation reruns on a 250 ms debounce and discards out-of-order responses. In Personal mode the rupiah amount is primary; Professional mode keeps the fraction primary, since that is what gets checked against the pokok masalah.
-- The derivation diagram uses React Flow; blocked heirs hang off their excluder on dashed red edges. Styling is a hand-written 768-line CSS token system with no UI kit.
-- About 164 tests: 147 Django-free plus 17 API contract tests. The bank holds 61 worked examples (the PRD floor was 50), 10 KHI-vs-Syafi'i divergence cases, 16 Beta-madhab cases and 26 validator cases. 6 API endpoints, 2 models.
-- 39 commits by one author, 4 July to 2 August 2026, in three bursts: engine to PDF on day one, the static move on 1 August, and the live-recalculating interface on 2 August.
+- Three static routes: `/`, `/pelajari/` (a standalone explainer of how the calculation works) and `/references/` (the citation registry and a coverage-gap listing).
+- The derivation view, `EstateFlow`, renders the estate as proportional ribbons splitting through each pipeline stage, with citations surfaced inline; it replaced an earlier React Flow node/edge diagram, which is no longer a frontend dependency. A `ShareCard` component separately draws a result, including who receives nothing and why, onto a canvas in a fixed light palette for sharing into chat apps.
+- Styling is a hand-written CSS custom-property token system with no UI kit or icon library; a later redesign reopened the palette and typeface once (Nila/Kunyit colours, Newsreader and Noto Naskh Arabic) and re-froze them.
+- About 308 tests: 291 Django-free plus 17 API contract tests. The bank holds 61 worked examples (the PRD floor was 50), 10 KHI-vs-Syafi'i divergence cases, 16 Beta-madhab cases and 26 validator cases. 6 API endpoints, 2 models.
+- 131 commits by one author, 4 July to 28 September 2026, with a long gap between mid-August and late September before a final pass added the family-tree input and the derivation-view redesign.

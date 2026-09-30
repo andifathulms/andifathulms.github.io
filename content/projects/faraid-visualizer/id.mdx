@@ -10,7 +10,7 @@ Di bawahnya ada masalah kedua. Kompilasi Hukum Islam (KHI, Inpres No. 1/1991) da
 
 ### Setiap bagian menunjuk ke sumbernya
 
-Saya menulis mesin hitungnya sebagai paket Python mandiri tanpa dependensi dari luar. Setiap hasil mencatat ahli waris, bagiannya, aturan yang dipakai, dan sumber aturan itu. Daftar rujukan saya susun sebelum logika apa pun: 34 sumber, termasuk 13 pasal KHI, rujukan kitab klasik, ayat Al-Qur'an, dan hadis. Al-Qur'an dan hadis disimpan sebagai rujukan, tidak pernah sebagai kutipan teks. Aturan tanpa sumber akan gagal di tes dan tidak bisa dirilis.
+Saya menulis mesin hitungnya sebagai paket Python mandiri tanpa dependensi dari luar. Setiap hasil mencatat ahli waris, bagiannya, aturan yang dipakai, dan sumber aturan itu. Daftar rujukan saya susun sebelum logika apa pun: 35 sumber, termasuk 14 pasal KHI, rujukan kitab klasik, ayat Al-Qur'an, dan hadis. Al-Qur'an dan hadis disimpan sebagai rujukan, tidak pernah sebagai kutipan teks. Aturan tanpa sumber akan gagal di tes dan tidak bisa dirilis.
 
 ### KHI dan Syafi'i adalah dua aturan terpisah
 
@@ -22,7 +22,7 @@ Beberapa susunan keluarga punya sub-kasus yang rumit, seperti sebagian kasus kak
 
 ### Mesin Python yang sama berjalan di browser
 
-Versi pertamanya berupa situs Django dengan database. Data warisan termasuk data paling pribadi, jadi saya pindah ke situs statis yang tidak pernah menerimanya. Browser mengunduh runtime Python dan menjalankan paket yang sama dengan yang dipakai server. Tidak ada data yang keluar dari perangkat. Sebuah kasus bisa dibagikan karena seluruh isinya disimpan di tautan. Pemuatan pertama makan waktu sekitar 20 detik, jadi formulir sudah bisa diisi sementara mesin dimuat di latar.
+Versi pertamanya berupa situs Django dengan database. Data warisan termasuk data paling pribadi, jadi saya pindah ke situs statis yang tidak pernah menerimanya. Browser mengunduh runtime Python dan menjalankan paket yang sama dengan yang dipakai server. Tidak ada data yang keluar dari perangkat. Sebuah kasus bisa dibagikan karena seluruh isinya disimpan di tautan. Pemuatan pertama makan waktu sekitar 20 detik, jadi formulir sudah bisa diisi sementara mesin dimuat di latar. Sebuah pembaruan belakangan menambahkan pemilih pohon keluarga terpandu untuk mode Personal, menggambar hubungan di sekitar orang yang meninggal, bukan mengisi formulir, tapi mengirim data yang persis sama ke mesin.
 
 ### Tes menentukan boleh rilis atau tidak
 
@@ -30,19 +30,21 @@ Proses deploy menjalankan bank validasi dan tes API. Proses itu juga memastikan 
 
 ## Hasilnya
 
-Faraid Visualizer sudah live dan gratis di GitHub Pages, tanpa backend dan tanpa akun. Aplikasi ini menunjukkan siapa yang terhalang dan oleh siapa, setiap bagian pasti, bagaimana sisa harta dibagi, dan setiap rujukannya, dalam bentuk teks dan diagram. KHI dan Syafi'i klasik lolos semua 61 contoh soal di bank validasi, ditambah satu set kasus terpisah tempat kedua mazhab berbeda pendapat. Mode Profesional mengekspor PDF lengkap dengan jejak rujukannya, dalam bahasa Indonesia atau Inggris, untuk notaris dan staf pengadilan agama. Saya membangunnya sendiri antara Juli dan Agustus 2026.
+Faraid Visualizer sudah live dan gratis di GitHub Pages, tanpa backend dan tanpa akun. Aplikasi ini menunjukkan siapa yang terhalang dan oleh siapa, setiap bagian pasti, bagaimana sisa harta dibagi, dan setiap rujukannya, dalam bentuk teks dan diagram. KHI dan Syafi'i klasik lolos semua 61 contoh soal di bank validasi, ditambah satu set kasus terpisah tempat kedua mazhab berbeda pendapat. Mode Profesional mengekspor PDF lengkap dengan jejak rujukannya, dalam bahasa Indonesia atau Inggris, untuk notaris dan staf pengadilan agama. Saya membangunnya sendiri dalam dua tahap: mesin, perpindahan ke situs statis, dan ekspor PDF pada Juli hingga awal Agustus 2026. Pembaruan berikutnya pada September menambahkan pemilih pohon keluarga terpandu dan mendesain ulang tampilan derivasinya.
 
 ## Di balik layar
 
 - `faraid_engine` berisi sekitar 2.400 baris Python 3.12 murni dengan `Fraction` dan `Decimal` dari stdlib, tanpa import Django dan tanpa dependensi pihak ketiga. Setiap fungsi mengembalikan `{heir, share, rule_applied, source_id}`.
 - Pipeline delapan tahap mencakup 17 jenis hubungan ahli waris di lima objek `RulesetConfig`. Pipeline ini menangani hajb, furud, asabah (sisa, dibagi 2:1), 'aul, dan radd.
-- `sources.py` adalah commit mesin yang pertama: 13 pasal KHI, 11 rujukan klasik, 3 penunjuk ayat, 3 hadis beserta perawinya, 2 komentar yurisprudensi, 2 ijmak. `source_id` yang tidak dikenal langsung memunculkan error.
+- `sources.py` adalah commit mesin yang pertama: 14 pasal KHI, 11 rujukan klasik, 3 penunjuk ayat, 3 hadis beserta perawinya, 2 komentar yurisprudensi, 2 ijmak. `source_id` yang tidak dikenal langsung memunculkan error.
 - Kasus yang tidak didukung memunculkan `UnsupportedConfiguration`. Al-jadd wa al-ikhwah memakai muqasamah Zaid dan tetap berhenti pada sub-kasus akdariyya dan mu'adda.
 - `faraid_web` adalah lapisan tanpa Django untuk validasi, label dwibahasa, serialisasi, dan tata letak PDF, sehingga API hanya menjadi jalur transport. Pyodide (di-hosting sendiri, tanpa CDN) menjalankan paket yang sama di browser, dan kedua deployment diuji menghasilkan keluaran yang identik per byte. Port ke TypeScript ditolak karena seluruh bank tes harus dibuktikan ulang dalam bahasa kedua.
 - Hasil pengukuran: runtime Python sekitar 9 MB, sekitar 20 detik sampai mesin siap saat cache kosong, sekitar 0,8 detik saat cache hangat, RAM 50–100 MB. Renderer PDF reportlab (sekitar 2,9 MB) hanya dimuat saat ekspor.
 - State kasus disimpan di URL, dan setiap nilai yang dibaca dari URL divalidasi ulang sebagai input yang berpotensi berbahaya. Batas `MAX_COUNT=50` per ahli waris mencegah payload jahat membuat aritmetika KPK meledak. Input rusak mengembalikan 400; kasus yang tidak didukung mengembalikan 422.
 - Urutan CI: bank validasi, tes kontrak API, grep kedua paket untuk import LLM atau pemanggilan model, pengecekan bahwa situs hasil build memuat bundle mesin, lalu publish.
 - Hitung ulang live berjalan dengan debounce 250 ms dan membuang respons yang datang tidak berurutan. Di mode Personal, nominal rupiah menjadi jawaban utama; mode Profesional tetap mengutamakan pecahan, karena itulah yang dicocokkan dengan pokok masalah.
-- Diagram derivasi memakai React Flow; ahli waris yang terhalang digantung pada penghalangnya dengan garis merah putus-putus. Styling memakai sistem token CSS 768 baris yang ditulis tangan, tanpa UI kit.
-- Sekitar 164 tes: 147 tanpa Django plus 17 tes kontrak API. Bank validasi berisi 61 contoh soal (batas minimum di PRD 50), 10 kasus beda KHI dan Syafi'i, 16 kasus mazhab Beta, dan 26 kasus validator. 6 endpoint API, 2 model.
-- 39 commit oleh satu orang, 4 Juli sampai 2 Agustus 2026, dalam tiga gelombang: mesin sampai PDF di hari pertama, perpindahan ke statis pada 1 Agustus, dan antarmuka hitung ulang live pada 2 Agustus.
+- Tiga route statis: `/`, `/pelajari/` (penjelasan berdiri sendiri tentang cara kerja perhitungannya) dan `/references/` (daftar rujukan dan daftar celah cakupan).
+- Tampilan derivasinya, `EstateFlow`, menggambar harta warisan sebagai pita proporsional yang terbelah di setiap tahap pipeline, dengan rujukan tampil langsung di dalamnya; ini menggantikan diagram simpul-tepi React Flow sebelumnya, yang kini bukan lagi dependensi frontend. Komponen `ShareCard` terpisah menggambar sebuah hasil, termasuk siapa yang tidak mendapat bagian dan kenapa, ke sebuah kanvas dengan palet terang tetap untuk dibagikan ke aplikasi chat.
+- Styling memakai sistem token CSS custom-property tulisan tangan tanpa UI kit atau pustaka ikon; sebuah desain ulang belakangan membuka kembali palet dan jenis huruf sekali (warna Nila/Kunyit, Newsreader dan Noto Naskh Arabic) lalu membekukannya lagi.
+- Sekitar 308 tes: 291 tanpa Django plus 17 tes kontrak API. Bank validasi berisi 61 contoh soal (batas minimum di PRD 50), 10 kasus beda KHI dan Syafi'i, 16 kasus mazhab Beta, dan 26 kasus validator. 6 endpoint API, 2 model.
+- 131 commit oleh satu orang, 4 Juli sampai 28 September 2026, dengan jeda panjang antara pertengahan Agustus dan akhir September sebelum tahap terakhir menambahkan pemilih pohon keluarga dan desain ulang tampilan derivasi.
