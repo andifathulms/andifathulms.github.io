@@ -1,0 +1,69 @@
+{
+  "slug": "language-lineage",
+  "title": "Language Lineage",
+  "tagline": "A branching map of how language families split over history, where every disputed classification shows both sides' evidence",
+  "glance": {
+    "for": "Curious non-specialists who want a language family's origin story",
+    "result": "Live; 18 language families mapped, 602 turning points, 77 disputed classifications shown"
+  },
+  "skills": [
+    "Data modeling",
+    "Graph algorithms",
+    "Data visualization",
+    "Content pipeline design"
+  ],
+  "categoryTags": [
+    "Personal Project",
+    "Knowledge Platform",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "TypeScript",
+    "React",
+    "D3.js",
+    "Tailwind CSS",
+    "topojson-client",
+    "world-atlas",
+    "react-markdown"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/language-lineage/",
+  "access": "public",
+  "githubUrl": "https://github.com/andifathulms/language-lineage",
+  "heroImage": "/images/projects/language-lineage/hero.webp",
+  "order": 52,
+  "featured": false,
+  "metrics": [
+    { "value": "18", "label": "language families covered, root to present" },
+    { "value": "602", "label": "turning points, each citing a source" },
+    { "value": "77", "label": "disputed classifications shown with evidence for both sides" },
+    { "value": "67", "label": "historical figures indexed by turning point" }
+  ],
+  "id": {
+    "tagline": "Peta percabangan bagaimana rumpun bahasa terpecah sepanjang sejarah, dengan setiap klasifikasi yang diperdebatkan menampilkan bukti dari kedua sisi",
+    "glance": {
+      "for": "Pembaca awam yang penasaran akan kisah asal sebuah rumpun bahasa",
+      "result": "Live; 18 rumpun bahasa dipetakan, 602 titik balik, 77 klasifikasi yang diperdebatkan"
+    },
+    "skills": [
+      "Pemodelan data",
+      "Algoritma graf",
+      "Visualisasi data",
+      "Perancangan pipeline konten"
+    ],
+    "metrics": [
+      { "value": "18", "label": "rumpun bahasa dicakup, dari akar sampai kini" },
+      { "value": "602", "label": "titik balik, masing-masing dengan sumber terkutip" },
+      { "value": "77", "label": "klasifikasi diperdebatkan dengan bukti dari kedua sisi" },
+      { "value": "67", "label": "tokoh sejarah terindeks per titik balik" }
+    ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-10-01"
+  }
+}

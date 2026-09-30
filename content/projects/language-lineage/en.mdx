@@ -1,0 +1,47 @@
+# Language Lineage
+
+## The problem
+
+Most readers meet a language family as a settled fact. West Germanic simply counts as separate from Proto-Germanic, and nobody explains why some scholars still reject "Altaic" as a family at all. That context exists in academic sources: Glottolog, sound-law catalogs, individual monographs. But it's written for other linguists, scattered across specialist literature no curious reader can just follow.
+
+I built Language Lineage for people with no linguistics background: anyone curious about where their language's ancestors came from. Historical-linguistics classification doesn't resolve the way an open math problem might; more research won't settle whether "Altaic" is a family. So the site shows live disagreement, not a single tidied-up tree: who argues what, and how settled each claim is.
+
+## What I built
+
+### A branch can descend from more than one ancestor
+
+Contact-driven change, such as creoles, sprachbunds and areal diffusion, can give a branch more than one ancestor. I modeled that as a DAG from the first commit: each branch stores a list of parent ids, and the layout algorithm was built from day one to handle more than one parent, not patched in later.
+
+### Every disputed classification carries both sides' evidence
+
+Macro-family disputes such as Altaic, Nostratic and Austric are live scholarly disagreements, not solved-but-unpublished problems, so picking one side would misrepresent the field. Each disputed grouping is its own record: a status (widely accepted, minority position, largely rejected), the evidence for it, and the evidence against it, drawn on the tree with a dashed border and a ring-count glyph.
+
+### I hand-wrote the branch layout instead of reaching for a graph library
+
+Branches can have more than one parent, so a plain linear timeline wasn't enough, but each family's tree stays small, up to a dozen branches, which didn't justify a general graph-layout dependency. The layout computes each branch's layer, then orders and refines it to keep the tree legible, drawn as the growth rings I wanted. I came back and adjusted it more than once as family trees grew wider than the original pilot.
+
+### Content lives as JSON files in the repo, with no database or backend
+
+Every family and branch is one JSON file, so a correction is a single-file pull request. It's the same model I use across my other static reference sites, no admin panel, no login. The whole site builds to static HTML with no server to run and no accounts to secure.
+
+### The build itself catches data errors before they ship
+
+With 165 hand-authored branch files, a bad id or a citation issue would otherwise only surface as a broken page after it deployed. The validator rejects an unknown parent, a cycle in the branch graph, and, added later, any turning point dated after every source cited for it. A broken commit can't reach production.
+
+## Result
+
+Language Lineage is live. It maps 18 language families from proto-language to present, with 602 sourced turning points, 77 disputed classifications each showing both sides' evidence, and 67 historical figures indexed by the events they're tied to. I built it solo over five days in September 2026, writing every family's content myself, then wiring the world map and sound-law comparison views on top of the same data.
+
+## Under the hood
+
+- Next.js 14, static export (`next build` → `out/`); no server runtime in production.
+- `src/lib/treeLayout.ts` is a manual layered DAG layout, drawn by `src/components/LineageTree.tsx` with D3 7.9 and a growth/reveal animation; it handles branches with more than one parent, and both chain and fan layouts (a flat fan when no well-supported intermediate subgroup exists, e.g. Austroasiatic, Pama-Nyungan).
+- `Branch`, `TurningPoint` (typed SPLIT / SOUND_LAW / CONTACT / WRITING_SYSTEM_ADOPTED / EXTINCTION / REVITALIZATION), `ContestedClassification` and `Figure` are defined in `src/lib/types.ts`; content is read at build time from JSON via `src/lib/content.ts`, with no database or runtime data layer.
+- Sound-law turning points carry extra comparison metadata (`process`, `notation`, `sort_year`) so `/sound-laws` can plot every sound law from all 18 families on one shared timeline and matrix.
+- `src/lib/worldMap.ts` builds a per-country choropleth from `topojson-client` and `world-atlas`, driven by per-branch speaker/country data; a UNESCO-style vitality indicator renders per language via `src/components/Vitality.tsx`.
+- IPA transcriptions and reconstructed forms render as real text in Gentium Plus, not images, so they stay selectable and searchable.
+- Sample phrases set their text direction automatically, so Arabic, Hebrew and Syriac samples render right to left; the heading font falls back to Source Serif 4 for extended-Latin diacritics it renders poorly.
+- `scripts/validate-content.mjs` runs before every build and fails it on an unknown parent, cross-branch id collisions, cycles, and any turning point dated later than every source cited for it.
+- Deploys via GitHub Actions on push to `main`: builds with the base path set by `actions/configure-pages`, then publishes via `actions/upload-pages-artifact` and `actions/deploy-pages`.
+- No database and no test framework anywhere in the project; `tsc --noEmit` is the only other automated check besides content validation.
+- 329 commits over 5 days, September 23 to 27, 2026. 3,941 lines of TypeScript and TSX across 6 route templates and 21 components, plus 18,441 lines of JSON content.
