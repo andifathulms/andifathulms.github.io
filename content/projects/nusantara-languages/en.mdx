@@ -26,11 +26,12 @@ Of the 726 languages, 421 have mapped speaker areas. The other 305 appear as lab
 
 ## Result
 
-Nusantara Languages is live in English and Indonesian, fully static, and works offline. Beyond the map and tree, it answers three questions from the same data. Which languages are a language's closest relatives? How far does a family spread? Austronesian spans about 5,010 km, Timor-Alor-Pantar about 350 km. Which languages from different families touch? There are 67 such pairs. Each answer prints its rule and its limit next to the number. You can also colour by subgroup, follow guided views of the seams, and export a PNG with attribution built in, as the licence requires. The site states that boundaries between languages are gradual, and how many languages are areas and how many are points. I built it alone over three days in August 2026.
+Nusantara Languages is live in English and Indonesian, fully static, and works offline. Beyond the map and tree, it answers three questions from the same data. Which languages are a language's closest relatives? How far does a family spread? Austronesian spans about 5,010 km, Timor-Alor-Pantar about 350 km. Which languages from different families touch? There are 67 such pairs. Each answer prints its rule and its limit next to the number. You can also colour by subgroup, follow guided views of the seams, and export a PNG with attribution built in, as the licence requires. The site states that boundaries between languages are gradual, and how many languages are areas and how many are points. I built it alone between August and September 2026.
 
 ## Under the hood
 
-- Next.js static export on GitHub Pages; React, strict TypeScript, Tailwind, Zod for the source manifest, Vitest, `tsx` for pipeline scripts, pnpm. Fonts are self-hosted through `next/font`.
+- Next.js static export on GitHub Pages; React, strict TypeScript, Tailwind, Zod for the source manifest, Vitest, `tsx` for pipeline scripts, pnpm. Type is Newsreader for display and prose, IBM Plex Sans Condensed for labels, IBM Plex Mono for data and counts, all self-hosted through `next/font`.
+- Two browser-only bugs slipped past the type checker and the test suite. A `<style>` tag with a text child broke hydration, fixed by switching to `dangerouslySetInnerHTML`. Grouping land by geometry kind silently dropped 273 minor islands; the fix groups by whether a shape has a neighbour instead.
 - No mapping, GIS, Newick or topology library. The Newick parser and the SVG plate with its hover hit-testing are hand-written; `lib/tree` and `lib/geo` are pure functions tested in Node.
 - `sources:build` fetches, licence-gates, filters to Indonesia, simplifies polygons, cross-checks lineages and writes the bundle plus `coverage.json`. Raw worldwide dumps are never committed.
 - M0 render budget: 19,570 vertices against 60,000, hover about 0.01 ms against 2 ms, so SVG stayed and canvas wasn't needed.
@@ -39,5 +40,5 @@ Nusantara Languages is live in English and Indonesian, fully static, and works o
 - Family colours come from a curated OKLCH set scored against three colour-vision deficiencies; confusable pairs fell from 15 to 0 in normal vision. Saturation is reserved for the current selection.
 - Accessibility: the tree is a `role="tree"` with roving tabindex, one tab stop instead of 1,716 when fully expanded. Several ARIA roles without matching keyboard behaviour (`tablist`, `combobox`) were removed in favour of native elements.
 - The flaky gate uses `Math.max(...samples)` against 16 ms; observed runs ranged from 0.57 ms to 27.34 ms.
-- 726 languages, 56 top-level families, 23 isolates. Contact pairs come from a segment-to-segment adjacency check. Target JS budget: at most 250 KB gzipped excluding geometry (not re-measured).
-- About 15,100 lines of TypeScript, 25 test files, 18 components, about 10 routes, 85 commits from 12 to 14 August 2026.
+- 726 languages, 56 top-level families, 23 isolates. Contact pairs come from a segment-to-segment adjacency check. JS budget: 234 KB gzipped excluding geometry, measured against a 250 KB target.
+- About 21,135 lines of TypeScript, 579 tests across 37 test files, 18 components, about 10 routes, 112 commits from 12 August to 27 September 2026.

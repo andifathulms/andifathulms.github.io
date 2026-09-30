@@ -22,15 +22,16 @@
     "Next.js",
     "React",
     "TypeScript",
-    "Zod",
-    "SVG",
     "Tailwind CSS",
-    "Vitest"
+    "Zod",
+    "Vitest",
+    "SVG",
+    "pnpm"
   ],
   "status": "active",
   "role": "Solo Developer",
-  "timeframe": "Aug 2026",
-  "liveUrl": "https://andifathulms.github.io/nusantara-languages/en/",
+  "timeframe": "Aug – Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/nusantara-languages/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/nusantara-languages",
   "heroImage": "/images/projects/nusantara-languages/hero.webp",
@@ -50,8 +51,8 @@
       "label": "languages with a mapped speaker area"
     },
     {
-      "value": "0",
-      "label": "network requests at runtime"
+      "value": "48 → 2",
+      "label": "confusable colour pairs fixed for colour-blind readers"
     }
   ],
   "id": {
@@ -80,9 +81,13 @@
         "label": "bahasa dengan peta wilayah penutur"
       },
       {
-        "value": "0",
-        "label": "permintaan jaringan saat runtime"
+        "value": "48 → 2",
+        "label": "pasangan warna rumpun yang diperbaiki untuk buta warna"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }
