@@ -1,0 +1,71 @@
+{
+  "slug": "field-atlas",
+  "title": "Field Atlas",
+  "tagline": "A map of how math, physics and biology branched into their fields, every turning point sourced",
+  "glance": {
+    "for": "Curious non-specialists who want a field's origin story",
+    "result": "Live; 104 fields mapped, 604 turning points, 805 figures indexed"
+  },
+  "skills": [
+    "Data modeling",
+    "Graph algorithms",
+    "Data visualization",
+    "Static site architecture"
+  ],
+  "categoryTags": [
+    "Personal Project",
+    "Knowledge Platform",
+    "Web App"
+  ],
+  "problemShape": "explainer",
+  "techStack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "D3 (d3-shape)",
+    "KaTeX",
+    "react-markdown",
+    "gray-matter",
+    "GitHub Actions",
+    "GitHub Pages"
+  ],
+  "status": "active",
+  "role": "Solo Developer",
+  "timeframe": "Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/field-atlas/",
+  "access": "public",
+  "githubUrl": "https://github.com/andifathulms/field-atlas",
+  "heroImage": "/images/projects/field-atlas/hero.webp",
+  "order": 51,
+  "featured": false,
+  "metrics": [
+    { "value": "104", "label": "fields documented across math, physics and biology" },
+    { "value": "604", "label": "turning points, each with a cited source" },
+    { "value": "121", "label": "open problems tracked across all fields" },
+    { "value": "805", "label": "historical figures indexed by field" }
+  ],
+  "id": {
+    "tagline": "Peta bagaimana matematika, fisika, dan biologi bercabang menjadi bidangnya masing-masing, tiap titik balik bersumber",
+    "glance": {
+      "for": "Pembaca awam yang penasaran akan kisah asal sebuah bidang ilmu",
+      "result": "Live; 104 bidang dipetakan, 604 titik balik, 805 tokoh terindeks"
+    },
+    "skills": [
+      "Pemodelan data",
+      "Algoritma graf",
+      "Visualisasi data",
+      "Arsitektur situs statis"
+    ],
+    "metrics": [
+      { "value": "104", "label": "bidang ilmu didokumentasikan di matematika, fisika, dan biologi" },
+      { "value": "604", "label": "titik balik, masing-masing dengan sumber terkutip" },
+      { "value": "121", "label": "masalah terbuka dilacak di semua bidang" },
+      { "value": "805", "label": "tokoh sejarah terindeks per bidang" }
+    ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-10-01"
+  }
+}

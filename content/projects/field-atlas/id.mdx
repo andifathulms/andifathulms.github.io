@@ -1,0 +1,46 @@
+# Field Atlas
+
+## Masalahnya
+
+Sebuah bidang ilmu biasanya hadir ke pembaca sebagai kumpulan fakta yang sudah mapan. Geometri Riemann, misalnya, muncul di buku teks tanpa memberi gambaran dari mana ia berasal, pertanyaan apa yang awalnya ingin dijawabnya, atau apa yang dihubungkannya dengan bidang lain. Konteks itu sebenarnya ada, tersebar di bagian sejarah Wikipedia, kata pengantar buku teks, dan biografi, tetapi tak satu pun menunjukkan struktur percabangan di seluruh sebuah domain sekaligus.
+
+Saya membangun Field Atlas untuk pembaca yang penasaran tanpa latar belakang spesialis: pelajar, orang yang berganti karier, siapa pun yang ingin tahu kisah asal sebuah bidang dan bentuknya, bukan isi buku teksnya. Situs ini tak punya akun, tak punya kolom komentar, dan tak punya peringkat bidang "terbaik". Setiap fakta butuh sumber, dan setiap koreksi harus berupa suntingan satu berkas, yang melimpahkan tugas menjaga data tetap benar ke proses build itu sendiri.
+
+## Yang saya bangun
+
+### Saya menyimpan tiap fakta sebagai berkas terkontrol versi, tanpa basis data atau backend
+
+Kontennya hidup sebagai berkas Markdown dan JSON di repositori, jadi sebuah koreksi adalah pull request, bukan sesuatu yang diketik ke panel admin — model yang sama yang saya pakai di situs referensi statis saya yang lain. Semuanya dibangun menjadi HTML statis tanpa server yang perlu dijalankan dan tanpa akun yang perlu diamankan. Hostingnya gratis di GitHub Pages.
+
+### Proses build sendiri yang menegakkan kebenaran data
+
+Tanpa panel admin, salah ketik pada referensi induk atau kutipan yang hilang baru akan terlihat sebagai halaman rusak setelah ter-deploy. Proses build-nya gagal pada induk yang tak dikenal, siklus di graf bidang, atau id titik balik yang duplikat. Ia juga gagal pada tipe titik balik di luar kosakata domainnya, titik yang diperdebatkan tanpa catatan yang menjelaskan perselisihannya, atau referensi apa pun yang tak cocok. Commit yang rusak tak bisa sampai ke produksi.
+
+### Saya menulis sendiri tata letak pohon bidangnya alih-alih memakai pustaka graf
+
+Sebuah bidang bisa tumbuh dari dua induk sekaligus, lahir di titik temu keduanya, jadi linimasa linear biasa saja tak cukup. Graf-grafnya sendiri tetap kecil, dari segelintir sampai puluhan simpul per alur, terlalu kecil untuk membenarkan dependensi tata letak graf yang umum. Tata letaknya menghitung lapisan tiap bidang berdasar jalur terpanjangnya, menilai tiap kemungkinan urutan kiri-ke-kanan berdasar seberapa banyak ia membuat cabang melewati titik atau label bidang lain, lalu menghaluskan beberapa kandidat terbaik dengan menggeser simpul ke samping.
+
+### Setiap jenis data hidup dalam satu koleksi yang sama untuk semua domain
+
+Bidang, titik balik, masalah terbuka, dan tokoh masing-masing hidup dalam satu koleksi yang disaring berdasar domain, bukan tiga salinan paralel untuk matematika, fisika, dan biologi. Itulah yang membuat tampilan persilangan lintas-domain bisa hadir sebagai penyaring di atas data yang sudah ada, tanpa menulis ulang model kontennya.
+
+### Pengaruh sebuah bidang adalah properti dari graf silsilahnya sendiri
+
+Proyek ini menutup kemungkinan lapisan peringkat sejak awal, tetapi pembaca tetap ingin tahu gagasan bidang mana yang menjalar paling jauh. Halaman toolkit menjawabnya dengan menghitung berapa banyak alur yang dijangkau langsung sebuah bidang, lalu tautan langsungnya, lalu semua yang ada di bawahnya. Ini adalah pencarian di atas graf penerus dan aplikasi lintas-domain yang sama yang sudah dihitung situs ini di tempat lain. Peringkatnya adalah proksi atas fakta bersumber, bukan opini terpisah yang ditumpuk di atasnya.
+
+## Hasilnya
+
+Field Atlas sudah live. Situs ini mendokumentasikan 104 bidang di matematika, fisika, dan biologi, dengan 604 titik balik bersumber, 121 masalah terbuka yang dilacak, dan 805 tokoh sejarah terindeks di dalamnya. Saya membangunnya sendirian selama lima hari pada September 2026, menulis sendiri bab, titik balik, dan masalah terbuka tiap bidang, lalu merangkai tampilan lintas-domain dan peringkatnya di atas data yang sama.
+
+## Di balik layar
+
+- Next.js 14.2.35, static export (`next build` → `out/`); tanpa server runtime di produksi.
+- `gray-matter` mem-parsing frontmatter YAML dan Markdown per berkas bidang; `react-markdown` dengan `remark-gfm` menggambar tabel, daftar, dan blok kode pada prosa; `remark-math` dan `rehype-katex` (KaTeX 0.16.47) menggambar matematika inline dan display, dengan paket `katex` di akar hanya dipakai untuk stylesheet-nya, dikunci ke versi yang digambar `rehype-katex`.
+- `src/lib/content.ts` berjalan saat build dan menolak induk yang tak dikenal, tautan induk lintas-domain, siklus (ditemukan lewat depth-first search dengan pelacakan jejak), id titik balik yang duplikat lintas-domain, tipe titik balik di luar kosakata domainnya, titik yang diperdebatkan tanpa catatan wajibnya, dan referensi tokoh yang tak cocok.
+- `src/lib/treeLayout.ts` adalah tata letak DAG berlapis buatan tangan: pelapisan jalur-terpanjang, penanganan baris yang meluap untuk baris dengan lebih dari tiga bidang, pencarian urutan yang dinilai dari biaya cabang-melewati-titik, lalu biaya label, lalu persilangan, lalu jarak barycenter, dihaluskan dengan pergeseran lokal. `src/components/FieldTree.tsx` menggambar hasilnya sebagai SVG memakai `d3-shape` untuk kurva cabang, dianimasikan masuk dengan dash `pathLength`, dengan masalah terbuka yang belum terselesaikan digambar sebagai garis putus-putus memudar.
+- Silsilah yang menyeberang ke alur lain digambar di dalam kolom label simpulnya sendiri, bukan sebagai potongan terpisah di antara baris — pendekatan potongan-di-celah sebelumnya bertabrakan dengan cabang yang menyatu.
+- Kartu sosial digambar saat build oleh `src/lib/og.tsx` lewat image response `next/og` berbasis Satori milik Next, lewat sebuah route yang slug-nya membawa `.png` sehingga static export menulis berkas gambar sungguhan; font kartunya adalah TTF yang di-commit karena Satori tak bisa membaca woff2.
+- Token tema adalah variabel CSS untuk siang dan malam, diterapkan oleh skrip pra-render sebelum tampilan pertama; tak ada komponen atau SVG yang menuliskan warna secara langsung.
+- Di-deploy lewat GitHub Actions saat push ke `main`: Node 22, instal, lint, build, lalu diterbitkan lewat `actions/upload-pages-artifact` dan `actions/deploy-pages`, dengan base path dan URL situs diatur oleh `actions/configure-pages`.
+- Tanpa basis data dan tanpa framework pengujian di mana pun dalam proyek ini; sebuah pustaka charting yang dipertimbangkan di awal perencanaan tak pernah ditambahkan karena datanya tak membutuhkannya.
+- 268 commit dalam 5 hari, 23 sampai 27 September 2026. 4.624 baris TypeScript dan TSX di 14 route dan 15 komponen.
