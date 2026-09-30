@@ -1,10 +1,10 @@
 {
   "slug": "gempa-watch",
   "title": "GempaWatch",
-  "tagline": "An earthquake risk site that tells anyone in Indonesia how active their area is, from 69,641 recorded quakes",
+  "tagline": "An earthquake risk site that tells anyone in Indonesia how active their area is, from 70,271 recorded quakes",
   "glance": {
     "for": "Indonesian residents, journalists and students checking local earthquake risk",
-    "result": "Live on GitHub Pages, 57 years of quakes, 24 regions profiled"
+    "result": "Live since August 2026, 57 years of quakes, 52 regions profiled"
   },
   "skills": [
     "Geospatial data",
@@ -31,7 +31,7 @@
   ],
   "status": "active",
   "role": "Solo Developer",
-  "timeframe": "Jul – Aug 2026",
+  "timeframe": "Jul – Sep 2026",
   "liveUrl": "https://andifathulms.github.io/gempawatch/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/gempawatch",
@@ -40,27 +40,27 @@
   "featured": true,
   "metrics": [
     {
-      "value": "69,641",
+      "value": "70,271",
       "label": "earthquakes merged from BMKG and USGS"
     },
     {
-      "value": "1970–2026",
-      "label": "years of earthquake records covered"
+      "value": "57",
+      "label": "years of quake history, back to 1970"
     },
     {
-      "value": "24",
+      "value": "52",
       "label": "regions with a published risk profile"
     },
     {
-      "value": "6",
+      "value": "20",
       "label": "curated historical disasters, Aceh 2004 to Cianjur 2022"
     }
   ],
   "id": {
-    "tagline": "Situs risiko gempa yang menunjukkan seberapa aktif daerah Anda, dari 69.641 gempa yang tercatat",
+    "tagline": "Situs risiko gempa yang menunjukkan seberapa aktif daerah Anda, dari 70.271 gempa yang tercatat",
     "glance": {
       "for": "Warga, jurnalis, dan pelajar yang mengecek risiko gempa di daerahnya",
-      "result": "Live di GitHub Pages, 57 tahun data gempa, 24 wilayah diprofilkan"
+      "result": "Live sejak Agustus 2026, 57 tahun data gempa, 52 wilayah diprofilkan"
     },
     "skills": [
       "Data geospasial",
@@ -70,21 +70,25 @@
     ],
     "metrics": [
       {
-        "value": "69.641",
+        "value": "70.271",
         "label": "gempa gabungan dari BMKG dan USGS"
       },
       {
-        "value": "1970–2026",
-        "label": "rentang tahun catatan gempa"
+        "value": "57",
+        "label": "tahun riwayat gempa, sejak 1970"
       },
       {
-        "value": "24",
+        "value": "52",
         "label": "wilayah dengan profil risiko terbuka"
       },
       {
-        "value": "6",
+        "value": "20",
         "label": "bencana bersejarah pilihan, Aceh 2004 hingga Cianjur 2022"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }

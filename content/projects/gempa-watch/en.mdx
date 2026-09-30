@@ -8,13 +8,9 @@ Two gaps make that hard to answer. BMKG, Indonesia's official agency, publishes 
 
 ## What I built
 
-### I merged the national feed with the global archive
+### I merged the national feed with the global archive, then scored it
 
-USGS gives the historical depth. BMKG gives local authority and the smaller felt quakes that USGS never records. When both report the same quake, within five minutes and 50 km of each other, I keep one record and let BMKG's version win. It is the more accurate source for Indonesian events. The merged dataset answers geographic questions, like "events within 100 km of here" or "nearest fault", with a spatial database that indexes them properly.
-
-### One score from 0 to 100, with every weight published
-
-Nobody can read "217 events above magnitude 4, 14 above 5, 2 above 6". I combine them into one score: frequency counts for 40 points, the largest recorded magnitude for 30, the share of shallow quakes for 15, and closeness to a known fault for 15. The methodology page lists every weight. Each region also gets a national percentile, so a resident reads "more active than 84% of Indonesia". The site describes history only. It states that it is not a tsunami warning system and links to BMKG's official alerts.
+USGS gives the historical depth. BMKG gives local authority and the smaller felt quakes that USGS never records. When both report the same quake, within five minutes and 50 km of each other, I keep one record and let BMKG's version win. It is the more accurate source for Indonesian events. Nobody can read "217 events above magnitude 4, 14 above 5, 2 above 6". So I combine them into one score out of 100: frequency counts for 40 points, the largest recorded magnitude for 30, the portion of shallow quakes for 15, and closeness to a known fault for 15. The methodology page lists every weight, and the site describes history only, states plainly that it is not a tsunami warning system, and links to BMKG's official alerts.
 
 ### When the server went away, the build became the pipeline
 
@@ -28,20 +24,27 @@ Without a server, the "am I in a risk zone?" check has to run on the phone. I po
 
 BMKG only shows its last 15 events, so every older BMKG record exists because an earlier run saved it. Between runs, the database lives in a build cache that can be cleared at any time. I back it up daily, and keep a permanent snapshot every month. If a backup fails, publishing still goes ahead. New earthquake data matters more than the backup.
 
+### I rebuilt the homepage and palette around the risk tool
+
+A self-authored design audit found the shipped homepage led with the live map and event list, while the app's actual purpose, a risk answer built from decades of data, sat one click away behind a nav link. I demoted the live feed to a ticker, folded the compare and explore views into region pages as inline context, and made a seismogram of a region's own quake history the page's signature visual. The old dark palette used one colour for buttons, links, headings and a depth band, right next to the risk-tier red, so a HIGH result carried no colour meaning of its own. Chrome is ink-only now; colour is reserved for depth and risk tier alone.
+
 ## Result
 
-GempaWatch is live on GitHub Pages with 69,641 earthquakes from 1970 to 2026, merged across BMKG and USGS. The target in the plan was more than 10,000. The site has a live 24-hour map, a location risk report, profiles for 24 regions with charts, a region leaderboard and side-by-side compare, a fault and hazard map, and shareable risk cards. The full server version, with email alerts, is complete and runs under Docker Compose, but isn't hosted. I built it alone over about five weeks, in July and August 2026.
+GempaWatch has been live since August 2026, with 70,271 earthquakes from 1970 to 2026, merged across BMKG and USGS. The target in the plan was more than 10,000. The site has a location risk report, profiles for 52 regions with charts, a region leaderboard with compare folded in, a fault and hazard map, shareable risk cards, and a live quake ticker. The full server version, with email alerts, is complete and runs under Docker Compose, but isn't hosted. I built it alone over about three months, in three bursts between July and September 2026.
 
 ## Under the hood
 
-- Backend: Django with GeoDjango and PostGIS, 7 apps and 7 models, `djangorestframework-gis` for GeoJSON straight into Leaflet. Regional profiles are rebuilt nightly by a Celery task; the single-point check is the one live computation.
+- Backend: Django with GeoDjango and PostGIS, 7 apps and 6 models (EarthquakeEvent, AdminRegion, RegionRiskProfile, FaultLine, HistoricalDisaster, LocationWatch), `djangorestframework-gis` for GeoJSON straight into Leaflet. In the shipped static deployment, regional profiles are recomputed each ~30-minute publish cycle by `manage.py refresh_for_export`, not nightly; a nightly Celery beat schedule is only the live-mode design, and no live server is confirmed deployed. The single-point risk check is the one live computation.
 - Deduplication: events within 5 minutes and 50 km are one record; a BMKG report overwrites a stored USGS one.
 - Score weights: frequency 40, max magnitude 30, shallow share 15, fault proximity 15. BMKG attribution is a legal requirement, rendered by a `SourceAttribution` component on every surface that shows their data.
 - `manage.py export_static` drives the real DRF views and writes a JSON tree matching the live URLs. `api.live.ts` and `api.static.ts` share one interface, chosen by a build-time constant so the unused client is tree-shaken out.
 - `manage.py export_risk_fixtures` pins Django's output at 39 points. A Vitest suite asserts the TypeScript port matches every one, against freshly regenerated fixtures in the deploy workflow. Convention: change Python first, regenerate fixtures, then update the port.
+- Frontend tests (Vitest): 163 across 6 files — the scoring engine (33), province lookup (1), island and geography helpers (18), seismogram data shaping (16), static-API-tree integrity across every exported region (16), and the 79-test Django-fixture parity suite. No backend test suite exists.
 - Events sit in parallel typed arrays, about 1.1 MB. They stay Float64 because Float32 can't hold a magnitude like 6.6 exactly, which would reintroduce the mismatch the fixtures exist to catch.
 - The database travels between CI runs in the GitHub Actions cache (evicted after 7 days unused). Backups: daily workflow artifacts kept 90 days, plus monthly release-asset snapshots. Release assets, because committing ~8 MB a month to git would grow every clone by ~100 MB a year. Both steps are `continue-on-error`. A cache miss self-heals from a full USGS bootstrap, minus BMKG's felt quakes.
 - Cron is set to 30 minutes; observed freshness is 70–90 minutes. Per-region OpenGraph images fall back to the site card, because Next 14 can't prerender metadata image routes under `output: export`. Backend-only routes are named `*.live.tsx` and registered only for live builds.
-- The PRD's "Fault Line" palette was rebuilt as "Seismograph". The muted text tone measured about 3.4:1 against cards, below WCAG AA, so every text token was retuned. Hex colours also broke Tailwind opacity modifiers silently; every colour is now declared once as space-separated RGB channels.
-- Reference data: 6 fault features, 24 admin region boundaries, 6 curated historical disasters (Aceh 2004 to Cianjur 2022). Beyond the PRD: percentiles, leaderboard, compare, the "Siap Gempa" preparedness checklist and location-watch email subscriptions.
-- About 19 API endpoints, 11 frontend routes, about 40 components, a 320-line CI/CD workflow. 51 commits from 1 July to 4 August 2026; about 2,800 lines of backend Python and 7,800 of frontend code.
+- The map basemap was swapped mid-project: the PRD specified keyed CartoDB/OpenStreetMap tiles, but a self-hosted Protomaps extract now ships from the frontend's own `public/tiles/`, with no external runtime dependency or key.
+- The PRD's dark-only "Fault Line" palette was replaced by the light-default "Kertas & Tinta" ("paper and ink") system, typeset in Plus Jakarta Sans and JetBrains Mono. The muted text tone measured about 3.4:1 against cards, below WCAG AA, so every text token was retuned. Hex colours also broke Tailwind opacity modifiers silently; every colour is now declared once as space-separated RGB channels.
+- Reference data: 6 fault features, 52 administrative region boundaries, 20 curated historical disasters (Aceh 2004 to Cianjur 2022, up from an earlier 6). Beyond the PRD: percentiles, the region leaderboard, compare folded into region pages, the "Siap Gempa" preparedness checklist and location-watch email subscriptions.
+- Charts are Recharts throughout; the PRD's "Recharts + D3.js" listing is stale, D3 isn't in the codebase.
+- 4 DRF viewsets (earthquakes, regions, faults, disasters), 3 standalone endpoints (risk-check, tsunami coastal zones, meta) and 2 alert endpoints; 10 static frontend routes plus 2 live-only ones; about 56 components; a 320-line CI/CD workflow. 119 commits from 1 July to 27 September 2026, in three bursts; about 2,800 lines of backend Python and 7,800 of frontend code.
