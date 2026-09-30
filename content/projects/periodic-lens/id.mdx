@@ -2,9 +2,9 @@
 
 ## Masalahnya
 
-Siswa mengenal tabel periodik sebagai bagan untuk dihafal. Versi yang bisa diklik dengan detail unsur sudah banyak, dan ptable.com mengerjakannya dengan sangat baik. Hampir tidak ada yang menjelaskan bentuk tabelnya. Kenapa baris pertama hanya berisi dua unsur? Kenapa lantanida ditaruh di catatan kaki? Kenapa blok-bloknya selebar 2, 6, 10, dan 14 kolom? Jawabannya ada pada urutan elektron mengisi orbital.
+Siswa mengenal tabel periodik sebagai bagan untuk dihafal. Versi yang bisa diklik dengan detail unsur sudah banyak, dan ptable.com mengerjakannya dengan baik. Hampir tidak ada yang menjelaskan bentuk tabelnya: kenapa baris pertama hanya berisi dua unsur, kenapa lantanida ditaruh di catatan kaki, kenapa blok-bloknya selebar 2, 6, 10, dan 14 kolom. Jawabannya ada pada urutan elektron mengisi orbital.
 
-Ada celah kedua. Belum ada tabel periodik yang menunjukkan unsur apa saja yang diproduksi Indonesia dan berapa porsinya di produksi dunia. Nikel, timah, tembaga, dan emas adalah cerita nasional yang sering didengar siswa di berita, apalagi nikel kini berada di pusat rantai pasok baterai kendaraan listrik.
+Ada celah kedua. Belum ada tabel periodik yang menunjukkan unsur apa saja yang diproduksi Indonesia dan berapa porsinya di produksi dunia, padahal nikel, timah, tembaga, dan emas adalah cerita nasional yang sering didengar siswa di berita.
 
 Saya membuat Periodic Lens untuk siswa dan pembaca yang penasaran dengan kimia. Bahasa utamanya Inggris dengan terjemahan Indonesia yang lengkap, karena kosakata kimia bersifat internasional.
 
@@ -28,13 +28,13 @@ Banyak tabel periodik yang mencolok menumpuk lima pengodean di 118 sel. Di sini 
 
 ### Setiap angka membawa sumbernya
 
-Setiap sifat berasal dari file sumber dengan sitasi per kolom. Validator memeriksa lisensi, sitasi, tahun edisi survei, dan kelengkapan, dan sifat tanpa sumber tidak ikut dirilis. Angka produksi Indonesia berasal dari US Geological Survey. Setiap angka membawa tahun edisinya dan apakah yang dihitung hasil tambang atau hasil olahan. Tidak berproduksi dibedakan dari berproduksi dalam jumlah kecil, dan tidak ada komentar kebijakan ke arah mana pun.
+Setiap sifat berasal dari file sumber dengan sitasi per kolom. Validator memeriksa lisensi, sitasi, tahun edisi survei, dan kelengkapan, dan sifat tanpa sumber tidak ikut dirilis. Angka produksi Indonesia berasal dari US Geological Survey, dicocokkan dengan 77 komoditas yang dipantau supaya "tidak berproduksi" dan "tidak diketahui" tidak pernah tertukar. Setiap angka membawa tahun edisinya dan apakah yang dihitung hasil tambang atau hasil olahan. Tidak berproduksi dibedakan dari berproduksi dalam jumlah kecil, dan tidak ada komentar kebijakan ke arah mana pun.
 
 ## Hasilnya
 
 Periodic Lens sudah live dan terbuka untuk umum dalam bahasa Inggris dan Indonesia. Situs ini mencakup 118 unsur, 11 lensa, tiga tata letak tabel dengan sel yang berpindah posisi, dan tiga tampilan, termasuk relief yang menampilkan sifat unsur sebagai ketinggian. Lensa Indonesia mencakup nikel, timah, kobalt, bauksit, tembaga, emas, dan perak.
 
-Saya melakukan perbaikan aksesibilitas tersendiri setelah fiturnya selesai. Tabelnya cukup satu tab stop dengan navigasi tombol panah, dan ada tabel teks yang bisa diurutkan dengan data yang sama. Di ponsel, tabel digulir ke samping dengan ukuran penuh, karena bentuknya adalah pokok bahasannya. Situs tidak membuat permintaan jaringan setelah halaman dimuat. Saya membangunnya dalam tujuh hari pada Agustus 2026.
+Saya melakukan perbaikan aksesibilitas tersendiri setelah fiturnya selesai: satu tab stop dengan navigasi tombol panah, ditambah tabel teks yang bisa diurutkan dengan data yang sama. Di ponsel, tabel digulir ke samping dengan ukuran penuh, karena bentuknya adalah pokok bahasannya. Situs tidak membuat permintaan jaringan setelah halaman dimuat. Saya membangun versi pertamanya dalam tujuh hari pada Agustus 2026, lalu terus mengerjakannya sampai akhir September untuk navigasi mobile, pemilih tata letak, dan grafik utama halaman Indonesia.
 
 ## Di balik layar
 
@@ -48,5 +48,6 @@ Saya melakukan perbaikan aksesibilitas tersendiri setelah fiturnya selesai. Tabe
 - Enam belas perbaikan aksesibilitas berturut-turut: semantik list bawaan menggantikan ARIA grid yang tidak valid, satu tab stop, cincin fokus dua warna, metrik huruf berbasis rem, nama landmark sesuai bahasa, pengumuman pembaca layar saat lensa berganti.
 - Build identik byte demi byte untuk dataset yang sama, termasuk pembuatan gambar OG saat build.
 - Static export Next.js 14 di GitHub Pages. Empat dependensi runtime (next, react, react-dom, zod). Tanpa pustaka grafik, kimia, animasi, atau komponen.
-- Milestone PRD M0–M5 selesai, ditambah sebagian besar M6. Spektrum emisi dari data NIST dipotong (`04458f4`).
-- 157 tes di 6 file. Sekitar 8.000 baris TypeScript, TSX, dan CSS. 82 commit dari 20 sampai 26 Agustus 2026.
+- Tabel, animasi build, tiga tata letak, tiga tampilan, halaman Indonesia, dan halaman metode semuanya sudah dibangun dan live dalam dua bahasa. Spektrum emisi dari data NIST dipotong (`04458f4`).
+- Pembaruan belakangan menambahkan gaya huruf serif untuk display, yang sebelumnya cuma satu keluarga sans-serif, ditambah satu warna aksen dan permukaan yang lebih lembut.
+- 183 tes di 6 file. Sekitar 7.522 baris TypeScript dan TSX di folder app, components, dan lib. 93 commit antara 20 Agustus dan 29 September 2026.

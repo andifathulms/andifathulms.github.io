@@ -2,9 +2,9 @@
 
 ## The problem
 
-Students meet the periodic table as a chart to memorise. Clickable versions with element details already exist, and ptable.com does that very well. Almost none explain the shape itself. Why does the first row have two elements? Why do the lanthanides sit in a footnote? Why are the blocks 2, 6, 10 and 14 columns wide? The answer is the order in which electrons fill orbitals.
+Students meet the periodic table as a chart to memorise. Clickable versions with element details already exist, and ptable.com does that well. Almost none explain the shape itself: why the first row has two elements, why the lanthanides sit in a footnote, why the blocks are 2, 6, 10 and 14 columns wide. The answer is the order in which electrons fill orbitals.
 
-There was a second gap. No periodic table shows which elements Indonesia produces and at what share of world output. Nickel, tin, copper and gold are a national story students already hear on the news, since nickel sits at the centre of the electric-vehicle battery supply chain.
+There was a second gap. No periodic table shows which elements Indonesia produces and at what share of world output, even though nickel, tin, copper and gold are a national story students already hear on the news.
 
 I built Periodic Lens for students and chemistry-curious readers. It is English-first with a full Indonesian translation, because chemistry vocabulary is international.
 
@@ -28,13 +28,13 @@ Most flashy periodic tables put five competing encodings on 118 cells. Here colo
 
 ### Every number carries its source
 
-Each property comes from a source file with a citation per field. A validator checks licences, citations, survey edition years and completeness, and a property without a source doesn't ship. Indonesia's production figures come from the US Geological Survey. Each one carries its edition year and whether it counts mined or refined output. Not produced is kept distinct from produced in small amounts, and there is no policy commentary either way.
+Each property comes from a source file with a citation per field. A validator checks licences, citations, survey edition years and completeness, and a property without a source doesn't ship. Indonesia's production figures come from the US Geological Survey, checked against 77 tracked commodities so "not produced" and "unknown" are never confused. Each figure carries its edition year and whether it counts mined or refined output. Not produced is kept distinct from produced in small amounts, and there is no policy commentary either way.
 
 ## Result
 
 Periodic Lens is live and public in English and Indonesian. It covers 118 elements, 11 lenses, three table layouts with cells travelling between them, and three views, including a relief that shows properties as height. The Indonesian lens covers nickel, tin, cobalt, bauxite, copper, gold and silver.
 
-I did a separate accessibility pass after the features were built. The grid is one tab stop with arrow-key navigation, and there's a sortable text table with the same data. On phones the grid scrolls sideways at full size, because the shape is the subject. The site makes no network requests after the page loads. I built it in seven days in August 2026.
+I did a separate accessibility pass after the features were built: one tab stop with arrow-key navigation, plus a sortable text table with the same data. On phones the grid scrolls sideways at full size, because the shape is the subject. The site makes no network requests after the page loads. I built the first version in seven days in August 2026, then kept working into late September on mobile navigation, a layout picker and the Indonesia page's headline chart.
 
 ## Under the hood
 
@@ -48,5 +48,6 @@ I did a separate accessibility pass after the features were built. The grid is o
 - Sixteen consecutive accessibility fixes: native list semantics in place of invalid grid ARIA, a single tab stop, two-tone focus rings, rem-based type metrics, locale-aware landmark names, screen-reader announcements for lens changes.
 - Builds are byte-identical for the same datasets, including build-time OG image generation.
 - Next.js 14 static export on GitHub Pages. Four runtime dependencies (next, react, react-dom, zod). No charting, chemistry, animation or component library.
-- PRD milestones M0–M5 complete plus most of M6. Emission spectra from NIST data were cut (`04458f4`).
-- 157 tests in 6 files. About 8,000 lines of TypeScript, TSX and CSS. 82 commits from 20 to 26 August 2026.
+- The table, build animation, three layouts, three views, Indonesia page and method page are all built and live in two locales. Emission spectra from NIST data were cut (`04458f4`).
+- A later pass added a serif display voice to what was originally a single sans-serif type family, alongside one accent colour and softer surfaces.
+- 183 tests in 6 files. About 7,522 lines of TypeScript and TSX across the app, components and lib folders. 93 commits between 20 August and 29 September 2026.

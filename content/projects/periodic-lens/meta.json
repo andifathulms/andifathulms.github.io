@@ -30,8 +30,8 @@
   ],
   "status": "active",
   "role": "Solo Developer",
-  "timeframe": "Aug 2026",
-  "liveUrl": "https://andifathulms.github.io/periodic-lens/en/table/?lens=category&layout=standard&view=grid",
+  "timeframe": "Aug – Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/periodic-lens/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/periodic-lens",
   "heroImage": "/images/projects/periodic-lens/hero.webp",
@@ -43,16 +43,12 @@
       "label": "elements, each with cited properties"
     },
     {
-      "value": "11",
-      "label": "lenses, one active at a time"
-    },
-    {
-      "value": "~20",
-      "label": "elements where the filling rule is wrong"
-    },
-    {
       "value": "7",
-      "label": "Indonesian minerals with world production share"
+      "label": "Indonesian minerals tracked for world production"
+    },
+    {
+      "value": "77",
+      "label": "commodities checked to tell zero from unknown"
     }
   ],
   "id": {
@@ -73,17 +69,17 @@
         "label": "unsur, sifatnya lengkap dengan sumber"
       },
       {
-        "value": "11",
-        "label": "lensa, satu aktif sekali waktu"
-      },
-      {
-        "value": "~20",
-        "label": "unsur tempat aturan pengisian meleset"
-      },
-      {
         "value": "7",
         "label": "mineral Indonesia dengan porsi produksi dunia"
+      },
+      {
+        "value": "77",
+        "label": "komoditas dicek untuk membedakan nol dari tak diketahui"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }
