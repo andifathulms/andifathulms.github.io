@@ -4,7 +4,7 @@
   "tagline": "An atlas of Indonesia's three rainfall patterns, computed from raw satellite data so anyone can check it",
   "glance": {
     "for": "Indonesians curious why the rainy season differs by region",
-    "result": "Live in Indonesian, 34 locations, every disagreement with BMKG shown"
+    "result": "Live in Indonesian, 86 locations, every disagreement with BMKG shown"
   },
   "skills": [
     "Climate data analysis",
@@ -20,8 +20,8 @@
   "problemShape": "explainer",
   "techStack": [
     "Next.js",
-    "React",
     "TypeScript",
+    "React",
     "Tailwind CSS",
     "Zod",
     "Vitest",
@@ -30,7 +30,7 @@
   ],
   "status": "active",
   "role": "Solo Developer",
-  "timeframe": "Aug 2026",
+  "timeframe": "Aug – Sep 2026",
   "liveUrl": "https://andifathulms.github.io/pola-hujan/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/pola-hujan",
@@ -39,16 +39,16 @@
   "featured": true,
   "metrics": [
     {
-      "value": "34",
+      "value": "86",
       "label": "locations classified from satellite rainfall"
     },
     {
-      "value": "14/34",
-      "label": "BMKG labels checked against its own bulletin"
+      "value": "71%",
+      "label": "agreement with BMKG across 52 compared cities"
     },
     {
-      "value": "10 yrs",
-      "label": "of rainfall records, 2006 to 2015"
+      "value": "4",
+      "label": "verified disagreements reported, not hidden"
     },
     {
       "value": "0",
@@ -59,7 +59,7 @@
     "tagline": "Atlas tiga pola curah hujan Indonesia, dihitung dari data satelit mentah sehingga siapa pun bisa memeriksanya",
     "glance": {
       "for": "Warga yang penasaran kenapa musim hujan berbeda di tiap daerah",
-      "result": "Live dalam bahasa Indonesia, 34 lokasi, setiap perbedaan dengan BMKG ditampilkan"
+      "result": "Live dalam bahasa Indonesia, 86 lokasi, setiap perbedaan dengan BMKG ditampilkan"
     },
     "skills": [
       "Analisis data iklim",
@@ -69,21 +69,25 @@
     ],
     "metrics": [
       {
-        "value": "34",
+        "value": "86",
         "label": "lokasi diklasifikasi dari curah hujan satelit"
       },
       {
-        "value": "14/34",
-        "label": "label BMKG dicocokkan dengan buletinnya"
+        "value": "71%",
+        "label": "kecocokan dengan data BMKG di 52 kota"
       },
       {
-        "value": "10 thn",
-        "label": "data curah hujan, 2006 sampai 2015"
+        "value": "4",
+        "label": "perbedaan terverifikasi yang dilaporkan, tidak disembunyikan"
       },
       {
         "value": "0",
         "label": "panggilan jaringan saat runtime"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }

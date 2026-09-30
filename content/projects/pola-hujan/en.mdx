@@ -10,11 +10,11 @@ I built Pola Hujan for general Indonesian readers who want to know why "rainy se
 
 ### I computed the map from raw data
 
-The easy route was to digitise BMKG's zone map and colour it in. I computed my own classification from satellite rainfall instead. Each place's twelve-month rainfall cycle is treated as a wave and split into a yearly part and a twice-a-year part, the same maths used to describe tides. Which part is stronger, and when it peaks, decides the family. Anyone can check the result.
+The easy route was to digitise BMKG's zone map and colour it in. I computed my own classification from satellite rainfall instead. Each place's twelve-month rainfall cycle is treated as a wave and split into a yearly part and a twice-a-year part, the same maths that describes tides. Which part is stronger, and when it peaks, decides the family. Anyone can check the result.
 
 ### Disagreements with BMKG stay on the map
 
-The thresholds live in one file, each cited to Aldrian and Susanto (2003), the paper behind the three-family system. I set a rule never to adjust them until the map matches BMKG. Two places where my result differs, Medan and Palu, are shown as findings. A separate layer marks every place where the two maps disagree, with sources.
+The thresholds live in one file, each cited to Aldrian and Susanto (2003), the paper behind the three-family system. I set a rule never to adjust them until the map matches BMKG. Four places where my result differs, Medan, Palu, Tobelo and Labuha, stay on the map as reported findings, not quietly resolved. A separate layer marks every place where the two maps disagree, with sources, and the agreement rate has moved as I've added more cited comparisons, never from touching a threshold.
 
 ### I tested the classifier on made-up data first
 
@@ -22,21 +22,23 @@ A generator builds rainfall cycles from known wave settings, and the classifier 
 
 ### A static site with no heavy libraries
 
-The pipeline downloads CHIRPS satellite archives and reads the raster files with decoders I wrote by hand. There is no mapping, charting, statistics or machine-learning library. Everything runs once at build time, so the site is static, makes no network calls and costs nothing to host.
+The pipeline downloads CHIRPS satellite archives and reads the raster files with decoders I wrote by hand. There is no mapping, charting, statistics or machine-learning library. Everything runs once at build time, so the site is static, makes no network calls and costs nothing to host. Download cost is dominated by the fixed set of monthly rasters, not by how many places get sampled from them. Coverage grew from an initial 15 cities to 34, then to 86, at almost no extra cost each time.
 
-### The method page shows its work
+### I turned down the obvious build
 
-The method page lists the dataset citation, the exact thresholds, an agreement rate with BMKG calculated by the pipeline, a CSV of the full dataset, and the limits. The main limit: the regional CHIRPS archive stopped updating in October 2016, so this is a ten-year climate record (2006 to 2015), shorter than the 30-year standard.
+The easy pitch was an animated wind map: a gridded field, a month dial, particles drifting across it. I would have built a third near-identical animated-field project. I chose a categorical atlas instead, small multiples and time series rather than a continuous vector field, because the map's job here is to show which family a place belongs to, not to look impressive in motion.
 
 ## Result
 
-Pola Hujan is live, in Indonesian. It has four parts: the atlas, a Jakarta and Ambon comparison, the method page, and an explainer where sliders morph a rainfall cycle between the three families. It covers 34 locations. I checked 14 of the 34 BMKG labels against the agency's own 139-page bulletin, with page numbers, and found and fixed one wrong label (Ternate). The other 20 are marked as estimates. After the build I did a separate accessibility and plain-language pass. I built it in three days in August 2026.
+Pola Hujan is live, in Indonesian. A story-driven home page introduces the three families, then the atlas, individual city pages, a two-place comparison, and a merged method-and-explainer page carry the detail. It covers 86 locations. I've compared 52 of them against BMKG's published families, and my map agrees on 71%. Of those 52 comparisons, 32 are independently verified against the agency's own bulletin, up from zero; the other 20 are marked as estimates. I built the first version in three days in mid-August 2026, then kept returning over the following weeks to redesign the palette and type system, merge the method pages into one, and more than double the city count.
 
 ## Under the hood
 
 - The harmonic fit decomposes each location's monthly climatology into annual and semi-annual components. Amplitude ratio and peak phase decide Monsunal, Ekuatorial or Lokal.
 - Thresholds live in a single cited config file. Agreement with BMKG is computed by the pipeline, never written by hand.
 - A synthetic generator produces cycles from known parameters, with a permanent regression case for the phase-inverted family.
-- Hand-written decoders read CHIRPS BIL rasters and tar archives, so there's no GDAL. Download cost is dominated by the 120 monthly rasters, which is why coverage grew from 15 to 34 points at almost no extra cost.
-- Fetch, fit and classification run at build time. The output is a static export on GitHub Pages.
-- 54 tests across 7 files gate CI. About 3,140 lines of TypeScript, 64 commits over three days.
+- Hand-written decoders (`lib/geo/bil.ts`, `lib/geo/tar.ts`) read CHIRPS BIL rasters and tar archives directly, so there's no GDAL dependency.
+- The build downloads 120 monthly CHIRPS rasters, samples all 86 city coordinates plus a 0.25° mosaic grid of 2,414 land cells over Indonesia, then runs the harmonic fit over every point. A determinism check asserts the same source version and thresholds produce a byte-identical bundle; the original 34 cities' values stayed byte-identical after the sampling method changed for the newer ones.
+- The design system's shared border-radius rule is softened here on purpose: 2px on data marks, 10px and 22px on panels and sheets, recorded as a named per-app deviation rather than an inconsistency.
+- Fetch, fit and classification run at build time. The output is a static export on GitHub Pages, deployed by GitHub Actions on every push to `main`.
+- 169 tests across 17 files gate CI. About 6,369 lines of TypeScript, 98 commits between 17 August and 29 September 2026: the first three days built the pipeline and the original site, then a further stretch of weeks redesigned the palette and type system, merged `/metode` and `/harmonik` into one `/cara-kerja` page, and expanded coverage from 34 cities to 86.

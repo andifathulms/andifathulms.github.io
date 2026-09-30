@@ -14,7 +14,7 @@ Jalan pintasnya adalah mendigitalkan peta zona BMKG lalu mewarnainya. Saya memil
 
 ### Perbedaan dengan BMKG tetap ditampilkan
 
-Ambang batasnya ada di satu berkas, masing-masing mengutip Aldrian dan Susanto (2003), makalah yang menjadi dasar sistem tiga kelompok ini. Saya menetapkan aturan untuk tidak mengutak-atik ambang itu sampai petanya cocok dengan BMKG. Dua tempat yang hasilnya berbeda, Medan dan Palu, ditampilkan sebagai temuan. Satu lapisan peta khusus menandai setiap tempat yang berbeda dari peta resmi, lengkap dengan sumbernya.
+Ambang batasnya ada di satu berkas, masing-masing mengutip Aldrian dan Susanto (2003), makalah yang menjadi dasar sistem tiga kelompok ini. Saya menetapkan aturan untuk tidak mengutak-atik ambang itu sampai petanya cocok dengan BMKG. Empat tempat yang hasilnya berbeda, Medan, Palu, Tobelo, dan Labuha, tetap tampil di peta sebagai temuan yang dilaporkan, bukan diam-diam diselesaikan. Satu lapisan peta khusus menandai setiap tempat yang berbeda dari peta resmi, lengkap dengan sumbernya, dan tingkat kecocokannya bergerak seiring saya menambah perbandingan bersumber, bukan karena mengubah ambang batas.
 
 ### Klasifikasinya diuji dengan data buatan dulu
 
@@ -22,21 +22,23 @@ Sebuah generator membuat siklus hujan dari parameter gelombang yang sudah diketa
 
 ### Situs statis tanpa pustaka berat
 
-Pipeline-nya mengunduh arsip satelit CHIRPS dan membaca berkas rasternya dengan decoder yang saya tulis sendiri. Tidak ada pustaka peta, grafik, statistik, atau machine learning. Semuanya dijalankan sekali saat build, jadi situsnya statis, tidak memanggil jaringan, dan tidak butuh biaya hosting.
+Pipeline-nya mengunduh arsip satelit CHIRPS dan membaca berkas rasternya dengan decoder yang saya tulis sendiri. Tidak ada pustaka peta, grafik, statistik, atau machine learning. Semuanya dijalankan sekali saat build, jadi situsnya statis, tidak memanggil jaringan, dan tidak butuh biaya hosting. Biaya unduh didominasi oleh jumlah raster bulanan yang tetap, bukan oleh berapa banyak tempat yang diambil sampelnya. Cakupannya tumbuh dari 15 kota awal menjadi 34, lalu menjadi 86, hampir tanpa biaya tambahan setiap kali.
 
-### Halaman metode menunjukkan cara kerjanya
+### Saya menolak build yang paling gampang
 
-Halaman metode memuat sitasi dataset, ambang batas yang dipakai, tingkat kecocokan dengan BMKG yang dihitung oleh pipeline, CSV berisi seluruh data, dan batasannya. Batasan utamanya: arsip CHIRPS regional berhenti diperbarui pada Oktober 2016, jadi ini adalah catatan iklim sepuluh tahun (2006 sampai 2015), lebih pendek dari standar 30 tahun.
+Pilihan gampangnya adalah peta angin beranimasi: sebuah medan grid, penunjuk bulan, partikel yang melayang di atasnya. Itu akan jadi proyek animated-field ketiga yang nyaris identik. Saya memilih atlas kategorikal sebagai gantinya, small multiples dan deret waktu, bukan medan vektor kontinu, karena tugas peta ini adalah menunjukkan kelompok mana yang cocok untuk suatu tempat, bukan tampil mengesankan saat bergerak.
 
 ## Hasilnya
 
-Pola Hujan sudah live dalam bahasa Indonesia. Isinya empat bagian: atlas, perbandingan Jakarta dan Ambon, halaman metode, dan penjelasan interaktif tempat penggeser mengubah siklus hujan di antara ketiga kelompok. Situs ini mencakup 34 lokasi. Saya mencocokkan 14 dari 34 label BMKG dengan buletin resmi setebal 139 halaman, lengkap dengan nomor halamannya, dan menemukan serta memperbaiki satu label yang salah (Ternate). Sisanya, 20 label, ditandai sebagai perkiraan. Setelah build selesai, saya melakukan perbaikan aksesibilitas dan bahasa sebagai tahap tersendiri. Saya membangunnya dalam tiga hari pada Agustus 2026.
+Pola Hujan sudah live dalam bahasa Indonesia. Sebuah halaman beranda bergaya cerita memperkenalkan tiga kelompoknya, lalu atlas, halaman per kota, perbandingan dua tempat, dan satu halaman metode-sekaligus-penjelasan yang menyatu membawa detailnya. Situs ini mencakup 86 lokasi. Saya membandingkan 52 di antaranya dengan data resmi BMKG, dan peta saya cocok pada 71%. Dari 52 perbandingan itu, 32 terverifikasi langsung dari buletin resmi BMKG, naik dari nol; sisanya, 20, ditandai sebagai perkiraan. Saya membangun versi pertamanya dalam tiga hari pada pertengahan Agustus 2026, lalu terus kembali selama beberapa minggu berikutnya untuk mendesain ulang palet dan sistem tipografinya, menggabungkan halaman metodenya menjadi satu, dan melipatgandakan jumlah kotanya lebih dari dua kali.
 
 ## Di balik layar
 
 - Fitting harmonik memecah klimatologi bulanan setiap lokasi menjadi komponen tahunan dan setengah tahunan. Rasio amplitudo dan fase puncak menentukan Monsunal, Ekuatorial, atau Lokal.
 - Ambang batas ada di satu berkas konfigurasi yang dikutip. Tingkat kecocokan dengan BMKG dihitung oleh pipeline, tidak ditulis tangan.
 - Generator sintetis membuat siklus dari parameter yang diketahui, dengan kasus regresi tetap untuk kelompok yang fasenya terbalik.
-- Decoder buatan sendiri membaca raster BIL dan arsip tar CHIRPS, jadi tidak perlu GDAL. Biaya unduh didominasi 120 raster bulanan, sehingga cakupan bisa naik dari 15 ke 34 titik hampir tanpa biaya tambahan.
-- Pengambilan data, fitting, dan klasifikasi berjalan saat build. Hasilnya berupa static export di GitHub Pages.
-- 54 tes di 7 berkas menjaga CI. Sekitar 3.140 baris TypeScript, 64 commit dalam tiga hari.
+- Decoder buatan sendiri (`lib/geo/bil.ts`, `lib/geo/tar.ts`) langsung membaca raster BIL dan arsip tar CHIRPS, jadi tidak perlu dependensi GDAL.
+- Proses build mengunduh 120 raster bulanan CHIRPS, mengambil sampel dari 86 koordinat kota ditambah grid mosaik 0,25° berisi 2.414 sel daratan di seluruh Indonesia, lalu menjalankan fitting harmonik pada setiap titiknya. Sebuah pengecekan determinisme memastikan versi sumber dan ambang batas yang sama menghasilkan bundel yang identik per byte; nilai 34 kota awal tetap identik per byte setelah metode pengambilan sampel berubah untuk kota-kota baru.
+- Aturan radius sudut milik sistem desain bersama sengaja dilonggarkan di sini: 2px pada penanda data, 10px dan 22px pada panel dan sheet, dicatat sebagai penyimpangan bernama khusus aplikasi ini, bukan ketidakkonsistenan.
+- Pengambilan data, fitting, dan klasifikasi berjalan saat build. Hasilnya berupa static export di GitHub Pages, di-deploy oleh GitHub Actions setiap kali push ke `main`.
+- 169 tes di 17 berkas menjaga CI. Sekitar 6.369 baris TypeScript, 98 commit antara 17 Agustus dan 29 September 2026: tiga hari pertama membangun pipeline dan situs aslinya, lalu beberapa minggu berikutnya mendesain ulang palet dan sistem tipografi, menggabungkan `/metode` dan `/harmonik` menjadi satu halaman `/cara-kerja`, dan memperluas cakupan dari 34 kota menjadi 86.
