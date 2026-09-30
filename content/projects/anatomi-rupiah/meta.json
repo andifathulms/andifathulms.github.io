@@ -30,7 +30,7 @@
   ],
   "status": "active",
   "role": "Solo Developer",
-  "timeframe": "Aug 2026",
+  "timeframe": "Aug – Sep 2026",
   "liveUrl": "https://andifathulms.github.io/anatomi-rupiah/id/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/anatomi-rupiah",
@@ -47,8 +47,8 @@
       "label": "security mechanisms drawn as cited diagrams"
     },
     {
-      "value": "8",
-      "label": "legal compliance checks that gate every build"
+      "value": "27",
+      "label": "licensed photographs of figures and motifs"
     },
     {
       "value": "0",
@@ -77,13 +77,17 @@
         "label": "mekanisme pengaman digambar sebagai diagram bersumber"
       },
       {
-        "value": "8",
-        "label": "cek kepatuhan hukum yang menahan setiap build"
+        "value": "27",
+        "label": "foto berlisensi tokoh dan motif"
       },
       {
         "value": "0",
         "label": "foto uang di seluruh situs"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }
