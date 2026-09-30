@@ -32,14 +32,14 @@ Mapped footpaths can't tell an alley from a garden path. Bogor's best-covered ca
 
 ## Result
 
-Bentuk Kota is live and public, in Indonesian and English. It covers 33 sites, each measured as two networks under three tag mappings, chosen from 126 candidate centres in 56 cities. Every site shows how well its alleys are mapped, and thin sites are flagged so missing data can't fake the finding.
+Bentuk Kota is live and public, in Indonesian and English. It covers 33 sites, each measured as two networks under three tag mappings, chosen from 126 candidate centres surveyed across 56 cities; 22 of those candidates were rejected and published anyway, with their reason stated rather than deleted. Every site shows how well its alleys are mapped, and 9 of the 33 are flagged for thin coverage so missing map data can't fake the finding.
 
-That limit reaches the headline comparison. Every gated-housing candidate came back thin, at 0.9–4.4% coverage, so the kampung versus perumahan comparison rests on two readable gated sites out of three. The page states that number. The site makes no network calls once it loads. I built it in eight days in August 2026.
+That limit reaches the headline comparison. Every gated-housing candidate came back thin, at 0.9–4.4% coverage, so the kampung versus perumahan comparison rests on two readable gated sites out of three. The page states that number. The site makes no network calls once it loads. I built the first version in eight days in August 2026, then kept working on it into late September.
 
 ## Under the hood
 
 - Method: Boeing (2019) orientation entropy on 36-bin bearing histograms ("roses"), the φ orientation-order indicator, sampled circuity, node-degree statistics and footway coverage. The dual drive/walk application is original.
-- The measurement core in `lib/morphology/` (~2,100 lines) is pure TypeScript: no DOM, no React, no clock, no network.
+- The measurement core in `lib/morphology/` (1,029 lines) is pure TypeScript: no DOM, no React, no clock, no network.
 - Synthetic tests: perfect grid, grid rotated 29°, random graph, pure tree. Invariants asserted on every histogram: 180° symmetry, circuity ≥ 1, degree proportions summing to 1.
 - The OSM tag mapping lives in one module with 3 switchable mappings; sensitivity is reported on `/asumsi`. Method, limits and ODbL attribution are on `/metode`.
 - Coverage rules: a park share above 25% is not urban fabric; `landuse=grass` is fetched and ignored because mappers use it for roadside verges.
@@ -47,6 +47,6 @@ That limit reaches the headline comparison. Every gated-housing candidate came b
 - Next.js 14 static export on GitHub Pages. Four runtime dependencies (Next.js, React, React DOM, Zod). Cards, sorting, density modes and cross-card highlights are server-rendered HTML and CSS with state in the URL; the only client component is a small nav-state helper.
 - The plate exports at ~4.7 MB of HTML, ~59% of it the App Router flight payload. Ruler ticks were trimmed from 165 to 66 bytes each; the rest is the collapsed data tables kept for screen readers.
 - Contrast ratios and the type scale are recomputed by unit tests from the hex values (`palette.test.ts`, `type-scale.test.ts`). A dedicated test stops the distribution ruler from reading as a ranking.
-- 577 tests in 14 files. Synthetic, invariant and data-validation suites plus an accessibility audit gate every deploy.
-- Bilingual (id/en), installable as a PWA, all milestones M0–M6 shipped. Commit `5c89a8d` exists only to correct a published sentence the data had outgrown.
-- About 11,000 lines of TypeScript, 93 commits over eight days (20–27 August 2026).
+- 585 tests in 16 files. Synthetic, invariant and data-validation suites plus an accessibility audit gate every deploy.
+- Bilingual (id/en), installable as a PWA, all milestones M0–M6 shipped.
+- About 13,840 lines of TypeScript, 101 commits between 20 August and 27 September 2026.

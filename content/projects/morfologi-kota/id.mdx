@@ -24,7 +24,7 @@ Tag OpenStreetMap mana yang dihitung sebagai jalan kendaraan atau jalan kaki men
 
 ### Lokasi dipilih dengan mengukur cakupan peta
 
-Rencana awal saya adalah daftar pilihan tangan. Dua putaran tebakan hanya menghasilkan 10 lokasi yang bisa dipakai dari 49 tebakan, dan yang gagal pun tidak membuktikan apa-apa. Jadi saya menulis penyisir untuk 56 kota yang mengurutkan calon area berdasarkan seberapa banyak jalan setapak yang benar tercatat di peta. Penyisir ini menemukan 14 dari 33 lokasi akhir, termasuk lokasi pertama di Papua, Lombok, dan Kalimantan.
+Rencana awal saya adalah daftar pilihan tangan. Dua putaran tebakan hanya menghasilkan 10 lokasi yang layak dari 49 tebakan, dan yang gagal pun tidak membuktikan apa-apa. Jadi saya menulis penyisir untuk 56 kota yang mengurutkan calon area berdasarkan seberapa banyak jalan setapak yang benar tercatat di peta. Penyisir ini menemukan 14 dari 33 lokasi akhir, termasuk lokasi pertama di Papua, Lombok, dan Kalimantan.
 
 ### Aturan untuk cakupan yang menyesatkan
 
@@ -32,14 +32,14 @@ Jalan setapak di peta tidak bisa membedakan gang dari jalur taman. Calon terbaik
 
 ## Hasilnya
 
-Bentuk Kota sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris. Situs ini memuat 33 lokasi, masing-masing diukur sebagai dua jaringan dengan tiga pemetaan tag, dipilih dari 126 calon titik di 56 kota. Setiap lokasi menunjukkan seberapa lengkap gangnya terpetakan, dan lokasi yang datanya tipis diberi tanda, supaya data yang hilang tidak memalsukan temuan.
+Bentuk Kota sudah live dan terbuka untuk umum, dalam bahasa Indonesia dan Inggris. Situs ini memuat 33 lokasi, masing-masing diukur sebagai dua jaringan dengan tiga pemetaan tag, dipilih dari 126 calon titik yang disurvei di 56 kota; 22 dari calon itu ditolak dan tetap dipublikasikan, lengkap dengan alasannya, bukan dihapus. Setiap lokasi menunjukkan seberapa lengkap gangnya terpetakan, dan 9 dari 33 lokasi ditandai karena cakupannya tipis, supaya data peta yang hilang tidak memalsukan temuan.
 
-Batasan itu ikut menyentuh perbandingan utamanya. Semua calon perumahan berpagar datanya tipis, dengan cakupan 0,9–4,4%, sehingga perbandingan kampung dan perumahan bertumpu pada dua dari tiga lokasi perumahan yang terbaca. Halamannya menyebut angka itu. Situs tidak memanggil jaringan sama sekali setelah dimuat. Saya membangunnya dalam delapan hari pada Agustus 2026.
+Batasan itu ikut menyentuh perbandingan utamanya. Semua calon perumahan berpagar datanya tipis, dengan cakupan 0,9–4,4%, sehingga perbandingan kampung dan perumahan bertumpu pada dua dari tiga lokasi perumahan yang terbaca. Halamannya menyebut angka itu. Situs tidak memanggil jaringan sama sekali setelah dimuat. Saya membangun versi pertamanya dalam delapan hari pada Agustus 2026, lalu terus mengerjakannya sampai akhir September.
 
 ## Di balik layar
 
 - Metode: entropi orientasi Boeing (2019) pada histogram arah 36 bin ("mawar"), indikator keteraturan orientasi φ, sampel circuity, statistik derajat simpul, dan cakupan footway. Penerapan ganda kendaraan/jalan kaki adalah gagasan saya.
-- Inti pengukuran di `lib/morphology/` (~2.100 baris) berupa TypeScript murni: tanpa DOM, tanpa React, tanpa jam, tanpa jaringan.
+- Inti pengukuran di `lib/morphology/` (1.029 baris) berupa TypeScript murni: tanpa DOM, tanpa React, tanpa jam, tanpa jaringan.
 - Tes sintetis: kisi sempurna, kisi diputar 29°, graf acak, pohon murni. Invarian dicek di setiap histogram: simetri 180°, circuity ≥ 1, proporsi derajat berjumlah 1.
 - Pemetaan tag OSM ada di satu modul dengan 3 pilihan yang bisa diganti; sensitivitasnya dilaporkan di `/asumsi`. Metode, batasan, dan atribusi ODbL ada di `/metode`.
 - Aturan cakupan: porsi taman di atas 25% tidak dihitung sebagai kawasan kota; `landuse=grass` diambil lalu diabaikan karena pemeta memakainya untuk jalur hijau di tepi jalan.
@@ -47,6 +47,6 @@ Batasan itu ikut menyentuh perbandingan utamanya. Semua calon perumahan berpagar
 - Static export Next.js 14 di GitHub Pages. Empat dependensi runtime (Next.js, React, React DOM, Zod). Kartu, pengurutan, mode kepadatan, dan sorotan antarkartu dirender di server sebagai HTML dan CSS dengan state di URL; satu-satunya komponen klien adalah helper kecil untuk navigasi.
 - Halaman lempeng berukuran ~4,7 MB HTML, ~59% di antaranya flight payload App Router. Tanda penggaris dipangkas dari 165 menjadi 66 byte; sisanya adalah tabel data tersembunyi untuk pembaca layar.
 - Rasio kontras dan skala huruf dihitung ulang oleh unit test dari nilai hex-nya (`palette.test.ts`, `type-scale.test.ts`). Satu tes khusus menjaga agar penggaris distribusi tidak terbaca sebagai peringkat.
-- 577 tes di 14 file. Suite sintetis, invarian, dan validasi data, ditambah audit aksesibilitas, menjadi gerbang setiap deploy.
-- Dwibahasa (id/en), bisa dipasang sebagai PWA, semua milestone M0–M6 selesai. Commit `5c89a8d` dibuat khusus untuk mengoreksi satu kalimat yang sudah tidak sesuai data.
-- Sekitar 11.000 baris TypeScript, 93 commit dalam delapan hari (20–27 Agustus 2026).
+- 585 tes di 16 file. Suite sintetis, invarian, dan validasi data, ditambah audit aksesibilitas, menjadi gerbang setiap deploy.
+- Dwibahasa (id/en), bisa dipasang sebagai PWA, semua milestone M0–M6 selesai.
+- Sekitar 13.840 baris TypeScript, 101 commit antara 20 Agustus dan 27 September 2026.

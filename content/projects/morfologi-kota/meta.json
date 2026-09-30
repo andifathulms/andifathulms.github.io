@@ -30,7 +30,7 @@
   ],
   "status": "active",
   "role": "Solo Developer",
-  "timeframe": "Aug 2026",
+  "timeframe": "Aug – Sep 2026",
   "liveUrl": "https://andifathulms.github.io/morfologi-kota/id/lempeng/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/morfologi-kota",
@@ -43,12 +43,12 @@
       "label": "sites, each measured by car and on foot"
     },
     {
-      "value": "126",
-      "label": "candidate centres surveyed across 56 cities"
+      "value": "9",
+      "label": "sites flagged for thin footway coverage"
     },
     {
-      "value": "3",
-      "label": "tag mappings readers can switch between"
+      "value": "22",
+      "label": "rejected candidates published with their reason"
     },
     {
       "value": "0",
@@ -73,17 +73,21 @@
         "label": "lokasi, diukur dengan mobil dan jalan kaki"
       },
       {
-        "value": "126",
-        "label": "calon titik disurvei di 56 kota"
+        "value": "9",
+        "label": "lokasi ditandai karena cakupan gang tipis"
       },
       {
-        "value": "3",
-        "label": "pemetaan tag yang bisa diganti pembaca"
+        "value": "22",
+        "label": "calon lokasi ditolak, disertai alasannya"
       },
       {
         "value": "0",
         "label": "panggilan jaringan saat runtime"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }
