@@ -19,17 +19,21 @@
   ],
   "problemShape": "explainer",
   "techStack": [
-    "React",
     "TypeScript",
+    "React",
     "Vite",
-    "Vitest",
     "Canvas",
-    "SVG"
+    "SVG",
+    "Vitest",
+    "ESLint",
+    "Web Worker",
+    "GitHub Actions",
+    "GitHub Pages"
   ],
   "status": "active",
   "role": "Solo Developer",
   "timeframe": "Sep 2026",
-  "liveUrl": "https://andifathulms.github.io/mixed-traffic-simulator/?s=phantom-jam&x=4&tab=inspector",
+  "liveUrl": "https://andifathulms.github.io/mixed-traffic-simulator/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/mixed-traffic-simulator",
   "heroImage": "/images/projects/mixed-traffic-simulator/hero.webp",
@@ -49,8 +53,8 @@
       "label": "measured speed of a phantom traffic jam"
     },
     {
-      "value": "3",
-      "label": "lateral movement models, always named on screen"
+      "value": "+16 to −30",
+      "label": "spread between methods, against one flat truth"
     }
   ],
   "id": {
@@ -79,9 +83,13 @@
         "label": "kecepatan terukur kemacetan hantu"
       },
       {
-        "value": "3",
-        "label": "model gerak menyamping, selalu disebut di layar"
+        "value": "+16 sampai −30",
+        "label": "selisih antar metode, padahal kebenarannya datar"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }

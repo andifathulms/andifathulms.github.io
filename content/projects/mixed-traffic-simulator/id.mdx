@@ -30,7 +30,7 @@ Saat estimator menghasilkan faktor sepeda motor yang negatif, saya menggambarnya
 
 ## Hasilnya
 
-Simulator ini sudah live dan terbuka untuk umum. Skenario phantom jam menempatkan 22 kendaraan di jalan melingkar 230 meter tanpa penyempitan. Kemacetan tetap terbentuk hanya dari jeda reaksi dan merambat ke belakang, terukur di aplikasi pada −8,6 km/jam, mereproduksi eksperimen yang sudah dipublikasikan. Bangku ekuivalensi memplot lima metode terhadap porsi sepeda motor. Kebenaran lapangan nyaris datar, sementara metode regresi dan kecepatan berayun dari +16 sampai −30 dan mereproduksi −0,11 pada agregasi lebar. Sebuah inspektor menampilkan hitungan mengemudi secara langsung untuk kendaraan mana pun yang dipilih. Saya membangunnya sendiri dalam dua hari pada September 2026.
+Simulator ini sudah live dan terbuka untuk umum. Skenario phantom jam menempatkan 22 kendaraan di jalan melingkar 230 meter tanpa penyempitan. Kemacetan tetap terbentuk hanya dari jeda reaksi dan merambat ke belakang, terukur di aplikasi pada −8,6 km/jam, mereproduksi eksperimen yang sudah dipublikasikan. Bangku ekuivalensi memplot lima metode terhadap porsi sepeda motor. Kebenaran lapangan nyaris datar, sementara metode regresi dan kecepatan berayun dari +16 sampai −30 dan mereproduksi −0,11 pada agregasi lebar. Sebuah inspektor menampilkan hitungan mengemudi secara langsung untuk kendaraan mana pun yang dipilih. Saya membangun versi pertamanya sendiri dalam dua hari pada September 2026, lalu terus mengerjakannya sepanjang sisa bulan itu untuk desain ulang, perbaikan aksesibilitas, serta dukungan mobile dan keyboard.
 
 Aplikasi ini menyatakan dengan jelas bahwa ia bukan model terkalibrasi untuk ruas jalan tertentu dan bukan pengganti perangkat lunak lalu lintas profesional. Tugasnya menunjukkan sebuah asumsi yang gagal.
 
@@ -46,5 +46,5 @@ Aplikasi ini menyatakan dengan jelas bahwa ia bukan model terkalibrasi untuk rua
 - Simulasi interaktif tetap di main thread pada 400 kendaraan; sweep batch berjalan di Web Worker yang bisa dibatalkan. Lintasan bisa diekspor ke CSV.
 - Enam skenario (phantom jam, koridor, penyempitan, simpang bersinyal, angkot, bench), empat kelas kendaraan (MC, LV, HV, PU), dan toggle Ruang Henti Khusus dengan plot discharge untuk arus jenuh dan headway.
 - Kecepatan ditampilkan lewat kecerahan dan jenis kendaraan lewat bentuk; warna hanya untuk kelima estimator. Peregangan sumbu melintang di tampilan jalan dibatasi dan dicetak di pojok.
-- Empat dependensi runtime: React 18.3, React DOM, dan dua paket font Overpass. Tanpa library fisika, grafik, simulasi, atau state. Sekitar 78 KB JS dan 7 KB CSS gzip dari anggaran 300 KB.
-- 129 tes di 11 suite. Engine di `src/sim/` sepanjang 2.635 baris, murni dan headless. Sekitar 11.700 baris di `src/` dan 38 commit pada 2–3 September 2026.
+- Empat dependensi runtime: React 18.3, React DOM, dan dua paket font Overpass. Tanpa library fisika, grafik, simulasi, atau state. Sekitar 91 KB JS utama gzip ditambah chunk baked-sweep 7 KB, dan CSS 9,5 KB gzip, dari anggaran 300 KB; chunk sweep-worker dimuat belakangan dan tidak termasuk dalam angka itu.
+- 170 tes di 15 file. Engine di `src/sim/` sepanjang 4.915 baris, murni dan headless; modul estimator terpisah sepanjang 759 baris. Sekitar 15.500 baris di `src/` dan 67 commit antara 2 dan 28 September 2026.

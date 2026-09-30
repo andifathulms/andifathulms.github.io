@@ -30,7 +30,7 @@ When an estimator returns a negative motorcycle factor, I plot it below the axis
 
 ## Result
 
-The simulator is live and public. The phantom-jam scenario puts 22 vehicles on a 230-metre ring with no bottleneck. A jam still forms from reaction delays alone and travels backward, measured in the app at −8.6 km/h, reproducing a published experiment. The equivalence bench plots five methods against motorcycle share. Ground truth stays nearly flat, while the regression and speed methods swing from +16 to −30 and reproduce the published −0.11 at wide aggregation. An inspector shows the live driving arithmetic of any vehicle you select. I built it alone over two days in September 2026.
+The simulator is live and public. The phantom-jam scenario puts 22 vehicles on a 230-metre ring with no bottleneck. A jam still forms from reaction delays alone and travels backward, measured in the app at −8.6 km/h, reproducing a published experiment. The equivalence bench plots five methods against the motorcycle proportion in traffic. Ground truth stays nearly flat, while the regression and speed methods swing from +16 to −30 and reproduce the published −0.11 at wide aggregation. An inspector shows the live driving arithmetic of any vehicle you select. I built the first version alone over two days in September 2026, then kept working through the rest of the month on a redesign, an accessibility pass, and mobile and keyboard support.
 
 The app states plainly that it is not a calibrated model of any specific road and not a replacement for professional traffic software. Its job is to show an assumption failing.
 
@@ -46,5 +46,5 @@ The app states plainly that it is not a calibrated model of any specific road an
 - Interactive simulation stays on the main thread at 400 vehicles; batch sweeps run in a cancellable Web Worker. Trajectories export as CSV.
 - Six scenarios (phantom jam, corridor, bottleneck, signalised, angkot, bench), four vehicle classes (MC, LV, HV, PU) and a Ruang Henti Khusus toggle with a discharge plot for saturation flow and headway.
 - Speed is luminance and vehicle type is shape; hue is reserved for the five estimators. The road view's across-road stretch is capped and printed in the corner.
-- Four runtime dependencies: React 18.3, React DOM and two Overpass font packages. No physics, chart, simulation or state library. About 78 KB JS and 7 KB CSS gzipped against a 300 KB budget.
-- 129 tests across 11 suites. The engine in `src/sim/` is 2,635 lines, pure and headless. About 11,700 lines in `src/` and 38 commits on 2–3 September 2026.
+- Four runtime dependencies: React 18.3, React DOM and two Overpass font packages. No physics, chart, simulation or state library. About 91 KB of main JS gzipped plus a 7 KB baked-sweep chunk, and 9.5 KB CSS gzipped, against a 300 KB budget; the sweep-worker chunk loads lazily and isn't counted in that figure.
+- 170 tests across 15 files. The engine in `src/sim/` is 4,915 lines, pure and headless; the estimator module is a separate 759 lines. About 15,500 lines in `src/` and 67 commits between 2 and 28 September 2026.
