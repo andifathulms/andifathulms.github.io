@@ -16,30 +16,35 @@ Saya memisahkan perhitungan dosis dari antarmuka. Mesin hitungnya menerima input
 
 Setelah menghitung dosis, aplikasi menyarankan pecahan tablet atau volume sirup yang perlu diberikan, berdasarkan sediaan yang dijual di apotek Indonesia. Tablet dibulatkan ke pecahan yang bisa dipotong: ¼, ½, ¾, 1, 1½, dan 2. Aplikasi menampilkan dosis yang akhirnya diberikan di samping dosis target, jadi dokter bisa melihat selisih pembulatannya. Tab Puyer melakukan hal yang sama untuk obat racikan. Tab ini menghitung setiap obat dalam satu racikan, lalu mencetak kartu resep gabungan lengkap dengan jumlah tablet dan signa.
 
-### Katalognya tumbuh dari 8 obat menjadi 92
+### Satu obat bisa punya lebih dari satu dosis
 
-Spesifikasi awalnya hanya berisi 8 obat contoh. Kini katalognya memuat 92 obat dalam 16 kategori. Setiap obat punya rentang dosis, batas maksimum, konsentrasi sediaan, dan rujukan dosis seperti IDAI, BNFc, WHO, atau Fornas. Saya memecah katalog menjadi tujuh modul dan memisahkan informasi rujukan dari data untuk perhitungan. Efek samping, kontraindikasi, dan ukuran kemasan bisa terus ditambah tanpa menyentuh hitungannya. Panel "Detail Obat" yang bisa dibuka-tutup menampilkannya saat diketuk.
+Katalognya semula memodelkan satu dosis per obat. Itu berantakan begitu diazepam butuh satu dosis lewat IV untuk kejang dan dosis berbeda lewat mulut untuk kecemasan, dan begitu dosis dewasa ditaruh berdampingan dengan angka pediatrik obat yang sama. Saya memisahkan "obat" dari "dosis": setiap obat kini punya satu atau lebih regimen, satu per rute, indikasi, dan populasi, sementara setiap dosis yang sudah ada tetap persis seperti semula, sehingga perhitungan lama tetap memakai angka yang sama. Katalognya ikut tumbuh seiring perubahan ini, dari 8 obat contoh awal menjadi 127, kini disusun dalam 9 kelompok klinis, bukan 17 kategori datar seperti sebelumnya.
 
-### Empat kalkulator untuk empat keperluan
+### Obat yang belum diverifikasi menunggu di gerbang tinjauan
 
-Preset memakai katalog. Kustom memungkinkan dokter menyimpan obatnya sendiri dan memakainya lagi. Puyer untuk obat racikan. Infus menghitung laju tetesan dalam mililiter per jam dan tetes per menit, dengan mesin hitung sendiri dan empat satuan dosis. Penaksir berat badan memakai rumus pediatrik APLS dan Luscombe-Owens, dan hasilnya diberi label sebagai perkiraan.
+Obat, rute, dan dosis baru muncul lebih cepat daripada yang bisa saya verifikasi ulang sendiri ke sumbernya. Saya membuat status tinjauan terpisah. Entri baru dimulai sebagai draf dengan sumbernya dicantumkan dan tidak terlihat di luar mode tinjauan, ditandai belum diverifikasi di mana pun ia seharusnya tampil. Hanya saya yang bisa memindahkannya ke katalog yang sudah ditinjau. Per commit terakhir, daftar drafnya kosong, artinya daftar obat saat ini sudah melewati pemeriksaan itu.
 
-### Dokter bisa mengubah dosis preset dan melihat bahwa itu berubah
+### Navigasi mengikuti tugas klinis yang sedang dihadapi
 
-Rencana awalnya memakai dosis preset apa adanya. Kenyataannya, dokter kadang butuh dosis per kilogram yang berbeda, masih dalam rentang yang aman. Saat dosis preset diubah, muncul penanda kuning dan tombol reset. Versi pertama saya belum meneruskan dosis yang diubah ke perhitungan, dan saya langsung memperbaikinya.
+Aplikasi ini semula terdiri dari empat tab: Preset, Custom, Puyer, Infus. Itu cocok dengan empat mesin hitungnya, bukan dengan cara dokter berpikir sebenarnya di samping pasien, yang lebih dekat ke "apa yang saya butuhkan untuk keadaan darurat ini" daripada "kalkulator mana yang harus saya buka". Saya mengganti tab-tab itu dengan tujuan berbasis tugas: Obat, Darurat, Puyer, Cairan, dan Riwayat, dengan satu bilah berat pasien yang dipakai bersama di semuanya.
 
 ## Hasilnya
 
-DoseRx sudah live di GitHub Pages dan bisa dipasang di layar utama ponsel. Setelah dimuat, aplikasinya jalan tanpa internet. Obat yang baru dipakai dan yang diberi bintang muncul paling atas, jadi daftar 92 obat tetap cepat dipakai dengan satu tangan. Setiap perhitungan tersimpan di browser, lengkap dengan catatan opsional. Spesifikasi awalnya berisi 8 obat dan tiga panel. Dalam sekitar tiga setengah minggu di bulan Juni dan Juli 2026, saya membangun empat kalkulator, laci riwayat, dan katalog lengkapnya. Aplikasi menyatakan bahwa ini alat bantu hitung dan bukan sistem pendukung keputusan klinis. Pernyataan itu selalu terlihat.
+DoseRx sudah live di GitHub Pages dan bisa dipasang di layar utama ponsel, dan jalan tanpa internet setelah dimuat. Obat yang baru dibuka dan yang diberi bintang muncul paling atas, membuat katalog 127 obat tetap cepat dicari dengan satu tangan, dan setiap perhitungan tersimpan di browser lengkap dengan catatan opsional. Spesifikasi awalnya berisi 8 obat dan tiga panel, dibangun dalam sekitar tiga setengah minggu di bulan Juni dan Juli 2026. Saya terus mengerjakannya sampai September untuk tahap kedua yang mengganti struktur tab dengan navigasi berbasis tugas, menambahkan alur tinjauan untuk obat yang belum diverifikasi, dan membesarkan katalognya ke ukuran sekarang. Aplikasi menyatakan dengan jelas bahwa ini alat bantu hitung, bukan sistem pendukung keputusan klinis.
 
 ## Di balik layar
 
-- React 18 dan TypeScript di Vite, dengan `vite-plugin-pwa`. CSS biasa. Tanpa library UI, state, atau router.
-- `src/lib/calculate.ts` tidak berisi kode DOM atau React dan mengembalikan `CalcResult | CalcError`. UI harus mengecek `result.valid` sebelum membaca angka apa pun, jadi bug tampilan NaN dan Infinity hilang secara struktural. `calculate.test.ts` di Vitest mencakup dosis normal, batas harian dan sekali pemberian, konsentrasi yang kosong, dan input tidak valid.
-- `calculateInfusion.ts` mendukung mcg/kg/menit, mcg/kg/jam, mg/kg/jam, dan unit/kg/jam, dan menghasilkan laju pompa dalam mL/jam serta laju tetes makro dan mikro. Mesin ini hanya berbagi pola validasi input dengan mesin utama.
+- React 18 dan TypeScript di Vite, dengan `vite-plugin-pwa`. CSS biasa. Tanpa library UI, state, atau router; routing memakai router kecil buatan sendiri, bukan react-router.
+- `src/lib/calculate.ts` tidak berisi kode DOM atau React dan mengembalikan `CalcResult | CalcError`. UI harus mengecek `result.valid` sebelum membaca angka apa pun, jadi bug tampilan NaN dan Infinity hilang secara struktural. Pola yang sama dipakai `calculateInfusion.ts`, `calculateElectrolyte.ts`, `calculateFluidRate.ts`, dan `calculateDextrose.ts`. `calculate.test.ts` di Vitest mencakup dosis normal, batas harian dan sekali pemberian, konsentrasi yang kosong, dan input tidak valid.
+- `calculateInfusion.ts` mendukung mcg/kg/menit, mcg/kg/jam, mg/kg/jam, dan unit/kg/jam, dan menghasilkan laju pompa dalam mL/jam serta laju tetes makro dan mikro. `estimateWeight.ts` memakai rumus pediatrik APLS dan Luscombe-Owens, diberi label sebagai perkiraan di mana pun ditampilkan.
 - `suggest.ts` membulatkan dosis ke array `SOLID_FRACTIONS`.
-- Katalog ada di tujuh modul (analgesics, anti-infectives, antiparasitics, cardiorespiratory, emergency, gastro-allergy, steroids-nutrition) di balik barrel `index.ts`. Tipe `DrugPreset` memisahkan field perhitungan dari metadata yang hanya untuk tampilan.
-- Pilihan input dosis per kali atau per hari disimpan dan dipakai di tab Preset maupun Puyer.
+- `catalog.ts` menumpuk `CatalogDrug`/`Regimen` di atas data preset dan infus yang sudah ada tanpa menulis ulang, jadi setiap regimen tetap memegang objek asli yang dipakai tes-tesnya. Katalognya mencakup 164 regimen dosis di 127 obatnya.
+- Obat baru masuk ke `drafts.ts` dengan `status: 'draft'` dan sumber yang dikutip; seorang klinisi menerbitkannya ke berkas domain dengan `status: 'verified'` dan nama peninjau agar tampil — perubahan kode, bukan sekadar sakelar data.
+- Katalog ada di tujuh modul domain (analgesics, anti-infectives, antiparasitics, cardiorespiratory, emergency, gastro-allergy, steroids-nutrition) ditambah `requested.ts` (daftar permintaan bangsal) dan `drafts.ts`, di balik barrel `index.ts`. Tipe `DrugPreset` memisahkan field perhitungan dari metadata yang hanya untuk tampilan.
+- Metadata halaman (judul, deskripsi, tag OG/Twitter, manifest PWA, sitemap) semuanya dihasilkan dari satu sumber data `site.ts`/`routes.ts` saat build, setelah manifest dan deskripsi halaman pernah tidak sinkron satu kali.
+- Proses build menjalankan typecheck, build Vite untuk klien, build Vite SSR untuk entry point, lalu skrip prerender Node yang mengembangkan setiap route, termasuk satu per obat, menjadi HTML statis untuk GitHub Pages.
+- Pilihan input dosis per kali atau per hari disimpan dan dipakai di seluruh aplikasi. Saat dosis preset diubah dalam rentang yang sah, muncul penanda kuning dan tombol reset.
 - Riwayat disimpan lewat `storage.ts`, pembungkus bertipe dan satu-satunya kode yang menyentuh `localStorage` secara langsung. Preset kustom, obat terakhir, dan favorit juga disimpan di perangkat, dengan kunci id obat yang stabil.
-- Perbaikan mode gelap dan aksesibilitas menambahkan palet teal medis.
-- GitHub Actions melakukan deploy ke GitHub Pages. Sekitar 5.000 baris TypeScript, 39 commit dari 20 Juni sampai 13 Juli 2026.
+- Perbaikan mode gelap dan aksesibilitas menambahkan palet teal medis, didokumentasikan sebagai token desain "Ward Day / Ward Night".
+- 165 tes di 20 berkas mencakup mesin hitung, integritas katalog, pencarian, pencocokan route, saran dosis kemasan, penandaan posisi dosis, token gaya, dan tes asap yang merender setiap halaman obat.
+- GitHub Actions melakukan deploy ke GitHub Pages. Sekitar 15.400 baris TypeScript, 134 commit antara 20 Juni dan 27 September 2026.

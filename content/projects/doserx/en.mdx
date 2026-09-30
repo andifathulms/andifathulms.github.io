@@ -16,30 +16,35 @@ I kept the dose calculation separate from the interface. It takes typed inputs, 
 
 After calculating a dose, the app suggests the tablet fraction or syrup volume to give, using preparations sold in Indonesian pharmacies. Tablets snap to fractions a person can cut: ¼, ½, ¾, 1, 1½ and 2. The app shows the dose actually delivered next to the target, so the doctor sees any rounding. The Puyer tab does the same for compounded powders. It calculates each drug in a batch and prints a combined recipe card with tablet counts and signa.
 
-### The catalog grew from 8 drugs to 92
+### Every drug can carry more than one dose
 
-The spec started with 8 seed drugs. The catalog now has 92 across 16 categories. Each has a dose range, maximum caps, stock concentration and a dosing reference such as IDAI, BNFc, WHO or Fornas. I split the catalog into seven modules and kept reference details apart from the calculation fields. Side effects, contraindications and pack sizes can grow without touching the maths. A collapsible "Detail Obat" panel shows them when tapped.
+The catalog first modelled one dose per drug. That broke once diazepam needed one dose by IV for a seizure and a different dose by mouth for anxiety, and once adult dosing sat next to a drug's paediatric numbers. I split "drug" from "dose": each drug now holds one or more regimens, one per route, indication and population, while every existing dose stayed exactly as it was, so past calculations still compute from the same numbers. The catalog has grown alongside this, from the original 8 seed drugs to 127, now organised into 9 clinical groups instead of the earlier 17 flat categories.
 
-### Four calculators for four jobs
+### Unverified drugs wait behind a review gate
 
-Preset uses the catalog. Kustom lets the doctor save their own drugs and reuse them. Puyer handles compounded powders. Infus calculates IV drip rates in millilitres per hour and drops per minute, with its own engine and four dose units. A weight estimator uses the APLS and Luscombe-Owens paediatric formulas and labels its answer as an estimate.
+New drugs, routes and doses arrive faster than I can personally re-verify each one against a source. I built a separate review state instead. A new entry starts as a draft with its source cited and stays invisible outside review mode, marked as unverified everywhere it would otherwise show. Only I can move it into the reviewed catalog. As of the most recent commit, the draft list is empty, meaning the current drug list has been through that check.
 
-### The doctor can adjust a preset and see that it changed
+### Navigation follows the clinical task at hand
 
-The first plan used preset doses as they were. In practice a doctor sometimes needs a different dose per kilogram within the valid range. When a preset dose changes, an amber marker and a reset button appear. My first version didn't pass the changed dose into the calculation, and I fixed that right after.
+The app began with four tabs: Preset, Custom, Puyer, Infus. That matched the four calculation engines, not how a doctor actually thinks at the bedside, closer to what an emergency needs than which calculator to open. I replaced the tabs with task-based destinations instead: Obat, Darurat, Puyer, Cairan and Riwayat, with one shared patient-weight bar carried across all of them.
 
 ## Result
 
-DoseRx is live on GitHub Pages and installs to a phone's home screen. It works offline once loaded. Recent and starred drugs sit at the top of the picker, so the 92-drug list stays quick to use with one hand. Every calculation is saved in the browser with an optional note. The original spec had 8 drugs and three panels. Over about three and a half weeks in June and July 2026, I built four calculators, a history drawer and the full catalog. The app states that it is a calculation aid and not clinical decision support. That notice stays visible.
+DoseRx is live on GitHub Pages and installs to a phone's home screen, working offline once loaded. Recent and starred drugs sit at the top of the picker, keeping the 127-drug catalog fast to search with one hand, and every calculation is saved in the browser with an optional note. The original spec had 8 drugs and three panels, built over about three and a half weeks in June and July 2026. I kept returning to it through September for a second pass that replaced the tab structure with task-based navigation, added the review workflow for unverified drugs, and grew the catalog to its current size. The app states plainly that it is a calculation aid, not clinical decision support.
 
 ## Under the hood
 
-- React 18 and TypeScript on Vite, with `vite-plugin-pwa`. Plain CSS. No UI, state or router library.
-- `src/lib/calculate.ts` has no DOM or React code and returns `CalcResult | CalcError`. The UI branches on `result.valid` before reading any number, which removes the NaN and Infinity display bugs by construction. `calculate.test.ts` in Vitest covers normal doses, daily and single caps, missing concentration and invalid input.
-- `calculateInfusion.ts` supports mcg/kg/min, mcg/kg/hr, mg/kg/hr and unit/kg/hr, and outputs a pump rate in mL/hr plus macro and micro drip rates. It shares only the input-validation pattern with the main engine.
+- React 18 and TypeScript on Vite, with `vite-plugin-pwa`. Plain CSS. No UI, state or router library; routing is a small custom router rather than react-router.
+- `src/lib/calculate.ts` has no DOM or React code and returns `CalcResult | CalcError`. The UI branches on `result.valid` before reading any number, which removes the NaN and Infinity display bugs by construction. The same pattern covers `calculateInfusion.ts`, `calculateElectrolyte.ts`, `calculateFluidRate.ts` and `calculateDextrose.ts`. `calculate.test.ts` in Vitest covers normal doses, daily and single caps, missing concentration and invalid input.
+- `calculateInfusion.ts` supports mcg/kg/min, mcg/kg/hr, mg/kg/hr and unit/kg/hr, and outputs a pump rate in mL/hr plus macro and micro drip rates. `estimateWeight.ts` implements the APLS and Luscombe-Owens paediatric weight-from-age formulas, labelled as an estimate wherever it's shown.
 - `suggest.ts` snaps doses to a `SOLID_FRACTIONS` array.
-- The catalog lives in seven modules (analgesics, anti-infectives, antiparasitics, cardiorespiratory, emergency, gastro-allergy, steroids-nutrition) behind a barrel `index.ts`. The `DrugPreset` type separates calculation fields from display-only metadata.
-- A per-dose / per-day entry toggle is saved and applied in both Preset and Puyer.
+- `catalog.ts` layers `CatalogDrug`/`Regimen` on top of the existing preset and infusion data without rewriting it, so every regimen still holds the original object the tests were written against. The catalog spans 164 dosing regimens across its 127 drugs.
+- New drugs enter `drafts.ts` with `status: 'draft'` and a cited source; a clinician republishes one into a domain file with `status: 'verified'` and a reviewer name to make it live — a code change, not a data toggle.
+- The catalog lives in seven domain modules (analgesics, anti-infectives, antiparasitics, cardiorespiratory, emergency, gastro-allergy, steroids-nutrition) plus `requested.ts` (the ward-requested list) and `drafts.ts`, behind a barrel `index.ts`. The `DrugPreset` type separates calculation fields from display-only metadata.
+- Page metadata (title, description, OG/Twitter tags, the PWA manifest, sitemap) all generate from one `site.ts`/`routes.ts` data source at build time, after the manifest and page description had drifted out of sync once.
+- The build runs a typecheck, a client Vite build, an SSR Vite build of the entry point, then a Node prerender script that expands every route, including one per drug, into static HTML for GitHub Pages.
+- A per-dose / per-day entry toggle is saved and applied across the app. When a preset dose is edited within its valid range, an amber marker and reset button appear.
 - History goes through `storage.ts`, a typed wrapper and the only code that touches `localStorage` directly. Custom presets, recents and favourites are also saved locally, keyed by a stable drug id.
-- A dark-mode and accessibility pass added a medical-teal palette.
-- GitHub Actions deploys to GitHub Pages. About 5,000 lines of TypeScript, 39 commits from 20 June to 13 July 2026.
+- A dark-mode and accessibility pass added a medical-teal palette, documented as "Ward Day / Ward Night" design tokens.
+- 165 tests across 20 files cover the calculation engines, catalog integrity, search, route matching, pack-dose suggestion, dose-position banding, style tokens, and a smoke test that renders every drug page.
+- GitHub Actions deploys to GitHub Pages. About 15,400 lines of TypeScript, 134 commits between 20 June and 27 September 2026.

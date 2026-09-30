@@ -1,10 +1,10 @@
 {
   "slug": "doserx",
   "title": "DoseRx",
-  "tagline": "A bedside dose calculator for 92 drugs that rounds each dose to tablets and syrups Indonesian pharmacies sell",
+  "tagline": "A bedside dose calculator for 127 drugs that rounds each dose to tablets and syrups Indonesian pharmacies sell",
   "glance": {
     "for": "A practising doctor, on a phone at the bedside and on desktop",
-    "result": "Live, installable and offline, with 92 drugs and four calculators"
+    "result": "Live, installable and offline, with 127 drugs across five clinical tasks"
   },
   "skills": [
     "Healthcare software",
@@ -22,30 +22,28 @@
     "React",
     "TypeScript",
     "Vite",
-    "PWA",
-    "GitHub Actions"
+    "Vitest",
+    "vite-plugin-pwa",
+    "GitHub Actions",
+    "GitHub Pages"
   ],
   "status": "active",
-  "role": "Developer",
-  "timeframe": "Jun – Jul 2026",
+  "role": "Solo Developer",
+  "timeframe": "Jun – Sep 2026",
   "liveUrl": "https://andifathulms.github.io/doserx/",
   "access": "public",
-  "githubUrl": null,
+  "githubUrl": "https://github.com/andifathulms/doserx",
   "heroImage": "/images/projects/doserx/hero.webp",
   "order": 8,
   "featured": true,
   "metrics": [
     {
-      "value": "92",
+      "value": "127",
       "label": "drugs, each with dose range and caps"
     },
     {
-      "value": "16",
-      "label": "therapeutic drug categories"
-    },
-    {
-      "value": "4",
-      "label": "calculators: preset, custom, powder, infusion"
+      "value": "9",
+      "label": "clinical groups organizing the drug catalog"
     },
     {
       "value": "¼",
@@ -53,10 +51,10 @@
     }
   ],
   "id": {
-    "tagline": "Kalkulator dosis untuk 92 obat yang membulatkan dosis ke tablet dan sirup yang dijual apotek Indonesia",
+    "tagline": "Kalkulator dosis untuk 127 obat yang membulatkan dosis ke tablet dan sirup yang dijual apotek Indonesia",
     "glance": {
       "for": "Dokter praktik, lewat ponsel di samping pasien dan desktop",
-      "result": "Live, bisa dipasang, dan jalan offline, dengan 92 obat dan empat kalkulator"
+      "result": "Live, bisa dipasang, dan jalan offline, dengan 127 obat di lima tugas klinis"
     },
     "skills": [
       "Perangkat lunak kesehatan",
@@ -66,21 +64,21 @@
     ],
     "metrics": [
       {
-        "value": "92",
+        "value": "127",
         "label": "obat, lengkap dengan rentang dan batas dosis"
       },
       {
-        "value": "16",
-        "label": "kategori terapi obat"
-      },
-      {
-        "value": "4",
-        "label": "kalkulator: preset, kustom, puyer, infus"
+        "value": "9",
+        "label": "kelompok klinis yang menyusun katalog obat"
       },
       {
         "value": "¼",
         "label": "pecahan tablet terkecil yang disarankan"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }
