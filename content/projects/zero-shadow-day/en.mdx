@@ -26,11 +26,11 @@ I checked the app against 76 dates from BMKG's official tables for 2025 and 2026
 
 ### The shadow is the readout
 
-The main view is an animated 3D stick and shadow for any place and date. The shadow's length and direction are the numbers, not a picture beside them. I built the 3D scene by hand to keep the whole app at about 110 KB of JavaScript, under a 150 KB budget. A general 3D engine would have used the whole budget on its own.
+The main view is an animated 3D stick and shadow for any place and date. The shadow's length and direction are the numbers, not a picture beside them. I built the 3D scene by hand to keep the whole app at about 110 KB of JavaScript, under a 150 KB budget. A general 3D engine would have taken the whole budget on its own.
 
 ## Result
 
-Zero Shadow Day is live in Indonesian and English as a static site. Your coordinates stay in the browser, and the app makes no network requests. It shows your two dates with the sun's highest moment to the second, and explains the gap between clock noon and sun noon. It draws shadow-tip curves and the figure-eight analemma. Eratosthenes mode finds a measurement partner elsewhere in the archipelago and shows your error against the true circumference, because the gap is the lesson. A sweep animates the overhead sun across the islands through the year. Any view can be shared as a link, and dates export to a calendar file. I built it in two days in August 2026.
+Zero Shadow Day is live in Indonesian and English as a static site, with your coordinates staying in the browser and no network requests at all. It shows your two dates with the sun's highest moment to the second, draws shadow-tip curves and the figure-eight analemma, and sweeps the overhead sun across the islands through the year. Eratosthenes mode finds a measurement partner elsewhere in the archipelago and shows your error against the true circumference, because the gap is the lesson. Any view can be shared as a link, with dates exportable to a calendar file. I built the first version in two days in August 2026, then returned at the end of September for a further pass that redesigned the visuals.
 
 ## Under the hood
 
@@ -39,8 +39,8 @@ Zero Shadow Day is live in Indonesian and English as a static site. Your coordin
 - The numeric core uses Julian Day numbers only. `Date` and timezones live in one display module, `lib/clock`, since Indonesia has three zones and no DST.
 - Pekanbaru 2026: the app's rule picks the smaller noon-zenith residual, 0.111° on 22 March against 0.284° on 21 March. The four 2025 rows are Jayapura, Nabire, Wamena and Merauke. Their times are checked against two cities in the same zone and table, whose difference matches the change in the Equation of Time.
 - The 3D gnomon is a hand-rolled camera and perspective projection of about 450 lines, with the sky driven by solar altitude. No Three.js.
-- The PRD's flat "bleached concrete" palette gave way to a day/night sky and a full-day hero animation. Two rules stayed: vermilion only marks the zero-shadow day, and the shadow is the darkest tone on the page.
+- The PRD's flat "bleached concrete" palette (with a serif/sans/mono type trio) gave way to a day/night sky and a full-day hero animation, now set in Bricolage Grotesque, Plus Jakarta Sans and JetBrains Mono. Two rules stayed: vermilion only marks the zero-shadow day, and the shadow is the darkest tone on the page.
 - Accessibility pass: focus rings, error-to-field association, real headings, keyboard hints for canvas elements, toggle states and slider announcements. Contrast ratios are asserted in tests.
 - Performance pass: cached the per-year declination limits, pinned the variable font to the one weight used, and removed a city-data chunk shipped twice per route.
 - Next.js 14 static export on GitHub Pages, strict TypeScript, Tailwind, Vitest, pnpm, self-hosted fonts. CI runs `pnpm test:solar` first, then the full suite, typecheck and lint.
-- About 9,600 lines of TypeScript, 189 tests written before the UI (the README badge counts 210 at deploy time), 8 routes in 2 locales, 80 commits over 13 and 14 August 2026.
+- About 11,157 lines of TypeScript, 235 tests, 15 statically exported pages (7 routes in 2 locales, plus one root redirect), 91 commits between 13 August and 28 September 2026, with a long gap before a final pass in late September that added tests and redesigned the visuals.

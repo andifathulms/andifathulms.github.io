@@ -22,14 +22,14 @@
     "Next.js",
     "React",
     "TypeScript",
-    "WebGL",
     "Tailwind CSS",
-    "Vitest"
+    "Vitest",
+    "pnpm"
   ],
   "status": "active",
   "role": "Solo Developer",
-  "timeframe": "Aug 2026",
-  "liveUrl": "https://andifathulms.github.io/zero-shadow-day/en/",
+  "timeframe": "Aug – Sep 2026",
+  "liveUrl": "https://andifathulms.github.io/zero-shadow-day/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/zero-shadow-day",
   "heroImage": "/images/projects/zero-shadow-day/hero.webp",
@@ -41,12 +41,8 @@
       "label": "official BMKG dates matched exactly"
     },
     {
-      "value": "38",
-      "label": "provincial capitals checked against BMKG"
-    },
-    {
-      "value": "~110 KB",
-      "label": "of JavaScript, including a hand-built 3D scene"
+      "value": "86",
+      "label": "Indonesian cities with built-in coordinates"
     },
     {
       "value": "0",
@@ -71,17 +67,17 @@
         "label": "tanggal resmi BMKG yang cocok persis"
       },
       {
-        "value": "38",
-        "label": "ibu kota provinsi dicocokkan dengan BMKG"
-      },
-      {
-        "value": "~110 KB",
-        "label": "JavaScript, termasuk adegan 3D buatan sendiri"
+        "value": "86",
+        "label": "kota di Indonesia dengan koordinat bawaan"
       },
       {
         "value": "0",
         "label": "permintaan jaringan saat runtime"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }
