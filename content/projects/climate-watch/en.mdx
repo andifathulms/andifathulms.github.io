@@ -8,42 +8,44 @@ I built ClimateWatch for those readers: the curious public, students, journalist
 
 ## What I built
 
-### I used reanalysis data because ground stations are sparse
+### One pinned setting stops a fake warming trend
 
-Indonesia has few weather stations with long, unbroken records. So I used ERA5, a historical dataset rebuilt from satellites and weather models, served free through Open-Meteo. It gives gap-free daily data back to 1950 for any point on the map, whether a station stands there or not. One source covers all 75 cities the same way.
+Open-Meteo's archive quietly switches weather models partway through the record, and I found the switch alone added about 1.5°C to Jakarta's daily highs in a single year, enough to fake a warming trend that isn't in the data. I pin every request to one model family so the whole 1950-to-present record stays comparable. Indonesia has few weather stations with long, unbroken records anyway. That's why this reanalysis dataset was the right fit from the start: gap-free daily data for any point on the map, station or no station, for all 94 cities the same way.
 
 ### Every chart reads from a precomputed summary
 
-Seventy-five cities with daily data since 1950 add up to millions of rows. I roll them up into monthly and yearly summary tables ahead of time, in scheduled background jobs. A page load reads a small table and never adds up decades of rows on request. The daily data lives in a time-series database, split by date and indexed the way the pages ask for it: by city, then by date.
+Ninety-four cities with daily data since 1950 add up to millions of rows. I roll them up into monthly and yearly summary tables ahead of time, in scheduled background jobs. A page load reads a small table and never adds up decades of rows on request. The daily data lives in a time-series database, split by date and indexed the way the pages ask for it: by city, then by date.
 
 ### Missing measurements stay missing
 
-When the source has no value for a day, I store it as empty. I never turn it into zero. Zero millimetres of rain and "we don't know" are different facts, and gaps are common in the older years of the record. Counting a gap as zero would make an old year look drier than it was.
+When the source has no value for a day, I store it as empty. I never turn it into zero. Zero millimetres of rain and "we don't know" are different facts, and gaps are common in the older years of the record. A warning badge tells a reader when a city or month's coverage is too thin to trust.
 
-### The importer survives a throttled free API
+### A hot day means something different by region
 
-Open-Meteo needs no key, but it still slows down heavy users. Fetching 75 years for a city in one request wasn't reliable, so I split each history into 25-year windows. The importer backs off when the API says it's busy. A stopped run picks up where it left off and skips cities that already finished, which matters when a full load takes hours. For offline demos, one command generates clearly labelled synthetic data.
+The standard 35°C threshold for a "hot day" is a temperate-climate convention, dead across most of maritime Indonesia. A quarter of the loaded cities never once crossed it in 77 years, so their hot-day chart just rendered empty. I added a second, region-relative threshold, each city's own hottest 5% of days from its 1951-1980 baseline, and kept the fixed 35°C figure only for comparing across cities.
 
-### One grid shows a city's whole history
+### The same frontend runs two ways, live or static
 
-The Climate Fingerprint is a calendar heatmap: years down the side, months across, 75 years in one view. You can switch between rainfall, maximum temperature, hot days and dry days, and mark El Niño and La Niña years on top. I drew this one chart by hand and used a standard chart library for the rest. After release I caught a colour bug. On the dark background, zero rain was the brightest cell. Each variable now uses a single-hue scale where a bigger value always looks stronger.
+Open-Meteo has been known to stall or rate-limit requests coming from GitHub Actions, so importing data during a cloud build wasn't reliable, and a backend costs money to keep running continuously. The frontend now switches on one environment variable between calling the live Django API and reading a pre-baked JSON export. I run the import from a normal connection myself and commit the result, so the public deploy needs no server and no live call to Open-Meteo at all.
 
 ## Result
 
-ClimateWatch is live on GitHub Pages, and the code is public. It covers 75 Indonesian cities with daily data from 1950. Each city page counts heat days, heavy rain days and the longest heatwave per year, each with a trend line. It also estimates when the wet season started each year and shows whether that date is moving. You can compare two cities, see how El Niño and La Niña change a city's weather, and rank every city by heat, rain or how fast it is warming. The rankings and the El Niño analysis went beyond the original plan.
+ClimateWatch is live on GitHub Pages, and the code is public. It covers 94 Indonesian cities with 77 years of daily data, from 1950 to the present. Each city page counts heat days, heavy rain days and the longest heatwave per year with a trend line, and estimates when the wet season started. A "Looking ahead" panel now projects each city's future from several CMIP6 models, beyond the original plan. You can compare two cities, see how 45 tracked El Niño and La Niña episodes changed a city's weather, and rank every city by heat, rain or warming speed.
 
-The live site is a static snapshot. Open-Meteo throttles cloud build servers, so I run the import from a normal connection and publish the resulting data files. That cut the deploy from 38 minutes to 44 seconds. The trade-off is that the numbers refresh when I re-run the export. I built it in July 2026.
+The live site is a static snapshot: Open-Meteo throttles cloud build servers, so I run the import myself and publish the resulting data files, refreshing the numbers only when I re-run that export. I started building in July 2026 and have kept working on it since.
 
 ## Under the hood
 
 - Data comes from ERA5 through Open-Meteo's archive API. The PRD named `archive.open-meteo.com`, which doesn't resolve; the real host is `archive-api.open-meteo.com`.
-- Five core models: `IndonesiaRegion`, `ClimateDaily`, `ClimateMonthly`, `ClimateAnnual`, `ENSOEvent`. Celery Beat (django-celery-beat) schedules daily ingestion and the monthly/annual rollups.
+- Six concrete models: `IndonesiaRegion`, `ClimateDaily`, `ClimateMonthly`, `ClimateAnnual`, `ENSOEvent`, `ClimateProjection`. Celery Beat (django-celery-beat) schedules daily ingestion and the monthly/annual rollups.
+- `ClimateProjection` stores each CMIP6 model's *change* against that model's own 1995–2014 mean, never a raw absolute temperature, since individual models carry city-scale biases of a degree or more.
 - `ClimateDaily` is a TimescaleDB hypertable partitioned on `date`. Hypertables require every unique index to include the partition column, so the auto `id` primary key was dropped for a composite `(region, date)` uniqueness constraint, which also matches the main query index.
-- Ingestion fetches in 25-year chunks (3 requests per city instead of 75), uses exponential backoff on HTTP 429 with or without a `Retry-After` header, and resumes with `--skip-existing`. `seed_demo` generates reproducible synthetic data, labelled as not ERA5.
+- Ingestion fetches in yearly chunks with a polite delay, uses exponential backoff on HTTP 429 with or without a `Retry-After` header, and resumes with `--skip-existing`. `seed_demo` generates reproducible synthetic data, labelled as not ERA5.
 - Wet-season onset is the first 5-day window after 1 August with at least 40 mm of cumulative rain. Trend lines are linear regressions from `simple-statistics`. ENSO phases come from NOAA's ONI event data.
-- The Fingerprint is hand-rolled D3; every other chart is Recharts. The homepage coverage map draws the real Indonesian coastline from `topojson-client` and `world-atlas`, with no Leaflet.
+- The Fingerprint is hand-rolled D3; every other chart is Recharts, narrowed down to a monthly bar chart and the compare panels after the standalone extreme-days and season-shift charts were folded into the Fingerprint as toggleable layers. The homepage coverage map draws the real Indonesian coastline from `topojson-client` and `world-atlas`, with no Leaflet.
 - The colour fix: single-hue ramps anchored dark-to-vivid, checked monotonic in both lightness and saturation.
-- Two weeks in, the dark "Musim Nokturnal" design replaced the PRD's light "Musim" palette. Every data colour was checked for WCAG contrast against the real surfaces, and a colour follows the city across charts, not the metric.
+- The dark "Musim Nokturnal" design replaced the PRD's light "Musim" palette. Every data colour was checked for WCAG contrast against the real surfaces, and a colour follows the city across charts, not the metric.
 - One frontend builds two ways, switched by `NEXT_PUBLIC_DATA_MODE`: against the live Django REST API, or as a Next.js static export reading pre-baked JSON. `manage.py export_static` writes that JSON; the Pages workflow copies it into `public/` and builds. The CI bootstrap was removed because Open-Meteo stalls requests from GitHub Actions runners.
-- Tests cover aggregation edge cases (null precipitation, dry spells, wet-season onset) and API contracts.
-- 15 REST endpoints and 45 commits in about four weeks. At the mid-July snapshot the backend was about 1,980 lines of Python and the frontend about 3,525 lines of TypeScript.
+- The site is bilingual, Indonesian first, rendering both languages into the static HTML and showing one based on a pre-paint boot script.
+- The static export is about 33 MB across 1,416 JSON files. The frontend has 46 components across 6 top-level routes (home, city, compare, rankings, stories, about); the backend has 8 management commands and 14 test cases.
+- 16 API routes and 161 commits between 3 July and 28 September 2026. At an earlier mid-project snapshot the backend was about 1,980 lines of Python and the frontend about 3,525 lines of TypeScript.

@@ -8,42 +8,44 @@ Saya membangun ClimateWatch untuk pembaca seperti itu: masyarakat yang penasaran
 
 ## Yang saya bangun
 
-### Saya memakai data reanalysis karena stasiun cuaca jarang
+### Satu pengaturan tetap mencegah tren pemanasan palsu
 
-Indonesia punya sedikit stasiun cuaca dengan catatan panjang yang tidak terputus. Jadi saya memakai ERA5, dataset historis yang disusun ulang dari satelit dan model cuaca, yang disediakan gratis lewat Open-Meteo. ERA5 memberi data harian tanpa celah sejak 1950 untuk titik mana pun di peta, ada stasiunnya atau tidak. Satu sumber mencakup ke-75 kota dengan cara yang sama.
+Arsip Open-Meteo diam-diam berganti model cuaca di tengah rekamannya, dan saya menemukan pergantian itu sendiri menambah sekitar 1,5°C ke suhu tertinggi harian Jakarta hanya dalam satu tahun, cukup untuk memalsukan tren pemanasan yang sebenarnya tidak ada di data. Saya mengunci setiap permintaan ke satu keluarga model saja, supaya seluruh rekaman dari 1950 sampai sekarang tetap sebanding. Indonesia memang punya sedikit stasiun cuaca dengan catatan panjang yang tidak terputus. Itu sebabnya dataset reanalysis ini cocok sejak awal: data harian tanpa celah untuk titik mana pun di peta, ada stasiunnya atau tidak, untuk ke-94 kota dengan cara yang sama.
 
 ### Setiap grafik membaca ringkasan yang sudah dihitung
 
-Tujuh puluh lima kota dengan data harian sejak 1950 berarti jutaan baris. Saya meringkasnya menjadi tabel bulanan dan tahunan lebih dulu, lewat proses latar yang terjadwal. Saat halaman dibuka, aplikasi cukup membaca tabel kecil, tanpa menjumlahkan puluhan tahun data saat itu juga. Data hariannya disimpan di database time-series, dipecah per tanggal dan diindeks sesuai cara halaman memintanya: per kota, lalu per tanggal.
+Sembilan puluh empat kota dengan data harian sejak 1950 berarti jutaan baris. Saya meringkasnya menjadi tabel bulanan dan tahunan lebih dulu, lewat proses latar yang terjadwal. Saat halaman dibuka, aplikasi cukup membaca tabel kecil, tanpa menjumlahkan puluhan tahun data saat itu juga. Data hariannya disimpan di database time-series, dipecah per tanggal dan diindeks sesuai cara halaman memintanya: per kota, lalu per tanggal.
 
 ### Data yang kosong tetap kosong
 
-Kalau sumber tidak punya nilai untuk suatu hari, saya menyimpannya sebagai kosong. Saya tidak pernah mengubahnya menjadi nol. Hujan nol milimeter dan "kita tidak tahu" adalah dua fakta berbeda, dan data kosong sering muncul di tahun-tahun awal. Kalau kekosongan dihitung nol, tahun lama akan tampak lebih kering dari kenyataannya.
+Kalau sumber tidak punya nilai untuk suatu hari, saya menyimpannya sebagai kosong. Saya tidak pernah mengubahnya menjadi nol. Hujan nol milimeter dan "kita tidak tahu" adalah dua fakta berbeda, dan data kosong sering muncul di tahun-tahun awal. Sebuah lencana peringatan memberi tahu pembaca kalau cakupan data sebuah kota atau bulan terlalu tipis untuk dipercaya.
 
-### Pengambil data tahan terhadap API gratis yang dibatasi
+### Hari panas berarti berbeda di tiap daerah
 
-Open-Meteo tidak butuh API key, tapi tetap memperlambat pengguna yang terlalu banyak meminta. Mengambil 75 tahun data satu kota dalam satu permintaan ternyata tidak andal, jadi saya memecah setiap riwayat menjadi jendela 25 tahun. Pengambil data mundur sejenak saat API sedang sibuk. Proses yang terhenti bisa dilanjutkan dan melewati kota yang sudah selesai, penting karena pemuatan penuh makan waktu berjam-jam. Untuk demo offline, satu perintah membuat data sintetis yang diberi label jelas.
+Ambang 35°C untuk "hari panas" adalah konvensi iklim sedang, dan itu tidak berlaku di sebagian besar wilayah maritim Indonesia. Seperempat kota yang datanya sudah dimuat tidak pernah sekalipun melewati ambang itu dalam 77 tahun, jadi grafik hari panasnya kosong saja. Saya menambahkan ambang kedua yang relatif per daerah, yaitu 5% hari terpanas masing-masing kota dari baseline 1951-1980-nya, dan tetap menyimpan angka 35°C tetap hanya untuk membandingkan antarkota.
 
-### Satu grid menampilkan seluruh riwayat kota
+### Frontend yang sama berjalan dengan dua cara, live atau statis
 
-Climate Fingerprint adalah heatmap kalender: tahun ke bawah, bulan ke samping, 75 tahun dalam satu tampilan. Pengguna bisa berganti antara curah hujan, suhu maksimum, hari panas, dan hari kering, lalu menandai tahun El Niño dan La Niña di atasnya. Grafik yang satu ini saya gambar sendiri, sementara sisanya memakai pustaka grafik standar. Setelah rilis, saya menemukan bug warna. Di latar gelap, hujan nol justru menjadi sel paling terang. Kini setiap variabel memakai skala satu warna, dan nilai yang lebih besar selalu tampak lebih kuat.
+Open-Meteo diketahui pernah macet atau membatasi permintaan dari GitHub Actions, jadi mengimpor data saat build di cloud tidak bisa diandalkan, dan sebuah backend butuh biaya untuk terus menyala. Frontend-nya kini beralih lewat satu variabel lingkungan antara memanggil API Django yang live atau membaca hasil ekspor JSON siap pakai. Saya menjalankan impor dari koneksi biasa sendiri dan meng-commit hasilnya, jadi deploy publiknya tidak butuh server dan tidak butuh panggilan live ke Open-Meteo sama sekali.
 
 ## Hasilnya
 
-ClimateWatch sudah live di GitHub Pages, dan kodenya publik. Cakupannya 75 kota di Indonesia dengan data harian sejak 1950. Setiap halaman kota menghitung hari panas, hari hujan lebat, dan gelombang panas terpanjang per tahun, masing-masing dengan garis tren. Halaman itu juga memperkirakan kapan musim hujan dimulai setiap tahun dan menunjukkan apakah tanggalnya bergeser. Pengguna bisa membandingkan dua kota, melihat pengaruh El Niño dan La Niña terhadap cuaca sebuah kota, dan mengurutkan semua kota berdasarkan panas, hujan, atau kecepatan pemanasannya. Peringkat dan analisis El Niño ini di luar rencana awal.
+ClimateWatch sudah live di GitHub Pages, dan kodenya publik. Cakupannya 94 kota di Indonesia dengan 77 tahun data harian, dari 1950 sampai sekarang. Setiap halaman kota menghitung hari panas, hari hujan lebat, dan gelombang panas terpanjang per tahun dengan garis tren, dan memperkirakan kapan musim hujan dimulai. Panel "Looking ahead" kini memproyeksikan masa depan tiap kota dari beberapa model CMIP6, di luar rencana awal. Pengguna bisa membandingkan dua kota, melihat bagaimana 45 episode El Niño dan La Niña yang terlacak mengubah cuaca sebuah kota, dan mengurutkan semua kota berdasarkan panas, hujan, atau kecepatan pemanasannya.
 
-Situs live-nya adalah snapshot statis. Open-Meteo membatasi server build di cloud, jadi saya menjalankan impor dari koneksi biasa lalu menerbitkan berkas datanya. Waktu deploy turun dari 38 menit menjadi 44 detik. Konsekuensinya, angka diperbarui saat saya menjalankan ulang ekspor. Saya membangunnya pada Juli 2026.
+Situs live-nya adalah snapshot statis: Open-Meteo membatasi server build di cloud, jadi saya menjalankan impor sendiri lalu menerbitkan berkas datanya, dan angkanya diperbarui hanya saat saya menjalankan ulang ekspor itu. Saya mulai membangunnya pada Juli 2026 dan terus mengerjakannya sejak itu.
 
 ## Di balik layar
 
 - Data berasal dari ERA5 lewat API arsip Open-Meteo. PRD menyebut `archive.open-meteo.com`, yang tidak bisa di-resolve; host yang benar adalah `archive-api.open-meteo.com`.
-- Lima model inti: `IndonesiaRegion`, `ClimateDaily`, `ClimateMonthly`, `ClimateAnnual`, `ENSOEvent`. Celery Beat (django-celery-beat) menjadwalkan pengambilan data harian dan ringkasan bulanan/tahunan.
+- Enam model konkret: `IndonesiaRegion`, `ClimateDaily`, `ClimateMonthly`, `ClimateAnnual`, `ENSOEvent`, `ClimateProjection`. Celery Beat (django-celery-beat) menjadwalkan pengambilan data harian dan ringkasan bulanan/tahunan.
+- `ClimateProjection` menyimpan *perubahan* tiap model CMIP6 terhadap rata-rata model itu sendiri di 1995–2014, bukan suhu absolut mentah, karena tiap model punya bias skala kota sebesar satu derajat lebih.
 - `ClimateDaily` adalah hypertable TimescaleDB yang dipartisi pada `date`. Hypertable mewajibkan setiap unique index memuat kolom partisi, jadi primary key `id` otomatis dihapus dan diganti constraint keunikan komposit `(region, date)`, yang juga cocok dengan indeks kueri utama.
-- Pengambilan data memakai potongan 25 tahun (3 permintaan per kota, bukan 75), exponential backoff pada HTTP 429 dengan atau tanpa header `Retry-After`, dan bisa dilanjutkan dengan `--skip-existing`. `seed_demo` membuat data sintetis yang bisa direproduksi, berlabel bukan ERA5.
+- Pengambilan data memakai potongan per tahun dengan jeda sopan, exponential backoff pada HTTP 429 dengan atau tanpa header `Retry-After`, dan bisa dilanjutkan dengan `--skip-existing`. `seed_demo` membuat data sintetis yang bisa direproduksi, berlabel bukan ERA5.
 - Awal musim hujan adalah jendela 5 hari pertama setelah 1 Agustus dengan curah hujan kumulatif minimal 40 mm. Garis tren adalah regresi linear dari `simple-statistics`. Fase ENSO diambil dari data kejadian ONI milik NOAA.
-- Fingerprint dibuat dengan D3 secara manual; grafik lainnya memakai Recharts. Peta cakupan di beranda menggambar garis pantai Indonesia dari `topojson-client` dan `world-atlas`, tanpa Leaflet.
+- Fingerprint dibuat dengan D3 secara manual; grafik lainnya memakai Recharts, kini hanya grafik batang bulanan dan panel bandingan, setelah grafik hari-ekstrem dan pergeseran-musim yang semula berdiri sendiri dilebur menjadi lapisan yang bisa dinyalakan-matikan di Fingerprint. Peta cakupan di beranda menggambar garis pantai Indonesia dari `topojson-client` dan `world-atlas`, tanpa Leaflet.
 - Perbaikan warna: ramp satu warna dari gelap ke terang, diperiksa monoton pada kecerahan dan saturasi.
-- Dua minggu berjalan, desain gelap "Musim Nokturnal" menggantikan palet terang "Musim" dari PRD. Setiap warna data diperiksa kontras WCAG-nya terhadap permukaan yang sebenarnya, dan warna mengikuti kota di semua grafik, bukan metriknya.
+- Desain gelap "Musim Nokturnal" menggantikan palet terang "Musim" dari PRD. Setiap warna data diperiksa kontras WCAG-nya terhadap permukaan yang sebenarnya, dan warna mengikuti kota di semua grafik, bukan metriknya.
 - Satu frontend bisa di-build dua cara, diatur oleh `NEXT_PUBLIC_DATA_MODE`: memanggil Django REST API yang live, atau static export Next.js yang membaca JSON siap pakai. `manage.py export_static` menulis JSON itu; workflow Pages menyalinnya ke `public/` lalu build. Bootstrap di CI dihapus karena Open-Meteo menahan permintaan dari runner GitHub Actions.
-- Tes mencakup kasus tepi agregasi (curah hujan null, periode kering, awal musim hujan) dan kontrak API.
-- 15 endpoint REST dan 45 commit dalam sekitar empat minggu. Pada snapshot pertengahan Juli, backend berisi sekitar 1.980 baris Python dan frontend sekitar 3.525 baris TypeScript.
+- Situsnya dwibahasa, Indonesia lebih dulu, merender kedua bahasa ke HTML statis dan menampilkan salah satunya lewat boot script sebelum render pertama.
+- Static export-nya sekitar 33 MB di 1.416 berkas JSON. Frontend-nya punya 46 komponen di 6 route utama (beranda, kota, bandingkan, peringkat, cerita, tentang); backend-nya punya 8 perintah manajemen dan 14 kasus tes.
+- 16 route API dan 161 commit antara 3 Juli dan 28 September 2026. Pada snapshot pertengahan proyek sebelumnya, backend berisi sekitar 1.980 baris Python dan frontend sekitar 3.525 baris TypeScript.

@@ -1,10 +1,10 @@
 {
   "slug": "climate-watch",
   "title": "ClimateWatch",
-  "tagline": "A climate history site for 75 Indonesian cities, with daily temperature and rainfall back to 1950",
+  "tagline": "A climate history site for 94 Indonesian cities, with daily temperature and rainfall back to 1950",
   "glance": {
     "for": "Curious readers, students, journalists and farmers in Indonesia",
-    "result": "Live and free, 75 cities with daily data since 1950"
+    "result": "Live and free, 94 cities with daily climate data from 1950"
   },
   "skills": [
     "Climate data analysis",
@@ -19,18 +19,20 @@
   ],
   "problemShape": "data",
   "techStack": [
-    "Django",
     "Next.js",
+    "Django",
     "TypeScript",
-    "PostgreSQL",
     "D3.js",
-    "Recharts",
+    "PostgreSQL",
+    "TimescaleDB",
     "Celery",
+    "Redis",
+    "Recharts",
     "Docker"
   ],
   "status": "active",
-  "role": "Fullstack Developer",
-  "timeframe": "Jul 2026",
+  "role": "Solo Developer",
+  "timeframe": "Jul 2026 – present",
   "liveUrl": "https://andifathulms.github.io/climatewatch/",
   "access": "public",
   "githubUrl": "https://github.com/andifathulms/climatewatch",
@@ -39,27 +41,23 @@
   "featured": true,
   "metrics": [
     {
-      "value": "75",
+      "value": "94",
       "label": "Indonesian cities with daily climate data"
     },
     {
-      "value": "1950",
-      "label": "first year of each city's daily record"
+      "value": "77",
+      "label": "years of daily climate record, back to 1950"
     },
     {
-      "value": "38 min → 44 sec",
-      "label": "deploy time after moving data import out"
-    },
-    {
-      "value": "75 years",
-      "label": "of a city's weather in one heatmap"
+      "value": "45",
+      "label": "El Niño and La Niña episodes tracked"
     }
   ],
   "id": {
-    "tagline": "Situs riwayat iklim untuk 75 kota di Indonesia, dengan suhu dan curah hujan harian sejak 1950",
+    "tagline": "Situs riwayat iklim untuk 94 kota di Indonesia, dengan suhu dan curah hujan harian sejak 1950",
     "glance": {
       "for": "Pembaca yang penasaran, pelajar, jurnalis, dan petani di Indonesia",
-      "result": "Live dan gratis, 75 kota dengan data harian sejak 1950"
+      "result": "Live dan gratis, 94 kota dengan data iklim harian dari 1950"
     },
     "skills": [
       "Analisis data iklim",
@@ -69,21 +67,21 @@
     ],
     "metrics": [
       {
-        "value": "75",
+        "value": "94",
         "label": "kota di Indonesia dengan data iklim harian"
       },
       {
-        "value": "1950",
-        "label": "tahun awal catatan harian tiap kota"
+        "value": "77",
+        "label": "tahun catatan iklim harian, sejak 1950"
       },
       {
-        "value": "38 mnt → 44 dtk",
-        "label": "waktu deploy setelah impor data dipisah"
-      },
-      {
-        "value": "75 tahun",
-        "label": "cuaca satu kota dalam satu heatmap"
+        "value": "45",
+        "label": "episode El Niño dan La Niña yang dilacak"
       }
     ]
+  },
+  "source": {
+    "schema": "portfolio-context/v2",
+    "generated": "2026-09-30"
   }
 }
